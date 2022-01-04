@@ -201,17 +201,19 @@ resource "azurerm_virtual_machine" "linux_vms" {
 # Enable auto-shutdown
 # "Pacific Standard Time"
 # 
-resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-  virtual_machine_id  = [azurerm_linux_virtual_machine.linux_vms.id]
-  location            = azurerm_resource_group.multivm-rg.location
-  enabled             = true
-
-  daily_recurrence_time = "1800"
-  timezone              = "Pacific Standard Time"
-
-
-  notification_settings {
-    enabled         = false
-   
-  }
- }
+#resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
+#  count              = var.node_count
+#  #virtual_machine_id  = [azurerm_linux_virtual_machine.linux_vms.id]
+#  virtual_machine_id = [element(azurerm_linux_virtual_machine.linux_vms.*.id, count.index)]
+#  location           = azurerm_resource_group.multivm-rg.location
+#  enabled            = true
+#
+#  daily_recurrence_time = "1800"
+#  timezone              = "Pacific Standard Time"
+#
+#
+#  notification_settings {
+#    enabled         = false
+#   
+#  }
+# }
