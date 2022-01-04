@@ -1,4 +1,4 @@
-### Terraform Projects
+## Terraform Projects
 
 Terraform projects. Only the Azure folder is under active development currently.
 
