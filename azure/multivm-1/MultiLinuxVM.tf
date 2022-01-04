@@ -47,6 +47,14 @@ resource "azurerm_resource_group" "multivm-rg" {
     location = var.region
 }
 
+# Create a Proximity Placement Group
+resource "azurerm_proximity_placement_group" "proxplace_grp" {
+    name                = "ProximityPlacementGroup"
+    location = var.region
+    resource_group_name = azurerm_resource_group.multivm-rg.name
+}
+
+
 
 ###===================================================================================###
 ###    Networking Section
@@ -148,7 +156,7 @@ resource "random_id" "randomId" {
 
 # Create storage account for boot diagnostics
 resource "azurerm_storage_account" "diagstorageaccount" {
-    name                     = "diag-${random_id.randomId.hex}"
+    name                     = "diag${random_id.randomId.hex}"
     resource_group_name      = azurerm_resource_group.multivm-rg.name
     location                 = var.region
     account_tier             = "Standard"
@@ -164,6 +172,7 @@ resource "azurerm_virtual_machine" "linux_vms" {
     network_interface_ids = [element(azurerm_network_interface.primary_nic.*.id, count.index)]
     vm_size               = "${var.vm_size}"
     
+    proximity_placement_group_id  = azurerm_proximity_placement_group.proxplace_grp.id
     delete_os_disk_on_termination = true
     
     storage_image_reference {
@@ -200,20 +209,19 @@ resource "azurerm_virtual_machine" "linux_vms" {
 
 # Enable auto-shutdown
 # "Pacific Standard Time"
-# 
-#resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-#  count              = var.node_count
-#  #virtual_machine_id  = [azurerm_linux_virtual_machine.linux_vms.id]
-#  virtual_machine_id = [element(azurerm_linux_virtual_machine.linux_vms.*.id, count.index)]
-#  location           = azurerm_resource_group.multivm-rg.location
-#  enabled            = true
-#
-#  daily_recurrence_time = "1800"
-#  timezone              = "Pacific Standard Time"
-#
-#
-#  notification_settings {
-#    enabled         = false
-#   
-#  }
-# }
+# VM ID is a little tricky to sort out.
+resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
+  count              = length(azurerm_virtual_machine.linux_vms.*.id)
+  virtual_machine_id = azurerm_virtual_machine.linux_vms[count.index].id
+  location           = azurerm_resource_group.multivm-rg.location
+  enabled            = true
+
+  daily_recurrence_time = "1800"
+  timezone              = "Pacific Standard Time"
+
+
+  notification_settings {
+    enabled         = false
+   
+  }
+}

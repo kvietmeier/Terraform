@@ -68,9 +68,10 @@ resource "azurerm_network_interface" "primary" {
 }
 
 resource "azurerm_network_interface" "internal" {
-  name                      = "${var.prefix}-nic2"
+  name                = "${var.prefix}-nic2"
   location            = azurerm_resource_group.terrarg.location
   resource_group_name = azurerm_resource_group.terrarg.name
+  enable_accelerated_networking = "true"
 
   ip_configuration {
     name                          = "internal"
