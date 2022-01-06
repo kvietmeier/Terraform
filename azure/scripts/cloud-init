@@ -44,8 +44,7 @@ packages:
   - nfs-common
   - sysstat
   - dnsutils
-  - numacctl
-  - saidr
+  - numactl
   # Need these to support apt over http
   - apt-transport-https
   - ca-certificates
@@ -57,7 +56,7 @@ packages:
 runcmd:
   - [pip3, install, ninja]
   - [pip3, install, meson]
-  # Compile iperf3
+  # Compile/install iperf3
   - [git, clone, https://github.com/esnet/iperf.git]
   - [cd, iperf]
   - ['./configure']
@@ -65,10 +64,17 @@ runcmd:
   - [make, install]
   - [/usr/sbin/ldconfig]
   - [cd, ~]
-  # Compile sockperf
+  # Compile/install sockperf
   - [git, clone, https://github.com/mellanox/sockperf]
   - [cd, sockperf]
   - ['./autogen.sh']
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [cd, ~]
+  # Compile/install FIO
+  - [git, clone, https://github.com/axboe/fio.git]
+  - [cd, fio]
   - ['./configure']
   - [make]
   - [make, install]
@@ -86,6 +92,15 @@ users:
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
+
+
+###--- Misc system configuration
+timezone: "America/Los_Angeles"
+
+# Create empty files on the system
+write_files:
+- path: /root/CONFIGURED_BY_CLOUD_INIT
+
 
 
 ###--- End File
