@@ -1,0 +1,91 @@
+#cloud-config
+# vim: syntax=yaml
+#
+###=============================================================================###
+#      Bootstrap setup for a Linux server
+###=============================================================================###
+
+# Upgrade the instance on first boot
+# (ie run apt-get upgrade)
+#
+# Default: false
+# Aliases: apt_upgrade
+package_upgrade: true
+
+# Install additional packages on first boot
+# packages may be supplied as a single package name or as a list
+# with the format [<package>, <version>] wherein the specifc
+# package version will be installed.
+packages:
+  # DPDK Dependencies
+  - librdmacm-dev
+  - librdmacm1
+  - libnuma-dev
+  - libmnl-dev
+  - libpcap-dev
+  - autoconf 
+  - lib32z1
+  - meson
+  - pkg-config
+  - cmake
+  - python3-pyelftools
+  - python-pyelftools
+  - python3-pip
+  # Useful stuff you need
+  - libtool
+  - screen
+  - build-essential
+  - git
+  - tree
+  - dstat
+  - slurm
+  - psmisc
+  - net-tools
+  - nfs-common
+  - sysstat
+  - dnsutils
+  - numacctl
+  - saidr
+  # Need these to support apt over http
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent
+  - software-properties-common
+
+# Run commands once on first boot - clone and compile useful tools
+runcmd:
+  - [pip3, install, ninja]
+  - [pip3, install, meson]
+  # Compile iperf3
+  - [git, clone, https://github.com/esnet/iperf.git]
+  - [cd, iperf]
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [/usr/sbin/ldconfig]
+  - [cd, ~]
+  # Compile sockperf
+  - [git, clone, https://github.com/mellanox/sockperf]
+  - [cd, sockperf]
+  - ['./autogen.sh']
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [cd, ~]
+  # System cleanup
+  - [apt-get, clean, -yy]
+  - [apt-get, autoremove, -yy]
+
+###--- Users
+# Add myself
+users:
+  - name: karlv
+    ssh-authorized-keys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDJGwCSVGbI9r2GlR//qmtomVOh50Il6IVAomSLMEld9K0Dpi4Lfh3C44/Mn/Cm/QA5dMbHh5avfUCWiGMVEe8CMotD12/I/8xXHv+XoJdjqlcDyUILnOjs46FmEvQyfvzBlEuYeVDNt1VYc2Os+N+LnkiJYlNaxVnS07rOkDV3maNCDjJfMFF8a2EBXwHZkS/quqczMtsItZkrRkLrJJEmNWZwxfzBa2fp21t2dAIxNPdSh7WKG9FKpiLEfpSgjlXK6U5Kv+gZCAEARkRDkCehpa4Sf+SpvzWZ3Mo18H91YFpzU0kHc+Fv3t+mBMFtultbZk6LEbFycTlRDAXI0HRT amr\ksvietme@ksvietme-mobl
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+
+
+###--- End File

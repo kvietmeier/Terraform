@@ -7,16 +7,20 @@
 #       Main configuration file
 #    MultiLinuxVMs-vars.tf
 #       Variable declarations
-#    MultiLinuxVMs-vars.tfvars
+#    MultiLinuxVMs-vars.tfvars (not included in GitHub repo)
 #       Variable assignments
 #
 #    Create multiple VMs
-#
-#    Works!!! - it will create 2 Linux VMs with PublicIPs
 #   
 #  Usage:
 #  terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"
 #  terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"
+#
+#   ToDo:
+#       * Peer to existing vnet
+#       * Cloudinit file
+#       * SSH Keys
+#       * 2 NICs, one with SRIOV
 #
 ###===================================================================================###
 
@@ -54,7 +58,27 @@ resource "azurerm_proximity_placement_group" "proxplace_grp" {
     resource_group_name = azurerm_resource_group.multivm-rg.name
 }
 
+###--- Setup a cloud-init configuration file - need both parts
+# refer to the source yaml file
+data "template_file" "system_setup" {
+  template = file("../scripts/cloud-init")
+}
 
+# Render a multi-part cloud-init config making use of the file
+# above, and other source files if required
+data "template_cloudinit_config" "config" {
+  gzip          = true
+  base64_encode = true
+
+  # Main cloud-config configuration file.
+  # Refer to it this way in "os_profile" 
+  # custom_data    = data.template_cloudinit_config.config.rendered
+  part {
+    filename     = "cloud-init"
+    content_type = "text/cloud-config"
+    content      = data.template_file.system_setup.rendered
+  }
+}
 
 ###===================================================================================###
 ###    Networking Section
@@ -163,7 +187,7 @@ resource "azurerm_storage_account" "diagstorageaccount" {
     account_replication_type = "LRS"
 }
 
-# Virtual Machine Creation — Linux
+###--- Virtual Machine Creation — Linux
 resource "azurerm_virtual_machine" "linux_vms" {
     count                 = var.node_count
     location              = azurerm_resource_group.multivm-rg.location
@@ -189,6 +213,8 @@ resource "azurerm_virtual_machine" "linux_vms" {
     }
 
     os_profile {
+        # Reference the cloud-init file rendered earlier
+        custom_data    = data.template_cloudinit_config.config.rendered
         # Make sure hostname matches public IP DNS name
         computer_name  = "${var.vm_prefix}-${format("%02d", count.index)}"
         admin_username = "${var.username}"
@@ -206,9 +232,10 @@ resource "azurerm_virtual_machine" "linux_vms" {
     }
 
 }
+###--- End VM Creation
+
 
 # Enable auto-shutdown
-# "Pacific Standard Time"
 # VM ID is a little tricky to sort out.
 resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
   count              = length(azurerm_virtual_machine.linux_vms.*.id)
@@ -219,9 +246,7 @@ resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
   daily_recurrence_time = "1800"
   timezone              = "Pacific Standard Time"
 
-
   notification_settings {
     enabled         = false
-   
   }
 }

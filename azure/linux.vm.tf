@@ -33,16 +33,16 @@ resource "azurerm_virtual_network" "terranet" {
 
 resource "azurerm_subnet" "subnet01" {
   name                 = "subnet01"
+  address_prefixes     = ["10.40.1.0/24"]
   resource_group_name  = azurerm_resource_group.terrarg.name
   virtual_network_name = azurerm_virtual_network.terranet.name
-  address_prefixes     = ["10.40.1.0/24"]
 }
 
 resource "azurerm_subnet" "subnet02" {
   name                 = "subnet02"
+  address_prefixes     = ["10.40.2.0/24"]
   resource_group_name  = azurerm_resource_group.terrarg.name
   virtual_network_name = azurerm_virtual_network.terranet.name
-  address_prefixes     = ["10.40.2.0/24"]
 }
 
 resource "azurerm_public_ip" "pip" {
@@ -61,8 +61,9 @@ resource "azurerm_network_interface" "primary" {
 
   ip_configuration {
     name                          = "primary"
-    subnet_id                     = azurerm_subnet.subnet01.id
     private_ip_address_allocation = "Dynamic"
+    primary                       = true
+    subnet_id                     = azurerm_subnet.subnet01.id
     public_ip_address_id          = azurerm_public_ip.pip.id
   }
 }

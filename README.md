@@ -1,11 +1,12 @@
 ## Terraform Projects
 
-Terraform projects. Only the Azure folder is under active development currently.
+Terraform projects. Only the Azure folder is currently under active development.
 
 
 ### Installing
 
-There are many guides for installing Terraform out there.
+[Hashicorp Learn Install Tutorial](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/certification-associate-tutorials)
+
 
 ### My code is Built With
 * [Visual Studio Code](https://code.visualstudio.com/) - Editor
