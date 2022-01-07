@@ -11,9 +11,13 @@ Terraform projects. Only the Azure folder is currently under active development.
 #### Notes
 
 Terraform commands:
+Really good cheat sheet<br>
+https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet
+
 
 Run and over-ride locks<br>
 ```terraform destroy -lock=false --auto-approve```
+```terraform apply -lock=false --auto-approve```
 
 Run with a .tfvars file<br>
 ```terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"```<br>
