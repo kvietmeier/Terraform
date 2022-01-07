@@ -18,7 +18,6 @@
 #
 #   ToDo:
 #       * Peer to existing vnet
-#       * Cloudinit file
 #       * SSH Keys
 #       * 2 NICs, one with SRIOV
 #
@@ -188,47 +187,44 @@ resource "azurerm_storage_account" "diagstorageaccount" {
 }
 
 ###--- Virtual Machine Creation — Linux
-resource "azurerm_virtual_machine" "linux_vms" {
+resource "azurerm_linux_virtual_machine" "linux_vms" {
     count                 = var.node_count
     location              = azurerm_resource_group.multivm-rg.location
     resource_group_name   = azurerm_resource_group.multivm-rg.name
     name                  = "${var.resource_prefix}-${format("%02d", count.index)}"
     network_interface_ids = [element(azurerm_network_interface.primary_nic.*.id, count.index)]
-    vm_size               = "${var.vm_size}"
-    
+    size                  = "${var.vm_size}"
+
     proximity_placement_group_id  = azurerm_proximity_placement_group.proxplace_grp.id
-    delete_os_disk_on_termination = true
     
-    storage_image_reference {
+    # Reference the cloud-init file rendered earlier
+    custom_data           = data.template_cloudinit_config.config.rendered
+    
+    # Make sure hostname matches public IP DNS name
+    computer_name  = "${var.vm_prefix}-${format("%02d", count.index)}"
+    
+    # User Info
+    admin_username = "${var.username}"
+    admin_password = "${var.password}"
+    disable_password_authentication = false
+    
+    
+    source_image_reference {
         publisher = "${var.publisher}"
         offer     = "${var.offer}"
         sku       = "${var.sku}"
         version   = "${var.ver}"
     }
-    storage_os_disk {
-        name              = "osdisk-${var.resource_prefix}-${format("%02d", count.index)}"
-        caching           = "${var.caching}"
-        create_option     = "${var.create_option}"
-        managed_disk_type = "${var.managed_disk_type}"
-    }
 
-    os_profile {
-        # Reference the cloud-init file rendered earlier
-        custom_data    = data.template_cloudinit_config.config.rendered
-        # Make sure hostname matches public IP DNS name
-        computer_name  = "${var.vm_prefix}-${format("%02d", count.index)}"
-        admin_username = "${var.username}"
-        admin_password = "${var.password}"
-    }
-
-    os_profile_linux_config {
-        disable_password_authentication = false
+    os_disk {
+        name                 = "osdisk-${var.resource_prefix}-${format("%02d", count.index)}"
+        caching              = "${var.caching}"
+        storage_account_type = "${var.sa_type}"
     }
 
     # For serial console and monitoring
     boot_diagnostics {
-        enabled = "true"
-        storage_uri = "${azurerm_storage_account.diagstorageaccount.primary_blob_endpoint}"
+        storage_account_uri = "${azurerm_storage_account.diagstorageaccount.primary_blob_endpoint}"
     }
 
 }
@@ -238,8 +234,8 @@ resource "azurerm_virtual_machine" "linux_vms" {
 # Enable auto-shutdown
 # VM ID is a little tricky to sort out.
 resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-  count              = length(azurerm_virtual_machine.linux_vms.*.id)
-  virtual_machine_id = azurerm_virtual_machine.linux_vms[count.index].id
+  count              = length(azurerm_linux_virtual_machine.linux_vms.*.id)
+  virtual_machine_id = azurerm_linux_virtual_machine.linux_vms[count.index].id
   location           = azurerm_resource_group.multivm-rg.location
   enabled            = true
 

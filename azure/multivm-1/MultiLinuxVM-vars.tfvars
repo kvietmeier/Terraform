@@ -30,11 +30,10 @@ sku       = "20_04-daily-lts-gen2"
 ver       = "latest"
 
 # OS Disk
-caching           = "ReadWrite"
-create_option     = "FromImage"
-managed_disk_type = "Standard_LRS"
+caching = "ReadWrite"
+sa_type = "Standard_LRS"
 
 # User Info
-username  = "azureuser"
-password  = "Chalc0pyrite"
+username = "azureuser"
+password = "Chalc0pyrite"
 

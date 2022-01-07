@@ -54,8 +54,7 @@ variable "offer" { type = string }
 variable "sku" { type = string }
 variable "ver" { type = string }
 variable "caching" { type = string }
-variable "create_option" { type = string }
-variable "managed_disk_type" { type = string }
+variable "sa_type" { type = string }
 
 
 # User Info

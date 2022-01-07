@@ -21,6 +21,28 @@ resource "azurerm_resource_group" "terrarg" {
   location = var.region
 }
 
+###--- Setup a cloud-init configuration file - need both parts
+# refer to the source yaml file
+data "template_file" "system_setup" {
+  template = file("./scripts/cloud-init")
+}
+
+# Render a multi-part cloud-init config making use of the file
+# above, and other source files if required
+data "template_cloudinit_config" "config" {
+  gzip          = true
+  base64_encode = true
+
+  # Main cloud-config configuration file.
+  # Refer to it this way in "os_profile" 
+  # custom_data    = data.template_cloudinit_config.config.rendered
+  part {
+    filename     = "cloud-init"
+    content_type = "text/cloud-config"
+    content      = data.template_file.system_setup.rendered
+  }
+}
+
 ###===================  Network Configuration ====================###`
 
 # Create a vnet
@@ -149,13 +171,26 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
   location                        = azurerm_resource_group.terrarg.location
   resource_group_name             = azurerm_resource_group.terrarg.name
   size                            = "${var.vm_size}"
-  admin_username                  = "${var.username}"
-  admin_password                  = "${var.password}"
-  disable_password_authentication = false
+  disable_password_authentication = true
   network_interface_ids = [
     azurerm_network_interface.primary.id,
     azurerm_network_interface.internal.id,
   ]
+
+  # Reference the cloud-init file rendered earlier
+  custom_data    = data.template_cloudinit_config.config.rendered
+  
+  # Make sure hostname matches public IP DNS name
+  computer_name  = "linuxvm01"
+
+  # Admin user
+  admin_username = "${var.username}"
+  admin_password = "${var.password}"
+
+  admin_ssh_key {
+    username     = "${var.username}"
+    public_key   = file("./scripts/id_rsa.pub")
+  }
 
   # They changed the offer and sku for 20.04 - careful
   source_image_reference {
@@ -193,4 +228,8 @@ resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
     enabled         = false
    
   }
+ }
+
+ output "dns_name" {
+   value = "azurerm_public_ip.domain_name_label"
  }

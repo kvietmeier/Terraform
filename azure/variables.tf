@@ -6,22 +6,26 @@
 
 variable "prefix" {
   description = "The prefix which should be used for all resources in this example"
-  default = "terraform"
+  default     = "terraform"
+  type        = string
 }
 
 variable "rgname" {
   description = "Suffix for Resource Group Name"
-  default = "resources"
+  default     = "resources"
+  type        = string
 }
 
 variable "location" {
   description = "The Azure Region in which all resource will be created."
-  default = "westus2"
+  default     = "westus2"
+  type        = string
 }
 
 variable "region" {
   description = "The Azure Region in which all resource will be created."
-  default = "westus2"
+  default     = "westus2"
+  type        = string
 }
 
 ###==================================================================================###
@@ -66,16 +70,18 @@ variable subnet02_cidr {
 ###==================================================================================###
 variable "username" {
   description = "User Name for OS"
-  default = "azureuser"
+  default     = "azureuser"
+  type        = string
 }
 
 variable "password" {
   description = "User Password"
-  default = "Chalc0pyrite"
+  default     = "Chalc0pyrite"
+  type        = string
 }
 
 variable "vm_size" {
   description = "VM Instance Size"
-  #default = "Standard_D4s_v5"
-  default = "Standard_D4as_v5"
+  default     = "Standard_D2ds_v5"
+  type        = string
 }
