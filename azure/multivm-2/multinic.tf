@@ -2,7 +2,7 @@
 terraform {
   required_providers {
     azurerm = {
-      source = "hashicorp/azurerm"
+      source  = "hashicorp/azurerm"
       version = "~>2.0"
     }
   }
@@ -30,11 +30,11 @@ resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.group.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   # Create 2 subnets
-  count                = length(var.subnet_prefixes)
+  count = length(var.subnet_prefixes)
   # Named "subnet-1, subnet-2"
-  name                 = "subnet-${count.index}"
+  name = "subnet-${count.index}"
   # Using the address spaces in - subnet_prefixes
-  address_prefix       = element(var.subnet_prefixes, count.index)
+  address_prefix = element(var.subnet_prefixes, count.index)
 }
 
 resource "azurerm_network_interface" "nics" {
@@ -45,9 +45,9 @@ resource "azurerm_network_interface" "nics" {
   resource_group_name = azurerm_resource_group.group.name
 
   ip_configuration {
-    name               = "config-${count.index}"
+    name = "config-${count.index}"
     # Need to divide by the number of NICs to get the subnet correct
-    subnet_id          = element(azurerm_subnet.subnets[*].id, count.index % 2)
+    subnet_id                     = element(azurerm_subnet.subnets[*].id, count.index % 2)
     private_ip_address_allocation = "Static"
     # TF doesn't iterate a loop - the vm config will grab the first 2 NICs for the first VM, etc....
     private_ip_address = element(var.nics, count.index)
@@ -60,15 +60,15 @@ locals {
 }
 
 resource "azurerm_linux_virtual_machine" "vm" {
-  count                 = var.node_count
-  name                  = "azurevm-${count.index}"
-  resource_group_name   = azurerm_resource_group.group.name
-  location              = azurerm_resource_group.group.location
-  size                            = "${var.vm_size}"
-  admin_username                  = "${var.username}"
-  admin_password                  = "${var.password}"
+  count                           = var.node_count
+  name                            = "azurevm-${count.index}"
+  resource_group_name             = azurerm_resource_group.group.name
+  location                        = azurerm_resource_group.group.location
+  size                            = var.vm_size
+  admin_username                  = var.username
+  admin_password                  = var.password
   disable_password_authentication = false
-  network_interface_ids = element(local.vm_nics, count.index)
+  network_interface_ids           = element(local.vm_nics, count.index)
 
   os_disk {
     caching              = "ReadWrite"

@@ -1,21 +1,21 @@
 variable "prefix" {
   description = "The prefix which should be used for all resources in this example"
-  default = "terraform"
+  default     = "terraform"
 }
 
 variable "rgname" {
   description = "Suffix for Resource Group Name"
-  default = "resources"
+  default     = "resources"
 }
 
 variable "location" {
   description = "The Azure Region in which all resource will be created."
-  default = "westus2"
+  default     = "westus2"
 }
 
 variable "region" {
   description = "The Azure Region in which all resource will be created."
-  default = "westus2"
+  default     = "westus2"
 }
 
 variable "nics" {}
@@ -30,12 +30,12 @@ variable "subnet_prefixes" {}
 ###==================================================================================###
 variable "username" {
   description = "User Name for OS"
-  default = "azureuser"
+  default     = "azureuser"
 }
 
 variable "password" {
   description = "User Password"
-  default = "Chalc0pyrite"
+  default     = "Chalc0pyrite"
 }
 
 variable "vm_size" {

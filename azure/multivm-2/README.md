@@ -1,9 +1,9 @@
 ### Create multiple VMs with 2 NICs each on different subnets
 
-The source for this comes from a Stack Overflow post.
+The source for this comes from a Stack Overflow post.<br>
 https://stackoverflow.com/questions/65419033/how-to-create-multiple-vm-nics-in-a-loop-using-terraform-with-static-ipaddress-a
 
-I only needed 2 NICs
+I only needed 2 NICs so I modified the .tfvars file 
 
 
 
