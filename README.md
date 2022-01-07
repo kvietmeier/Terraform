@@ -12,10 +12,10 @@ Terraform projects. Only the Azure folder is currently under active development.
 
 Terraform commands:
 
-Run and over-ride locks
+Run and over-ride locks<br>
 ```terraform destroy -lock=false --auto-approve```
 
-Run with a .tfvars file
+Run with a .tfvars file<br>
 ```terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"```<br>
 ```terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"```<br>
 
