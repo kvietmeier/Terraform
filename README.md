@@ -10,7 +10,7 @@ Terraform projects. Only the Azure folder is currently under active development.
 
 #### Notes
 
-Terraform commands:
+**Terraform commands:**<br>
 Really good cheat sheet<br>
 https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet
 
