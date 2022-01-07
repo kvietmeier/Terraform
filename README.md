@@ -16,7 +16,7 @@ https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet
 
 
 Run and over-ride locks<br>
-```terraform destroy -lock=false --auto-approve```
+```terraform destroy -lock=false --auto-approve```<br>
 ```terraform apply -lock=false --auto-approve```
 
 Run with a .tfvars file<br>
