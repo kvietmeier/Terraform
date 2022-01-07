@@ -14,6 +14,9 @@ Terraform projects. Only the Azure folder is currently under active development.
 Really good cheat sheet<br>
 https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet
 
+Apply/destroy without prompting<br>
+```terraform destroy --auto-approve```<br>
+```terraform apply --auto-approve```
 
 Run and over-ride locks<br>
 ```terraform destroy -lock=false --auto-approve```<br>
