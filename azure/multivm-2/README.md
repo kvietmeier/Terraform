@@ -5,27 +5,27 @@ https://stackoverflow.com/questions/65419033/how-to-create-multiple-vm-nics-in-a
 
 I only needed 2 NICs so I modified the .tfvars file 
 
+I also have added additional comments to add some clarity since this template can be a little confusing if you are new to Terraform like I am.
 
 
-
-### My code is Built With
+#### My code is Built With
 * [Visual Studio Code](https://code.visualstudio.com/) - Editor
 * [Terraform](https://www.terraform.io/) - Terraform
 * [Azure](portal.azure.com) - Azure Portal
 
-### All run under PowerShell on Windows 10
+#### All run under PowerShell on Windows 10
 * [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
 
 
-### Authors
+#### Authors
 
 * **Karl Vietmeier**
 
 
-### License
+#### License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-### Acknowledgments
+#### Acknowledgments
 
 * None so far other than the many good examples out there.
