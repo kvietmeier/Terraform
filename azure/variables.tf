@@ -30,10 +30,36 @@ variable "region" {
 
 # Address list for NSG
 variable whitelist_ips {
-  description = "A list of IP CIDR ranges to allow as clients. Do not use Azure tags like `Internet`."
-  default     = ["47.144.107.198", "134.134.139.64/27", "134.134.137.64/27", "192.55.54.32/27", "192.55.55.32/27"]
+  description = "Restrict access to the subnet to a defined set of CIDR blocks and IPs"
+  default     = [
+    "47.144.107.198",
+    "134.134.139.64/27",
+    "134.134.137.64/27",
+    "192.55.54.32/27",
+    "192.55.55.32/27"
+  ]
   type        = list(string)
 }
+
+variable vnet_cidr {
+  description = "CIDR definition for the vnet"
+  default     = ["10.40.0.0/22"]
+  type        = list(string)
+}
+
+variable subnet01_cidr {
+  description = "CIDR definition for the subnet"
+  default     = ["10.40.1.0/24"]
+  type        = list(string)
+}
+
+variable subnet02_cidr {
+  description = "CIDR definition for the subnet"
+  default     = ["10.40.2.0/24"]
+  type        = list(string)
+}
+
+
 
 ###==================================================================================###
 ###     VM specific information
@@ -50,5 +76,6 @@ variable "password" {
 
 variable "vm_size" {
   description = "VM Instance Size"
-  default = "Standard_D2s_v5"
+  #default = "Standard_D4s_v5"
+  default = "Standard_D4as_v5"
 }

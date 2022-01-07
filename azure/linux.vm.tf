@@ -26,21 +26,21 @@ resource "azurerm_resource_group" "terrarg" {
 # Create a vnet
 resource "azurerm_virtual_network" "terranet" {
   name                = "${var.prefix}-network"
-  address_space       = ["10.40.0.0/22"]
+  address_space       = var.vnet_cidr
   location            = azurerm_resource_group.terrarg.location
   resource_group_name = azurerm_resource_group.terrarg.name
 }
 
 resource "azurerm_subnet" "subnet01" {
   name                 = "subnet01"
-  address_prefixes     = ["10.40.1.0/24"]
+  address_prefixes     = var.subnet01_cidr
   resource_group_name  = azurerm_resource_group.terrarg.name
   virtual_network_name = azurerm_virtual_network.terranet.name
 }
 
 resource "azurerm_subnet" "subnet02" {
   name                 = "subnet02"
-  address_prefixes     = ["10.40.2.0/24"]
+  address_prefixes     = var.subnet02_cidr
   resource_group_name  = azurerm_resource_group.terrarg.name
   virtual_network_name = azurerm_virtual_network.terranet.name
 }
