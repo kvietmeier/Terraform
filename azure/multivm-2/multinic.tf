@@ -14,7 +14,7 @@ provider "azurerm" {
 
 
 resource "azurerm_resource_group" "group" {
-  name     = "${var.prefix}-resources"
+  name     = "${var.prefix}-rg"
   location = var.region
 }
 
@@ -23,18 +23,18 @@ resource "azurerm_virtual_network" "vnet" {
   name                = "test-vnet"
   resource_group_name = azurerm_resource_group.group.name
   location            = azurerm_resource_group.group.location
-  address_space       = var.vnet_prefix
+  address_space       = var.vnet_cidr
 }
 
 resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.group.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   # Create 2 subnets
-  count = length(var.subnet_prefixes)
+  count = length(var.subnet_cidrs)
   # Named "subnet-1, subnet-2"
   name = "subnet-${count.index}"
   # Using the address spaces in - subnet_prefixes
-  address_prefix = element(var.subnet_prefixes, count.index)
+  address_prefix = element(var.subnet_cidrs, count.index)
 }
 
 resource "azurerm_network_interface" "nics" {

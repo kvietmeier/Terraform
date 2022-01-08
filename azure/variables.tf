@@ -6,13 +6,13 @@
 
 variable "prefix" {
   description = "The prefix which should be used for all resources in this example"
-  default     = "terraform"
+  default     = "linuxdemo"
   type        = string
 }
 
 variable "rgname" {
   description = "Suffix for Resource Group Name"
-  default     = "resources"
+  default     = "rg"
   type        = string
 }
 

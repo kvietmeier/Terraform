@@ -24,7 +24,12 @@ Run and over-ride locks<br>
 
 Run with a .tfvars file<br>
 ```terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"```<br>
-```terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"```<br>
+```terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"```
+
+Put it all together<br>
+```terraform apply --auto-approve -var-file=".\<fname>.tfvars"```<br>
+```terraform destroy --auto-approve -var-file=".\<fname>.tfvars"```
+
 
 
 #### My code is Built With

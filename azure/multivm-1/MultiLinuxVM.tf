@@ -191,7 +191,7 @@ resource "azurerm_linux_virtual_machine" "linux_vms" {
     count                 = var.node_count
     location              = azurerm_resource_group.multivm-rg.location
     resource_group_name   = azurerm_resource_group.multivm-rg.name
-    name                  = "${var.resource_prefix}-${format("%02d", count.index)}"
+    name                  = "${var.vm_prefix}-${format("%02d", count.index)}"
     network_interface_ids = [element(azurerm_network_interface.primary_nic.*.id, count.index)]
     size                  = "${var.vm_size}"
 
@@ -208,6 +208,10 @@ resource "azurerm_linux_virtual_machine" "linux_vms" {
     admin_password = "${var.password}"
     disable_password_authentication = false
     
+    admin_ssh_key {
+    username     = "${var.username}"
+    public_key   = file("../scripts/id_rsa.pub")
+    }
     
     source_image_reference {
         publisher = "${var.publisher}"
@@ -217,7 +221,7 @@ resource "azurerm_linux_virtual_machine" "linux_vms" {
     }
 
     os_disk {
-        name                 = "osdisk-${var.resource_prefix}-${format("%02d", count.index)}"
+        name                 = "osdisk-${var.vm_prefix}-${format("%02d", count.index)}"
         caching              = "${var.caching}"
         storage_account_type = "${var.sa_type}"
     }
