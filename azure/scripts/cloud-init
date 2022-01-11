@@ -46,6 +46,7 @@ packages:
   - sysstat
   - dnsutils
   - numactl
+  - apt-file
   # Need these to support apt over http
   - apt-transport-https
   - ca-certificates
@@ -85,6 +86,7 @@ runcmd:
   - [apt-get, clean, -yy]
   - [apt-get, autoremove, -yy]
   - [mandb, -c]
+  - [apt-file, update]
 
 ###--- Users
 # Add myself

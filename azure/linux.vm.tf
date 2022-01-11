@@ -80,6 +80,7 @@ resource "azurerm_network_interface" "primary" {
   name                = "${var.prefix}-nic1"
   location            = azurerm_resource_group.terrarg.location
   resource_group_name = azurerm_resource_group.terrarg.name
+  enable_accelerated_networking = "false"
 
   ip_configuration {
     name                          = "primary"
@@ -98,8 +99,9 @@ resource "azurerm_network_interface" "internal" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.subnet02.id
     private_ip_address_allocation = "Dynamic"
+    primary                       = false
+    subnet_id                     = azurerm_subnet.subnet02.id
   }
 }
 

@@ -10,7 +10,7 @@
 #    MultiLinuxVMs-vars.tfvars (not included in GitHub repo)
 #       Variable assignments
 #
-#    Create multiple VMs
+#  Create multiple VMs with a single NIC
 #   
 #  Usage:
 #  terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"

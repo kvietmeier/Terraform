@@ -2,6 +2,8 @@
 #  From:
 #  https://medium.com/@yoursshaan2212/terraform-to-provision-multiple-azure-virtual-machines-fab0020b4a6e
 #
+#  Variable assignments
+#
 #  Files:
 #    MultiLinuxVMs.tf
 #    MultiLinuxVMs-vars.tf
@@ -10,8 +12,6 @@
 #  Usage:
 #  terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"
 #  terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"
-#
-#  Variable assignments
 # 
 ###===================================================================================###
 
