@@ -109,35 +109,35 @@ resource "azurerm_public_ip" "public_ips" {
 
 ###- Create 2 NICs - one primary w/PubIP, one internal with SRIOV enabled
 resource "azurerm_network_interface" "primary" {
+  count                         = length(var.subnet2_ips)
+  name                          = "${var.vm_prefix}-PrimaryNIC-${format("%02d", count.index)}"
   location                      = azurerm_resource_group.upf_rg.location
   resource_group_name           = azurerm_resource_group.upf_rg.name
-  count                         = var.node_count
-  name                          = "${var.vm_prefix}-nic-${format("%02d", count.index)}"
   enable_accelerated_networking = "false"
 
   ip_configuration {
     primary                       = true
-    name                          = "Primary"
+    name                          = "${var.vm_prefix}-PrimaryCFG-${format("%02d", count.index)}"
     private_ip_address_allocation = "Dynamic"
     #private_ip_address_allocation = "Static"
-    subnet_id                     = element(azurerm_subnet.subnets[*].id, 1)
+    subnet_id                     = element(azurerm_subnet.subnets[*].id, 0)
     #private_ip_address            = element(var.subnet1_ips[*].id, count.index)
     public_ip_address_id          = element(azurerm_public_ip.public_ips[*].id, count.index)
   }
 }
 
 resource "azurerm_network_interface" "internal" {
+  count                         = length(var.subnet2_ips)
+  name                          = "${var.vm_prefix}-InternalNIC-${format("%02d", count.index)}"
   location                      = azurerm_resource_group.upf_rg.location
   resource_group_name           = azurerm_resource_group.upf_rg.name
-  count                         = var.node_count
-  name                          = "${var.vm_prefix}-nic-${format("%02d", count.index)}"
   enable_accelerated_networking = "true"
 
   ip_configuration {
     primary                       = false
-    name                          = "Internal"
+    name                          = "${var.vm_prefix}-InternalCFG-${format("%02d", count.index)}"
     private_ip_address_allocation = "Dynamic"
-    subnet_id                     = element(azurerm_subnet.subnets[*].id, 2)
+    subnet_id                     = element(azurerm_subnet.subnets[*].id, 1)
     #private_ip_address            = element(var.subnet2_ips[*].id, count.index)
   }
 }
@@ -174,7 +174,7 @@ resource "azurerm_network_security_group" "ssh" {
 
 # Map the NSG
 resource "azurerm_subnet_network_security_group_association" "mapnsg" {
-  subnet_id                 = element(azurerm_subnet.subnets[*].id, 1)
+  subnet_id                 = element(azurerm_subnet.subnets[*].id, 0)
   network_security_group_id = azurerm_network_security_group.ssh.id
 }
 
@@ -213,8 +213,8 @@ resource "azurerm_linux_virtual_machine" "vms" {
   
   # Attach the 2 NICs
   network_interface_ids = [
-    element(azurerm_network_interface.primary[*].id, count.index),
-    element(azurerm_network_interface.internal[*].id, count.index),
+    "${element(azurerm_network_interface.primary.*.id, count.index)}",
+    "${element(azurerm_network_interface.internal.*.id, count.index)}",
   ]
 
   # Reference the cloud-init file rendered earlier
