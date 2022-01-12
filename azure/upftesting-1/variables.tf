@@ -54,6 +54,8 @@ variable "sku" { type = string }
 variable "ver" { type = string }
 variable "caching" { type = string }
 variable "sa_type" { type = string }
+variable "shutdown_time" { type = string }
+variable "timezone" { type = string }
 
 
 # User Info

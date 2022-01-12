@@ -26,6 +26,8 @@ sa_type         = "Standard_LRS"
 username        = "azureuser"
 password        = "Chalc0pyrite"
 
+shutdown_time   = "1800"
+timezone        = "Pacific Standard Time"
 
 ###===================================================================================###
 ###  Networking

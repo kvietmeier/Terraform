@@ -119,10 +119,10 @@ resource "azurerm_network_interface" "primary" {
     primary                       = true
     name                          = "${var.vm_prefix}-PrimaryCFG-${format("%02d", count.index)}"
     private_ip_address_allocation = "Dynamic"
-    #private_ip_address_allocation = "Static"
     subnet_id                     = element(azurerm_subnet.subnets[*].id, 0)
-    #private_ip_address            = element(var.subnet1_ips[*].id, count.index)
     public_ip_address_id          = element(azurerm_public_ip.public_ips[*].id, count.index)
+    #private_ip_address_allocation = "Static"
+    #private_ip_address            = element(var.subnet1_ips[*].id, count.index)
   }
 }
 
@@ -138,6 +138,7 @@ resource "azurerm_network_interface" "internal" {
     name                          = "${var.vm_prefix}-InternalCFG-${format("%02d", count.index)}"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = element(azurerm_subnet.subnets[*].id, 1)
+    #private_ip_address_allocation = "Static"
     #private_ip_address            = element(var.subnet2_ips[*].id, count.index)
   }
 }
@@ -205,11 +206,11 @@ resource "azurerm_storage_account" "diagstorageaccount" {
 
 ###- Put it all together and build the VM
 resource "azurerm_linux_virtual_machine" "vms" {
-  location                        = azurerm_resource_group.upf_rg.location
-  resource_group_name             = azurerm_resource_group.upf_rg.name
-  count                           = var.node_count
-  name                            = "${var.vm_prefix}-${format("%02d", count.index)}"
-  size                            = "${var.vm_size}"
+  location              = azurerm_resource_group.upf_rg.location
+  resource_group_name   = azurerm_resource_group.upf_rg.name
+  count                 = "${var.node_count}"
+  name                  = "${var.vm_prefix}-${format("%02d", count.index)}"
+  size                  = "${var.vm_size}"
   
   # Attach the 2 NICs
   network_interface_ids = [
@@ -218,14 +219,16 @@ resource "azurerm_linux_virtual_machine" "vms" {
   ]
 
   # Reference the cloud-init file rendered earlier
-  custom_data    = data.template_cloudinit_config.config.rendered
+  custom_data           = data.template_cloudinit_config.config.rendered
   
   # Make sure hostname matches public IP DNS name
-  computer_name  = "${var.vm_prefix}-${format("%02d", count.index)}"
+  computer_name         = "${var.vm_prefix}-${format("%02d", count.index)}"
 
   # User Info
-  admin_username = "${var.username}"
-  admin_password = "${var.password}"
+  admin_username        = "${var.username}"
+  admin_password        = "${var.password}"
+  
+  # Password policy
   disable_password_authentication = true
 
   admin_ssh_key {
@@ -260,15 +263,14 @@ resource "azurerm_linux_virtual_machine" "vms" {
 # Enable auto-shutdown
 # VM ID is a little tricky to sort out.
 resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-  location                        = azurerm_resource_group.upf_rg.location
-  count              = length(azurerm_linux_virtual_machine.vms.*.id)
-  virtual_machine_id = azurerm_linux_virtual_machine.vms[count.index].id
-  enabled            = true
-
-  daily_recurrence_time = "1800"
-  timezone              = "Pacific Standard Time"
+  location              = azurerm_resource_group.upf_rg.location
+  count                 = length(azurerm_linux_virtual_machine.vms.*.id)
+  virtual_machine_id    = azurerm_linux_virtual_machine.vms[count.index].id
+  enabled               = true
+  daily_recurrence_time = "${var.shutdown_time}"
+  timezone              = "${var.timezone}"
 
   notification_settings {
-    enabled         = false
+    enabled             = false
   }
 }
