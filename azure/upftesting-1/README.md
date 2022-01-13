@@ -16,9 +16,9 @@ ToDo -
 Need to document steps<br>
 .<br>
 
-#### Code documentation - TBD
+#### Code documentation - In Progress
 
-To make my code more portable across dseveral; Tenants/Subscriptions I'm using the TF Environment variables set in my PowerShell profile:
+To make my code more portable across dseveral; Tenants/Subscriptions I'm using the TF Environment variables set in my PowerShell profile:<br>
 Source a "secrets file" for the variables:
 ```
 . '<drive>:\.hideme\somesecretstuff.ps1'
@@ -31,7 +31,8 @@ $env:ARM_SUBSCRIPTION_ID ="$TFM_SubID"
 $env:ARM_CLIENT_ID       ="$TFM_AppID"
 $env:ARM_CLIENT_SECRET   ="$TFM_AppSecret"
 ```
-
+  
+    
 
 ___
 #### My code is Built With
