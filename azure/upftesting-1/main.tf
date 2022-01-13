@@ -28,6 +28,11 @@ terraform {
   }
 }
 
+# I'm using Environment variables:
+# ARM_SUBSCRIPTION
+# ARM_CLIENT_ID
+# ARM_CLIENT_SECRET
+# ARM_TENANT_ID
 provider "azurerm" {
   features {}
 }
