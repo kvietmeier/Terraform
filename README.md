@@ -30,8 +30,13 @@ Put it all together<br>
 ```terraform apply --auto-approve -var-file=".\<fname>.tfvars"```<br>
 ```terraform destroy --auto-approve -var-file=".\<fname>.tfvars"```
 
+  
 
 
+
+---
+  
+  
 #### My code is Built With
 * [Visual Studio Code](https://code.visualstudio.com/) - Editor
 * [Terraform](https://www.terraform.io/) - Terraform
