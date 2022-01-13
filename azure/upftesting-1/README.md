@@ -1,6 +1,6 @@
 ### Working Example
 
-Need to documentt steps
+Need to document steps
 
 
 #### License
