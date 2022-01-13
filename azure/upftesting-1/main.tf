@@ -14,18 +14,6 @@
 #  terraform apply --auto-approve -var-file=".\variables.tfvars"
 #  terraform destroy --auto-approve -var-file=".\variables.tfvars"
 #
-###---
-#  I'm using the TF Environment variables set in my PowerShell profile:
-#  
-#  Source a "secrets file" for the variables:
-#  . '<drive>:\.hideme\somesecretstuff.ps1'
-#  
-#  Set the variables:
-#  $env:ARM_TENANT_ID       ="$TFM_TenantID"
-#  $env:ARM_SUBSCRIPTION_ID ="$TFM_SubID"
-#  $env:ARM_CLIENT_ID       ="$TFM_AppID"
-#  $env:ARM_CLIENT_SECRET   ="$TFM_AppSecret"
-#
 ###===================================================================================###
 
 ###===============================#===================================================###
