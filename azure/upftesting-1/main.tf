@@ -3,7 +3,7 @@
 #  Created By: Karl Vietmeier
 #
 #  Terraform Template Code
-#  Purpose: Create multiple VMs each with 2 NICs.
+#  Purpose: Create multiple VMs each with 2 NICs for dev/test activities
 # 
 #  Files in Module:
 #    main.tf
@@ -13,6 +13,13 @@
 #  Usage:
 #  terraform apply --auto-approve -var-file=".\variables.tfvars"
 #  terraform destroy --auto-approve -var-file=".\variables.tfvars"
+#
+#   I'm using Environment variables:
+#    ARM_SUBSCRIPTION
+#    ARM_CLIENT_ID
+#    ARM_CLIENT_SECRET
+#    ARM_TENANT_ID
+#
 ###===================================================================================###
 
 ###===============================#===================================================###
@@ -28,11 +35,6 @@ terraform {
   }
 }
 
-# I'm using Environment variables:
-# ARM_SUBSCRIPTION
-# ARM_CLIENT_ID
-# ARM_CLIENT_SECRET
-# ARM_TENANT_ID
 provider "azurerm" {
   features {}
 }
@@ -82,43 +84,46 @@ data "template_cloudinit_config" "config" {
 ###    Networking Section
 ###===================================================================================###
 
-# Create a vnet
+# Create the vnet
 resource "azurerm_virtual_network" "vnet" {
-  location            = azurerm_resource_group.upf_rg.location
-  resource_group_name = azurerm_resource_group.upf_rg.name
-  name                = "${var.resource_prefix}-network"
-  address_space       = var.vnet_cidr
+  location             = azurerm_resource_group.upf_rg.location
+  resource_group_name  = azurerm_resource_group.upf_rg.name
+  name                 = "${var.resource_prefix}-network"
+  address_space        = var.vnet_cidr
 }
 
 # 2 Subnets - one for each NIC
 resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.upf_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  # Create 2 subnets
+  # Create 2 subnets based on number of CIDRs defined in .tfvars
   count                = length(var.subnet_cidrs)
-  # Named "subnet01, subnet02" (keep number under 10)
+  # Named "subnet01, subnet02" etc....  (keep number under 10)
   name                 = "subnet0${count.index}"
   # Using the address spaces in - subnet_cidrs
   address_prefixes     = [element(var.subnet_cidrs, count.index)]
 }
 
+#--- Note - I am using "${var.vm_prefix}-${format("%02d", count.index)}" throughout
+#---        to create consistent naming of resources.
+
 # Create the Public IPs
 resource "azurerm_public_ip" "public_ips" {
   location            = azurerm_resource_group.upf_rg.location
   resource_group_name = azurerm_resource_group.upf_rg.name
-  count               = var.node_count
-  name                = "${var.vm_prefix}-${format("%02d", count.index)}-PublicIP"
+  count               = "${var.node_count}"
   allocation_method   = "Dynamic"
+  name                = "${var.vm_prefix}-${format("%02d", count.index)}-PublicIP"
   domain_name_label   = "${var.vm_prefix}-${format("%02d", count.index)}"
 }
 
 ###- Create 2 NICs - one primary w/PubIP, one internal with SRIOV enabled
 resource "azurerm_network_interface" "primary" {
-  count                         = length(var.subnet2_ips)
-  name                          = "${var.vm_prefix}-PrimaryNIC-${format("%02d", count.index)}"
-  location                      = azurerm_resource_group.upf_rg.location
-  resource_group_name           = azurerm_resource_group.upf_rg.name
-  enable_accelerated_networking = "false"
+  location                        = azurerm_resource_group.upf_rg.location
+  resource_group_name             = azurerm_resource_group.upf_rg.name
+  count                           = length(var.subnet2_ips)
+  name                            = "${var.vm_prefix}-PrimaryNIC-${format("%02d", count.index)}"
+  enable_accelerated_networking   = "false"
 
   ip_configuration {
     primary                       = true
@@ -132,11 +137,11 @@ resource "azurerm_network_interface" "primary" {
 }
 
 resource "azurerm_network_interface" "internal" {
-  count                         = length(var.subnet2_ips)
-  name                          = "${var.vm_prefix}-InternalNIC-${format("%02d", count.index)}"
-  location                      = azurerm_resource_group.upf_rg.location
-  resource_group_name           = azurerm_resource_group.upf_rg.name
-  enable_accelerated_networking = "true"
+  location                        = azurerm_resource_group.upf_rg.location
+  resource_group_name             = azurerm_resource_group.upf_rg.name
+  count                           = length(var.subnet2_ips)
+  name                            = "${var.vm_prefix}-InternalNIC-${format("%02d", count.index)}"
+  enable_accelerated_networking   = "true"
 
   ip_configuration {
     primary                       = false
@@ -151,30 +156,30 @@ resource "azurerm_network_interface" "internal" {
 
 ###- Create an NSG allowing SSH from my IP
 resource "azurerm_network_security_group" "ssh" {
-  location                      = azurerm_resource_group.upf_rg.location
-  resource_group_name           = azurerm_resource_group.upf_rg.name
-  name                          = "AllowInbound"
+  location                     = azurerm_resource_group.upf_rg.location
+  resource_group_name          = azurerm_resource_group.upf_rg.name
+  name                         = "AllowInbound"
   security_rule {
-    access                       = "Allow"
-    direction                    = "Inbound"
-    name                         = "SSH"
-    priority                     = 100
-    protocol                     = "Tcp"
-    source_port_range            = "*"
-    source_address_prefixes      = "${var.whitelist_ips}"
-    destination_port_range       = "22"
-    destination_address_prefix   = "*"
+    access                     = "Allow"
+    direction                  = "Inbound"
+    name                       = "SSH"
+    priority                   = 100
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    source_address_prefixes    = "${var.whitelist_ips}"
+    destination_port_range     = "22"
+    destination_address_prefix = "*"
   }
   security_rule {
-    access                       = "Allow"
-    direction                    = "Inbound"
-    name                         = "RDP"
-    priority                     = 101
-    protocol                     = "Tcp"
-    source_port_range            = "*"
-    source_address_prefixes      = "${var.whitelist_ips}"
-    destination_port_range       = "3389"
-    destination_address_prefix   = "*"
+    access                     = "Allow"
+    direction                  = "Inbound"
+    name                       = "RDP"
+    priority                   = 101
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    source_address_prefixes    = "${var.whitelist_ips}"
+    destination_port_range     = "3389"
+    destination_address_prefix = "*"
   }
 }
 

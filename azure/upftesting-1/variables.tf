@@ -1,6 +1,8 @@
 ###==================================================================================###
+#  File:  variables.tf
+#  Created By: Karl Vietmeier
 #
-#
+#  Define variables used in main.tf
 #
 ###==================================================================================###
 
@@ -67,4 +69,30 @@ variable "password" { type = string }
 # Environment (Tagging)
 ###==================================================================================###
 variable "Environment" { type = string }
+
+
+
+###===================================================================================###
+#   Retrieve existing resources in Azure
+###===================================================================================###
+
+### Right now we just need the Hub vNet to peer to.
+# Resource Groups
+data "azurerm_resource_group" "hub-rg" {
+  name = "Coreinfra-rg"
+}
+
+# Hub vNet to peer to
+data "azurerm_virtual_network" "hub-vnet" {
+  resource_group_name = data.azurerm_resource_group.hub-rg.name
+  name = "CoreInfraHub-vnet"
+}
+
+# Refer to them in maint.tf using: 
+# data.azurerm_resource_group.hub-rg.name
+# data.azurerm_resource_group.hub-rg.id
+# data.azurerm_virtual_network.hub-vnet.name
+# data.azurerm_virtual_network.hub-vnet.id
+
+
 

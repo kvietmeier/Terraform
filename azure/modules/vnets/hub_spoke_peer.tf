@@ -3,7 +3,7 @@
 #  Created By: Karl Vietmeier
 #
 #  Goal: Create a Hub-and-Spoke network topology with an existing Hub vnet
-#        --- I have resources I need to access in the hub like Ansible and ADDS  
+#        --- You may have resources in the hub like an Ansible server and ADD DS  
 # 
 #  Usage:
 #  terraform apply --auto-approve
@@ -67,19 +67,27 @@ resource "azurerm_virtual_network" "source" {
 #   3.)  Create the peering
 ###===================================================================================###
 
+# Syntax is important here -
+# 1) Refer to the "source" resources in each peering block by name and the remote vnet resource by its id.
+# 2) You match the vnet with its resource group in each peering block
+
 # Spoke-2-Hub Peer
 resource "azurerm_virtual_network_peering" "spoke2hub" {
   name                      = "peer-spoke2hub"
+  # Source resources by name
   resource_group_name       = azurerm_resource_group.spoke-rg.name
   virtual_network_name      = azurerm_virtual_network.source.name
+  # Target vnet by ID
   remote_virtual_network_id = data.azurerm_virtual_network.hub-vnet.id
 }
 
 # Hub-2-Spoke Peer
 resource "azurerm_virtual_network_peering" "hub2spoke" {
   name                      = "peer-hub2spoke"
+  # Source resources by name
   resource_group_name       = data.azurerm_resource_group.hub-rg.name
   virtual_network_name      = data.azurerm_virtual_network.hub-vnet.name
+  # Target vnet by ID
   remote_virtual_network_id = azurerm_virtual_network.source.id
 }
 
