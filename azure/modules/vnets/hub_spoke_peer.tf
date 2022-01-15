@@ -73,21 +73,21 @@ resource "azurerm_virtual_network" "source" {
 
 # Spoke-2-Hub Peer
 resource "azurerm_virtual_network_peering" "spoke2hub" {
-  name                      = "peer-spoke2hub"
-  # Source resources by name
+  name                      = "peertest1-spoke2hub"
+  # Spoke source resources by name
   resource_group_name       = azurerm_resource_group.spoke-rg.name
   virtual_network_name      = azurerm_virtual_network.source.name
-  # Target vnet by ID
+  # Hub target vnet by ID
   remote_virtual_network_id = data.azurerm_virtual_network.hub-vnet.id
 }
 
 # Hub-2-Spoke Peer
 resource "azurerm_virtual_network_peering" "hub2spoke" {
-  name                      = "peer-hub2spoke"
-  # Source resources by name
+  name                      = "peertest1-hub2spoke"
+  # Hub source resources by name
   resource_group_name       = data.azurerm_resource_group.hub-rg.name
   virtual_network_name      = data.azurerm_virtual_network.hub-vnet.name
-  # Target vnet by ID
+  # Spoke target vnet by ID
   remote_virtual_network_id = azurerm_virtual_network.source.id
 }
 

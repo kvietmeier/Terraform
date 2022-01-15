@@ -51,6 +51,20 @@ resource "azurerm_proximity_placement_group" "proxplace_grp" {
   name                = "ProximityPlacementGroup"
 }
 
+# Enable auto-shutdown
+# VM ID is a little tricky to sort out.
+resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
+  location              = azurerm_resource_group.upf_rg.location
+  count                 = length(azurerm_linux_virtual_machine.vms.*.id)
+  virtual_machine_id    = azurerm_linux_virtual_machine.vms[count.index].id
+  enabled               = true
+  daily_recurrence_time = "${var.shutdown_time}"
+  timezone              = "${var.timezone}"
+
+  notification_settings {
+    enabled             = false
+  }
+}
 
 ###--- Setup a cloud-init configuration file - need both parts
 # refer to the source yaml file
@@ -183,6 +197,31 @@ resource "azurerm_subnet_network_security_group_association" "mapnsg" {
   network_security_group_id = azurerm_network_security_group.ssh.id
 }
 
+### Create a vnet peer to the hub vnet
+# Syntax is important here -
+# 1) Refer to the "source" resources in each peering block by name and the remote vnet resource by its id.
+# 2) You match the vnet with its resource group in each peering block
+
+# Spoke-2-Hub Peer
+resource "azurerm_virtual_network_peering" "spoke2hub" {
+  name                      = "peer-spoke2hub"
+  # Source resources by name
+  resource_group_name  = azurerm_resource_group.upf_rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  # Target vnet by ID
+  remote_virtual_network_id = data.azurerm_virtual_network.hub-vnet.id
+}
+
+# Hub-2-Spoke Peer
+resource "azurerm_virtual_network_peering" "hub2spoke" {
+  name                      = "peer-hub2spoke"
+  # Source resources by name
+  resource_group_name       = data.azurerm_resource_group.hub-rg.name
+  virtual_network_name      = data.azurerm_virtual_network.hub-vnet.name
+  # Target vnet by ID
+  remote_virtual_network_id = azurerm_virtual_network.vnet.id
+}
+
 
 
 ###===================  VM Configuration Elements ====================###`
@@ -264,17 +303,15 @@ resource "azurerm_linux_virtual_machine" "vms" {
 ###--- End VM Creation
 
 
-# Enable auto-shutdown
-# VM ID is a little tricky to sort out.
-resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-  location              = azurerm_resource_group.upf_rg.location
-  count                 = length(azurerm_linux_virtual_machine.vms.*.id)
-  virtual_machine_id    = azurerm_linux_virtual_machine.vms[count.index].id
-  enabled               = true
-  daily_recurrence_time = "${var.shutdown_time}"
-  timezone              = "${var.timezone}"
+###--- Outputs
 
-  notification_settings {
-    enabled             = false
-  }
+/*
+output "public_ip_address" {
+  value = "${azurerm_public_ip.public_ips.*.ip_address}"
+}
+*/
+
+# FQDN of VM primary NICs 
+output "public_ip_address" {
+  value = "${azurerm_public_ip.public_ips.*.fqdn}"
 }
