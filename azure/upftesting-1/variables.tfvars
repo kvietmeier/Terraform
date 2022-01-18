@@ -3,7 +3,8 @@
 #  Created By: Karl Vietmeier
 #  
 #  Assign values to the variables defined in variables.tf
-#
+#  
+#  This should be in .gitignore
 #
 ###==================================================================================###
 
