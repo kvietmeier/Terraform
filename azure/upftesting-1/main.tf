@@ -276,7 +276,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
 
   admin_ssh_key {
     username     = "${var.username}"
-    public_key   = file("../scripts/id_rsa.pub")
+    public_key   = file("../secrets/id_rsa.pub")
   }
 
   # Image and Disk Info

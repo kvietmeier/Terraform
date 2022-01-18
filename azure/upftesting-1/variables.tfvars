@@ -47,7 +47,6 @@ subnet_cidrs = [
 # NSG Allow List
 whitelist_ips = [
   "47.144.107.198",     # My ISP Address
-  "76.170.100.169",     # My ISP Address
   "134.134.139.64/27",
   "134.134.137.64/27",
   "192.55.54.32/27",
