@@ -8,31 +8,18 @@ This template will build a platform for testing Telco related workloads leveragi
 * Bootdiags for Serial Console access
 * cloud-init for OS setup
 * Auto Shutdown enabled
+* Peer vnet to existing hub vnet with Ansible/utilities server.
 
 ToDo - 
-* Configure peering to existing hub vnet with Ansible server.
 * Refactor to be module based
 * Document key template code that is poorly documented in general.
+* Add Azure Arc agent
 
 Need to document steps<br>
 .<br>
 
 #### Code documentation - In Progress
 
-To make my code more portable across dseveral; Tenants/Subscriptions I'm using the TF Environment variables set in my PowerShell profile:<br>
-Source a "secrets file" for the variables:
-```
-. '<drive>:\.hideme\somesecretstuff.ps1'
-```
-
-Set the variables:
-```
-$env:ARM_TENANT_ID       ="$TFM_TenantID"
-$env:ARM_SUBSCRIPTION_ID ="$TFM_SubID"
-$env:ARM_CLIENT_ID       ="$TFM_AppID"
-$env:ARM_CLIENT_SECRET   ="$TFM_AppSecret"
-```
-  
     
 
 ___
