@@ -2,54 +2,59 @@
 
 Terraform projects. Only the Azure folder is currently under active development.
 
-
 #### Installing
 
 [Hashicorp Learn Install Tutorial](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/certification-associate-tutorials)
 
-
 #### Notes
 
-**Terraform commands:**<br>
-A good cheat sheet I ran across<br>
+**Terraform commands:**  
+A good cheat sheet I ran across  
 https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet
 
-Apply/destroy without prompting<br>
-```terraform destroy --auto-approve```<br>
-```terraform apply --auto-approve```
+Apply/destroy without prompting  
 
-Run and over-ride locks<br>
-```terraform destroy -lock=false --auto-approve```<br>
-```terraform apply -lock=false --auto-approve```
+```powershell
+terraform destroy --auto-approve
+terraform apply --auto-approve
+```
 
-Run with a .tfvars file<br>
-```terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"```<br>
-```terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"```
+Run and over-ride locks  
 
-Put it all together<br>
-```terraform apply --auto-approve -var-file=".\<fname>.tfvars"```<br>
-```terraform destroy --auto-approve -var-file=".\<fname>.tfvars"```
+```powershell
+terraform destroy -lock=false --auto-approve
+terraform apply -lock=false --auto-approve
+```
 
-  
+Run with a .tfvars file  
 
+```powershell
+terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"
+terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"
+```
 
+Put it all together  
+
+```powershell
+terraform apply --auto-approve -var-file=".\<fname>.tfvars"
+terraform destroy --auto-approve -var-file=".\<fname>.tfvars"
+```
 
 ---
   
-  
 #### My code is Built With
+
 * [Visual Studio Code](https://code.visualstudio.com/) - Editor
 * [Terraform](https://www.terraform.io/) - Terraform
 * [Azure](portal.azure.com) - Azure Portal
 
 #### All run under PowerShell on Windows 10
-* [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
 
+* [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
 
 #### Authors
 
 * **Karl Vietmeier**
-
 
 #### License
 
