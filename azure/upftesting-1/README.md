@@ -17,9 +17,8 @@ ToDo -
 * Document key template code that is poorly documented in general.
 * Add Azure Arc agent
 
-Need to document steps<br>
-.<br>
-
+Need to document steps  
+  
 #### Code documentation - In Progress
 
 ___
