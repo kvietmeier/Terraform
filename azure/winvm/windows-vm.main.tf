@@ -222,7 +222,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
 
 # Enable auto-shutdown
 # "Pacific Standard Time"
-# 
+ 
 resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
   virtual_machine_id  = azurerm_linux_virtual_machine.linuxvm01.id
   location            = azurerm_resource_group.win_vm.location
