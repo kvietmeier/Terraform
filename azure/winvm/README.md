@@ -1,7 +1,6 @@
 #### Create a single Windows VM
 
-Not working - still creates a Linux VM
-
+Not working -  Needs to be modified to create a Windows VM
 
 #### License
 
