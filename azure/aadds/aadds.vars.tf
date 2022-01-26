@@ -15,8 +15,7 @@
 variable "region" { type = string }
 
 # Misc dimensioning/scale parameters
-variable "resource_prefix" { type = string }
-variable "vm_prefix" { type = string }
+variable "prefix" { type = string }
 variable "node_count" { type = number }
 
 # Directory/User Parameters
@@ -25,6 +24,7 @@ variable "user_upn" { type = string }
 variable "display_name" { type = string }
 variable "password" { type = string }
 variable "aadds_sku" { type = string }
+variable "domain" { type = string }
 
 
 ###===================================================================================###
@@ -33,7 +33,8 @@ variable "aadds_sku" { type = string }
 
 # IP Ranges
 variable "vnet_cidr" {type = list(string)}
-variable "subnet_cidrs" {type = list(string)}
+variable "subnet_cidr" {type = list(string)}
+variable "dns_servers" {type = list(string)}
 
 # Allow list for NSG
 variable whitelist_ips {

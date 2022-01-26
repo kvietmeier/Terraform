@@ -43,6 +43,11 @@ variable "ip_alloc" {type = list(string)}
 variable "sriov" {type = list(string)}
 
 
+# Hub resources for vnet peering
+variable "hub-rg" {type = string}
+variable "hub-vnet" {type = string}
+
+
 ###==================================================================================###
 ###     VM specific information
 ###==================================================================================###
@@ -79,13 +84,13 @@ variable "Environment" { type = string }
 ### Right now we just need the Hub vNet to peer to.
 # Resource Groups
 data "azurerm_resource_group" "hub-rg" {
-  name = "Coreinfra-rg"
+  name = "${var.hub-rg}"
 }
 
 # Hub vNet to peer to
 data "azurerm_virtual_network" "hub-vnet" {
   resource_group_name = data.azurerm_resource_group.hub-rg.name
-  name = "CoreInfraHub-vnet"
+  name = "${var.hub-vnet}"
 }
 
 # Refer to them in maint.tf using: 
