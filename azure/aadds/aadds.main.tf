@@ -193,8 +193,13 @@ resource "azurerm_active_directory_domain_service" "aadds-dom" {
 
   notifications {
     notify_dc_admins        = true
-    notify_global_admins    = true
+    notify_global_admins    = false
   }
+
+  # TBD - For password sync - need a cert.
+  #secure_ldap {
+  #  enabled = true
+  #}
 
   security {
     sync_kerberos_passwords = true
