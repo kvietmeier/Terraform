@@ -1,6 +1,21 @@
-###===============================================================================###
-#   Create a Linux VM
-###===============================================================================###
+###===================================================================================###
+#  File:  windows-vm.main.tf
+#  Created By: Karl Vietmeier
+#
+#  Terraform Template Code
+#  Purpose: Create a single Linux VM
+#
+#  Files in Module:
+#    linux.vm.main.tf
+#    linux.vm.variables.tf
+#    linux.vm.variables.tfvars
+#    linux.vm.variables.tfvars.txt
+#
+#  Usage:
+#  terraform apply --auto-approve -var-file=".\linux.vm.variables.tfvars"
+#  terraform destroy --auto-approve -var-file=".\linux.vm.variables.tfvars"
+#
+###===================================================================================###
 
 ###===============================#===================================================###
 ###--- Configure the Azure Provider

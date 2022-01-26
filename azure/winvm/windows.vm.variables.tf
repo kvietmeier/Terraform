@@ -1,5 +1,22 @@
-###==================================================================================###
+###===================================================================================###
+#  File:  windows.vm.variables.tf
+#  Created By: Karl Vietmeier
 #
+#  Terraform Template Code
+#  Purpose: Create a single Windows VM
+#
+#  Files in Module:
+#    windows.vm.main.tf
+#    windows.vm.variables.tf
+#    windows.vm.variables.tfvars
+#    windows.vm.variables.tfvars.txt
+#
+#  Usage:
+#  terraform apply --auto-approve -var-file=".\windows.vm.variables.tfvars"
+#  terraform destroy --auto-approve -var-file=".\windows.vm.variables.tfvars"
+#
+###===================================================================================###
+
 #
 #
 ###==================================================================================###
