@@ -1,9 +1,9 @@
 ###===================================================================================###
-#  File:  main.tf
+#  File:  Template.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Template Code
-#  Purpose: Create multiple VMs each with 2 NICs.
+#  Purpose:  Blank Template
 # 
 #  Files in Module:
 #    main.tf

@@ -1,0 +1,56 @@
+###==================================================================================###
+#  File:  variables.tfvars
+#  Created By: Karl Vietmeier
+#  
+#  Assign values to the variables defined in variables.tf
+#  
+#  This should be in .gitignore
+#
+###==================================================================================###
+
+# Basic Information
+region          = "West US 2"
+prefix          = "linuxvm"
+vm_name         = "linuxtest01"
+shutdown_time   = "1800"
+timezone        = "Pacific Standard Time"
+
+# OS/VM Info
+vm_size         = "Standard_D2s_v4"
+publisher       = "Canonical"
+offer           = "0001-com-ubuntu-server-focal-daily"
+sku             = "20_04-daily-lts-gen2"
+ver             = "latest"
+
+# OS Disk
+caching         = "ReadWrite"
+sa_type         = "Standard_LRS"
+
+# User Info
+username        = ""
+password        = ""
+
+###===================================================================================###
+###  Networking Configuration
+###===================================================================================###
+
+# vnet address space (no need for a /16 or a /8)
+vnet_cidr = ["0.0.0.0/22"]
+
+# Subnet address spaces
+subnet01_cidr = [
+  "0.0.1.0/24",
+]
+
+subnet02_cidr = [
+  "0.0.2.0/24",
+]
+
+# NSG Allow List
+whitelist_ips = [
+  "47.144.107.198",     # My ISP Address
+  "134.134.139.64/27",
+  "134.134.137.64/27",
+  "192.55.54.32/27",
+  "192.55.55.32/27"
+]

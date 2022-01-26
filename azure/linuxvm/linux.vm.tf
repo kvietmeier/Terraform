@@ -2,7 +2,9 @@
 #   Create a Linux VM
 ###===============================================================================###
 
-# Configure the Microsoft Azure Provider
+###===============================#===================================================###
+###--- Configure the Azure Provider
+###===================================================================================###
 terraform {
   required_providers {
     azurerm = {
@@ -16,15 +18,34 @@ provider "azurerm" {
   features {}
 }
 
+###===================================================================================###
+#     Start creating infrastructure resources
+###===================================================================================###
+
 resource "azurerm_resource_group" "terrarg" {
   name     = "${var.prefix}-rg"
   location = var.region
 }
 
+# Enable auto-shutdown
+# VM ID is a little tricky to sort out.
+resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
+  location              = azurerm_resource_group.terrarg.location
+  virtual_machine_id    = azurerm_linux_virtual_machine.linuxvm01.id
+  enabled               = true
+  daily_recurrence_time = "${var.shutdown_time}"
+  timezone              = "${var.timezone}"
+
+  notification_settings {
+    enabled             = false
+  }
+}
+
+
 ###--- Setup a cloud-init configuration file - need both parts
 # refer to the source yaml file
 data "template_file" "system_setup" {
-  template = file("./scripts/cloud-init")
+  template = file("../secrets/cloud-init")
 }
 
 # Render a multi-part cloud-init config making use of the file
@@ -43,44 +64,46 @@ data "template_cloudinit_config" "config" {
   }
 }
 
-###===================  Network Configuration ====================###`
+###===================================================================================###
+###    Networking Section
+###===================================================================================###
 
 # Create a vnet
 resource "azurerm_virtual_network" "terranet" {
   name                = "${var.prefix}-network"
-  address_space       = var.vnet_cidr
+  address_space       = "${var.vnet_cidr}"
   location            = azurerm_resource_group.terrarg.location
   resource_group_name = azurerm_resource_group.terrarg.name
 }
 
 resource "azurerm_subnet" "subnet01" {
   name                 = "subnet01"
-  address_prefixes     = var.subnet01_cidr
+  address_prefixes     = "${var.subnet01_cidr}"
   resource_group_name  = azurerm_resource_group.terrarg.name
   virtual_network_name = azurerm_virtual_network.terranet.name
 }
 
 resource "azurerm_subnet" "subnet02" {
   name                 = "subnet02"
-  address_prefixes     = var.subnet02_cidr
+  address_prefixes     = "${var.subnet02_cidr}"
   resource_group_name  = azurerm_resource_group.terrarg.name
   virtual_network_name = azurerm_virtual_network.terranet.name
 }
 
 resource "azurerm_public_ip" "pip" {
-  name                = "${var.prefix}-pip"
+  name                = "${var.vm_name}-pip"
+  domain_name_label   = "${var.vm_name}"
+  allocation_method   = "Dynamic"
   location            = azurerm_resource_group.terrarg.location
   resource_group_name = azurerm_resource_group.terrarg.name
-  domain_name_label   = "linuxvm01"
-  allocation_method   = "Dynamic"
 }
 
 ###- Create 2 NICs, one with a public IP
 resource "azurerm_network_interface" "primary" {
-  name                = "${var.prefix}-nic1"
-  location            = azurerm_resource_group.terrarg.location
-  resource_group_name = azurerm_resource_group.terrarg.name
+  name                          = "${var.vm_name}-nic1"
   enable_accelerated_networking = "false"
+  location                      = azurerm_resource_group.terrarg.location
+  resource_group_name           = azurerm_resource_group.terrarg.name
 
   ip_configuration {
     name                          = "primary"
@@ -92,10 +115,10 @@ resource "azurerm_network_interface" "primary" {
 }
 
 resource "azurerm_network_interface" "internal" {
-  name                = "${var.prefix}-nic2"
-  location            = azurerm_resource_group.terrarg.location
-  resource_group_name = azurerm_resource_group.terrarg.name
+  name                          = "${var.vm_name}-nic2"
   enable_accelerated_networking = "true"
+  location                      = azurerm_resource_group.terrarg.location
+  resource_group_name           = azurerm_resource_group.terrarg.name
 
   ip_configuration {
     name                          = "internal"
@@ -118,7 +141,7 @@ resource "azurerm_network_security_group" "ssh" {
     priority                     = 100
     protocol                     = "Tcp"
     source_port_range            = "*"
-    source_address_prefixes      = var.whitelist_ips
+    source_address_prefixes      = "${var.whitelist_ips}"
     destination_port_range       = "22"
     destination_address_prefix   = "*"
   }
@@ -129,12 +152,11 @@ resource "azurerm_network_security_group" "ssh" {
     priority                     = 101
     protocol                     = "Tcp"
     source_port_range            = "*"
-    source_address_prefixes      = var.whitelist_ips
+    source_address_prefixes      = "${var.whitelist_ips}"
     destination_port_range       = "3389"
     destination_address_prefix   = "*"
   }
 }
-
 
 resource "azurerm_network_interface_security_group_association" "mapnsg" {
   network_interface_id      = azurerm_network_interface.primary.id
@@ -159,22 +181,21 @@ resource "random_id" "randomId" {
 # Create storage account for boot diagnostics
 resource "azurerm_storage_account" "diagstorageaccount" {
     name                     = "diag${random_id.randomId.hex}"
-    resource_group_name      = azurerm_resource_group.terrarg.name
-    location                 = azurerm_resource_group.terrarg.location
     account_tier             = "Standard"
     account_replication_type = "LRS"
-
+    resource_group_name      = azurerm_resource_group.terrarg.name
+    location                 = azurerm_resource_group.terrarg.location
 }
 
 
 ###- Put it all together and build the VM
 resource "azurerm_linux_virtual_machine" "linuxvm01" {
-  name                            = "${var.prefix}-vm"
   location                        = azurerm_resource_group.terrarg.location
   resource_group_name             = azurerm_resource_group.terrarg.name
+  name                            = "${var.vm_name}"
   size                            = "${var.vm_size}"
   disable_password_authentication = true
-  network_interface_ids = [
+  network_interface_ids           = [
     azurerm_network_interface.primary.id,
     azurerm_network_interface.internal.id,
   ]
@@ -183,7 +204,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
   custom_data    = data.template_cloudinit_config.config.rendered
   
   # Make sure hostname matches public IP DNS name
-  computer_name  = "linuxvm01"
+  computer_name  = "${var.vm_name}"
 
   # Admin user
   admin_username = "${var.username}"
@@ -191,20 +212,21 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
 
   admin_ssh_key {
     username     = "${var.username}"
-    public_key   = file("./scripts/id_rsa.pub")
+    public_key   = file("../secrets/id_rsa.pub")
   }
 
   # They changed the offer and sku for 20.04 - careful
   source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-focal-daily"
-    sku       = "20_04-daily-lts-gen2"
-    version   = "latest"
+    publisher = "${var.publisher}"
+    offer     = "${var.offer}"
+    sku       = "${var.sku}"
+    version   = "${var.ver}"
   }
 
   os_disk {
-    storage_account_type = "Standard_LRS"
-    caching              = "ReadWrite"
+    name                 = "${var.vm_name}"
+    caching              = "${var.caching}"
+    storage_account_type = "${var.sa_type}"
   }
   
   # For serial console and monitoring
@@ -213,25 +235,10 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
   }
   
 }
+###--- End VM Creation
 
-# Enable auto-shutdown
-# "Pacific Standard Time"
-# 
-resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-  virtual_machine_id  = azurerm_linux_virtual_machine.linuxvm01.id
-  location            = azurerm_resource_group.terrarg.location
-  enabled             = true
-
-  daily_recurrence_time = "1800"
-  timezone              = "Pacific Standard Time"
-
-
-  notification_settings {
-    enabled         = false
-   
-  }
- }
-
+###--- Outputs
+# What is the public IP?
  output "dns_name" {
-   value = "azurerm_public_ip.domain_name_label"
+   value = "${azurerm_public_ip.pip.fqdn}"
  }

@@ -1,0 +1,94 @@
+###==================================================================================###
+#  File:  variables.tfvars
+#  Created By: Karl Vietmeier
+#  
+#  Assign values to the variables defined in variables.tf
+#  
+#  Template for .tfvars that is excluded from the repo - populate as required
+#  I left in some common values
+#
+###==================================================================================###
+
+# Basic Information
+region          = ""
+resource_prefix = ""
+vm_prefix       = ""
+shutdown_time   = ""
+timezone        = ""
+Environment     = ""
+
+# OS/VM Info
+node_count      = 2
+vm_size         = "Standard_D2s_v4"
+publisher       = "Canonical"
+offer           = "0001-com-ubuntu-server-focal-daily"
+sku             = "20_04-daily-lts-gen2"
+ver             = "latest"
+
+# OS Disk
+caching         = "ReadWrite"
+sa_type         = "Standard_LRS"
+
+# User Info
+username        = ""
+password        = ""
+
+###===================================================================================###
+###  Networking Configuration
+###===================================================================================###
+
+# vnet address space
+vnet_cidr = ["0.0.0.0/22"]
+
+# Subnet address spaces
+subnet_cidrs = [
+  "0.0.1.0/24",
+  "0.0.2.0/24",
+]
+
+# NSG Allow List
+whitelist_ips = [
+  "0.0.0.0",     # My ISP Address
+  "0.0.0.0/27",  # A range of IPs
+]
+
+
+###---- Not using these right now.
+subnet_name = [
+  "",
+  "",
+]
+
+# Static IP Allocation
+subnet1_ips = [
+  "0.0.1.4",
+  "0.0.1.5",
+]
+
+subnet2_ips = [
+  "0.0.2.4",
+  "0.0.2.5",
+]
+
+nic_labels = [
+  "true",
+  "false",
+  "true",
+  "false",
+]
+
+ip_alloc = [
+  "Static",
+  "Static",
+  "Static",
+  "Static",
+]
+
+sriov = [
+  "false",
+  "true",
+  "false",
+  "true",
+]
+
+
