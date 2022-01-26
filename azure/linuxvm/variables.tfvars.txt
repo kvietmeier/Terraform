@@ -9,11 +9,11 @@
 ###==================================================================================###
 
 # Basic Information
-region          = "West US 2"
-prefix          = "linuxvm"
-vm_name         = "linuxtest01"
+region          = ""
+prefix          = ""
+vm_name         = ""
 shutdown_time   = "1800"
-timezone        = "Pacific Standard Time"
+timezone        = ""
 
 # OS/VM Info
 vm_size         = "Standard_D2s_v4"
@@ -48,9 +48,6 @@ subnet02_cidr = [
 
 # NSG Allow List
 whitelist_ips = [
-  "47.144.107.198",     # My ISP Address
-  "134.134.139.64/27",
-  "134.134.137.64/27",
-  "192.55.54.32/27",
-  "192.55.55.32/27"
+  "0.0.0.0",     # My ISP Address
+  "0.0.0.0/27",  # An IP Range
 ]

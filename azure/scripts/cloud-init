@@ -54,11 +54,12 @@ packages:
   - gnupg-agent
   - software-properties-common
 
-# Run commands once on first boot - clone and compile useful tools
+###--- Run commands once on first boot
 runcmd:
   # Needed for DPDK
   - [pip3, install, ninja]
   - [pip3, install, meson]
+  #--- Clone and compile useful tools 
   # Compile/install iperf3
   - [git, clone, https://github.com/esnet/iperf.git]
   - [cd, iperf]
@@ -88,8 +89,7 @@ runcmd:
   - [mandb, -c]
   - [apt-file, update]
 
-###--- Users
-# Add myself
+###--- User Configuration
 users:
   # Keep the original default user
   - name: default
