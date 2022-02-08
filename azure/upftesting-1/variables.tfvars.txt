@@ -37,6 +37,10 @@ password        = ""
 ###  Networking Configuration
 ###===================================================================================###
 
+# Existing vNet and Resource Group gfor peering
+hub-rg   = ""
+hub-vnet = ""
+
 # vnet address space
 vnet_cidr = ["0.0.0.0/22"]
 
