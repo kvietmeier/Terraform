@@ -163,7 +163,7 @@ resource "azurerm_network_interface" "internal" {
 
 
 ###- Create an NSG allowing SSH from my IP
-resource "azurerm_network_security_group" "ssh" {
+resource "azurerm_network_security_group" "upfnsg" {
   location                     = azurerm_resource_group.upf_rg.location
   resource_group_name          = azurerm_resource_group.upf_rg.name
   name                         = "AllowInbound"
@@ -194,7 +194,7 @@ resource "azurerm_network_security_group" "ssh" {
 # Map the NSG
 resource "azurerm_subnet_network_security_group_association" "mapnsg" {
   subnet_id                 = element(azurerm_subnet.subnets[*].id, 0)
-  network_security_group_id = azurerm_network_security_group.ssh.id
+  network_security_group_id = azurerm_network_security_group.upfnsg.id
 }
 
 ### Create a vnet peer to the hub vnet
