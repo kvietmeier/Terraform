@@ -1,5 +1,5 @@
 ###===================================================================================###
-#  File:  testing.tf
+#  File:  hub_spoke_peer.tf
 #  Created By: Karl Vietmeier
 #
 #  Goal: Create a Hub-and-Spoke network topology with an existing Hub vnet
