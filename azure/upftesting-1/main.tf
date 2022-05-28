@@ -3,6 +3,7 @@
 #  Created By: Karl Vietmeier
 #
 #  Terraform Template Code
+#  Terraform Template Code
 #  Purpose: Create multiple VMs each with 2 NICs for dev/test activities
 # 
 #  Files in Module:
