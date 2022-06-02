@@ -1,8 +1,12 @@
 ###===================================================================================###
+#   Copyright (C) 2022 Intel Corporation
+#   SPDX-License-Identifier: Apache-2.0
+###===================================================================================###
+#
 #  File:  Template.tf
 #  Created By: Karl Vietmeier
 #
-#  Terraform Template Code
+#  Terraform Module Code
 #  Purpose:  Blank Template
 # 
 #  Files in Module:
@@ -11,26 +15,15 @@
 #    variables.tfvars
 #
 #  Usage:
-#  terraform apply --auto-approve -var-file=".\variables.tfvars"
-#  terraform destroy --auto-approve -var-file=".\variables.tfvars"
+#  terraform apply --auto-approve
+#  terraform destroy --auto-approve
 ###===================================================================================###
 
-###===============================#===================================================###
-###--- Configure the Azure Provider
-###===================================================================================###
-# Configure the Microsoft Azure Provider
-terraform {
-  required_providers {
-    azurerm = {
-      source = "hashicorp/azurerm"
-      version = "~>2.0"
-    }
-  }
-}
+/* 
 
-provider "azurerm" {
-  features {}
-}
+Put Usage Documentation here
+
+*/
 
 
 ###===================================================================================###

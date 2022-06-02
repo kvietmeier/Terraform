@@ -1,0 +1,60 @@
+###==================================================================================###
+#  File:  variables.tfvars
+#  Created By: Karl Vietmeier
+#  
+#  Assign values to the variables defined in variables.tf
+#  
+#  Placeholder values - actual tfvars is in .gitignore
+#
+###==================================================================================###
+
+# Basic Information
+region     = "westus2"
+nsg_prefix = "Managed"
+
+# Existing Resource Groups for the NSGs (NSG has to be in same region as vnet/subnet/NIC)
+westus2-rg = "<Name>"
+eastus2-rg = "<Name>"
+
+# Region list for NSG (placeholder)
+nsg_regions = [
+  "westus",
+  "westus2",
+  "westus3",
+  "central",
+  "eastus",
+  "eastus2"
+]
+
+# Try using a map
+region_map = {
+  "WUS"  = "westus",
+  "WUS2" = "westus2",
+  "WUS3" = "westus3",
+  "CUS"  = "centralus",
+  "EUS"  = "eastus",
+  "EUS2" = "eastus2"
+}
+
+# Destination port list - standard services you might need
+destination_ports = [
+  "20",
+  "21",
+  "22",
+  "45",
+  "53",
+  "88",
+  "443",
+  "3389",
+  "8080"
+]
+
+# NSG Source IP allow list
+whitelist_ips = [
+  "<ISP IP>",     # My ISP Address
+  "<ISP IP>",     # Other ISP Address
+  # Other address spaces
+  "<CIDR1>",
+  "<CIDR2>",
+  "<CIDR3>"
+]
