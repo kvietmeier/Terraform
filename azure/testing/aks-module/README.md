@@ -4,14 +4,23 @@ Using the published Hashicorp Terraform AKS module
 
 #### Notes
 
-Put notes here
-  
 Get cluster credentials
 
-```powershell
+```text
 PS C:\> az aks get-credentials --resource-group aks-resource-group --name cpumgrtesting
-
 ```
+
+```text
+PS C:\> kubectl get namespace
+NAME                STATUS   AGE
+default             Active   20h
+gatekeeper-system   Active   20h
+kube-node-lease     Active   20h
+kube-public         Active   20h
+kube-system         Active   20h
+```
+
+
 
 
 
