@@ -7,8 +7,9 @@ Using the published Hashicorp Terraform AKS module
 Put notes here
   
 Get cluster credentials
+
 ```powershell
-'PS C:\> az aks get-credentials --resource-group aks-resource-group --name cpumgrtesting'
+PS C:\> az aks get-credentials --resource-group aks-resource-group --name cpumgrtesting
 
 ```
 
