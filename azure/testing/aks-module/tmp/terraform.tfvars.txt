@@ -15,14 +15,14 @@
 #
 ###===================================================================================###
 
-# Cluster Settings
-resource_group_name = "AKS-Testing"
+
+#  Standard Values
+resource_group_name = "TF-Testing"
 location            = "westus2"
 
-
-### Cluster settings
-dns_prefix          = "akscluster"
+# Some AKS Variables
 aks_name            = "TestCluster" 
+prefix              = "akscluster"
 kubernetes_version  = "1.23.5"
 node_count          = "1"
 vm_size             = "Standard_DS2_v2"
@@ -31,4 +31,4 @@ vm_size             = "Standard_DS2_v2"
 ### Guard These - 
 client_id     = "<keep secure>"
 client_secret = "<keep secure>"
-ssh_key       = "<key>"
+ssh_key       = "<keep secure>"

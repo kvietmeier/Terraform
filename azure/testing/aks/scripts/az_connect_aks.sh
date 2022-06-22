@@ -1,7 +1,7 @@
 #!/bin/sh
+# Arc Agent installation
 
 # <--- Change the following environment variables according to your Azure service principal name --->
-
 echo "Exporting environment variables"
 export appId='<Your Azure service principal name>'
 export password='<Your Azure service principal password>'

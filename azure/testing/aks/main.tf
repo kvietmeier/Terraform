@@ -31,19 +31,23 @@ Put Usage Documentation here
 ###===================================================================================###
 
 
+# We need a Resource Group to hold everything
 resource "azurerm_resource_group" "aks-demo" {
   name     = var.resource_group_name
   location = var.location
 }
 
+# Define the AKS Cluster
 resource "azurerm_kubernetes_cluster" "akscluster" {
-  name                = var.aks_name
   location            = azurerm_resource_group.aks-demo.location
   resource_group_name = azurerm_resource_group.aks-demo.name
-  dns_prefix          = var.prefix
+  
+  # Cluster arguments
+  name                = var.aks_name
+  dns_prefix          = var.dns_prefix
+  kubernetes_version  = var.kubernetes_version
 
-  kubernetes_version = var.kubernetes_version
-
+  ###--- Argument blocks  
   default_node_pool {
     name       = "default"
     node_count = var.node_count
@@ -55,11 +59,13 @@ resource "azurerm_kubernetes_cluster" "akscluster" {
     client_secret = var.client_secret
   }
 
+  role_based_access_control {
+    enabled = false
+  }
+  
   tags = {
     Project = "AKS_Testing"
   }
 
-  role_based_access_control {
-    enabled = false
-  }
-}
+
+}  ###---- End Cluster Definition ----###

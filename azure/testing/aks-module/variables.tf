@@ -6,34 +6,29 @@
 #  File:  variables.tf
 #  Created By: Karl Vietmeier
 #
+#  Variable definitions with defaults
+#
 ###===================================================================================###
+/* 
 
-### Basic infrastructure settings
 variable "resource_group_name" {
-  description = "The Azure resource group for this AKS Cluster"
-  default     = "AKS-Testing"
+  description = "Resource Group"
+  default     = "TF-Testing"
 }
 
 variable "location" {
-  description = "Azure Region where this AKS Cluster should be provisioned"
-  default     = "West US 2"
+  description = "Region to deploy resources"
+  default     = "westus2"
 }
 
-
-### Cluster Variables
-variable "dns_prefix" {
-  description = "DNS prefix for the fqdn"
-  default     = "akscluster"
+variable "prefix" {
+  description = "A prefix to use for all resources"
+  default     = "tf-testing"
 }
 
 variable "aks_name" {
   description = "AKS Cluster name"
   default     = "TestCluster"
-}
-
-variable "kubernetes_version" {
-  description = "Kubernetes version deployed"
-  default     = "1.23.5"
 }
 
 variable "node_count" {
@@ -45,17 +40,20 @@ variable "vm_size" {
   description = "VM size for the node pool"
   default     = "Standard_DS2_v2"
 }
+ */
 
 
-### "Secrets"
+# Sensitive variables
+variable "public_ssh_key" {
+  description = "A custom ssh key to control access to the AKS cluster"
+  type        = string
+  default     = ""
+}
+
 variable "client_id" {
   description = "The Client ID for the Service Principal to use for this AKS Cluster"
 }
 
 variable "client_secret" {
   description = "The Client Secret for the Service Principal to use for this AKS Cluster"
-}
-
-variable "ssh_key" {
-  description = "SSH Key for the cludster nodes"
 }
