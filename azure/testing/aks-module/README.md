@@ -5,19 +5,21 @@ Using the published Hashicorp Terraform AKS module
 #### Notes
 
 Install kubectl for PowerShell:  
-* [Official Docs](https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/)
+* [Official Docs - curl/choco/scoop](https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/)
 * [PowerShell Module Install-AzAksKubectl](https://docs.microsoft.com/en-us/powershell/module/az.aks/install-azakskubectl?view=azps-8.0.0)
 
 CheatSheets:  
 * [kubectl cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/):
 
-Get cluster credentials
+Get cluster credentials:
 
-```text
+```shell
 PS C:\> az aks get-credentials --resource-group aks-resource-group --name cpumgrtesting
 ```
 
-```text
+Basic cluster information:
+
+```shell
 PS C:\> kubectl get namespace
 NAME                STATUS   AGE
 default             Active   20h
@@ -42,4 +44,4 @@ This project is licensed under the Apache License - see the [LICENSE.md](LICENSE
 
 #### Acknowledgments
 
-* [https://registry.terraform.io/modules/Azure/aks/azurerm/latest](Terraform AKS Module)
+* [Terraform AKS Module](https://registry.terraform.io/modules/Azure/aks/azurerm/latest)
