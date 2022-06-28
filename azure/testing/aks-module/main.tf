@@ -19,16 +19,14 @@
 ###===================================================================================###
 
 /* 
-
-Usage
-
 Provider information is in provider.tf
 
 Notes:
-* Needed to enable host encryption
+- Needed to enable host encryption
   az feature register --namespace "Microsoft.Compute" --name "EncryptionAtHost"
 
-
+- Enable kubectl to access this cluster -
+  az aks get-credentials --resource-group aks-resource-group --name cpumgrtesting  
 
 */
 
@@ -44,7 +42,7 @@ resource "azurerm_resource_group" "aksrg" {
   location = "westus2"
 }
 
-# We need networks 
+# We need a vnet
 module "network" {
   source              = "Azure/network/azurerm"
   resource_group_name = azurerm_resource_group.aksrg.name
@@ -65,9 +63,10 @@ module "aks" {
   resource_group_name              = azurerm_resource_group.aksrg.name
   prefix                           = "tf"
 
-  # Service Principle for Auth
-  client_id                        = var.client_id
-  client_secret                    = var.client_secret
+  # Service Principle for Auth and SSH Key - values stored in terraform.tfvars 
+  client_id      = var.client_id
+  client_secret  = var.client_secret
+  public_ssh_key = var.public_ssh_key
   
   # Versions
   kubernetes_version               = "1.23.5"
@@ -75,15 +74,14 @@ module "aks" {
   sku_tier                         = "Paid" # defaults to Free
   
   # Base Cluster configuration
-  private_cluster_enabled          = false # default value
   cluster_name                     = "cpumgrtesting"
+  private_cluster_enabled          = false # default value
   enable_role_based_access_control = false
   rbac_aad_managed                 = false # AAD Auth deprecated in 1.25
   #rbac_aad_admin_group_object_ids  = [data.azuread_group.aks_cluster_admins.id]
   enable_azure_policy              = true
   enable_host_encryption           = false
   
-  public_ssh_key = var.public_ssh_key
 
   # Node Pool Configuration
   enable_auto_scaling              = true
@@ -105,15 +103,15 @@ module "aks" {
     "Agent" : "defaultnodepoolagent"
   }
 
-  # Ingress/Approuting Setup
+  ### Ingress/Approuting Setup
   enable_http_application_routing         = true
   
-  # App GW (not working)
-  #enable_ingress_application_gateway      = true
-  #ingress_application_gateway_name        = "aks-agw"
-  #ingress_application_gateway_subnet_cidr = "10.52.1.0/24"
+  # Enable AppGW setup (need an AppGW to exist) leage false for now.
+  enable_ingress_application_gateway      = false
+  ingress_application_gateway_name        = "aks-agw"
+  ingress_application_gateway_subnet_cidr = "10.52.250.0/24"
 
-  # Network Setup
+  #### Internal K8S Network Setup
   vnet_subnet_id                 = module.network.vnet_subnets[0]
   network_plugin                 = "azure"
   network_policy                 = "azure"
