@@ -3,11 +3,11 @@ output "resource_group_name" {
 }
 
 #output "kubernetes_cluster_name" {
-#  value = azurerm_kubernetes_cluster.aks.name
+#  value = azurerm_kubernetes_cluster.main.name
 #}
 
 # output "host" {
-#   value = azurerm_kubernetes_cluster.default.kube_config.0.host
+#   value = azurerm_kubernetes_cluster.main.kube_config.0.host
 # }
 
 #output "client_key" {
