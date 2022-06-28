@@ -11,7 +11,7 @@
 #  Files in Module:
 #    main.tf
 #    variables.tf
-#    variables.tfvars
+#    terraform.tfvars
 #
 #  Usage:
 #  terraform apply --auto-approve
