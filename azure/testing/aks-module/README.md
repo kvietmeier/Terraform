@@ -5,10 +5,12 @@ Using the published Hashicorp Terraform AKS module
 #### Notes
 
 Install kubectl for PowerShell:  
+
 * [Official Docs - curl/choco/scoop](https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/)
 * [PowerShell Module Install-AzAksKubectl](https://docs.microsoft.com/en-us/powershell/module/az.aks/install-azakskubectl?view=azps-8.0.0)
 
 CheatSheets:  
+
 * [kubectl cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/):
 
 Get cluster credentials:
