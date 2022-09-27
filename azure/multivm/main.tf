@@ -1,20 +1,25 @@
 ###===================================================================================###
+#   Copyright (C) 2022 Intel Corporation
+#   SPDX-License-Identifier: Apache-2.0
+###===================================================================================###
 #  File:  main.tf
 #  Created By: Karl Vietmeier
 #
-#  Terraform Template Code
 #  Terraform Template Code
 #  Purpose: Create multiple VMs each with 2 NICs for dev/test activities
 # 
 #  Files in Module:
 #    main.tf
 #    variables.tf
-#    variables.tfvars
+#    terraform.tfvars
 #
 #  Usage:
+#  terraform apply --auto-approve
+#  terraform destroy --auto-approve
+#  
+#  If you use a nonstandard tfvars file.
 #  terraform apply --auto-approve -var-file=".\variables.tfvars"
 #  terraform destroy --auto-approve -var-file=".\variables.tfvars"
-#
 ###===================================================================================###
 
 ###===============================#===================================================###
