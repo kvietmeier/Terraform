@@ -1,8 +1,14 @@
-#### Terraform Azure Templates
+### Terraform Azure Templates
 
 Terraform templates for creating infrastructure in Azure.
 
-#### Notes
+#### Documentation Links
+
+- [Terraform on Azure](https://docs.microsoft.com/en-us/azure/developer/terraform/)
+- [HashiLearn - Azure](https://learn.hashicorp.com/collections/terraform/azure-get-started)
+- [AzureRM Registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+
+#### Misc Notes
 
 To make my code more portable across Tenants/Subscriptions I'm using the TF Environment variables set in the PowerShell profile:  
 
@@ -23,17 +29,17 @@ $env:ARM_CLIENT_SECRET   ="$TFM_AppSecret"
   
 #### My code is Built With
 
-* [Visual Studio Code](https://code.visualstudio.com/) - Editor
-* [Terraform](https://www.terraform.io/) - Terraform
-* [Azure](portal.azure.com) - Azure Portal
+- [Visual Studio Code](https://code.visualstudio.com/) - Editor
+- [Terraform](https://www.terraform.io/) - Terraform
+- [Azure](portal.azure.com) - Azure Portal
 
-#### All run under PowerShell on Windows 10
+#### All run under PowerShell on Windows 10/11
 
-* [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
+- [Use Windows Terminal Console](https://docs.microsoft.com/en-us/windows/terminal/)
 
-#### Authors
+#### Author/s
 
-* **Karl Vietmeier**
+- **Karl Vietmeier**
 
 #### License
 
@@ -41,4 +47,4 @@ This project is licensed under the Apache License - see the [LICENSE.md](LICENSE
 
 #### Acknowledgments
 
-* None so far other than the many good examples out there.
+- None so far other than the many good examples out there.
