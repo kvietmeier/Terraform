@@ -105,16 +105,19 @@ resource "azurerm_virtual_network" "vnet" {
 resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.upf_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
+  
   # Create 2 subnets based on number of CIDRs defined in .tfvars
   count                = length(var.subnet_cidrs)
+  
   # Named "subnet01, subnet02" etc....  (keep number under 10)
   name                 = "subnet0${count.index}"
+  
   # Using the address spaces in - subnet_cidrs
   address_prefixes     = [element(var.subnet_cidrs, count.index)]
 }
 
 #--- Note - I am using "${var.vm_prefix}-${format("%02d", count.index)}" throughout
-#---        to create consistent naming of resources.
+#--- to create consistent naming of resources.
 
 # Create the Public IPs
 resource "azurerm_public_ip" "public_ips" {

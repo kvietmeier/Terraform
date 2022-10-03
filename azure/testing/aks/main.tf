@@ -19,7 +19,9 @@
 #  terraform destroy --auto-approve
 ###===================================================================================###
 
-/* 
+/*
+Following this example:
+https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks
 
 Put Usage Documentation here
 
@@ -32,40 +34,121 @@ Put Usage Documentation here
 
 
 # We need a Resource Group to hold everything
-resource "azurerm_resource_group" "aks-demo" {
+resource "azurerm_resource_group" "aks-rg" {
   name     = var.resource_group_name
-  location = var.location
+  location = var.region
 }
 
-# Define the AKS Cluster
-resource "azurerm_kubernetes_cluster" "akscluster" {
-  location            = azurerm_resource_group.aks-demo.location
-  resource_group_name = azurerm_resource_group.aks-demo.name
-  
-  # Cluster arguments
-  name                = var.aks_name
-  dns_prefix          = var.dns_prefix
-  kubernetes_version  = var.kubernetes_version
 
-  ###--- Argument blocks  
+###--- Setup the LAW
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_solution
+
+resource "random_id" "log_analytics_workspace_name_suffix" {
+    byte_length = 8
+}
+
+resource "azurerm_log_analytics_workspace" "akslaw" {
+    # The WorkSpace name has to be unique across the whole of azure, not just the current subscription/tenant.
+    name                = "${var.log_analytics_workspace_name}-${random_id.log_analytics_workspace_name_suffix.dec}"
+    location            = azurerm_resource_group.aks-rg.location
+    resource_group_name = azurerm_resource_group.aks-rg.name
+    sku                 = var.log_analytics_workspace_sku
+    retention_in_days   = var.log_retention_in_days
+}
+
+resource "azurerm_log_analytics_solution" "akslaw" {
+    solution_name         = "ContainerInsights"
+    resource_group_name   = azurerm_resource_group.aks-rg.name
+    location              = azurerm_resource_group.aks-rg.location
+    workspace_resource_id = azurerm_log_analytics_workspace.akslaw.id
+    workspace_name        = azurerm_log_analytics_workspace.akslaw.name
+
+    plan {
+        publisher = "Microsoft"
+        product   = "OMSGallery/ContainerInsights"
+    }
+} ###--- End LAW Setup
+
+
+###--- AKS Cluster Definition
+resource "azurerm_kubernetes_cluster" "k8s" {
+  name                = var.cluster_name
+  location            = azurerm_resource_group.aks-rg.location
+  resource_group_name = azurerm_resource_group.aks-rg.name
+  dns_prefix          = var.dns_prefix
+
+  linux_profile {
+    admin_username = var.admin_username
+
+    ssh_key {
+      key_data = file(var.ssh_public_key)
+    }
+  }
+
   default_node_pool {
-    name       = "default"
-    node_count = var.node_count
-    vm_size    = var.vm_size
+    name            = "agentpool"
+    node_count      = var.node_count
+    vm_size         = var.vm_size
   }
 
   service_principal {
-    client_id     = var.client_id
-    client_secret = var.client_secret
+    client_id     = var.aks_service_principal_app_id
+    client_secret = var.aks_service_principal_client_secret
   }
 
-  role_based_access_control {
-    enabled = false
+  addon_profile {
+    oms_agent {
+      enabled                    = true
+      log_analytics_workspace_id = azurerm_log_analytics_workspace.akslaw.id
+    }
+  }
+
+
+  ###--- Cluster network configuration
+  network_profile {
+    dns_service_ip     = var.net_profile_dns_service_ip
+    outbound_type      = var.net_profile_outbound_type
+    network_plugin     = var.network_plugin
+    network_policy     = var.network_policy
+    docker_bridge_cidr = var.net_profile_docker_bridge_cidr
+    pod_cidr           = var.net_profile_pod_cidr
+    service_cidr       = var.net_profile_service_cidr
+  }
+
+
+  ###--- Misc
+  tags = {
+    Environment = "Development"
+  }
+
+
+} ### End Cluster definition
+
+
+
+
+
+###--- Configure additional node pools
+# https://docs.microsoft.com/en-us/azure/aks/custom-node-configuration
+/* 
+resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
+  name                  = "CPUManager"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.akscluster.id
+  node_count            = var.node_count
+  vm_size               = var.vm_size
+
+  kubelet_config {
+    cpu_manager_policy = var.cpu_manager_policy
   }
   
-  tags = {
-    Project = "AKS_Testing"
+  linux_os_config {
+    transparent_huge_page_enabled = var.transparent_huge_page_enabled
   }
+  
+  
+}
 
 
-}  ###---- End Cluster Definition ----###
+
+ */

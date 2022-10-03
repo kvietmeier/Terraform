@@ -1,14 +1,31 @@
+###===================================================================================###
+#   Copyright (C) 2022 Intel Corporation
+#   SPDX-License-Identifier: Apache-2.0
+###===================================================================================###
+#
+#  File:  outputs.tf
+#  Created By: Karl Vietmeier
+#
+#  Purpose:  Output cluster info after apply
+# 
+###===================================================================================###
+
+
 output "resource_group_name" {
   value = azurerm_resource_group.aksrg.name
 }
 
 output "kubernetes_cluster_name" {
-  value = module.azurerm_kubernetes_cluster.name
+  value     = module.aks
+  sensitive = true
 }
 
-# output "host" {
-#   value = azurerm_kubernetes_cluster.main.kube_config.0.host
-# }
+output "host" {
+  #value = azurerm_kubernetes_cluster.main.kube_config.0.host
+  #value = "${module.aks.kube_config_raw}"
+  value = nonsensitive(module.aks.kube_config_raw)
+  #sensitive = true
+}
 
 #output "client_key" {
 #  value = azurerm_kubernetes_cluster.main.kube_config.0.client_key

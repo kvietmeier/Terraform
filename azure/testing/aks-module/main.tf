@@ -95,6 +95,13 @@ module "aks" {
   agents_availability_zones        = ["1", "2"]
   agents_type                      = "VirtualMachineScaleSets"
 
+  #kubelet_config = {
+  #  cpu_manager_policy = "static"
+  #}
+  
+  cpu_manager_policy      = static
+  topology_manager_policy = never
+
   agents_labels = {
     "nodepool" : "defaultnodepool"
   }
