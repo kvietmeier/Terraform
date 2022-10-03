@@ -1,6 +1,7 @@
 ### Misc core/shared infrastructre resources
 
-- Active Directory
+- Azxure Active Directory - user management
+- Azure Active Directory Domain Services
 - Network Security Groups
 - vNet Peering
 
