@@ -2,13 +2,12 @@
 
 From: [AADS Terraform Registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/active_directory_domain_service)
 
-The docs are incomplete - you need to add API Permissions to the Serice Principle - See:
+The docs are incomplete - you need to add API Permissions to the Serice Principle - See:  
+<https://github.com/hashicorp/terraform-provider-azuread/issues/657>  
+<https://github.com/hashicorp/terraform-provider-azuread/blob/main/docs/guides/service_principal_configuration.md>  
+<https://github.com/hashicorp/terraform-provider-azuread/blob/main/docs/guides/microsoft-graph.md>  
 
-<https://github.com/hashicorp/terraform-provider-azuread/issues/657>
-<https://github.com/hashicorp/terraform-provider-azuread/blob/main/docs/guides/service_principal_configuration.md>
-<https://github.com/hashicorp/terraform-provider-azuread/blob/main/docs/guides/microsoft-graph.md>
-
-And the Service Principle must have GA permissions in the Tenant:
+And the Service Principle must have GA permissions in the Tenant:  
 <https://docs.microsoft.com/en-us/azure/active-directory-domain-services/template-create-instance>
 
 Important:
