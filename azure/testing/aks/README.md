@@ -22,26 +22,43 @@ PS C:\> az aks get-credentials --resource-group <rg_name> --name <cluster_name>
 Basic cluster information:
 
 ```shell
-PS C:\> kubectl get namespace
-NAME                STATUS   AGE
-default             Active   20h
-gatekeeper-system   Active   20h
-kube-node-lease     Active   20h
-kube-public         Active   20h
-kube-system         Active   20h
+kubectl cluster-info
 ```
+  
+Dump detailed cluster information:
 
-Get all deplopymenmts in all namespaces
+```shell
+kubectl cluster-info dump
+```
+  
+List Namespaces:
+
+```shell
+kubectl get namespace
+NAME                   STATUS   AGE
+default                Active   11h
+kube-node-lease        Active   11h
+kube-public            Active   11h
+kube-system            Active   11h
+```
+  
+Get all deployments in all namespaces:
 
 ```shell
 kubectl get deployments --all-namespaces=true
+NAMESPACE              NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+kube-system            coredns                     2/2     2            2           11h
+kube-system            coredns-autoscaler          1/1     1            1           11h
+kube-system            konnectivity-agent          2/2     2            2           11h
+kube-system            metrics-server              2/2     2            2           11h
+kube-system            omsagent-rs                 1/1     1            1           11h
+kubernetes-dashboard   dashboard-metrics-scraper   1/1     1            1           10h
 ```
-
-Access a debug console in a privledged container -
+  
+Access a debug console in a privledged container:
 
 ```shell
 kubectl debug node/<node_name> -it --image=mcr.microsoft.com/dotnet/runtime-deps:6.0
-
 ```
 
 
