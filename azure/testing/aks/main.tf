@@ -87,7 +87,10 @@ resource "azurerm_log_analytics_solution" "akslaw" {
 } ###--- End LAW Setup
 
 
-###--- AKS Cluster Definition
+###===================================================================================###
+###     AKS Cluster Definition 
+###===================================================================================###
+
 resource "azurerm_kubernetes_cluster" "k8s" {
   name                = var.cluster_name
   location            = azurerm_resource_group.aks-rg.location
@@ -109,10 +112,17 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   }
 
   default_node_pool {
-    name            = "agentpool"
+    name            = var.default_pool_name
     node_count      = var.node_count
     vm_size         = var.vm_size
-    
+
+    kubelet_config {
+      cpu_manager_policy = var.cpu_manager_policy
+    }
+  
+    linux_os_config {
+      transparent_huge_page_enabled = var.transparent_huge_page_enabled
+    }
   }
 
   service_principal {
@@ -120,13 +130,12 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     client_secret = var.aks_service_principal_client_secret
   }
 
-  addon_profile {
-    oms_agent {
-      enabled                    = true
-      log_analytics_workspace_id = azurerm_log_analytics_workspace.akslaw.id
-    }
-  }
+  #addon_profile {
+  #}
 
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.akslaw.id
+  }
 
   ###--- Cluster network configuration
   network_profile {
@@ -135,8 +144,8 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     dns_service_ip     = var.net_profile_dns_service_ip
     outbound_type      = var.net_profile_outbound_type
     docker_bridge_cidr = var.net_profile_docker_bridge_cidr
-    pod_cidr           = var.net_profile_pod_cidr
     service_cidr       = var.net_profile_service_cidr
+    #pod_cidr           = var.net_profile_pod_cidr
   }
 
 

@@ -40,7 +40,7 @@ variable "resource_group_name_prefix" {
 }
 
 
-###====================#=======   Cluster Configuration  =============================###
+###============================   Cluster Configuration  =============================###
 variable cluster_name {
   default = "k8stest"
   type    = string
@@ -49,18 +49,6 @@ variable cluster_name {
 variable "dns_prefix" {
   default = "k8stest"
   type    = string
-}
-
-variable "node_count" {
-  description = "Number of Azure VMs in the node pool"
-  default     = 1
-  type        = number
-}
-
-variable "vm_size" {
-  description = "VM size for the node pool"
-  default     = "Standard_DS2_v2"
-  type        = string
 }
 
 variable "admin_username" {
@@ -86,6 +74,41 @@ variable "sku_tier" {
   description = "AKS SKU"
   type        = string
 }
+
+##-- Default node pool
+variable "node_count" {
+  description = "Number of Azure VMs in the node pool"
+  default     = 1
+  type        = number
+}
+
+variable "vm_size" {
+  description = "VM size for the node pool"
+  default     = "Standard_DS2_v2"
+  type        = string
+}
+
+variable "default_pool_name" {
+  description = "Name of the default node pool"
+  default     = "defaultpool"
+  type        = string
+}
+
+#- kubelet
+variable "cpu_manager_policy" {
+  description = "Pinning configuration (none or static)"
+  default     = "static"
+  type        = string
+}
+
+#- Linux OS Config
+variable "transparent_huge_page_enabled" {
+  description = "Huge Pages Setup (always, madvise, never)"
+  default     = "always"
+  type        = string
+}
+
+
 
 
 ###================================== Network Config ==================================###
@@ -119,11 +142,13 @@ variable "net_profile_outbound_type" {
   default     = "loadBalancer"
 }
 
+/* Cant be set when plugin = azure
 variable "net_profile_pod_cidr" {
   description = " (Optional) The CIDR to use for pod IP addresses. This field can only be set when network_plugin is set to kubenet. Changing this forces a new resource to be created."
   type        = string
   default     = null
 }
+*/
 
 variable "net_profile_service_cidr" {
   description = "(Optional) The Network Range used by the Kubernetes service. Changing this forces a new resource to be created."
