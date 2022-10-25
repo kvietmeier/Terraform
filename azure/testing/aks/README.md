@@ -68,6 +68,9 @@ Access a debug console in a privledged container:
 
 ```shell
 kubectl debug node/aks-agentpool-34182189-vmss000000 -it --image=mcr.microsoft.com/dotnet/runtime-deps:6.0
+```
+
+```shell
 Creating debugging pod node-debugger-aks-agentpool-34182189-vmss000000-pkhvf with container debugger on node aks-agentpool-34182189-vmss000000.
 If you don't see a command prompt, try pressing enter.
 root@aks-agentpool-34182189-vmss000000:/#
