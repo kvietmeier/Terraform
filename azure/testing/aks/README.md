@@ -1,6 +1,6 @@
 ### AKS Cluster
 
-Create using local template/module
+Create using local template/module following this example - [Create K8S cluster with tF amd and AKS](https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks)
 
 #### Notes
 
