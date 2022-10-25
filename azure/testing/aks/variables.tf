@@ -41,12 +41,12 @@ variable "resource_group_name_prefix" {
 
 
 ###====================#=======   Cluster Configuration  =============================###
-variable "dns_prefix" {
+variable cluster_name {
   default = "k8stest"
   type    = string
 }
 
-variable cluster_name {
+variable "dns_prefix" {
   default = "k8stest"
   type    = string
 }
@@ -66,6 +66,24 @@ variable "vm_size" {
 variable "admin_username" {
   default     = "aksadmin"
   description = "The username of the local administrator to be created on the Kubernetes cluster"
+  type        = string
+}
+
+variable "kubernetes_version" {
+  default     = "1.23.5"
+  description = "Version of Kubernetes"
+  type        = string
+}
+
+variable "operator_version" {
+  default     = "1.23.5"
+  description = "Version of Operator"
+  type        = string
+}
+
+variable "sku_tier" {
+  default     = "Free"
+  description = "AKS SKU"
   type        = string
 }
 
@@ -142,12 +160,12 @@ variable "log_retention_in_days" {
 
 
 ###==============================  Secrets - in tfvars  ===============================###
-variable "client_id" {
+variable "aks_service_principal_app_id" { 
   description = "The Client ID for the Service Principal to use for this AKS Cluster"
   type        = string
 }
 
-variable "client_secret" {
+variable "aks_service_principal_client_secret" {
   description = "The Client Secret for the Service Principal to use for this AKS Cluster"
   type        = string
 }

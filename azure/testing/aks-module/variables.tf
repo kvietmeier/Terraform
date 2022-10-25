@@ -9,7 +9,16 @@
 #  Variable definitions with defaults
 #
 ###===================================================================================###
-/* 
+
+variable "kubernetes_version" {
+  description = "K8S Version"
+  default     = "1.23.5"
+}
+
+variable "orchestrator_version" {
+  description = "Orchestrator Version"
+  default     = "1.23.5"
+}
 
 variable "resource_group_name" {
   description = "Resource Group"
@@ -31,6 +40,11 @@ variable "aks_name" {
   default     = "TestCluster"
 }
 
+variable "sku_tier" {
+  description = "Cluster SKU"
+  default     = "Paid"
+}
+
 variable "node_count" {
   description = "Number of Azure VMs in the node pool"
   default     = 1
@@ -38,9 +52,16 @@ variable "node_count" {
 
 variable "vm_size" {
   description = "VM size for the node pool"
-  default     = "Standard_DS2_v2"
+  default     = "Standard_DS2_v5"
 }
- */
+
+
+
+
+
+/* 
+
+*/
 
 
 # Sensitive variables

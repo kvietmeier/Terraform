@@ -20,10 +20,17 @@
 ###===================================================================================###
 
 /*
-Following this example:
-https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks
+ Following this example:
+ https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks
 
-Put Usage Documentation here
+ Put Usage Documentation here
+ Notes:
+ - Needed to enable host encryption
+  az feature register --namespace "Microsoft.Compute" --name "EncryptionAtHost"
+
+ - Enable kubectl to access this cluster -
+  az login
+  az aks get-credentials --resource-group AKS-Testing" --name TestCluster  
 
 */
 
@@ -39,6 +46,15 @@ resource "azurerm_resource_group" "aks-rg" {
   location = var.region
 }
 
+# We need a vnet
+module "network" {
+  source              = "Azure/network/azurerm"
+  resource_group_name = var.resource_group_name
+  address_space       = "10.52.0.0/16"
+  subnet_prefixes     = ["10.52.0.0/24"]
+  subnet_names        = ["subnet01"]
+  depends_on          = [azurerm_resource_group.aks-rg]
+}
 
 ###--- Setup the LAW
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace
@@ -77,12 +93,18 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   location            = azurerm_resource_group.aks-rg.location
   resource_group_name = azurerm_resource_group.aks-rg.name
   dns_prefix          = var.dns_prefix
+  
+  # Versions
+  #kubernetes_version  = var.kubernetes_version
+  #sku_tier            = var.sku_version
 
+  
   linux_profile {
     admin_username = var.admin_username
 
     ssh_key {
-      key_data = file(var.ssh_public_key)
+      #key_data = file(var.ssh_public_key)
+      key_data = var.ssh_public_key
     }
   }
 
@@ -90,6 +112,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     name            = "agentpool"
     node_count      = var.node_count
     vm_size         = var.vm_size
+    
   }
 
   service_principal {
@@ -107,10 +130,10 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 
   ###--- Cluster network configuration
   network_profile {
-    dns_service_ip     = var.net_profile_dns_service_ip
-    outbound_type      = var.net_profile_outbound_type
     network_plugin     = var.network_plugin
     network_policy     = var.network_policy
+    dns_service_ip     = var.net_profile_dns_service_ip
+    outbound_type      = var.net_profile_outbound_type
     docker_bridge_cidr = var.net_profile_docker_bridge_cidr
     pod_cidr           = var.net_profile_pod_cidr
     service_cidr       = var.net_profile_service_cidr
@@ -151,4 +174,4 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
 
 
 
- */
+*/

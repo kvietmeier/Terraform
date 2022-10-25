@@ -3,10 +3,10 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  Template.tf
+#  File:  main.tf
 #  Created By: Karl Vietmeier
 #
-#  Purpose:  Create AKS Clusters
+#  Purpose:  Create AKS Clusters using pre-built module code
 # 
 #  Files in Module:
 #    main.tf
@@ -38,14 +38,14 @@ Notes:
 
 # Create a Resource Group
 resource "azurerm_resource_group" "aksrg" {
-  name     = "aks-resource-group"
-  location = "westus2"
+  name     = var.resource_group_name
+  location = var.location
 }
 
 # We need a vnet
 module "network" {
   source              = "Azure/network/azurerm"
-  resource_group_name = azurerm_resource_group.aksrg.name
+  resource_group_name = var.resource_group_name
   address_space       = "10.52.0.0/16"
   subnet_prefixes     = ["10.52.0.0/24"]
   subnet_names        = ["subnet01"]
@@ -61,7 +61,7 @@ data "azuread_group" "aks_cluster_admins" {
 module "aks" {
   source                           = "Azure/aks/azurerm"
   resource_group_name              = azurerm_resource_group.aksrg.name
-  prefix                           = "tf"
+  prefix                           = var.prefix
 
   # Service Principle for Auth and SSH Key - values stored in terraform.tfvars 
   client_id      = var.client_id
@@ -69,12 +69,12 @@ module "aks" {
   public_ssh_key = var.public_ssh_key
   
   # Versions
-  kubernetes_version               = "1.23.5"
-  orchestrator_version             = "1.23.5"
+  kubernetes_version               = var.kubernetes_version
+  orchestrator_version             = var.orchestrator_version
   sku_tier                         = "Paid" # defaults to Free
   
   # Base Cluster configuration
-  cluster_name                     = "cpumgrtesting"
+  cluster_name                     = var.aks_name
   private_cluster_enabled          = false # default value
   enable_role_based_access_control = false
   rbac_aad_managed                 = false # AAD Auth deprecated in 1.25
@@ -83,7 +83,7 @@ module "aks" {
   enable_host_encryption           = false
   
 
-  # Node Pool Configuration
+  # Node Pool Configurations
   enable_auto_scaling              = true
   os_disk_size_gb                  = 100
   agents_size                      = "standard_d2ds_v5"

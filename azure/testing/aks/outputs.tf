@@ -12,25 +12,25 @@
 
 
 output "aks_id" {
-  value = azurerm_kubernetes_cluster.akscluster.id
+  value = azurerm_kubernetes_cluster.k8s.id
 }
 
 output "aks_fqdn" {
-  value = azurerm_kubernetes_cluster.akscluster.fqdn
+  value = azurerm_kubernetes_cluster.k8s.fqdn
 }
 
 output "aks_node_rg" {
-  value = azurerm_kubernetes_cluster.akscluster.node_resource_group
+  value = azurerm_kubernetes_cluster.k8s.node_resource_group
 }
 
 # Need to explicitly declare the variable non-sensitive with "nonsensitive(var)"
 output "kube_config" {
-  value = nonsensitive(azurerm_kubernetes_cluster.akscluster.kube_config_raw)
+  value = nonsensitive(azurerm_kubernetes_cluster.k8s.kube_config_raw)
   #sensitive = true
 }
 
 output "resource_group_name" {
-  value = azurerm_resource_group.rg.name
+  value = azurerm_resource_group.aks-rg.name
 }
 
 output "client_key" {
@@ -53,10 +53,10 @@ output "cluster_password" {
     value = azurerm_kubernetes_cluster.k8s.kube_config.0.password
 }
 
-output "kube_config" {
-    value = azurerm_kubernetes_cluster.k8s.kube_config_raw
-    sensitive = true
-}
+#output "kube_config" {
+#    value = azurerm_kubernetes_cluster.k8s.kube_config_raw
+#    sensitive = true
+#}
 
 output "host" {
     value = azurerm_kubernetes_cluster.k8s.kube_config.0.host
