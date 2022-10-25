@@ -31,6 +31,15 @@ Dump detailed cluster information:
 kubectl cluster-info dump
 ```
   
+Show me the nodes:
+
+```shell
+kubectl get nodes
+NAME                                STATUS   ROLES   AGE   VERSION
+aks-agentpool-34182189-vmss000000   Ready    agent   11h   v1.23.12
+aks-agentpool-34182189-vmss000001   Ready    agent   11h   v1.23.12
+```
+  
 List Namespaces:
 
 ```shell
