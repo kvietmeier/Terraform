@@ -122,16 +122,17 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   default_node_pool {
     name                 = var.default_pool_name
     orchestrator_version = var.orchestrator_version
-    node_count           = var.node_count
+    node_count           = var.default_node_count
     vm_size              = var.vm_size
-
+    /* 
     kubelet_config {
       cpu_manager_policy = var.cpu_manager_policy
     }
   
     linux_os_config {
       transparent_huge_page_enabled = var.transparent_huge_page_enabled
-    }
+    } 
+    */
   }
 
   service_principal {
