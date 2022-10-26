@@ -22,6 +22,8 @@
 /*
  Following this example:
  https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks
+ 
+
 
  Put Usage Documentation here
  Notes:
@@ -30,7 +32,12 @@
 
  - Enable kubectl to access this cluster -
   az login
-  az aks get-credentials --resource-group AKS-Testing" --name TestCluster  
+  az aks get-credentials --resource-group AKS-Testing --name TestCluster  
+  
+
+
+
+
 
 */
 
@@ -50,6 +57,7 @@ resource "azurerm_resource_group" "aks-rg" {
 module "network" {
   source              = "Azure/network/azurerm"
   resource_group_name = var.resource_group_name
+  vnet_name           = "aks-vnet"
   address_space       = "10.52.0.0/16"
   subnet_prefixes     = ["10.52.0.0/24"]
   subnet_names        = ["subnet01"]
@@ -98,8 +106,8 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   dns_prefix          = var.dns_prefix
   
   # Versions
-  #kubernetes_version  = var.kubernetes_version
-  #sku_tier            = var.sku_version
+  kubernetes_version  = var.kubernetes_version
+  sku_tier            = var.sku_tier
 
   
   linux_profile {
@@ -112,9 +120,10 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   }
 
   default_node_pool {
-    name            = var.default_pool_name
-    node_count      = var.node_count
-    vm_size         = var.vm_size
+    name                 = var.default_pool_name
+    orchestrator_version = var.orchestrator_version
+    node_count           = var.node_count
+    vm_size              = var.vm_size
 
     kubelet_config {
       cpu_manager_policy = var.cpu_manager_policy
@@ -129,9 +138,6 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     client_id     = var.aks_service_principal_app_id
     client_secret = var.aks_service_principal_client_secret
   }
-
-  #addon_profile {
-  #}
 
   oms_agent {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.akslaw.id
@@ -158,15 +164,15 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 } ### End Cluster definition
 
 
-
-
-
-###--- Configure additional node pools
-# https://docs.microsoft.com/en-us/azure/aks/custom-node-configuration
-/* 
+###===================================================================================###
+###   Configure additional node pools
+#  https://docs.microsoft.com/en-us/azure/aks/custom-node-configuration
+#  https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
+###===================================================================================###
 resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
-  name                  = "CPUManager"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.akscluster.id
+  name                  = "cpumanager"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.k8s.id
+  orchestrator_version  = var.orchestrator_version
   node_count            = var.node_count
   vm_size               = var.vm_size
 
@@ -180,7 +186,3 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   
   
 }
-
-
-
-*/

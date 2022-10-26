@@ -58,14 +58,14 @@ variable "admin_username" {
 }
 
 variable "kubernetes_version" {
-  default     = "1.23.5"
+  default     = "1.24.6"
   description = "Version of Kubernetes"
   type        = string
 }
 
-variable "operator_version" {
-  default     = "1.23.5"
-  description = "Version of Operator"
+variable "orchestrator_version" {
+  default     = "1.24.6"
+  description = "Version of Orchestrator"
   type        = string
 }
 
@@ -76,7 +76,7 @@ variable "sku_tier" {
 }
 
 ##-- Default node pool
-variable "node_count" {
+variable "default_node_count" {
   description = "Number of Azure VMs in the node pool"
   default     = 1
   type        = number
@@ -93,6 +93,14 @@ variable "default_pool_name" {
   default     = "defaultpool"
   type        = string
 }
+
+##-- Additional node pools
+variable "node_count" {
+  description = "Number of Azure VMs in the node pool"
+  default     = 1
+  type        = number
+}
+
 
 #- kubelet
 variable "cpu_manager_policy" {

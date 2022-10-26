@@ -2,6 +2,10 @@
 
 Create using local template/module following this example - [Create K8S cluster with tF amd and AKS](https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks)
 
+This project currently creates 2 node pools, a "default" pool and a "cpumanager" pool.
+
+The goal is to test applying kubelet, linux OS, and sysctl custom settings to nodepools.
+
 #### Notes
 
 Install kubectl for PowerShell:  
@@ -16,7 +20,7 @@ CheatSheets:
 Get cluster credentials - may need "az login":
 
 ```shell
-PS C:\> az aks get-credentials --resource-group <rg_name> --name <cluster_name>
+az aks get-credentials --resource-group <rg_name> --name <cluster_name>
 ```
 
 Basic cluster information:
@@ -64,10 +68,10 @@ kube-system            omsagent-rs                 1/1     1            1       
 kubernetes-dashboard   dashboard-metrics-scraper   1/1     1            1           10h
 ```
   
-Access a debug console in a privledged container:
+Access a debug console in a privledged container - replace agentpool with current value:
 
 ```shell
-kubectl debug node/aks-agentpool-34182189-vmss000000 -it --image=mcr.microsoft.com/dotnet/runtime-deps:6.0
+kubectl debug node/aks-agentpool-27684724-vmss000000 -it --image=mcr.microsoft.com/dotnet/runtime-deps:6.0
 ```
 
 ```shell
