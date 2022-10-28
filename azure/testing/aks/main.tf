@@ -23,37 +23,35 @@
  Following this example:
  https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks
  
-
-
  Put Usage Documentation here
  Notes:
- - Needed to enable host encryption
+ - Needed to enable host encryption:
   az feature register --namespace "Microsoft.Compute" --name "EncryptionAtHost"
 
- - Enable kubectl to access this cluster -
-  az login
+ - Enable kubectl to access this cluster:
+  az login:
   az aks get-credentials --resource-group AKS-Testing --name TestCluster  
+
+  In WSL2: 
+  az aks get-credentials --resource-group AKS-Testing --name TestCluster --file ~/.kube/config --overwrite-existing
   
-
-
-
-
+  PowerShell:
+  Import-AzAksCredential -ResourceGroupName AKS-Testing -Name TestCluster
 
 */
 
 
 ###===================================================================================###
-#     Start creating infrastructure resources
+#     Create Infrastructure Resources
 ###===================================================================================###
 
-
-# We need a Resource Group to hold everything
+# Need a Resource Group to hold everything
 resource "azurerm_resource_group" "aks-rg" {
   name     = var.resource_group_name
   location = var.region
 }
 
-# We need a vnet
+# Need a vnet
 module "network" {
   source              = "Azure/network/azurerm"
   resource_group_name = var.resource_group_name
@@ -64,9 +62,11 @@ module "network" {
   depends_on          = [azurerm_resource_group.aks-rg]
 }
 
-###--- Setup the LAW
+###===================================================================================###
+#  Setup the LAW
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_solution
+###===================================================================================###
 
 resource "random_id" "log_analytics_workspace_name_suffix" {
     byte_length = 8
@@ -119,21 +119,15 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     }
   }
 
+  # In AKS/Terraform the "default" pool is the system pool - leave it basic and 
+  # put customizations in an additonal pool (see below)
   default_node_pool {
     name                 = var.default_pool_name
     orchestrator_version = var.orchestrator_version
     node_count           = var.default_node_count
     vm_size              = var.vm_size
-    /* 
-    kubelet_config {
-      cpu_manager_policy = var.cpu_manager_policy
-    }
-  
-    linux_os_config {
-      transparent_huge_page_enabled = var.transparent_huge_page_enabled
-    } 
-    */
-  }
+    
+  } # end default nodepool
 
   service_principal {
     client_id     = var.aks_service_principal_app_id
@@ -155,13 +149,10 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     #pod_cidr           = var.net_profile_pod_cidr
   }
 
-
   ###--- Misc
   tags = {
     Environment = "Development"
   }
-
-
 } ### End Cluster definition
 
 
@@ -171,19 +162,28 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 #  https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
 ###===================================================================================###
 resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
+  # Should probably make these variables
   name                  = "cpumanager"
+  node_labels           = {
+    "iac-tool/node_profile"                  = "compute_intensive"
+    "iac-tool/kubelet_cpu_manager_policy"    = "static"
+    "iac-tool/tf_kubelet_cpu_manager_policy" = "user_data"  # tf_config
+  } 
+  
+  # ID of cluster to add nodepool to
   kubernetes_cluster_id = azurerm_kubernetes_cluster.k8s.id
+  
+  # Set in *.tfvars
   orchestrator_version  = var.orchestrator_version
   node_count            = var.node_count
   vm_size               = var.vm_size
 
+  # Customize the nodepool
   kubelet_config {
-    cpu_manager_policy = var.cpu_manager_policy
+    cpu_manager_policy  = var.cpu_manager_policy
   }
   
   linux_os_config {
     transparent_huge_page_enabled = var.transparent_huge_page_enabled
   }
-  
-  
-}
+} ### End nodepool setup

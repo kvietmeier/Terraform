@@ -76,7 +76,26 @@ variable "sku_tier" {
 }
 
 ##-- Default node pool
+variable "default_pool_name" {
+  description = "Name of the default node pool"
+  default     = "defaultpool"
+  type        = string
+}
+
 variable "default_node_count" {
+  description = "Number of Azure VMs in the node pool"
+  default     = 1
+  type        = number
+}
+
+variable "default_vm_size" {
+  description = "VM size for the node pool"
+  default     = "Standard_DS2_v2"
+  type        = string
+}
+
+##-- Additional node pools
+variable "node_count" {
   description = "Number of Azure VMs in the node pool"
   default     = 1
   type        = number
@@ -86,19 +105,6 @@ variable "vm_size" {
   description = "VM size for the node pool"
   default     = "Standard_DS2_v2"
   type        = string
-}
-
-variable "default_pool_name" {
-  description = "Name of the default node pool"
-  default     = "defaultpool"
-  type        = string
-}
-
-##-- Additional node pools
-variable "node_count" {
-  description = "Number of Azure VMs in the node pool"
-  default     = 1
-  type        = number
 }
 
 
