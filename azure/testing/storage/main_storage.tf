@@ -20,15 +20,18 @@
 
 # Always need this - 
 resource "azurerm_resource_group" "storage-rg" {
-  name     = var.resource_group_name
-  location = var.region
+  #name     = var.resource_group_name
+  #location = var.region
+  count    = length(var.resource_group_config)
+  name     = var.resource_group_config[count.index].name
+  location = var.resource_group_config[count.index].region
 }
 
 # Generate random text for a unique storage account name
 resource "random_id" "randomID" {
   keepers = {
     # Generate a new ID only when a new resource group is defined - so we can re-use the ID.
-    resource_group = azurerm_resource_group.storage-rg.name
+    resource_group = azurerm_resource_group.storage-rg[0].name
   }
 
   byte_length = 6
@@ -36,22 +39,44 @@ resource "random_id" "randomID" {
 
 # Create the Storage Account
 resource "azurerm_storage_account" "storage_acct" {
-  name                     = "storacct${random_id.randomID.dec}"
-  location                 = azurerm_resource_group.storage-rg.location
-  resource_group_name      = azurerm_resource_group.storage-rg.name
-  account_kind             = var.acct_kind
-  account_tier             = var.account_tier
-  access_tier              = var.access_temp
-  account_replication_type = var.replication
+  #count                    = length(var.storage_account_configs)
+
+  # Use for_each
+  for_each                 = { for each in var.storage_account_configs : each.name => each }
+  location                 = var.resource_group_config[0].region
+  name                     = "${each.value.name}${random_id.randomID.dec}"
+  resource_group_name      = azurerm_resource_group.storage-rg[0].name
+  account_kind             = each.value.acct_kind
+  account_tier             = each.value.account_tier
+  access_tier              = each.value.access_temp
+  account_replication_type = each.value.replication
 }
 
+
 # Create shares using a complex object
-resource "azurerm_storage_share" "shares_obj" {
-  storage_account_name = azurerm_storage_account.storage_acct.name
-  count   = length(var.shares)
-    
-  name                 = var.shares[count.index].name
-  quota                = var.shares[count.index].quota
+resource "azurerm_storage_share" "fileshare" {
+  #count = length(var.shares)
+  for_each = { for each in var.shares: each.name => each }
+  
+  #storage_account_name = azurerm_storage_account.storage_acct.name
+  #storage_account_name = element(azurerm_storage_account.storage_acct[name], 0)
+  #storage_account_name = element(azurerm_storage_account.storage_acct[*], 0)
+  #storage_account_name = element(azurerm_storage_account.storage_acct[*].name, 0)
+  storage_account_name = values(azurerm_storage_account.storage_acct[0]).name
+  #storage_account_name = azurerm_storage_account.storage_acct[0].name
+  #storage_account_name = azurerm_storage_account.storage_acct[]
+  
+  /* 
+  azurerm_storage_account.storage_acct[each.key]
+  element(azurerm_storage_account.storage_acct[*].id, 0)
+  element(azurerm_storage_account.storage_acct[*], 0)
+  element(azurerm_storage_account.storage_acct[name], 0)
+  azurerm_storage_account.storage_acct[0].name
+  azurerm_storage_account.storage_acct.name
+ */
+  
+  name  = each.value.name
+  quota = each.value.quota
 
   /*  Don't really need this?
   acl {

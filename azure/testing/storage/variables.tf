@@ -11,14 +11,14 @@
 ###===================================================================================###
 
 ###--- Basic Infra
-variable "resource_group_name" {
-  description = "Resource Group"
-  default     = "TF-StorageTesting"
-}
-
 variable "region" {
   description = "Region to deploy resources"
   default     = "westus2"
+}
+
+variable "resource_group_name" {
+  description = "Resource Group"
+  default     = "TF-StorageTesting"
 }
 
 variable "prefix" {
@@ -26,7 +26,29 @@ variable "prefix" {
   default     = "tf-storage"
 }
 
+# Using object
+variable "resource_group_config" {
+  description = "Resource Group"
+  type        = list(object({ name = string, region = string }))
+}
+
+
 ###---  Storage Account Info
+# Use object - 
+variable "storage_account_configs" {
+  description = "Resource Group"
+  type = list(
+    object(
+      { name         = string,
+        acct_kind    = string,
+        account_tier = string,
+        access_temp  = string,
+        replication  = string
+      }
+    )
+  )
+}
+
 variable "acct_kind" {
   description = "The type of storage account. Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2."
   default     = "FileStorage"
@@ -67,7 +89,7 @@ variable "share_name" {
 # List/map of multiple shares (simple key:value)
 variable "file_shares" {
   description = "List of shares to create and their quotas."
-  type        = map
+  type        = map(any)
 }
 
 # Use Object syntax  (complex object)
