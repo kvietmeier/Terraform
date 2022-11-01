@@ -37,7 +37,7 @@ resource "random_id" "randomID" {
   byte_length = 6
 }
 
-# Create the Storage Account
+# Create the Storage Account/s
 resource "azurerm_storage_account" "storage_acct" {
   #count                    = length(var.storage_account_configs)
 
@@ -52,20 +52,27 @@ resource "azurerm_storage_account" "storage_acct" {
   account_replication_type = each.value.replication
 }
 
-
+/* 
 # Create shares using a complex object
 resource "azurerm_storage_share" "fileshare" {
   #count = length(var.shares)
   for_each = { for each in var.shares: each.name => each }
+  name     = each.value.name
+  quota    = each.value.quota
+
+  storage_account_name = azurerm_storage_account.storage_acct[each.key].name
   
-  #storage_account_name = azurerm_storage_account.storage_acct.name
-  #storage_account_name = element(azurerm_storage_account.storage_acct[name], 0)
-  #storage_account_name = element(azurerm_storage_account.storage_acct[*], 0)
-  #storage_account_name = element(azurerm_storage_account.storage_acct[*].name, 0)
-  storage_account_name = values(azurerm_storage_account.storage_acct[0]).name
-  #storage_account_name = azurerm_storage_account.storage_acct[0].name
-  #storage_account_name = azurerm_storage_account.storage_acct[]
+}
+*/
   
+### END main.tf
+
+
+
+###==============================================================================================###
+#              Scratch code - trying to get it working
+###==============================================================================================###
+
   /* 
   azurerm_storage_account.storage_acct[each.key]
   element(azurerm_storage_account.storage_acct[*].id, 0)
@@ -73,23 +80,15 @@ resource "azurerm_storage_share" "fileshare" {
   element(azurerm_storage_account.storage_acct[name], 0)
   azurerm_storage_account.storage_acct[0].name
   azurerm_storage_account.storage_acct.name
- */
+  storage_account_name = azurerm_storage_account.storage_acct.name
+  storage_account_name = element(azurerm_storage_account.storage_acct[name], 0)
+  storage_account_name = element(azurerm_storage_account.storage_acct[*], 0)
+  storage_account_name = element(azurerm_storage_account.storage_acct[*].name, 0)
+  storage_account_name = values(azurerm_storage_account.storage_acct[0]).name
+  storage_account_name = azurerm_storage_account.storage_acct[0].name
+  storage_account_name = azurerm_storage_account.storage_acct[]
   
-  name  = each.value.name
-  quota = each.value.quota
-
-  /*  Don't really need this?
-  acl {
-    id = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI"
-
-    access_policy {
-      permissions = "rwdl"
-      start       = "2022-10-02T09:38:21.0000000Z"
-      expiry      = "2025-07-02T10:38:21.0000000Z"
-    }
-  } */
-}
-
+  */
 
 /* # Create shares using a simple map - Key:Value
 resource "azurerm_storage_share" "shares" {

@@ -26,10 +26,17 @@ variable "prefix" {
   default     = "tf-storage"
 }
 
-# Using object
+# Using object - don't really need to.
 variable "resource_group_config" {
   description = "Resource Group"
-  type        = list(object({ name = string, region = string }))
+  type = list(
+    object(
+      { 
+        name = string,
+        region = string
+      }
+    )
+  )
 }
 
 
@@ -49,6 +56,7 @@ variable "storage_account_configs" {
   )
 }
 
+###--- Stand alone vars for Storage Account
 variable "acct_kind" {
   description = "The type of storage account. Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2."
   default     = "FileStorage"
