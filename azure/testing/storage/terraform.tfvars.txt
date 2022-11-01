@@ -1,4 +1,4 @@
-###===================================================================================###
+####===================================================================================###
 #   Copyright (C) 2022 Intel Corporation
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
@@ -6,8 +6,10 @@
 #  File:  terraform.tfvars
 #  Created By: Karl Vietmeier
 #
-#  This is a "sanitized" version of the terraform.tfvars file that is excluded from the repo. 
-#  Any values that aren't sensitive are left defined, any sensitive values are removed.
+#  This is a "sanitized" version of the terraform.tfvars file that is excluded 
+#  from the repo. 
+#  Any values that aren't sensitive are left defined, amy sensitive values are 
+#  removed.
 #  
 #
 ###===================================================================================###
@@ -18,15 +20,40 @@ resource_group_name = "TF-Storage"
 region              = "westus2"
 prefix              = "TF"
 
+resource_group_config = [
+  {
+    name   = "TF-Storage-WUS2"
+    region = "westus2"
+  }
+]
+
+
 # Storage Account
-acct_kind     = "FileStorage" # Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2.
-account_tier  = "Premium"   # If "Premium" - it must be in a "FileStorage" Storage Account
-access_temp   = "Hot"
-replication   = "LRS"
+acct_kind    = "FileStorage" # Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2.
+account_tier = "Premium"     # If "Premium" - it must be in a "FileStorage" Storage Account
+access_temp  = "Hot"
+replication  = "LRS"
+
+storage_account_configs = [
+  {
+    name         = "files"
+    acct_kind    = "FileStorage" # Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2.
+    account_tier = "Premium"     # If "Premium" - it must be in a "FileStorage" Storage Account
+    access_temp  = "Hot"
+    replication  = "LRS"
+  },
+  {
+    name         = "blobs"
+    acct_kind    = "BlobStorage" # Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2.
+    account_tier = "Premium"     # If "Premium" - it must be in a "FileStorage" Storage Account
+    access_temp  = "Hot"
+    replication  = "LRS"
+  }
+]
 
 ### Share settings
-share_quota= "250"
-share_name = "sharevol01"
+share_quota = "250"
+share_name  = "sharevol01"
 
 #- List/map of multiple shares - using simple map
 file_shares = {
@@ -37,18 +64,18 @@ file_shares = {
 
 #- Complex object syntax
 shares = [
-    {
-        name = "volume01",
-        quota = "100"
-    },
-    {
-        name = "volume02",
-        quota = "150"
-    },
-    {
-        name = "volume03",
-        quota = "200"
-    }
+  {
+    name  = "volume01",
+    quota = "100"
+  },
+  {
+    name  = "volume02",
+    quota = "150"
+  },
+  {
+    name  = "volume03",
+    quota = "200"
+  }
 ]
 
 
