@@ -1,5 +1,14 @@
-
-
+###===================================================================================###
+#   Copyright (C) 2022 Intel Corporation
+#   SPDX-License-Identifier: Apache-2.0
+###===================================================================================###
+#
+#  File:  variables.tf
+#  Created By: Karl Vietmeier
+#
+#  Variable definitions with defaults
+#
+###===================================================================================###
 
 # Misc
 variable "prefix" { type = string }
