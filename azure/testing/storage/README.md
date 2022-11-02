@@ -48,6 +48,12 @@ variable "storage_account_configs" {
   )
 }
 ```
+
+When referencing the Storage Account objects in other resource blocks you need to use the value of the "name" key as the index
+
+```terraform
+storage_account_name = azurerm_storage_account.storage_acct["files"].name
+```
   
 #### My code is Built With
 
