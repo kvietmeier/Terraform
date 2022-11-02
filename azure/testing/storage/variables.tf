@@ -10,6 +10,59 @@
 #
 ###===================================================================================###
 
+###--- Resource Group
+# Using type = list(object({}))
+variable "resource_group_config" {
+  description = "Resource Group"
+  type = list(
+    object(
+      { 
+        name = string,
+        region = string
+      }
+    )
+  )
+}
+
+###---  Storage Account Info
+# Using type = list(object({}))
+variable "storage_account_configs" {
+  description = "Resource Group"
+  type = list(
+    object(
+      { name         = string,
+        acct_kind    = string,
+        account_tier = string,
+        access_temp  = string,
+        replication  = string
+      }
+    )
+  )
+}
+
+###--- Fileshares
+# Using type = list(object({}))
+variable "shares" {
+  description = "List of shares to create and their quotas."
+  type = list(
+    object(
+      { name = string,
+        quota = number 
+      }
+    )
+  )
+}
+
+
+# Not Used: List/map of multiple shares (simple key:value)
+variable "file_shares" {
+  description = "List of shares to create and their quotas."
+  type        = map(any)
+}
+
+###-------------------------------------------------------------------------------###
+###--- Not Used:  Stand alone vars for Storage Account
+###-------------------------------------------------------------------------------###
 ###--- Basic Infra
 variable "region" {
   description = "Region to deploy resources"
@@ -26,37 +79,6 @@ variable "prefix" {
   default     = "tf-storage"
 }
 
-# Using object - don't really need to.
-variable "resource_group_config" {
-  description = "Resource Group"
-  type = list(
-    object(
-      { 
-        name = string,
-        region = string
-      }
-    )
-  )
-}
-
-
-###---  Storage Account Info
-# Use object - 
-variable "storage_account_configs" {
-  description = "Resource Group"
-  type = list(
-    object(
-      { name         = string,
-        acct_kind    = string,
-        account_tier = string,
-        access_temp  = string,
-        replication  = string
-      }
-    )
-  )
-}
-
-###--- Stand alone vars for Storage Account
 variable "acct_kind" {
   description = "The type of storage account. Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2."
   default     = "FileStorage"
@@ -92,16 +114,4 @@ variable "share_name" {
   description = "Name of the Fileshare - lower case only"
   default     = "sharevol01"
   type        = string
-}
-
-# List/map of multiple shares (simple key:value)
-variable "file_shares" {
-  description = "List of shares to create and their quotas."
-  type        = map(any)
-}
-
-# Use Object syntax  (complex object)
-variable "shares" {
-  description = "List of shares to create and their quotas."
-  type        = list(object({ name = string, quota = number }))
 }

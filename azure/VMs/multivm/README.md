@@ -15,9 +15,11 @@ ToDo -
 
 * Refactor to be module based
 * Document key template code that is poorly documented in general.
+* Create map object(list) for the NIC setup
+* Use existing NSGs
 * Add Azure Arc agent
 
-Need to document steps  
+Need to document steps better  
   
 #### Code documentation - In Progress
 

@@ -135,6 +135,7 @@ resource "azurerm_public_ip" "public_ips" {
 }
 
 ###- Create 2 NICs - one primary w/PubIP, one internal with SRIOV enabled
+###- Could make this a map object.
 resource "azurerm_network_interface" "primary" {
   location                        = azurerm_resource_group.upf_rg.location
   resource_group_name             = azurerm_resource_group.upf_rg.name
@@ -207,8 +208,10 @@ resource "azurerm_subnet_network_security_group_association" "mapnsg" {
 }
 
 ### Create a vnet peer to the hub vnet
+#   (Optional) - I do this because I have a "Linux Tools" VM in my hub vnet. 
 # Syntax is important here -
-# 1) Refer to the "source" resources in each peering block by name and the remote vnet resource by its id.
+# 1) Refer to the "source" resources in each peering block by name and the remote v
+#    net resource by its id.
 # 2) You match the vnet with its resource group in each peering block
 
 # Spoke-2-Hub Peer

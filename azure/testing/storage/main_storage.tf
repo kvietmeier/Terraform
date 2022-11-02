@@ -6,7 +6,7 @@
 #  File:  storagevolumes.tf
 #  Created By: Karl Vietmeier
 #
-#  Terraform Module Code
+#  Terraform Module Code:
 #  Purpose:  Create Azure File share/s
 #
 #   Terraform Docs -  
@@ -14,6 +14,13 @@
 #   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_share
 #   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_blob
 #
+#  Usage:
+#  terraform apply --auto-approve
+#  terraform destroy --auto-approve
+#  
+#  If you use a nonstandard tfvars file.
+#  terraform apply --auto-approve -var-file=".\variables.tfvars"
+#  terraform destroy --auto-approve -var-file=".\variables.tfvars"
 ###===================================================================================###
 
 /* Put Usage Documentation here */
@@ -39,10 +46,13 @@ resource "random_id" "randomID" {
 
 # Create the Storage Account/s
 resource "azurerm_storage_account" "storage_acct" {
-  #count                    = length(var.storage_account_configs)
-
   # Use for_each
+  # In later references to the Storage Accounts you use the "name" of the key in the lookup
+  # In this case - "files" and "blobs"
   for_each                 = { for each in var.storage_account_configs : each.name => each }
+   
+  # Example: storage_account_name = azurerm_storage_account.storage_acct["files"].name
+   
   location                 = var.resource_group_config[0].region
   name                     = "${each.value.name}${random_id.randomID.dec}"
   resource_group_name      = azurerm_resource_group.storage-rg[0].name
@@ -52,7 +62,6 @@ resource "azurerm_storage_account" "storage_acct" {
   account_replication_type = each.value.replication
 }
 
-/* 
 # Create shares using a complex object
 resource "azurerm_storage_share" "fileshare" {
   #count = length(var.shares)
@@ -60,10 +69,9 @@ resource "azurerm_storage_share" "fileshare" {
   name     = each.value.name
   quota    = each.value.quota
 
-  storage_account_name = azurerm_storage_account.storage_acct[each.key].name
+  storage_account_name = azurerm_storage_account.storage_acct["files"].name
   
 }
-*/
   
 ### END main.tf
 
