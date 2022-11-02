@@ -54,7 +54,26 @@ When referencing the Storage Account objects in other resource blocks you need t
 ```terraform
 storage_account_name = azurerm_storage_account.storage_acct["files"].name
 ```
+
+Example:
+
+```terraform
+# Create shares using a complex object
+resource "azurerm_storage_share" "fileshare" {
+  #count = length(var.shares)
+  for_each = { for each in var.shares: each.name => each }
+  name     = each.value.name
+  quota    = each.value.quota
+
+  storage_account_name = azurerm_storage_account.storage_acct["files"].name
   
+}
+```
+
+
+
+
+
 #### My code is Built With
 
 * [Visual Studio Code](https://code.visualstudio.com/) - Editor
