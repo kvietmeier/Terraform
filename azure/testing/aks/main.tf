@@ -38,6 +38,7 @@
   PowerShell:
   Import-AzAksCredential -ResourceGroupName AKS-Testing -Name TestCluster
 
+
 */
 
 
@@ -75,8 +76,8 @@ resource "random_id" "log_analytics_workspace_name_suffix" {
 resource "azurerm_log_analytics_workspace" "akslaw" {
     # The WorkSpace name has to be unique across the whole of azure, not just the current subscription/tenant.
     name                = "${var.log_analytics_workspace_name}-${random_id.log_analytics_workspace_name_suffix.dec}"
-    location            = azurerm_resource_group.aks-rg.location
     resource_group_name = azurerm_resource_group.aks-rg.name
+    location            = azurerm_resource_group.aks-rg.location
     sku                 = var.log_analytics_workspace_sku
     retention_in_days   = var.log_retention_in_days
 }
@@ -164,12 +165,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   # Should probably make these variables
   name                  = "cpumanager"
-  node_labels           = {
-    "iac-tool/node_profile"                  = "compute_intensive"
-    "iac-tool/kubelet_cpu_manager_policy"    = "static"
-    "iac-tool/tf_kubelet_cpu_manager_policy" = "user_data"  # tf_config
-  } 
-  
+
   # ID of cluster to add nodepool to
   kubernetes_cluster_id = azurerm_kubernetes_cluster.k8s.id
   
@@ -178,14 +174,33 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   node_count            = var.node_count
   vm_size               = var.vm_size
 
-  # Customize the nodepool
+  ###--- Customize the nodepool
+  
+  # Need to add some metadata about capabilities
+  node_labels           = {
+    "iac-tool/node_profile"                  = "compute_intensive"
+    "iac-tool/kubelet_cpu_manager_policy"    = "static"
+    "iac-tool/tf_kubelet_cpu_manager_policy" = "user_data"  # tf_config
+  } 
+  
+  # Configure kubelet properties
   kubelet_config {
-    cpu_manager_policy  = var.cpu_manager_policy
+    cpu_manager_policy       = var.cpu_manager_policy
+    topology_manager_policy  = var.topology_manager_policy
   }
   
+  # Linux OS config
   linux_os_config {
     transparent_huge_page_enabled = var.transparent_huge_page_enabled
+    transparent_huge_page_defrag  = var.transparent_huge_page_defrag
+
+    # Add some sysctl config parameters
+    sysctl_config {
+      fs_file_max = var.fs_file_max
+    }
   }
+
+
 } ### End nodepool setup
 
 #

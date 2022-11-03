@@ -115,10 +115,28 @@ variable "cpu_manager_policy" {
   type        = string
 }
 
+variable "topology_manager_policy" {
+  description = "NUMA topology management - (none, best-effort, restricted, single-numa-node)"
+  default     = "none"
+  type        = string
+}
+
 #- Linux OS Config
 variable "transparent_huge_page_enabled" {
   description = "Huge Pages Setup (always, madvise, never)"
   default     = "always"
+  type        = string
+}
+
+variable "transparent_huge_page_defrag" {
+  description = "Huge Pages defreag options (always, madvise, never, defer+madvise)"
+  default     = "always"
+  type        = string
+}
+
+variable "fs_file_max" {
+  description = "sysctl: Must be between 8192-12000500"
+  default     = "12000500"
   type        = string
 }
 

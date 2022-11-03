@@ -4,6 +4,13 @@ Create using local template/module following this example - [Create K8S cluster 
 
 This project currently creates 2 node pools, a "default" pool and a "cpumanager" pool.
 
+ToDo:
+
+* Proximity Placement Group
+* Storage Volumes
+* Non-standard CNI - "Cilium"
+* Run post install config commands
+
 The goal is to test applying kubelet, linux OS, and sysctl custom settings to nodepools.
 
 ---
