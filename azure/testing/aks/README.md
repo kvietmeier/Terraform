@@ -1,4 +1,4 @@
-### AKS Cluster
+## AKS Cluster
 
 Create using local template/module following this example - [Create K8S cluster with tF amd and AKS](https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks)
 
@@ -8,7 +8,7 @@ The goal is to test applying kubelet, linux OS, and sysctl custom settings to no
 
 ---
 
-#### Documentation
+### Documentation
 
 **Install kubectl for PowerShell:**  
 
@@ -28,7 +28,7 @@ The goal is to test applying kubelet, linux OS, and sysctl custom settings to no
 
 ---
 
-#### Notes
+### Notes
 
 Get cluster credentials - may need "az login":
 
