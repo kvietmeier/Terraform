@@ -78,31 +78,23 @@ resource "azurerm_storage_share" "fileshare" {
 
 
 ###==============================================================================================###
-#              Scratch code - trying to get it working
+#              Scratch code for testing
 ###==============================================================================================###
 
-  /* 
-  azurerm_storage_account.storage_acct[each.key]
-  element(azurerm_storage_account.storage_acct[*].id, 0)
-  element(azurerm_storage_account.storage_acct[*], 0)
-  element(azurerm_storage_account.storage_acct[name], 0)
-  azurerm_storage_account.storage_acct[0].name
-  azurerm_storage_account.storage_acct.name
-  storage_account_name = azurerm_storage_account.storage_acct.name
-  storage_account_name = element(azurerm_storage_account.storage_acct[name], 0)
-  storage_account_name = element(azurerm_storage_account.storage_acct[*], 0)
-  storage_account_name = element(azurerm_storage_account.storage_acct[*].name, 0)
-  storage_account_name = values(azurerm_storage_account.storage_acct[0]).name
-  storage_account_name = azurerm_storage_account.storage_acct[0].name
-  storage_account_name = azurerm_storage_account.storage_acct[]
-  
-  */
+/* Block Comnment
 
-/* # Create shares using a simple map - Key:Value
+# Create shares using a simple map - Key:Value
 resource "azurerm_storage_share" "shares" {
   storage_account_name = azurerm_storage_account.storage_acct.name
   for_each             = var.file_shares
   name                 = "${each.key}"
   quota                = "${each.value}"
 
-} */
+} 
+
+
+
+
+
+
+*/

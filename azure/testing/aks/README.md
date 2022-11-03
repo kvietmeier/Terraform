@@ -6,16 +6,29 @@ This project currently creates 2 node pools, a "default" pool and a "cpumanager"
 
 The goal is to test applying kubelet, linux OS, and sysctl custom settings to nodepools.
 
-#### Notes
+---
 
-Install kubectl for PowerShell:  
+#### Documentation
+
+**Install kubectl for PowerShell:**  
 
 * [Official Docs - curl/choco/scoop](https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/)
 * [PowerShell Module Install-AzAksKubectl](https://docs.microsoft.com/en-us/powershell/module/az.aks/install-azakskubectl?view=azps-8.0.0)
 
-CheatSheets:  
+**Terraform Azure and AKS Module docs:**
+
+* [Terraform Azure Provider:](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+* [kubernetes_cluster:](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster)
+* [kubernetes_cluster_node_pool:](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool)
+* [Helm](https://registry.terraform.io/providers/hashicorp/helm/latest/docs)
+
+**CheatSheets:**  
 
 * [kubectl cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/):
+
+---
+
+#### Notes
 
 Get cluster credentials - may need "az login":
 
@@ -80,11 +93,6 @@ If you don't see a command prompt, try pressing enter.
 root@aks-agentpool-34182189-vmss000000:/#
   
 ```
-
-
-
-
-
 
 #### Author/s
 
