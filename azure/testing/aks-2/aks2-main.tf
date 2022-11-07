@@ -91,6 +91,7 @@ resource "azurerm_proximity_placement_group" "aks_prox_grp" {
   name                  = "AKSProximityPlacementGroup"
 }
 
+
 ###===================================================================================###
 #  Setup the LAW
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace
