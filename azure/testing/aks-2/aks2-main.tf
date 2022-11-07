@@ -78,6 +78,9 @@ resource "azurerm_subnet" "subnets" {
   virtual_network_name  = azurerm_virtual_network.vnet.name
   
   # Create 2 subnets based on number of CIDRs defined in .tfvars
+  # You can use this with simple key:value:
+  # for_each = { for subnet in var.subnets : subnet.name => subnet.address_prefixes }
+
    for_each = { for each in var.subnets: each.name => each }
      name                 = each.value.name
      address_prefixes     = [each.value.cidr] 

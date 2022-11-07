@@ -248,7 +248,7 @@ variable "subnets" {
 # Using type = list(object({}))
 # Reference: for_each = { for each in var.nodepools : each.name => each }
 variable "nodepools" {
-  description = "List of subnets to create and their address space."
+  description = "List of nodepools to create and the configuration for each."
   type = list(
     object(
       { 
@@ -275,6 +275,11 @@ variable "aks_service_principal_app_id" {
 
 variable "aks_service_principal_client_secret" {
   description = "The Client Secret for the Service Principal to use for this AKS Cluster"
+  type        = string
+}
+
+variable "aks_tenant_id" { 
+  description = "The Client ID for the Service Principal to use for this AKS Cluster"
   type        = string
 }
 

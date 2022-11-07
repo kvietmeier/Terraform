@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  submodule.tf
+#  File:  aks2-nodepools.tf
 #  Created By: Karl Vietmeier
 #
 #  Purpose:  Create additional nodepools for the cluster
@@ -24,36 +24,28 @@ Put Usage Documentation here
 ###===================================================================================###
 resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   
-  /* Spread these out - 
   for_each = { for each in var.nodepools : each.name => each }
   
-  name                          = each.value.name
-  orchestrator_version          = each.value.orchestrator_version
-  node_count                    = each.value.node_count
-  vm_size                       = each.value.vm_size
-  cpu_manager_policy            = each.value.cpu_manager_policy
-  topology_manager_policy       = each.value.topology_manager_policy
-  transparent_huge_page_enabled = each.value.transparent_huge_page_enabled
-  transparent_huge_page_defrag  = each.value.transparent_huge_page_defrag
-  fs_file_max                   = each.value.fs_file_max
-  */
-  
-  # Should probably make these variables
-  name                  = "cpumanager"
-
-  # ID of cluster to add nodepool to
+  #name                  = "cpumanager"
+  name = each.value.name
   kubernetes_cluster_id = azurerm_kubernetes_cluster.k8s.id
   
+  # Put this in the list so some nodepools are in some out?
+  proximity_placement_group_id = azurerm_proximity_placement_group.aks_prox_grp.id
+  
   # Set in *.tfvars
+  #orchestrator_version          = each.value.orchestrator_version
+  #node_count            = var.node_count
+  #vm_size               = var.vm_size
   orchestrator_version  = var.orchestrator_version
-  node_count            = var.node_count
-  vm_size               = var.vm_size
+  node_count            = each.value.node_count
+  vm_size               = each.value.vm_size
 
   ###--- Customize the nodepool
   
   # Need to add some metadata about capabilities
-  #---- This needs to be a list variable
-  node_labels           = {
+  #---- <This needs to be a list variable>
+  node_labels = {
     "iac-tool/node_profile"                  = "compute_intensive"
     "iac-tool/kubelet_cpu_manager_policy"    = "static"
     "iac-tool/tf_kubelet_cpu_manager_policy" = "user_data"  # tf_config
@@ -61,25 +53,28 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   
   # Configure kubelet properties
   kubelet_config {
-    cpu_manager_policy       = var.cpu_manager_policy
-    topology_manager_policy  = var.topology_manager_policy
+    cpu_manager_policy            = each.value.cpu_manager_policy
+    topology_manager_policy       = each.value.topology_manager_policy
+    #cpu_manager_policy       = var.cpu_manager_policy
+    #topology_manager_policy  = var.topology_manager_policy
   }
   
   # Linux OS config
   linux_os_config {
-    transparent_huge_page_enabled = var.transparent_huge_page_enabled
-    transparent_huge_page_defrag  = var.transparent_huge_page_defrag
+    #transparent_huge_page_enabled = var.transparent_huge_page_enabled
+    #transparent_huge_page_defrag  = var.transparent_huge_page_defrag
+    transparent_huge_page_enabled = each.value.transparent_huge_page_enabled
+    transparent_huge_page_defrag  = each.value.transparent_huge_page_defrag
 
     # Add some sysctl config parameters
     sysctl_config {
-      fs_file_max = var.fs_file_max
+      fs_file_max = each.value.fs_file_max
+      #fs_file_max = var.fs_file_max
     }
   }
 
-
-
   /* 
-    Run some "az" and kubectl commands using "local-exec" Doing it here so it goes at the end opf the run
+    Run some "az" and kubectl commands using "local-exec" Doing it here so it goes at the end of the run
      https://developer.hashicorp.com/terraform/language/resources/provisioners/syntax
      https://www.terraform.io/language/resources/provisioners/local-exec
   */
@@ -92,7 +87,7 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   
   provisioner "local-exec" {
     # Get the cluster config for kubectl
-    command = "az aks get-credentials --resource-group AKS-Testing2 --name TestCluster2"
+    command = "az aks get-credentials --resource-group ${azurerm_resource_group.aks-rg.name} --name ${azurerm_kubernetes_cluster.k8s.name} --overwrite-existing"
     on_failure = continue
   }
 
@@ -109,8 +104,3 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   }
 
 } ### End nodepool setup
-
-
-
-
-###----  END Main 
