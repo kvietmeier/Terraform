@@ -23,6 +23,21 @@ Put Usage Documentation here
 #  https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
 ###===================================================================================###
 resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
+  
+  /* Spread these out - 
+  for_each = { for each in var.nodepools : each.name => each }
+  
+  name                          = each.value.name
+  orchestrator_version          = each.value.orchestrator_version
+  node_count                    = each.value.node_count
+  vm_size                       = each.value.vm_size
+  cpu_manager_policy            = each.value.cpu_manager_policy
+  topology_manager_policy       = each.value.topology_manager_policy
+  transparent_huge_page_enabled = each.value.transparent_huge_page_enabled
+  transparent_huge_page_defrag  = each.value.transparent_huge_page_defrag
+  fs_file_max                   = each.value.fs_file_max
+  */
+  
   # Should probably make these variables
   name                  = "cpumanager"
 
@@ -60,6 +75,8 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
       fs_file_max = var.fs_file_max
     }
   }
+
+
 
   /* 
     Run some "az" and kubectl commands using "local-exec" Doing it here so it goes at the end opf the run

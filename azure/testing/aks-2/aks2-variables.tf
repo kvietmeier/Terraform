@@ -244,9 +244,9 @@ variable "subnets" {
 }
 
 
-# Nodepool configs - testing - use a complex object list fr multple nodepools
+# Nodepool configs - testing - use a complex object list for multiple nodepools
 # Using type = list(object({}))
-/* 
+# Reference: for_each = { for each in var.nodepools : each.name => each }
 variable "nodepools" {
   description = "List of subnets to create and their address space."
   type = list(
@@ -265,7 +265,6 @@ variable "nodepools" {
     )
   )
 }
-*/
 
 
 ###==============================  Secrets - in .tfvars ===============================###
