@@ -1,4 +1,4 @@
-## AKS Cluster
+## AKS Cluster-2
 
 Create using local template/module following this example - [Create K8S cluster with tF amd and AKS](https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks)
 
@@ -6,12 +6,30 @@ This project currently creates 2 node pools, a "default" pool and a "cpumanager"
 
 ToDo:
 
-* Proximity Placement Group
+* Use the Proximity Placement Group
 * Storage Volumes
-* Non-standard CNI - "Cilium"
-* Run post install config commands
 
-The goal is to test applying kubelet, linux OS, and sysctl custom settings to nodepools.
+In this example we are successfuly running post setup commands with the local-exec Provisioner to setup kubectl.config and install the Cillium CNI plugin using Helm.
+
+```terraform
+  provisioner "local-exec" {
+    # Get the cluster config for kubectl
+    command = "az aks get-credentials --resource-group AKS-Testing2 --name TestCluster2"
+    on_failure = continue
+  }
+
+  provisioner "local-exec" {
+    # Add cilium to ther Helm repo
+    command = "helm repo add cilium https://helm.cilium.io/"
+    on_failure = continue
+  }
+  
+  provisioner "local-exec" {
+    # Install cilium as the CNI plugin for network
+    command = "helm install cilium cilium/cilium --version 1.12.3  --namespace kube-system  --set aksbyocni.enabled=true  --set nodeinit.enabled=true"
+    on_failure = continue
+  }
+```
 
 ---
 
