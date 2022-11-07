@@ -8,11 +8,6 @@
 #
 ###===================================================================================###
 
-/* 
-
-Put Usage information here
-
-*/
 
 ###=============================  Basic Azure Infra  =================================###
 variable "resource_group_name" {
@@ -42,14 +37,20 @@ variable "resource_group_name_prefix" {
 
 ###============================   Cluster Configuration  =============================###
 variable cluster_name {
-  default = "k8stest"
+  default = "aks2-testing"
   type    = string
 }
 
 variable "dns_prefix" {
-  default = "k8stest"
+  default = "aks2"
   type    = string
 }
+
+variable "cluster_prefix" {
+  default = "aks2"
+  type    = string
+}
+
 
 variable "admin_username" {
   default     = "aksadmin"
@@ -141,9 +142,7 @@ variable "fs_file_max" {
 }
 
 
-
-
-###================================== Network Config ==================================###
+###================================== Cluster Network Config ==================================###
 variable "network_plugin" {
   description = "Network plugin to use for networking."
   type        = string
@@ -214,7 +213,62 @@ variable "log_retention_in_days" {
 }
 
 
-###==============================  Secrets - in tfvars  ===============================###
+###===================================================================================###
+###  Vnet Networking
+###===================================================================================###
+
+# vNet address spaces/cidrs
+variable "vnet_cidr" {type = list(string)}
+
+# Allow list for NSG
+variable whitelist_ips {
+  description = "A list of IP CIDR ranges to allow as clients. Do not use Azure tags like `Internet`."
+  type        = list(string)
+}
+
+# Hub resources for vnet peering
+variable "hub-rg" {type = string}
+variable "hub-vnet" {type = string}
+
+###--- subnets
+# Using type = list(object({}))
+variable "subnets" {
+  description = "List of subnets to create and their address space."
+  type = list(
+    object(
+      { name = string,
+        cidr = string 
+      }
+    )
+  )
+}
+
+
+# Nodepool configs - testing - use a complex object list fr multple nodepools
+# Using type = list(object({}))
+/* 
+variable "nodepools" {
+  description = "List of subnets to create and their address space."
+  type = list(
+    object(
+      { 
+        name                          = string,
+        orchestrator_version          = string,
+        node_count                    = number,
+        vm_size                       = string,
+        cpu_manager_policy            = string,
+        topology_manager_policy       = string,
+        transparent_huge_page_enabled = string,
+        transparent_huge_page_defrag  = string,
+        fs_file_max                   = string
+      }
+    )
+  )
+}
+*/
+
+
+###==============================  Secrets - in .tfvars ===============================###
 variable "aks_service_principal_app_id" { 
   description = "The Client ID for the Service Principal to use for this AKS Cluster"
   type        = string

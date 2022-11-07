@@ -66,13 +66,33 @@ resource "azurerm_storage_account" "storage_acct" {
 resource "azurerm_storage_share" "fileshare" {
   #count = length(var.shares)
   for_each = { for each in var.shares: each.name => each }
-  name     = each.value.name
-  quota    = each.value.quota
+    name     = each.value.name
+    quota    = each.value.quota
 
-  storage_account_name = azurerm_storage_account.storage_acct["files"].name
+    storage_account_name = azurerm_storage_account.storage_acct["files"].name
   
 }
-  
+
+### TBD - create a blob containner
+
+resource "azurerm_storage_container" "blobcontainer" {
+  name                  = "appstore"
+  storage_account_name = azurerm_storage_account.storage_acct["blobs"].name
+  container_access_type = "blob"
+}
+
+# Do I need this?
+/* 
+resource "azurerm_storage_blob" "my_blob" {
+  name                   = "blobshare"
+  storage_container_name = azurerm_storage_container.blobcontainer.name
+  storage_account_name   = azurerm_storage_account.storage_acct["blobs"].name
+  type                   = "Block"
+  access_tier            = "Hot"
+  #source                 = "some-local-file.zip"
+}
+
+*/
 ### END main.tf
 
 

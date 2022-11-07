@@ -14,9 +14,6 @@
 #    variables.tf
 #    terraform.tfvars
 #
-#  Usage:
-#  terraform apply --auto-approve
-#  terraform destroy --auto-approve
 ###===================================================================================###
 
 /*
@@ -38,6 +35,9 @@
   PowerShell:
   Import-AzAksCredential -ResourceGroupName AKS-Testing -Name TestCluster
 
+  - Create/destroy
+  terraform apply --auto-approve -var-file=".\aks2-terraform.tfvars"
+  terraform destroy --auto-approve -var-file=".\aks2-terraform.tfvars"
 
 */
 
@@ -52,15 +52,43 @@ resource "azurerm_resource_group" "aks-rg" {
   location = var.region
 }
 
-# Need a vnet
+/* # Need a vnet
 module "network" {
   source              = "Azure/network/azurerm"
   resource_group_name = var.resource_group_name
   vnet_name           = "aks-vnet"
-  address_space       = "10.52.0.0/16"
-  subnet_prefixes     = ["10.52.0.0/24"]
+  address_space       = "10.62.0.0/16"
+  subnet_prefixes     = ["10.62.0.0/24"]
   subnet_names        = ["subnet01"]
   depends_on          = [azurerm_resource_group.aks-rg]
+}
+ */
+ 
+# Create the vnet
+resource "azurerm_virtual_network" "vnet" {
+  resource_group_name   = azurerm_resource_group.aks-rg.name
+  location              = azurerm_resource_group.aks-rg.location
+  name                 = "${var.cluster_prefix}-vnet"
+  address_space        = var.vnet_cidr
+}
+
+# Subnets 
+resource "azurerm_subnet" "subnets" {
+  resource_group_name   = azurerm_resource_group.aks-rg.name
+  virtual_network_name  = azurerm_virtual_network.vnet.name
+  
+  # Create 2 subnets based on number of CIDRs defined in .tfvars
+   for_each = { for each in var.subnets: each.name => each }
+     name                 = each.value.name
+     address_prefixes     = [each.value.cidr] 
+}
+
+
+# Create a Proximity Placement Group
+resource "azurerm_proximity_placement_group" "aks_prox_grp" {
+  resource_group_name   = azurerm_resource_group.aks-rg.name
+  location              = azurerm_resource_group.aks-rg.location
+  name                  = "AKSProximityPlacementGroup"
 }
 
 ###===================================================================================###
@@ -157,51 +185,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 } ### End Cluster definition
 
 
-###===================================================================================###
-###   Configure additional node pools
-#  https://docs.microsoft.com/en-us/azure/aks/custom-node-configuration
-#  https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
-###===================================================================================###
-resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
-  # Should probably make these variables
-  name                  = "cpumanager"
 
-  # ID of cluster to add nodepool to
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.k8s.id
-  
-  # Set in *.tfvars
-  orchestrator_version  = var.orchestrator_version
-  node_count            = var.node_count
-  vm_size               = var.vm_size
-
-  ###--- Customize the nodepool
-  
-  # Need to add some metadata about capabilities
-  node_labels           = {
-    "iac-tool/node_profile"                  = "compute_intensive"
-    "iac-tool/kubelet_cpu_manager_policy"    = "static"
-    "iac-tool/tf_kubelet_cpu_manager_policy" = "user_data"  # tf_config
-  } 
-  
-  # Configure kubelet properties
-  kubelet_config {
-    cpu_manager_policy       = var.cpu_manager_policy
-    topology_manager_policy  = var.topology_manager_policy
-  }
-  
-  # Linux OS config
-  linux_os_config {
-    transparent_huge_page_enabled = var.transparent_huge_page_enabled
-    transparent_huge_page_defrag  = var.transparent_huge_page_defrag
-
-    # Add some sysctl config parameters
-    sysctl_config {
-      fs_file_max = var.fs_file_max
-    }
-  }
-
-
-} ### End nodepool setup
 
 #
 ### END main.tf
@@ -211,14 +195,6 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
 
 ###===================================================================================###
 #### Things to add:
-/* 
-# Create a Proximity Placement Group
-resource "azurerm_proximity_placement_group" "proxplace_grp" {
-  location            = azurerm_resource_group.upf_rg.location
-  resource_group_name = azurerm_resource_group.upf_rg.name
-  name                = "ProximityPlacementGroup"
-}
-*/
 
 ### I don't like the module - 
 /* 
