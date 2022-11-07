@@ -2,7 +2,7 @@
 
 Code in this module is attempting to create Storage Accounts and add shares and blobs to them.
 
-I'm also expirementing with using "count" and "for_each" to explore the differences between maps and complex object lists.
+I'm also experimenting with using "count" and "for_each" to explore the differences between maps and complex object lists.
 
 #### Notes
 
@@ -17,8 +17,6 @@ Resource block to create the Storage Accounts:
 ```terraform
 # Create the Storage Account/s
 resource "azurerm_storage_account" "storage_acct" {
-  #count                    = length(var.storage_account_configs)
-
   # Use for_each
   for_each                 = { for each in var.storage_account_configs : each.name => each }
   location                 = var.resource_group_config[0].region
@@ -66,13 +64,8 @@ resource "azurerm_storage_share" "fileshare" {
   quota    = each.value.quota
 
   storage_account_name = azurerm_storage_account.storage_acct["files"].name
-  
 }
 ```
-
-
-
-
 
 #### My code is Built With
 
