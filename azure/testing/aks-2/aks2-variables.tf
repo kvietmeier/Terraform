@@ -310,3 +310,28 @@ variable "ssh_public_key" {
   description = "SSH Key for the cludster nodes"
   type        = string
 }
+
+
+###===================================================================================###
+#   Retrieve existing resources in Azure
+###===================================================================================###
+
+### Right now we just need the Hub vNet to peer to.
+# Resource Groups
+data "azurerm_resource_group" "hub-rg" {
+  name = "${var.hub-rg}"
+}
+
+# Hub vNet to peer to
+data "azurerm_virtual_network" "hub-vnet" {
+  resource_group_name = data.azurerm_resource_group.hub-rg.name
+  name = "${var.hub-vnet}"
+}
+
+# Refer to them in maint.tf using: 
+# data.azurerm_resource_group.hub-rg.name
+# data.azurerm_resource_group.hub-rg.id
+# data.azurerm_virtual_network.hub-vnet.name
+# data.azurerm_virtual_network.hub-vnet.id
+
+

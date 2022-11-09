@@ -6,7 +6,7 @@
 #  File:  aks2-storagre-variables.tf
 #  Created By: Karl Vietmeier
 #
-#  Stoprae related variable definitions with defaults
+#  Storage related variable definitions
 #
 ###===================================================================================###
 

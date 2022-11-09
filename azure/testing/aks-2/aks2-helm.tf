@@ -12,16 +12,8 @@
 ###===================================================================================###
 
 /* 
-
-Put Usage Documentation here
-
+  Put Usage Documentation here
 */
-
-
-###===================================================================================###
-#     Start creating resources
-###===================================================================================###
-
 
 # Cluster info
 data "azurerm_kubernetes_cluster" "credentials" {
@@ -29,7 +21,11 @@ data "azurerm_kubernetes_cluster" "credentials" {
   resource_group_name = azurerm_resource_group.aks-rg.name
 }
 
-# Enable Helm
+###===================================================================================###
+#     Create Helm resources and add charts
+###===================================================================================###
+
+###----- Enable Helm
 provider "helm" {
   kubernetes {
     host                   = data.azurerm_kubernetes_cluster.credentials.kube_config.0.host
@@ -41,6 +37,7 @@ provider "helm" {
 }
 
 ###----- Helm Charts
+#- Install Cilium CNI plugin
 resource "helm_release" "cilium_cni" {
   name       = "cilium"
   namespace  = "kube-system"

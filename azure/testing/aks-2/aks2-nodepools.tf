@@ -12,16 +12,18 @@
 
 /* 
 
-Put Usage Documentation here
+  Put Usage Documentation here
+  
+  Reference Docs - 
+   https://docs.microsoft.com/en-us/azure/aks/custom-node-configuration
+   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
+   https://blog.wimwauters.com/devops/2022-03-01_terraformusecases/
 
 */
 
 
 ###===================================================================================###
 ###   Configure additional node pools
-#  https://docs.microsoft.com/en-us/azure/aks/custom-node-configuration
-#  https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
-#  https://blog.wimwauters.com/devops/2022-03-01_terraformusecases/
 ###===================================================================================###
 resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   
@@ -72,20 +74,21 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
      https://www.terraform.io/language/resources/provisioners/local-exec
   */
 
-  /* 
-  provisioner "local-exec" {
-    # Make sure we are logged in to the Tenant
-    command = "az login --service-principal --username $aks_service_principal_app_id --password $aks_service_principal_client_secret --tenant $aks_tenant_id"
-    on_failure = continue
-  }
-
-  */
   provisioner "local-exec" {
     # Get the cluster config for kubectl
     command = "az aks get-credentials --resource-group ${azurerm_resource_group.aks-rg.name} --name ${azurerm_kubernetes_cluster.k8s.name} --overwrite-existing"
     on_failure = continue
   }
 
+  ### Hang on to these as examples for now
+  /* 
+  provisioner "local-exec" {
+    # Make sure we are logged in to the Tenant
+    command = "az login --service-principal --username $aks_service_principal_app_id --password $aks_service_principal_client_secret --tenant $aks_tenant_id"
+    on_failure = continue
+  }
+  */
+  
   /*  
   provisioner "local-exec" {
     # Add cilium to ther Helm repo

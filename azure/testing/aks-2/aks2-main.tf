@@ -43,45 +43,20 @@
 
 
 ###===================================================================================###
-#     Create Infrastructure Resources
+#     Create Misc Infrastructure Resources
 ###===================================================================================###
 
-# Need a Resource Group to hold everything
+###--- Need a Resource Group to hold everything
 resource "azurerm_resource_group" "aks-rg" {
   name     = var.resource_group_name
   location = var.region
 }
 
-# Need a vnet
- 
-# Create the vnet
-resource "azurerm_virtual_network" "vnet" {
-  resource_group_name   = azurerm_resource_group.aks-rg.name
-  location              = azurerm_resource_group.aks-rg.location
-  name                 = "${var.cluster_prefix}-vnet"
-  address_space        = var.vnet_cidr
-}
-
-# Subnets 
-resource "azurerm_subnet" "subnets" {
-  resource_group_name   = azurerm_resource_group.aks-rg.name
-  virtual_network_name  = azurerm_virtual_network.vnet.name
-  
-  # Create 2 subnets based on number of CIDRs defined in .tfvars
-  # You can use this with simple key:value:
-  # for_each = { for subnet in var.subnets : subnet.name => subnet.address_prefixes }
-
-   for_each = { for each in var.subnets: each.name => each }
-     name                 = each.value.name
-     address_prefixes     = [each.value.cidr] 
-}
-
-
-# Create a Proximity Placement Group
+###--- Create a Proximity Placement Group
 resource "azurerm_proximity_placement_group" "aks_prox_grp" {
-  resource_group_name   = azurerm_resource_group.aks-rg.name
-  location              = azurerm_resource_group.aks-rg.location
-  name                  = "AKSProximityPlacementGroup"
+  resource_group_name = azurerm_resource_group.aks-rg.name
+  location            = azurerm_resource_group.aks-rg.location
+  name                = "AKSProximityPlacementGroup"
 }
 
 
@@ -189,30 +164,4 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 
 ###===================================================================================###
 #### Things to add:
-
-### I don't like the module - 
-/* 
-# Create the vnet
-resource "azurerm_virtual_network" "vnet" {
-  location             = azurerm_resource_group.upf_rg.location
-  resource_group_name  = azurerm_resource_group.upf_rg.name
-  name                 = "${var.resource_prefix}-network"
-  address_space        = var.vnet_cidr
-}
-
-# 2 Subnets - one for each NIC
-resource "azurerm_subnet" "subnets" {
-  resource_group_name  = azurerm_resource_group.upf_rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  
-  # Create 2 subnets based on number of CIDRs defined in .tfvars
-  count                = length(var.subnet_cidrs)
-  
-  # Named "subnet01, subnet02" etc....  (keep number under 10)
-  name                 = "subnet0${count.index}"
-  
-  # Using the address spaces in - subnet_cidrs
-  address_prefixes     = [element(var.subnet_cidrs, count.index)]
-}
-
-*/
+###   TBD
