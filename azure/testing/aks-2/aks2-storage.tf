@@ -25,17 +25,6 @@
 
 /* Put Usage Documentation here */
 
-/* 
-# Always need this - 
-resource "azurerm_resource_group" "storage-rg" {
-  #name     = var.resource_group_name
-  #location = var.region
-  count    = length(var.resource_group_config)
-  name     = var.resource_group_config[count.index].name
-  location = var.resource_group_config[count.index].region
-}
-*/
-
 # Generate random text for a unique storage account name
 resource "random_id" "randomID" {
   keepers = {
@@ -83,6 +72,24 @@ resource "azurerm_storage_container" "blobcontainer" {
   container_access_type = "blob"
 }
 
+### END main.tf
+
+
+###==============================================================================================###
+#              Scratch code for testing
+###==============================================================================================###
+
+/* Block Comnment
+# Create shares using a simple map - Key:Value
+resource "azurerm_storage_share" "shares" {
+  storage_account_name = azurerm_storage_account.storage_acct.name
+  for_each             = var.file_shares
+  name                 = "${each.key}"
+  quota                = "${each.value}"
+
+} 
+*/
+
 # Do I need this?
 /* 
 resource "azurerm_storage_blob" "my_blob" {
@@ -93,30 +100,5 @@ resource "azurerm_storage_blob" "my_blob" {
   access_tier            = "Hot"
   #source                 = "some-local-file.zip"
 }
-
-*/
-### END main.tf
-
-
-
-###==============================================================================================###
-#              Scratch code for testing
-###==============================================================================================###
-
-/* Block Comnment
-
-# Create shares using a simple map - Key:Value
-resource "azurerm_storage_share" "shares" {
-  storage_account_name = azurerm_storage_account.storage_acct.name
-  for_each             = var.file_shares
-  name                 = "${each.key}"
-  quota                = "${each.value}"
-
-} 
-
-
-
-
-
 
 */
