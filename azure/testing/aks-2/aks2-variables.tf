@@ -243,7 +243,6 @@ variable "subnets" {
   )
 }
 
-
 # Nodepool configs - testing - use a complex object list for multiple nodepools
 # Using type = list(object({}))
 # Reference: for_each = { for each in var.nodepools : each.name => each }
@@ -260,11 +259,35 @@ variable "nodepools" {
         topology_manager_policy       = string,
         transparent_huge_page_enabled = string,
         transparent_huge_page_defrag  = string,
+        proximity_placement_group     = bool,
+        fs_file_max                   = string
+      }
+    )
+  )
+} 
+
+/* 
+variable "nodepools" {
+  description = "List of nodepools to create and the configuration for each."
+  type = list(
+    object(
+      { 
+        name                          = string,
+        orchestrator_version          = string,
+        node_count                    = number,
+        vm_size                       = string,
+        cpu_manager_policy            = string,
+        topology_manager_policy       = string,
+        transparent_huge_page_enabled = string,
+        transparent_huge_page_defrag  = string,
+        #proximity_placement_group_id  = string,
+        node_labels                   = list(string),
         fs_file_max                   = string
       }
     )
   )
 }
+ */
 
 
 ###==============================  Secrets - in .tfvars ===============================###

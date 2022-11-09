@@ -52,17 +52,7 @@ resource "azurerm_resource_group" "aks-rg" {
   location = var.region
 }
 
-/* # Need a vnet
-module "network" {
-  source              = "Azure/network/azurerm"
-  resource_group_name = var.resource_group_name
-  vnet_name           = "aks-vnet"
-  address_space       = "10.62.0.0/16"
-  subnet_prefixes     = ["10.62.0.0/24"]
-  subnet_names        = ["subnet01"]
-  depends_on          = [azurerm_resource_group.aks-rg]
-}
- */
+# Need a vnet
  
 # Create the vnet
 resource "azurerm_virtual_network" "vnet" {

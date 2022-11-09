@@ -2,14 +2,16 @@
 
 Create using local template/module following this example - [Create K8S cluster with tF amd and AKS](https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks)
 
-This project currently creates 2 node pools, a "default" pool and a "cpumanager" pool.
+This project currently creates 3 node pools, a "default" pool and 2 "cpumanager" pools with different VM sizes.
 
 ToDo:
 
-* Use the Proximity Placement Group
-* Storage Volumes
+* Use the Proximity Placement Group ***(Done)***
+* Storage Volumes ***(Done)***
+* Availability Zones
+* Enable DPDK
 
-In this example we are successfuly running post setup commands with the local-exec Provisioner to setup kubectl.config and install the Cillium CNI plugin using Helm.
+In this example I am running a post setup command with the local-exec Provisioner to setup kubectl.config
 
 ```terraform
   provisioner "local-exec" {
@@ -17,18 +19,31 @@ In this example we are successfuly running post setup commands with the local-ex
     command = "az aks get-credentials --resource-group AKS-Testing2 --name TestCluster2"
     on_failure = continue
   }
+```
 
-  provisioner "local-exec" {
-    # Add cilium to ther Helm repo
-    command = "helm repo add cilium https://helm.cilium.io/"
-    on_failure = continue
+To install Cilium with Helm charts you can use the Helm provider. Look at aks2-helm.tf for the full code.
+
+```terraform
+###----- Helm Charts
+resource "helm_release" "cilium_cni" {
+  name       = "cilium"
+  namespace  = "kube-system"
+  repository = "https://helm.cilium.io/"
+  chart      = "cilium"
+  version    ="1.12.3"
+
+  set {
+    name  = "aksbyocni.enabled"
+    value = "true"
   }
   
-  provisioner "local-exec" {
-    # Install cilium as the CNI plugin for network
-    command = "helm install cilium cilium/cilium --version 1.12.3  --namespace kube-system  --set aksbyocni.enabled=true  --set nodeinit.enabled=true"
-    on_failure = continue
+  set {
+    name  = "nodeinit.enabled"
+    value = "true"
   }
+
+  depends_on = [ azurerm_kubernetes_cluster.k8s ]
+}
 ```
 
 ---
