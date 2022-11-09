@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  storagevolumes.tf
+#  File:  aks2-storage.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Module Code:
@@ -14,13 +14,6 @@
 #   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_share
 #   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_blob
 #
-#  Usage:
-#  terraform apply --auto-approve
-#  terraform destroy --auto-approve
-#  
-#  If you use a nonstandard tfvars file.
-#  terraform apply --auto-approve -var-file=".\variables.tfvars"
-#  terraform destroy --auto-approve -var-file=".\variables.tfvars"
 ###===================================================================================###
 
 /* Put Usage Documentation here */
