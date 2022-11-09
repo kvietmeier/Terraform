@@ -11,12 +11,7 @@
 # 
 ###===================================================================================###
 
-/* 
-
-Put Usage Documentation here
-
-*/
-
+/* Put Usage Documentation here */
 
 ###===================================================================================###
 #     Create Network Resources
@@ -31,7 +26,7 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = var.vnet_cidr
 }
 
-# Subnets 
+# Create Subnets 
 resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.aks-rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
@@ -45,8 +40,7 @@ resource "azurerm_subnet" "subnets" {
 }
 
 
-### Create a vnet peer to the hub vnet
-#   (Optional) - I do this because I have a "Linux Tools" VM in my hub vnet. 
+###--- Create a vnet peer to the hub vnet
 # Syntax is important here -
 # 1) Refer to the "source" resources in each peering block by name and the remote v
 #    net resource by its id.
@@ -71,5 +65,3 @@ resource "azurerm_virtual_network_peering" "hub2spoke" {
   # Target vnet by ID
   remote_virtual_network_id = azurerm_virtual_network.vnet.id
 }
-
-
