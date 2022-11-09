@@ -13,46 +13,159 @@
 ###===================================================================================###
 
 # Cluster Settings
-resource_group_name = "AKS-Testing"
-region              = "westus2"
+resource_group_name = ""
+region              = ""
 
 
 ### Cluster settings
-dns_prefix           = "akscluster"
-cluster_name         = "TestCluster" 
-orchestrator_version = "1.23.5"
-kubernetes_version   = "1.23.5"
-sku_tier             = "Paid"
+dns_prefix               = ""
+cluster_prefix           = ""
+cluster_name             = "" 
+kubernetes_version       = ""
+sku_tier                 = ""
 
-### Default Node Pool
-default_pool_name             = "agentpool"
-node_count                    = "2"
-vm_size                       = "standard_d2ds_v5"
-cpu_manager_policy            = "static"
-
-
-### Linux OS Config
-transparent_huge_page_enabled = "always"
+### Default Node Pool settings
+orchestrator_version     = "1.24.6"
+default_pool_name        = "agentpool"
+default_node_count       = "1"
+default_vm_size          = "Standard_DS2_v2"
 
 
-### Cluster Network
-network_plugin                 = "azure"
+###--- Additional Node Pools
+node_count                     = "2"
+vm_size                        = "standard_d2ds_v5"
+
+# Kubelet Config Settings
+cpu_manager_policy             = "static"
+topology_manager_policy        = "best-effort"
+
+# Linux OS Config
+transparent_huge_page_enabled  = "always"
+transparent_huge_page_defrag   = "always"
+fs_file_max                    = "12000500"
+
+
+# Create multiple nodepools (probably could trim this down by removing common values)
+nodepools = [
+ {
+    name                          = "cpumanagerd2",
+    orchestrator_version          = "1.24.6",
+    node_count                    = "2",
+    vm_size                       = "standard_d2ds_v5",
+    cpu_manager_policy            = "static",
+    topology_manager_policy       = "best-effort",
+    transparent_huge_page_enabled = "always",
+    transparent_huge_page_defrag  = "always",
+    proximity_placement_group     = "true",
+    fs_file_max                   = "12000500"
+ },
+ {
+    name                          = "cpumanagerd4",
+    orchestrator_version          = "1.24.6",
+    node_count                    = "2",
+    vm_size                       = "standard_d4ds_v5",
+    cpu_manager_policy            = "static",
+    topology_manager_policy       = "best-effort",
+    transparent_huge_page_enabled = "always",
+    transparent_huge_page_defrag  = "always",
+    proximity_placement_group     = "false",
+    fs_file_max                   = "12000500"
+  }
+]
+
+###--- Cluster Network
+network_plugin                 = "none"
 network_policy                 = "azure"
-net_profile_dns_service_ip     = "10.40.0.10"
-net_profile_docker_bridge_cidr = "170.10.0.1/16"
-net_profile_service_cidr       = "10.40.0.0/16"
 net_profile_outbound_type      = "loadBalancer"
-#net_profile_pod_cidr           = "10.40.0.0/16" # Can't be set when plugin = azure
+net_profile_dns_service_ip     = ""
+net_profile_service_cidr       = "/16"   # Must be smaller than /12
+net_profile_pod_cidr           = "/16"   # Can't be set when plugin = azure, only with "kubenet"
+net_profile_docker_bridge_cidr = "/16"
 
 
-### Log Analytics WS
-log_analytics_workspace_name     = "AKSLAW-Name"
-log_analytics_workspace_location = "westus2"
-log_analytics_workspace_sku      = "PerGB2018"
+###--- Log Analytics WS
+log_analytics_workspace_name     = "AKS2LAW-Name"
+log_analytics_workspace_location = ""
 log_retention_in_days            = "30"
 
 
 ### Guard These - 
+aks_tenant_id                       = ""
 aks_service_principal_app_id        = ""
 aks_service_principal_client_secret = ""
 ssh_public_key = ""
+
+
+###===================================================================================###
+###  Storage Configuration
+###  Create a few shares and a blob container
+###===================================================================================###
+
+# Storage Account configurations
+storage_account_configs = [
+  {
+    name         = "files"
+    acct_kind    = "FileStorage" # Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2.
+    account_tier = "Premium"     # If "Premium" - it must be in a "FileStorage" Storage Account
+    access_temp  = "Hot"
+    replication  = "LRS"
+  },
+  {
+    name         = "blobs"
+    acct_kind    = "BlobStorage" # Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2.
+    account_tier = "Standard"    # 
+    access_temp  = "Hot"
+    replication  = "LRS"
+  }
+]
+
+#- Fileshares using complex object syntax
+shares = [
+  {
+    name  = "volume01",
+    quota = "100"
+  },
+  {
+    name  = "volume02",
+    quota = "150"
+  },
+  {
+    name  = "volume03",
+    quota = "200"
+  }
+]
+
+
+###===================================================================================###
+###  vNet Configuration
+###===================================================================================###
+
+# Existing vNet and Resource Group for peering
+hub-rg   = ""
+hub-vnet = ""
+
+# vnet address space
+vnet_cidr = ["/20"]
+
+# Subnet setup - name/address spaces
+subnets = [
+  {
+    name  = "subnet00",
+    cidr = "/24"
+  },
+  {
+    name  = "subnet01",
+    cidr = "/24"
+  },
+  {
+    name  = "subnet02",
+    cidr = "/24"
+  }
+]
+
+# NSG Allow List - if you need an NSG
+whitelist_ips = [
+  "1.1.1.1",     # My ISP Address
+  "0.0.0.0/27",
+  "0.0.0.0/27"
+]
