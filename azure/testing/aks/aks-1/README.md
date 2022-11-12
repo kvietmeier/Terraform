@@ -15,7 +15,3 @@ The goal is to test applying kubelet, linux OS, and sysctl custom settings to no
 #### License
 
 This project is licensed under the Apache License - see the [LICENSE.md](LICENSE.md) file for details
-
-#### Acknowledgments
-
-* [Terraform AKS Module](https://registry.terraform.io/modules/Azure/aks/azurerm/latest)
