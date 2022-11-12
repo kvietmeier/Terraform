@@ -13,6 +13,18 @@
 
 /* 
   Put Usage Documentation here
+
+  Might need this due to bug - 
+  https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1234
+
+  Windows:
+  [Environment]::SetEnvironmentVariable("KUBE_CONFIG_PATH", "~/.kube/config")
+
+  Comment - 
+  "It appears to occur only when azurerm_kubernetes_cluster resource needs changes, 
+   so terraform thinks that auth data is stale and ignores "kubernetes" block in
+   helm's provider configuration and falls back to kubectl's config file"
+
 */
 
 # Cluster info
@@ -55,5 +67,31 @@ resource "helm_release" "cilium_cni" {
     value = "true"
   }
 
+  set {
+    name  = "global.kubeProxyReplacement"
+    value = "strict"
+  }
+
   depends_on = [ azurerm_kubernetes_cluster.k8s ]
+}
+
+#- Node Feature Discovery
+#helm install nfd/node-feature-discovery --set nameOverride=NFDinstance --set master.replicaCount=2 --namespace $NFD_NS --create-namespace
+
+resource "helm_release" "nfd" {
+  name       = "nodefeaturedisc"
+  namespace  = "node-feature-discovery"
+  repository = "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
+  chart      = "node-feature-discovery"
+  version    ="0.11.3"
+
+  set {
+    name  = "nameOverride"
+    value = "NFDinstance"
+  }
+  
+  set {
+    name  = "master.replicaCount"
+    value = "2"
+  }
 }

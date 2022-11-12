@@ -27,5 +27,10 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    # Skip checking for any Resources within the Resource Group and delete this using the Azure API directly
+    #resource_group {
+    #   prevent_deletion_if_contains_resources = false
+    #  }
+  }
 }

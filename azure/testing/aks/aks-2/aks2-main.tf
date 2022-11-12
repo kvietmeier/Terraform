@@ -140,11 +140,11 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   network_profile {
     network_plugin     = var.network_plugin
     #network_policy     = var.network_policy
+    pod_cidr           = var.net_profile_pod_cidr   # Comment if using azure plugin
     dns_service_ip     = var.net_profile_dns_service_ip
     outbound_type      = var.net_profile_outbound_type
     docker_bridge_cidr = var.net_profile_docker_bridge_cidr
     service_cidr       = var.net_profile_service_cidr
-    pod_cidr           = var.net_profile_pod_cidr
   }
 
   ###--- Misc

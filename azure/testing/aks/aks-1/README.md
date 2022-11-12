@@ -1,8 +1,10 @@
-## AKS Cluster
+## AKS Cluster - no longer being developed - see aks-2
 
 Create using local template/module following this example - [Create K8S cluster with tF amd and AKS](https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks)
 
 This project currently creates 2 node pools, a "default" pool and a "cpumanager" pool.
+
+***NO LONGER ACTIVELY DEVELOPED***
 
 ToDo:
 

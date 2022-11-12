@@ -255,6 +255,7 @@ variable "nodepools" {
         orchestrator_version          = string,
         node_count                    = number,
         vm_size                       = string,
+        os_sku                        = string,
         cpu_manager_policy            = string,
         topology_manager_policy       = string,
         transparent_huge_page_enabled = string,

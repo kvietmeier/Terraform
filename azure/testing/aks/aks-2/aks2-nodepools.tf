@@ -41,6 +41,7 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   orchestrator_version  = var.orchestrator_version
   node_count            = each.value.node_count
   vm_size               = each.value.vm_size
+  #os_sku                = each.value.os_sku
 
   ###--- Customize the nodepool
   # Need to add some metadata about capabilities
@@ -80,15 +81,19 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
     on_failure = continue
   }
 
-  ### Hang on to these as examples for now
-  /* 
+
+  /* ???
   provisioner "local-exec" {
-    # Make sure we are logged in to the Tenant
-    command = "az login --service-principal --username $aks_service_principal_app_id --password $aks_service_principal_client_secret --tenant $aks_tenant_id"
+    # Work around for Helm
+    command = "[Environment]::SetEnvironmentVariable("KUBE_CONFIG_PATH", "~/.kube/config")"
+    interpreter = [
+      "Powershell"
+    ]
     on_failure = continue
   }
   */
   
+  ### Hang on to these as examples for now
   /*  
   provisioner "local-exec" {
     # Add cilium to ther Helm repo

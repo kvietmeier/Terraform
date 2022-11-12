@@ -8,6 +8,8 @@
 #
 #  Terraform Module Code
 #  Purpose: Create an AKS cluster
+#  
+#           Original modulem, single nodepool, no Helm, Cilium.
 # 
 #  Files in Module:
 #    main.tf
@@ -206,43 +208,3 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
 #
 ### END main.tf
 #
-
-
-
-###===================================================================================###
-#### Things to add:
-/* 
-# Create a Proximity Placement Group
-resource "azurerm_proximity_placement_group" "proxplace_grp" {
-  location            = azurerm_resource_group.upf_rg.location
-  resource_group_name = azurerm_resource_group.upf_rg.name
-  name                = "ProximityPlacementGroup"
-}
-*/
-
-### I don't like the module - 
-/* 
-# Create the vnet
-resource "azurerm_virtual_network" "vnet" {
-  location             = azurerm_resource_group.upf_rg.location
-  resource_group_name  = azurerm_resource_group.upf_rg.name
-  name                 = "${var.resource_prefix}-network"
-  address_space        = var.vnet_cidr
-}
-
-# 2 Subnets - one for each NIC
-resource "azurerm_subnet" "subnets" {
-  resource_group_name  = azurerm_resource_group.upf_rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  
-  # Create 2 subnets based on number of CIDRs defined in .tfvars
-  count                = length(var.subnet_cidrs)
-  
-  # Named "subnet01, subnet02" etc....  (keep number under 10)
-  name                 = "subnet0${count.index}"
-  
-  # Using the address spaces in - subnet_cidrs
-  address_prefixes     = [element(var.subnet_cidrs, count.index)]
-}
-
-*/
