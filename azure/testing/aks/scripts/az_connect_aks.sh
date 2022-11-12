@@ -1,5 +1,5 @@
 #!/bin/sh
-# Arc Agent installation
+# Arc Kubernetes Agent installation
 
 # <--- Change the following environment variables according to your Azure service principal name --->
 echo "Exporting environment variables"
