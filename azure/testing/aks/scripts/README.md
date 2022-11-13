@@ -1,8 +1,6 @@
-## Utility scripts for working with AKS
+## Utility Scripts For Working with AKS
 
-
-
-#### Author/s
+### Author/s
 
 * **Karl Vietmeier**
 * **Misc Internet Sources - Acknowledged in the scripts**

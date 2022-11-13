@@ -151,6 +151,14 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   tags = {
     Environment = "Development"
   }
+  
+  # Enable SGX addon
+  # https://learn.microsoft.com/en-us/azure/confidential-computing/confidential-nodes-aks-overview
+  provisioner "local-exec" {
+    command = "az aks enable-addons --addon confcom --name ${azurerm_kubernetes_cluster.k8s.name} --resource-group ${azurerm_resource_group.aks-rg.name} --enable-sgxquotehelper"
+    on_failure = continue
+  }
+
 } ### End Cluster definition
 
 

@@ -77,10 +77,13 @@ resource "helm_release" "cilium_cni" {
 
 #- Node Feature Discovery
 #helm install nfd/node-feature-discovery --set nameOverride=NFDinstance --set master.replicaCount=2 --namespace $NFD_NS --create-namespace
-
+# 
+# Doesn't work - namespace needs to already exist - could it go in kube-system?
+# 
 resource "helm_release" "nfd" {
   name       = "nodefeaturedisc"
-  namespace  = "node-feature-discovery"
+  #namespace  = "node-feature-discovery"
+  namespace  = "kube-system"
   repository = "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
   chart      = "node-feature-discovery"
   version    ="0.11.3"
@@ -94,4 +97,4 @@ resource "helm_release" "nfd" {
     name  = "master.replicaCount"
     value = "2"
   }
-}
+} 
