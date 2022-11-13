@@ -1,5 +1,7 @@
 ## Utility Scripts For Working with AKS
 
+Misc scripts that might come in handy.
+
 ### Author/s
 
 * **Karl Vietmeier**
