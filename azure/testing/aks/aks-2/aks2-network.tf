@@ -31,7 +31,7 @@ resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.aks-rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   
-  # Create 2 subnets based on number of CIDRs defined in .tfvars
+  # Create subnets based on number of CIDRs defined in .tfvars
   # for_each = { for subnet in var.subnets : subnet.name => subnet.address_prefixes }
 
    for_each = { for each in var.subnets: each.name => each }

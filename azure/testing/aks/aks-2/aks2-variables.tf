@@ -144,52 +144,65 @@ variable "fs_file_max" {
 
 ###================================== Cluster Network Config ==================================###
 variable "network_plugin" {
-  description = "Network plugin to use for networking."
+  description = "Network plugin to use for networking - azure, kubenet, or none"
   type        = string
   default     = "kubenet"
 }
 
 variable "network_policy" {
-  description = "(Optional) Sets up network policy to be used with Azure CNI. Network policy allows us to control the traffic flow between pods. Currently supported values are calico and azure. Changing this forces a new resource to be created."
+  # Sets up network policy to be used with Azure CNI. Network policy allows us to control the traffic 
+  # flow between pods. Currently supported values are calico and azure.
+  # NOTE - When network_policy is set to azure, the network_plugin field can only be set to azure.
+  description = "(Optional)"
   type        = string
   default     = null
 }
 
 variable "net_profile_dns_service_ip" {
-  description = "(Optional) IP address within the Kubernetes service address range that will be used by cluster service discovery (kube-dns). Changing this forces a new resource to be created."
+  # IP address within the Kubernetes service address range that will be used by 
+  # cluster service discovery (kube-dns).
+  description = "(Optional)"
   type        = string
   default     = null
 }
 
 variable "net_profile_docker_bridge_cidr" {
-  description = "(Optional) IP address (in CIDR notation) used as the Docker bridge IP address on nodes. Changing this forces a new resource to be created."
+  # IP address (in CIDR notation) used as the Docker bridge IP address on nodes.
+  description = "(Optional)"
   type        = string
   default     = null
 }
-
+ 
 variable "net_profile_outbound_type" {
-  description = "(Optional) The outbound (egress) routing method which should be used for this Kubernetes Cluster. Possible values are loadBalancer and userDefinedRouting. Defaults to loadBalancer."
+  # The outbound (egress) routing method which should be used for this Kubernetes Cluster. 
+  # Possible values are loadBalancer and userDefinedRouting. Defaults to loadBalancer."
+  description = "(Optional)"
   type        = string
   default     = "loadBalancer"
 }
 
 variable "net_profile_pod_cidr" {
-  description = " (Optional) The CIDR to use for pod IP addresses. This field can only be set when network_plugin is set to kubenet. Changing this forces a new resource to be created."
+  # The CIDR to use for pod IP addresses. This field can only be set when 
+  # network_plugin is set to kubenet.
+  description = " (Optional)" 
   type        = string
   default     = null
 }
 
 variable "net_profile_service_cidr" {
-  description = "(Optional) The Network Range used by the Kubernetes service. Changing this forces a new resource to be created."
+  # The Network Range used by the Kubernetes service.
+  description = "(Optional)"
   type        = string
   default     = null
 }
 
 
-###==================================   Law Setup    ==================================###
+###===================================================================================###
+###                                     Law Setup                                     ###
 # Refer https://azure.microsoft.com/global-infrastructure/services/?products=monitor for log analytics available regions
 # Refer to: https://azure.microsoft.com/pricing/details/monitor/ for log analytics pricing 
 # Terraform values:" https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace
+###===================================================================================###
 
 variable log_analytics_workspace_name {
   default = "AKSLAW-Name"
@@ -243,9 +256,11 @@ variable "subnets" {
   )
 }
 
-# Nodepool configs - testing - use a complex object list for multiple nodepools
+###===================================================================================###
+# Nodepool configs  - use a complex object list for multiple nodepools
 # Using type = list(object({}))
 # Reference: for_each = { for each in var.nodepools : each.name => each }
+###===================================================================================###
 variable "nodepools" {
   description = "List of nodepools to create and the configuration for each."
   type = list(

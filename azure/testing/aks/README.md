@@ -22,8 +22,8 @@ Goals:
 
 * [Terraform Azure Provider:](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
 * [Terraform Kubernetes Provider:](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)
-* [kubernetes_cluster:](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster)
-* [kubernetes_cluster_node_pool:](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool)
+* [AzureRM - kubernetes_cluster:](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster)
+* [AzureRM - kubernetes_cluster_node_pool:](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool)
 * [Helm](https://registry.terraform.io/providers/hashicorp/helm/latest/docs)
 
 **CheatSheets:**  

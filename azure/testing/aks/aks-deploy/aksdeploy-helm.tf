@@ -27,26 +27,11 @@
 
 */
 
-# Cluster info
-data "azurerm_kubernetes_cluster" "credentials" {
-  name                = azurerm_kubernetes_cluster.k8s.name
-  resource_group_name = azurerm_resource_group.aks-rg.name
-}
 
 ###===================================================================================###
 #     Create Helm resources and add charts
 ###===================================================================================###
 
-###----- Enable Helm
-provider "helm" {
-  kubernetes {
-    host                   = data.azurerm_kubernetes_cluster.credentials.kube_config.0.host
-    client_certificate     = base64decode(data.azurerm_kubernetes_cluster.credentials.kube_config.0.client_certificate)
-    client_key             = base64decode(data.azurerm_kubernetes_cluster.credentials.kube_config.0.client_key)
-    cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.credentials.kube_config.0.cluster_ca_certificate)
-
-  }
-}
 
 ###----- Helm Charts
 #- Install Cilium CNI plugin
@@ -55,7 +40,7 @@ resource "helm_release" "cilium_cni" {
   namespace  = "kube-system"
   repository = "https://helm.cilium.io/"
   chart      = "cilium"
-  version    ="1.12.3"
+  version    = "1.12.3"
 
   set {
     name  = "aksbyocni.enabled"
@@ -72,7 +57,7 @@ resource "helm_release" "cilium_cni" {
     value = "strict"
   }
 
-  depends_on = [ azurerm_kubernetes_cluster.k8s ]
+  #depends_on = [ azurerm_kubernetes_cluster.k8s ]
 }
 
 #- Node Feature Discovery
