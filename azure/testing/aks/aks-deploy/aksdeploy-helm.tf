@@ -13,7 +13,9 @@
 
 /* 
   Put Usage Documentation here
-
+  https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs
+  
+  
   Might need this due to bug - 
   https://github.com/terraform-aws-modules/terraform-aws-eks/issues/1234
 
@@ -27,7 +29,23 @@
 
 */
 
+/* 
+resource "kubernetes_namespace" "nodefeaturedisc" {
+  metadata {
+    annotations = {
+      name = "nodefeaturedisc",
+      uuid = "89788oiukjkp"
+    }
 
+    labels = {
+      mylabel = "NFD"
+    }
+
+    name = "nfdisc"
+  }
+}
+
+ */
 ###===================================================================================###
 #     Create Helm resources and add charts
 ###===================================================================================###
@@ -63,20 +81,17 @@ resource "helm_release" "cilium_cni" {
 #- Node Feature Discovery
 #helm install nfd/node-feature-discovery --set nameOverride=NFDinstance --set master.replicaCount=2 --namespace $NFD_NS --create-namespace
 # 
-# Doesn't work - namespace needs to already exist - could it go in kube-system?
-# 
-/* 
 resource "helm_release" "nfd" {
   name       = "nodefeaturedisc"
-  #namespace  = "node-feature-discovery"
-  namespace  = "kube-system"
+  namespace  = "default"
+  #namespace  = "kube-system"
   repository = "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
   chart      = "node-feature-discovery"
   version    ="0.11.3"
 
   set {
     name  = "nameOverride"
-    value = "NFDinstance"
+    value = "nfdinstance"
   }
   
   set {
@@ -84,5 +99,3 @@ resource "helm_release" "nfd" {
     value = "2"
   }
 } 
-
- */

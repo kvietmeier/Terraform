@@ -9,7 +9,7 @@
 #  Output cluster information
 #
 ###===================================================================================###
-
+/* 
 
 output "aks_id" {
   value = azurerm_kubernetes_cluster.k8s.id
@@ -22,3 +22,4 @@ output "aks_fqdn" {
 output "aks_node_rg" {
   value = azurerm_kubernetes_cluster.k8s.node_resource_group
 }
+ */

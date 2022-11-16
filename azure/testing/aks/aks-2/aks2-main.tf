@@ -124,7 +124,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     orchestrator_version = var.orchestrator_version
     node_count           = var.default_node_count
     vm_size              = var.vm_size
-    
+    vnet_subnet_id       = azurerm_subnet.subnets["subnet00"].id 
   } # end default nodepool
 
   service_principal {

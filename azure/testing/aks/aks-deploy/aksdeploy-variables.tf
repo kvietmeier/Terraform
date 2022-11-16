@@ -16,6 +16,18 @@ variable "location" {
   default     = "westus2"
 }
 
+variable "resource_group_name" {
+  description = "AKS Cluster ResourceGroup"
+  default     = "TestRG"
+}
+
+variable "cluster_name" {
+  description = "AKS Cluster Name"
+  default     = "TestCluster"
+}
+
+
+
 ###===================================================================================###
 #   Retrieve existing resources in Azure
 ###===================================================================================###
@@ -23,12 +35,12 @@ variable "location" {
 # AKS Cluster info
 data "azurerm_kubernetes_cluster" "credentials" {
   name                = "${var.cluster_name}"
-  resource_group_name = azurerm_resource_group.aks-rg.name
+  resource_group_name = data.azurerm_resource_group.aks-rg.name
 }
 
 # Resource Group
 data "azurerm_resource_group" "aks-rg" {
-  name = "${var.aks-rg}"
+  name = "${var.resource_group_name}"
 }
 
 /* # Hub vNet to peer to

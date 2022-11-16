@@ -26,6 +26,7 @@ terraform {
   }
 }
 
+###----- Azure
 provider "azurerm" {
   features {
     # Skip checking for any Resources within the Resource Group and delete this using the Azure API directly
@@ -45,3 +46,17 @@ provider "helm" {
 
   }
 }
+
+###----- Kubernetes Provider
+/* K8S Provider
+provider "kubernetes" {
+  config_path    = "~/.kube/config"
+  config_context = "my-context"
+}
+
+resource "kubernetes_namespace" "example" {
+  metadata {
+    name = "my-first-namespace"
+  }
+}
+*/
