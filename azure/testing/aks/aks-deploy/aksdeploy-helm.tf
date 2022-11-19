@@ -29,10 +29,11 @@
 
 */
 
-/* 
 resource "kubernetes_namespace" "nodefeaturedisc" {
   metadata {
-    annotations = {
+    name = "nodefeature"
+    
+    /* annotations = {
       name = "nodefeaturedisc",
       uuid = "89788oiukjkp"
     }
@@ -40,12 +41,28 @@ resource "kubernetes_namespace" "nodefeaturedisc" {
     labels = {
       mylabel = "NFD"
     }
+   */
 
-    name = "nfdisc"
   }
 }
 
- */
+resource "kubernetes_namespace" "iac" {
+  metadata {
+    name = "iac-tool"
+  }
+}
+
+resource "kubernetes_namespace" "granulate" {
+  metadata {
+    name = "gprofiler"
+
+    annotations = {
+      name = "kubectl.kubernetes.io/last-applied-configuration"
+    }
+  }
+}
+
+
 ###===================================================================================###
 #     Create Helm resources and add charts
 ###===================================================================================###
@@ -74,8 +91,6 @@ resource "helm_release" "cilium_cni" {
     name  = "global.kubeProxyReplacement"
     value = "strict"
   }
-
-  #depends_on = [ azurerm_kubernetes_cluster.k8s ]
 }
 
 #- Node Feature Discovery
@@ -83,8 +98,26 @@ resource "helm_release" "cilium_cni" {
 # 
 resource "helm_release" "nfd" {
   name       = "nodefeaturedisc"
+  namespace  = "nodefeature"
+  repository = "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
+  chart      = "node-feature-discovery"
+  version    = "0.11.3"
+
+  set {
+    name  = "nameOverride"
+    value = "nfdinstance"
+  }
+  
+  set {
+    name  = "master.replicaCount"
+    value = "2"
+  }
+}
+
+/* 
+resource "helm_release" "opentelem" {
+  name       = "opentelemetry"
   namespace  = "default"
-  #namespace  = "kube-system"
   repository = "https://kubernetes-sigs.github.io/node-feature-discovery/charts"
   chart      = "node-feature-discovery"
   version    ="0.11.3"
@@ -98,4 +131,6 @@ resource "helm_release" "nfd" {
     name  = "master.replicaCount"
     value = "2"
   }
-} 
+}
+*/
+
