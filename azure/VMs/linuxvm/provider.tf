@@ -7,6 +7,8 @@
 #  Created By: Karl Vietmeier
 #
 #  Purpose: Configure Provider
+#
+#  Run "terraform init" when you make changes
 # 
 ###===================================================================================###
 
