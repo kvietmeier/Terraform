@@ -1,8 +1,8 @@
-## AKS Cluster-2 using Helm Charts and Multiple nodepools.
+## AKS Cluster-billrun
 
 Create using local template/module following this example - [Create Kubernetes cluster with TerraForm and AKS](https://docs.microsoft.com/en-us/azure/developer/terraform/create-k8s-cluster-with-tf-and-aks)
 
-This project currently creates 3 node pools, a "default" pool and 2 "cpumanager" pools with different VM sizes.
+This project currently creates 6 node pools, a "default" pool and pools with Intel, AMD, and Ampere based nodes.
 
 ToDo:
 

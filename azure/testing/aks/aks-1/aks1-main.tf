@@ -143,13 +143,15 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 
   ###--- Cluster network configuration
   network_profile {
-    network_plugin     = var.network_plugin
-    #network_policy     = var.network_policy
-    dns_service_ip     = var.net_profile_dns_service_ip
-    outbound_type      = var.net_profile_outbound_type
-    docker_bridge_cidr = var.net_profile_docker_bridge_cidr
-    service_cidr       = var.net_profile_service_cidr
-    pod_cidr           = var.net_profile_pod_cidr
+    #network_policy         = var.network_policy
+    network_plugin          = var.network_plugin
+    network_plugin_mode     = var.network_plugin_mode   # For Cilium
+    ebpf_data_plane         = var.ebpf_data_plane       # For Cilium
+    dns_service_ip          = var.net_profile_dns_service_ip
+    outbound_type           = var.net_profile_outbound_type
+    docker_bridge_cidr      = var.net_profile_docker_bridge_cidr
+    service_cidr            = var.net_profile_service_cidr
+    pod_cidr                = var.net_profile_pod_cidr
   }
 
   ###--- Misc

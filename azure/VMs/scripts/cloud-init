@@ -1,0 +1,127 @@
+#cloud-config
+# vim: syntax=yaml
+#
+###=============================================================================###
+# Bootstrap setup for a Linux server
+# 
+# cloud-init docs:
+#   https://cloudinit.readthedocs.io/en/latest/index.html 
+# 
+# Examples:
+#   https://cloudinit.readthedocs.io/en/latest/topics/examples.html
+#
+###=============================================================================###
+
+# Upgrade the instance on first boot
+# (ie run apt-get upgrade)
+package_upgrade: true
+
+# Install additional packages on first boot
+packages:
+  # DPDK Dependencies
+  - librdmacm-dev
+  - librdmacm1
+  - libnuma-dev
+  - libmnl-dev
+  - libpcap-dev
+  - autoconf 
+  - lib32z1
+  - meson
+  - pkg-config
+  - cmake
+  - python3-pyelftools
+  - python-pyelftools
+  - python3-pip
+  # Useful stuff you need
+  - libtool
+  - screen
+  - build-essential
+  - git
+  - tree
+  - dstat
+  - slurm
+  - psmisc
+  - net-tools
+  - nfs-common
+  - sysstat
+  - dnsutils
+  - numactl
+  - apt-file
+  # Need these to support apt over http
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent
+  - software-properties-common
+
+###--- Run commands once on first boot
+runcmd:
+  # Needed for DPDK
+  - [pip3, install, ninja]
+  - [pip3, install, meson]
+  #--- Clone and compile useful tools 
+  # Compile/install iperf3
+  - [git, clone, https://github.com/esnet/iperf.git]
+  - [cd, iperf]
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [/usr/sbin/ldconfig]
+  - [cd, ~]
+  # Compile/install sockperf
+  - [git, clone, https://github.com/mellanox/sockperf]
+  - [cd, sockperf]
+  - ['./autogen.sh']
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [cd, ~]
+  # Compile/install FIO
+  - [git, clone, https://github.com/axboe/fio.git]
+  - [cd, fio]
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [cd, ~]
+  # System cleanup
+  - [apt-get, clean, -yy]
+  - [apt-get, autoremove, -yy]
+  - [mandb, -c]
+  - [apt-file, update]
+
+###--- User Configuration
+users:
+  # Keep the original default user
+  - name: default
+    ssh-authorized-keys:
+    # Tools VM
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCg+Zwgb6lHJfAn7+29LJlnG28FjY5ShypmoiZlNZ1/YtlbsSDUfWs3Zhy+LGsfx8Fl6j/dU5e5j06A5monnM0sTr8rshqFbCMNfMtA1xQg37Uq5fELoJBaJI0h5vIZgoX5XREBWlcgoH1kha1q1Q8087fR+GLMIzZhigmOnzmLPsVU6SKwufibAJAW8G5hgSAlQd9X3BHcqhYX27cJfhQJ3pxD0wHqTI5lv3cyIyELDefIOtV+Y0HoaaqVzhrfy9JTNfEqtvghJZffGn7TPb2Nfo2D+SIxrtwpBO0IoZKum2j63qzfM7lRsv/kGFy0s2Q5g4DErytMJdqwukCUYoG+HyqwBVFp+JyEK1cO6W0rqSxNnBQtaKZhi2rwzOPfGtQZ7PohNaz2PV5NiaU4iJDczF478xZQwKd/SrTAgxCsqRyRrEImafECT9+qx7rlJ1GpFH4rDxz9f7Q+iRx3ys5mDo912GpysJke66gPlKxbWAhk34c/o+8QvgIFc45zVGs= azureuser@linuxtools
+    # X1 WSL instance
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC0Lm1VRw+QoaSlfvQCcyOee5tb7RJaMKRP+w2dKYnUFOmT0cfWlP2CCT4b8K8Q5Vz6VvQJ4k1H73L4dFoR2xcxITKKsOFUehF+zQDFEBCuYVTcFX5qEewAdAPWVS92Txlwm7dNWszkmeRxYqHyNnhh71xKLNh5Fq1aJlY8x9TnSMMLHjAjJvbRCfhzz10tjooB8l7UsX9SAdkceJO4ovi0VanJeG9RqOlIUQofpJsk7GCucka/lD8CAfIVlspt8scICvkGPjMqCfq9PbNyabM2e8Oo1tlxZdrk6a+gvybJrKMpfmlY+/qTQmBTKAzvlytajxeNnjdB+ZRAnTM6yXvzT/a/Ov0AJ6Tq8tBjrulbRXLqPw1Aa+gSvqeVgmztqtk/F0RK7mTfChYqsw2/t3Ib1zhHGiteYsGCWXGnyot/nm3Nd2J/gyR+wHvJO/jdeB/qgM2OfXQ+Tpeptk1sUSsmKyZDPpFmlZ/BQnpd6+b0/G7KR/BSGx7MKoTzjFsPBMs= ksvietme@ksvietme-mobl1
+    # X1 Windows
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC191SVNBDjAymcZcXf/ANjed+kNZt6r8Y53+NXkfLgTNWx+k9ofDW1DrlD+GBWakop7xNfUdXRSBMtXxSAdhY1sWCbHPafXlPVtZxFz8mvleqQW+I1oHWlG+Pv5fptsRpKG1CkRBno13JhB4BWEoA7GMxISktymKMgeuu7YMemlPh3DdoYiZrjVYwF775mAmHXlSJrozswWZzUJCT+nhabIeiks4/Y2ofQE5jtcJZeqOvG4WSZ/QUGhWpUm3f8giOFFIvnaqvP+tu3chHpMeVdoIt/Q0LApt2OcDM/GClrgKRpGT++q5TJjCn077Qlrvow5+FdLTJREffBpEuJbk9yr5GYh4htPRYnjRJ1ufPinxBzDPhl1vuydWbCGbbII4B620Qtp+mKLdivwZWn1eK/1PA08fQzhNojir/pjBGopiyycLWAnwvykIQjQooIVg4F79CHmNycQjKJHLHNVcaKuhY/kqAwtNsQK8wrPbj0P3fO9cZhyngF2xI2oOZKxAs= amr\ksvietme@ksvietme-mobl1
+  # Start adding additional users - with multple SSH public keys
+  - name: labuser
+    ssh-authorized-keys:
+    # Tools VM
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCg+Zwgb6lHJfAn7+29LJlnG28FjY5ShypmoiZlNZ1/YtlbsSDUfWs3Zhy+LGsfx8Fl6j/dU5e5j06A5monnM0sTr8rshqFbCMNfMtA1xQg37Uq5fELoJBaJI0h5vIZgoX5XREBWlcgoH1kha1q1Q8087fR+GLMIzZhigmOnzmLPsVU6SKwufibAJAW8G5hgSAlQd9X3BHcqhYX27cJfhQJ3pxD0wHqTI5lv3cyIyELDefIOtV+Y0HoaaqVzhrfy9JTNfEqtvghJZffGn7TPb2Nfo2D+SIxrtwpBO0IoZKum2j63qzfM7lRsv/kGFy0s2Q5g4DErytMJdqwukCUYoG+HyqwBVFp+JyEK1cO6W0rqSxNnBQtaKZhi2rwzOPfGtQZ7PohNaz2PV5NiaU4iJDczF478xZQwKd/SrTAgxCsqRyRrEImafECT9+qx7rlJ1GpFH4rDxz9f7Q+iRx3ys5mDo912GpysJke66gPlKxbWAhk34c/o+8QvgIFc45zVGs= azureuser@linuxtools
+    # X1 WSL instance
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC0Lm1VRw+QoaSlfvQCcyOee5tb7RJaMKRP+w2dKYnUFOmT0cfWlP2CCT4b8K8Q5Vz6VvQJ4k1H73L4dFoR2xcxITKKsOFUehF+zQDFEBCuYVTcFX5qEewAdAPWVS92Txlwm7dNWszkmeRxYqHyNnhh71xKLNh5Fq1aJlY8x9TnSMMLHjAjJvbRCfhzz10tjooB8l7UsX9SAdkceJO4ovi0VanJeG9RqOlIUQofpJsk7GCucka/lD8CAfIVlspt8scICvkGPjMqCfq9PbNyabM2e8Oo1tlxZdrk6a+gvybJrKMpfmlY+/qTQmBTKAzvlytajxeNnjdB+ZRAnTM6yXvzT/a/Ov0AJ6Tq8tBjrulbRXLqPw1Aa+gSvqeVgmztqtk/F0RK7mTfChYqsw2/t3Ib1zhHGiteYsGCWXGnyot/nm3Nd2J/gyR+wHvJO/jdeB/qgM2OfXQ+Tpeptk1sUSsmKyZDPpFmlZ/BQnpd6+b0/G7KR/BSGx7MKoTzjFsPBMs= ksvietme@ksvietme-mobl1
+    # X1 Windows
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC191SVNBDjAymcZcXf/ANjed+kNZt6r8Y53+NXkfLgTNWx+k9ofDW1DrlD+GBWakop7xNfUdXRSBMtXxSAdhY1sWCbHPafXlPVtZxFz8mvleqQW+I1oHWlG+Pv5fptsRpKG1CkRBno13JhB4BWEoA7GMxISktymKMgeuu7YMemlPh3DdoYiZrjVYwF775mAmHXlSJrozswWZzUJCT+nhabIeiks4/Y2ofQE5jtcJZeqOvG4WSZ/QUGhWpUm3f8giOFFIvnaqvP+tu3chHpMeVdoIt/Q0LApt2OcDM/GClrgKRpGT++q5TJjCn077Qlrvow5+FdLTJREffBpEuJbk9yr5GYh4htPRYnjRJ1ufPinxBzDPhl1vuydWbCGbbII4B620Qtp+mKLdivwZWn1eK/1PA08fQzhNojir/pjBGopiyycLWAnwvykIQjQooIVg4F79CHmNycQjKJHLHNVcaKuhY/kqAwtNsQK8wrPbj0P3fO9cZhyngF2xI2oOZKxAs= amr\ksvietme@ksvietme-mobl1
+    # To Add - Petar
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+
+
+###--- Misc system configuration
+timezone: "America/Los_Angeles"
+
+# Create empty files on the system
+write_files:
+- path: /root/CONFIGURED_BY_CLOUD_INIT
+
+
+
+###--- End File

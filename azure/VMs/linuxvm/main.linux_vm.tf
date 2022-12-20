@@ -18,20 +18,9 @@
 ###===================================================================================###
 
 ###===============================#===================================================###
-###--- Configure the Azure Provider
+###--- Configure the Azure Provider in provider.tf
 ###===================================================================================###
-terraform {
-  required_providers {
-    azurerm = {
-      source = "hashicorp/azurerm"
-      version = "~>2.0"
-    }
-  }
-}
 
-provider "azurerm" {
-  features {}
-}
 
 ###===================================================================================###
 #     Start creating infrastructure resources
