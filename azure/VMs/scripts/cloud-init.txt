@@ -2,7 +2,7 @@
 # vim: syntax=yaml
 #
 ###=============================================================================###
-# Bootstrap setup for a Linux server
+# Bootstrap setup for an Ubuntu Linux server
 # 
 # cloud-init docs:
 #   https://cloudinit.readthedocs.io/en/latest/index.html 
