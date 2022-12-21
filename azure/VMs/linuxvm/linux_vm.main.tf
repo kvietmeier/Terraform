@@ -26,7 +26,7 @@
 #     Start creating infrastructure resources
 ###===================================================================================###
 
-resource "azurerm_resource_group" "terrarg" {
+resource "azurerm_resource_group" "linuxvm_rg" {
   name     = "${var.prefix}-rg"
   location = var.region
 }
@@ -34,7 +34,7 @@ resource "azurerm_resource_group" "terrarg" {
 # Enable auto-shutdown
 # VM ID is a little tricky to sort out.
 resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-  location              = azurerm_resource_group.terrarg.location
+  location              = azurerm_resource_group.linuxvm_rg.location
   virtual_machine_id    = azurerm_linux_virtual_machine.linuxvm01.id
   enabled               = true
   daily_recurrence_time = "${var.shutdown_time}"
@@ -76,21 +76,21 @@ data "template_cloudinit_config" "config" {
 resource "azurerm_virtual_network" "terranet" {
   name                = "${var.prefix}-network"
   address_space       = "${var.vnet_cidr}"
-  location            = azurerm_resource_group.terrarg.location
-  resource_group_name = azurerm_resource_group.terrarg.name
+  location            = azurerm_resource_group.linuxvm_rg.location
+  resource_group_name = azurerm_resource_group.linuxvm_rg.name
 }
 
 resource "azurerm_subnet" "subnet01" {
   name                 = "subnet01"
   address_prefixes     = "${var.subnet01_cidr}"
-  resource_group_name  = azurerm_resource_group.terrarg.name
+  resource_group_name  = azurerm_resource_group.linuxvm_rg.name
   virtual_network_name = azurerm_virtual_network.terranet.name
 }
 
 resource "azurerm_subnet" "subnet02" {
   name                 = "subnet02"
   address_prefixes     = "${var.subnet02_cidr}"
-  resource_group_name  = azurerm_resource_group.terrarg.name
+  resource_group_name  = azurerm_resource_group.linuxvm_rg.name
   virtual_network_name = azurerm_virtual_network.terranet.name
 }
 
@@ -98,16 +98,16 @@ resource "azurerm_public_ip" "pip" {
   name                = "${var.vm_name}-pip"
   domain_name_label   = "${var.vm_name}"
   allocation_method   = "Dynamic"
-  location            = azurerm_resource_group.terrarg.location
-  resource_group_name = azurerm_resource_group.terrarg.name
+  location            = azurerm_resource_group.linuxvm_rg.location
+  resource_group_name = azurerm_resource_group.linuxvm_rg.name
 }
 
 ###- Create 2 NICs, one with a public IP
 resource "azurerm_network_interface" "primary" {
   name                          = "${var.vm_name}-nic1"
   enable_accelerated_networking = "false"
-  location                      = azurerm_resource_group.terrarg.location
-  resource_group_name           = azurerm_resource_group.terrarg.name
+  location                      = azurerm_resource_group.linuxvm_rg.location
+  resource_group_name           = azurerm_resource_group.linuxvm_rg.name
 
   ip_configuration {
     name                          = "primary"
@@ -121,8 +121,8 @@ resource "azurerm_network_interface" "primary" {
 resource "azurerm_network_interface" "internal" {
   name                          = "${var.vm_name}-nic2"
   enable_accelerated_networking = "true"
-  location                      = azurerm_resource_group.terrarg.location
-  resource_group_name           = azurerm_resource_group.terrarg.name
+  location                      = azurerm_resource_group.linuxvm_rg.location
+  resource_group_name           = azurerm_resource_group.linuxvm_rg.name
 
   ip_configuration {
     name                          = "internal"
@@ -136,8 +136,8 @@ resource "azurerm_network_interface" "internal" {
 ###- Create an NSG allowing SSH from my IP
 resource "azurerm_network_security_group" "ssh" {
   name                = "AllowInbound"
-  location            = azurerm_resource_group.terrarg.location
-  resource_group_name = azurerm_resource_group.terrarg.name
+  location            = azurerm_resource_group.linuxvm_rg.location
+  resource_group_name = azurerm_resource_group.linuxvm_rg.name
   security_rule {
     access                       = "Allow"
     direction                    = "Inbound"
@@ -176,7 +176,7 @@ resource "azurerm_network_interface_security_group_association" "mapnsg" {
 resource "random_id" "randomId" {
     keepers = {
         # Generate a new ID only when a new resource group is defined
-        resource_group = azurerm_resource_group.terrarg.name
+        resource_group = azurerm_resource_group.linuxvm_rg.name
     }
 
     byte_length = 8
@@ -187,15 +187,15 @@ resource "azurerm_storage_account" "diagstorageaccount" {
     name                     = "diag${random_id.randomId.hex}"
     account_tier             = "Standard"
     account_replication_type = "LRS"
-    resource_group_name      = azurerm_resource_group.terrarg.name
-    location                 = azurerm_resource_group.terrarg.location
+    resource_group_name      = azurerm_resource_group.linuxvm_rg.name
+    location                 = azurerm_resource_group.linuxvm_rg.location
 }
 
 
 ###- Put it all together and build the VM
 resource "azurerm_linux_virtual_machine" "linuxvm01" {
-  location                        = azurerm_resource_group.terrarg.location
-  resource_group_name             = azurerm_resource_group.terrarg.name
+  location                        = azurerm_resource_group.linuxvm_rg.location
+  resource_group_name             = azurerm_resource_group.linuxvm_rg.name
   name                            = "${var.vm_name}"
   size                            = "${var.vm_size}"
   disable_password_authentication = true
