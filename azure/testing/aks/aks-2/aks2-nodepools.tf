@@ -38,10 +38,10 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   proximity_placement_group_id = azurerm_proximity_placement_group.aks_prox_grp.id
   
   # Set in *.tfvars
-  orchestrator_version  = var.orchestrator_version
-  node_count            = each.value.node_count
-  vm_size               = each.value.vm_size
-  #os_sku                = each.value.os_sku
+  orchestrator_version = var.orchestrator_version
+  node_count           = each.value.node_count
+  vm_size              = each.value.vm_size
+  os_sku               = each.value.os_sku
 
   ###--- Customize the nodepool
   # Need to add some metadata about capabilities

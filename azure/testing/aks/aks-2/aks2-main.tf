@@ -140,7 +140,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   network_profile {
     network_plugin     = var.network_plugin
     network_policy     = var.network_policy
-    #pod_cidr           = var.net_profile_pod_cidr   # Comment if using azure plugin
+    pod_cidr           = var.net_profile_pod_cidr   # Comment if using azure plugin
     dns_service_ip     = var.net_profile_dns_service_ip
     outbound_type      = var.net_profile_outbound_type
     docker_bridge_cidr = var.net_profile_docker_bridge_cidr
@@ -154,10 +154,10 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   
   # Enable SGX addon
   # https://learn.microsoft.com/en-us/azure/confidential-computing/confidential-nodes-aks-overview
-  #provisioner "local-exec" {
-  #  command = "az aks enable-addons --addon confcom --name ${azurerm_kubernetes_cluster.k8s.name} --resource-group ${azurerm_resource_group.aks-rg.name} --enable-sgxquotehelper"
-  #  on_failure = continue
-  #}
+  provisioner "local-exec" {
+    command = "az aks enable-addons --addon confcom --name ${azurerm_kubernetes_cluster.k8s.name} --resource-group ${azurerm_resource_group.aks-rg.name} --enable-sgxquotehelper"
+    on_failure = continue
+  }
 
 } ### End Cluster definition
 
