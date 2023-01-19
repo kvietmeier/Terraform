@@ -8,6 +8,23 @@ Terraform projects. Only the Azure folder is currently under active development.
 
 #### Notes
 
+Directories
+
+```text
+├── azure
+│   │── AKS          (AKS cluster projects)
+│   │── CoreInfra    (Production modules to manage my infrastructure)
+│   │── VMs          (What it says)
+│   │── samples      (Non-functional code samples)
+│   │── secrets      (in .gitignore)
+│   │── templates    (templates for new projects)
+│   │── testing      (Primary working Directory)
+│   |── README.md
+├── LICENSE.md
+└── README.md
+```
+
+
 **Terraform commands:**  
 A good cheat sheet I ran across  
 <https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet>

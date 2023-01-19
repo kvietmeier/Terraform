@@ -1,6 +1,6 @@
-## AKS Cluster Deploymemt Code
+## AKS Cluster Deployment Code
 
-**----NOT TESTED----**
+**----  Working  ----**
 
 To install Cilium with Helm charts you can use the Helm provider. Look at aks2-helm.tf for the full code.
 

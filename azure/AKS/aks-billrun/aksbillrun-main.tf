@@ -3,16 +3,25 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  main.tf
-#  Created By: Karl Vietmeier
+#   File:  main.tf
+#   Created By: Karl Vietmeier
 #
-#  Terraform Module Code
-#  Purpose: Create an AKS cluster
+#   Terraform Module Code
+#   Purpose: Create an AKS cluster
 # 
-#  Files in Module:
-#    main.tf
-#    variables.tf
-#    terraform.tfvars
+#   Files in Module:
+#    aksbillrun-main.tf
+#    aksbillrun-network.tf
+#    aksbillrun-nodepools.tf
+#    aksbillrun-outputs.tf
+#    aksbillrun-providers.tf
+#    aksbillrun-variables.tf
+#    aksbillrun-terraform.tfvars
+#
+#   terraform apply --auto-approve -var-file=".\aksbillrun-terraform.tfvars"
+#   terraform destroy --auto-approve -var-file=".\aksbillrun-terraform.tfvars"
+#   terraform plan -var-file=".\linux.vm.variables.tfvars"
+#
 #
 ###===================================================================================###
 
@@ -35,9 +44,10 @@
   PowerShell:
   Import-AzAksCredential -ResourceGroupName AKS-Testing -Name TestCluster
 
-  - Create/destroy
-  terraform apply --auto-approve -var-file=".\aks2-terraform.tfvars"
-  terraform destroy --auto-approve -var-file=".\aks2-terraform.tfvars"
+  - Create/destroy/plan
+  terraform apply --auto-approve --var-file=".\aksbillrun-terraform.tfvars"
+  terraform destroy --auto-approve --var-file=".\aksbillrun-terraform.tfvars"
+  terraform plan -var-file=".\aksbillrun-terraform.tfvars"
 
 */
 
@@ -123,7 +133,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     name                 = var.default_pool_name
     orchestrator_version = var.orchestrator_version
     node_count           = var.default_node_count
-    vm_size              = var.vm_size
+    vm_size              = var.default_vm_size
     vnet_subnet_id       = azurerm_subnet.subnets["subnet00"].id 
   } # end default nodepool
 
@@ -140,7 +150,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   network_profile {
     network_plugin     = var.network_plugin
     network_policy     = var.network_policy
-    pod_cidr           = var.net_profile_pod_cidr   # Comment if using azure plugin
+    #pod_cidr           = var.net_profile_pod_cidr   # Comment if using azure plugin
     dns_service_ip     = var.net_profile_dns_service_ip
     outbound_type      = var.net_profile_outbound_type
     docker_bridge_cidr = var.net_profile_docker_bridge_cidr
@@ -154,10 +164,10 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   
   # Enable SGX addon
   # https://learn.microsoft.com/en-us/azure/confidential-computing/confidential-nodes-aks-overview
-  provisioner "local-exec" {
-    command = "az aks enable-addons --addon confcom --name ${azurerm_kubernetes_cluster.k8s.name} --resource-group ${azurerm_resource_group.aks-rg.name} --enable-sgxquotehelper"
-    on_failure = continue
-  }
+  #provisioner "local-exec" {
+  #  command = "az aks enable-addons --addon confcom --name ${azurerm_kubernetes_cluster.k8s.name} --resource-group ${azurerm_resource_group.aks-rg.name} --enable-sgxquotehelper"
+  #  on_failure = continue
+  #}
 
 } ### End Cluster definition
 
