@@ -35,7 +35,7 @@ resource "azurerm_resource_group" "linuxvm_rg" {
 ###--- Setup a cloud-init configuration file - need both parts
 # refer to the source yaml file
 data "template_file" "system_setup" {
-  template = file("../secrets/cloud-init")
+  template = file("../scripts/cloud-init")
 }
 
 # Render a multi-part cloud-init config making use of the file
