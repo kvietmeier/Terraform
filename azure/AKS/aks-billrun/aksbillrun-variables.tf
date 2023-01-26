@@ -130,6 +130,7 @@ variable "nodepools" {
         name                          = string,
         node_count                    = number,
         vm_size                       = string,
+        os_sku                        = string
       }
     )
   )

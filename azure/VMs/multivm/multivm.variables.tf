@@ -28,27 +28,23 @@ variable "node_count" { type = number }
 ###===================================================================================###
 
 # IP Ranges
-variable "vnet_cidr" {type = list(string)}
-variable "subnet_cidrs" {type = list(string)}
-variable "subnet1_ips" {type = list(string)}
-variable "subnet2_ips" {type = list(string)}
+variable "vnet_cidr" { type = list(string) }
+variable "subnet_cidrs" { type = list(string) }
+variable "subnet1_ips" { type = list(string) }
+variable "subnet2_ips" { type = list(string) }
 
 # Allow list for NSG
-variable whitelist_ips {
+variable "whitelist_ips" {
   description = "A list of IP CIDR ranges to allow as clients. Do not use Azure tags like `Internet`."
   type        = list(string)
 }
 
 # NIC Parameters
-variable "nic_labels" {type = list(string)}
-variable "subnet_name" {type = list(string)}
-variable "ip_alloc" {type = list(string)}
-variable "sriov" {type = list(string)}
 
 
 # Hub resources for vnet peering
-variable "hub-rg" {type = string}
-variable "hub-vnet" {type = string}
+variable "hub-rg" { type = string }
+variable "hub-vnet" { type = string }
 
 
 ###==================================================================================###
@@ -71,6 +67,7 @@ variable "timezone" { type = string }
 # User Info
 variable "username" { type = string }
 variable "password" { type = string }
+variable "ssh_key" { type = string }
 
 
 ###==================================================================================###
@@ -87,13 +84,13 @@ variable "Environment" { type = string }
 ### Right now we just need the Hub vNet to peer to.
 # Resource Groups
 data "azurerm_resource_group" "hub-rg" {
-  name = "${var.hub-rg}"
+  name = var.hub-rg
 }
 
 # Hub vNet to peer to
 data "azurerm_virtual_network" "hub-vnet" {
   resource_group_name = data.azurerm_resource_group.hub-rg.name
-  name = "${var.hub-vnet}"
+  name                = var.hub-vnet
 }
 
 # Refer to them in maint.tf using: 

@@ -41,7 +41,7 @@ variable "resource_group_name_prefix" {
 
 
 ###============================   Cluster Configuration  =============================###
-variable cluster_name {
+variable "cluster_name" {
   default = "k8stest"
   type    = string
 }
@@ -192,17 +192,17 @@ variable "net_profile_service_cidr" {
 # Refer to: https://azure.microsoft.com/pricing/details/monitor/ for log analytics pricing 
 # Terraform values:" https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace
 
-variable log_analytics_workspace_name {
+variable "log_analytics_workspace_name" {
   default = "AKSLAW-Name"
   type    = string
 }
 
-variable log_analytics_workspace_location {
+variable "log_analytics_workspace_location" {
   default = "westus2"
   type    = string
 }
 
-variable log_analytics_workspace_sku {
+variable "log_analytics_workspace_sku" {
   default = "PerGB2018"
   type    = string
 }
@@ -215,7 +215,7 @@ variable "log_retention_in_days" {
 
 
 ###==============================  Secrets - in tfvars  ===============================###
-variable "aks_service_principal_app_id" { 
+variable "aks_service_principal_app_id" {
   description = "The Client ID for the Service Principal to use for this AKS Cluster"
   type        = string
 }

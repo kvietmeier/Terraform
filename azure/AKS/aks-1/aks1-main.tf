@@ -72,29 +72,29 @@ module "network" {
 ###===================================================================================###
 
 resource "random_id" "log_analytics_workspace_name_suffix" {
-    byte_length = 8
+  byte_length = 8
 }
 
 resource "azurerm_log_analytics_workspace" "akslaw" {
-    # The WorkSpace name has to be unique across the whole of azure, not just the current subscription/tenant.
-    name                = "${var.log_analytics_workspace_name}-${random_id.log_analytics_workspace_name_suffix.dec}"
-    resource_group_name = azurerm_resource_group.aks-rg.name
-    location            = azurerm_resource_group.aks-rg.location
-    sku                 = var.log_analytics_workspace_sku
-    retention_in_days   = var.log_retention_in_days
+  # The WorkSpace name has to be unique across the whole of azure, not just the current subscription/tenant.
+  name                = "${var.log_analytics_workspace_name}-${random_id.log_analytics_workspace_name_suffix.dec}"
+  resource_group_name = azurerm_resource_group.aks-rg.name
+  location            = azurerm_resource_group.aks-rg.location
+  sku                 = var.log_analytics_workspace_sku
+  retention_in_days   = var.log_retention_in_days
 }
 
 resource "azurerm_log_analytics_solution" "akslaw" {
-    solution_name         = "ContainerInsights"
-    resource_group_name   = azurerm_resource_group.aks-rg.name
-    location              = azurerm_resource_group.aks-rg.location
-    workspace_resource_id = azurerm_log_analytics_workspace.akslaw.id
-    workspace_name        = azurerm_log_analytics_workspace.akslaw.name
+  solution_name         = "ContainerInsights"
+  resource_group_name   = azurerm_resource_group.aks-rg.name
+  location              = azurerm_resource_group.aks-rg.location
+  workspace_resource_id = azurerm_log_analytics_workspace.akslaw.id
+  workspace_name        = azurerm_log_analytics_workspace.akslaw.name
 
-    plan {
-        publisher = "Microsoft"
-        product   = "OMSGallery/ContainerInsights"
-    }
+  plan {
+    publisher = "Microsoft"
+    product   = "OMSGallery/ContainerInsights"
+  }
 } ###--- End LAW Setup
 
 
@@ -107,12 +107,12 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   location            = azurerm_resource_group.aks-rg.location
   resource_group_name = azurerm_resource_group.aks-rg.name
   dns_prefix          = var.dns_prefix
-  
-  # Versions
-  kubernetes_version  = var.kubernetes_version
-  sku_tier            = var.sku_tier
 
-  
+  # Versions
+  kubernetes_version = var.kubernetes_version
+  sku_tier           = var.sku_tier
+
+
   linux_profile {
     admin_username = var.admin_username
 
@@ -129,7 +129,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     orchestrator_version = var.orchestrator_version
     node_count           = var.default_node_count
     vm_size              = var.vm_size
-    
+
   } # end default nodepool
 
   service_principal {
@@ -144,14 +144,14 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   ###--- Cluster network configuration
   network_profile {
     #network_policy         = var.network_policy
-    network_plugin          = var.network_plugin
-    network_plugin_mode     = var.network_plugin_mode   # For Cilium
-    ebpf_data_plane         = var.ebpf_data_plane       # For Cilium
-    dns_service_ip          = var.net_profile_dns_service_ip
-    outbound_type           = var.net_profile_outbound_type
-    docker_bridge_cidr      = var.net_profile_docker_bridge_cidr
-    service_cidr            = var.net_profile_service_cidr
-    pod_cidr                = var.net_profile_pod_cidr
+    network_plugin      = var.network_plugin
+    network_plugin_mode = var.network_plugin_mode # For Cilium
+    ebpf_data_plane     = var.ebpf_data_plane     # For Cilium
+    dns_service_ip      = var.net_profile_dns_service_ip
+    outbound_type       = var.net_profile_outbound_type
+    docker_bridge_cidr  = var.net_profile_docker_bridge_cidr
+    service_cidr        = var.net_profile_service_cidr
+    pod_cidr            = var.net_profile_pod_cidr
   }
 
   ###--- Misc
@@ -166,33 +166,33 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 #  https://docs.microsoft.com/en-us/azure/aks/custom-node-configuration
 #  https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
 ###===================================================================================###
-resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
+resource "azurerm_kubernetes_cluster_node_pool" "cpu_manager" {
   # Should probably make these variables
-  name                  = "cpumanager"
+  name = "cpumanager"
 
   # ID of cluster to add nodepool to
   kubernetes_cluster_id = azurerm_kubernetes_cluster.k8s.id
-  
+
   # Set in *.tfvars
-  orchestrator_version  = var.orchestrator_version
-  node_count            = var.node_count
-  vm_size               = var.vm_size
+  orchestrator_version = var.orchestrator_version
+  node_count           = var.node_count
+  vm_size              = var.vm_size
 
   ###--- Customize the nodepool
-  
+
   # Need to add some metadata about capabilities
-  node_labels           = {
+  node_labels = {
     "iac-tool/node_profile"                  = "compute_intensive"
     "iac-tool/kubelet_cpu_manager_policy"    = "static"
-    "iac-tool/tf_kubelet_cpu_manager_policy" = "user_data"  # tf_config
-  } 
-  
+    "iac-tool/tf_kubelet_cpu_manager_policy" = "user_data" # tf_config
+  }
+
   # Configure kubelet properties
   kubelet_config {
-    cpu_manager_policy       = var.cpu_manager_policy
-    topology_manager_policy  = var.topology_manager_policy
+    cpu_manager_policy      = var.cpu_manager_policy
+    topology_manager_policy = var.topology_manager_policy
   }
-  
+
   # Linux OS config
   linux_os_config {
     transparent_huge_page_enabled = var.transparent_huge_page_enabled

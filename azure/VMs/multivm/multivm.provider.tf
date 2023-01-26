@@ -3,25 +3,19 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  provider.tf
+#  File:  multivm.provider.tf
 #  Created By: Karl Vietmeier
 #
-#  Purpose: Configure Provider
+#  Purpose:  Configure the Azure Provider
 # 
 ###===================================================================================###
 
-# Configure the Microsoft Azure Provider
-terraform {
-  required_version = ">=1.0"
 
+terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~>3.0"
+      version = "~>2.0"
     }
   }
 }
@@ -29,3 +23,4 @@ terraform {
 provider "azurerm" {
   features {}
 }
+

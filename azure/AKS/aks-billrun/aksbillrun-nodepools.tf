@@ -33,12 +33,12 @@ resource azurerm_kubernetes_cluster_node_pool "cpu_manager" {
   name        = each.value.name
   node_count  = each.value.node_count
   vm_size     = each.value.vm_size
+  os_sku      = each.value.os_sku
   
   # Set for all nodepools the same
   kubernetes_cluster_id        = azurerm_kubernetes_cluster.k8s.id
   proximity_placement_group_id = azurerm_proximity_placement_group.aks_prox_grp.id
   orchestrator_version         = var.orchestrator_version
-  os_sku                       = var.os_sku
   os_disk_size_gb              = var.os_disk_size_gb
   
 
