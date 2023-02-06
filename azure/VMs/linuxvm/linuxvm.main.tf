@@ -4,7 +4,6 @@
 #
 #  Terraform Template Code
 #  Purpose: Create a single Linux VM
-#           Broken right now
 #
 #  Files in Module:
 #    linux.vm.main.tf
@@ -12,15 +11,19 @@
 #    linux.vm.variables.tfvars
 #    linux.vm.variables.tfvars.txt
 #
-#  Usage:
-#  terraform apply --auto-approve -var-file=".\linux.vm.variables.tfvars"
-#  terraform destroy --auto-approve -var-file=".\linux.vm.variables.tfvars"
-#
-###===================================================================================###
+/* 
+  Usage:
+  terraform apply --auto-approve -var-file=".\linux.vm.variables.tfvars"
+  terraform destroy --auto-approve -var-file=".\linux.vm.variables.tfvars"
 
-###===============================#===================================================###
+  https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine
+  https://github.com/hashicorp/terraform-provider-azurerm/tree/main/examples/virtual-machines/linux
+
+  * Hyperthreading is disabled with a tag (needs to open Support Ticket to enable feature)
+
+
+*/
 ###--- Configure the Azure Provider in provider.tf
-###===================================================================================###
 
 
 ###===================================================================================###
@@ -58,7 +61,13 @@ data "template_cloudinit_config" "config" {
 
 ###===================  VM Configuration Elements ====================###`
 
-###-- Need boot diags for serial console
+### - Storage Account
+/* 
+ Need boot diags for serial console which requires a storage account
+ We will create an SA for the VM so we clean up after and not clutter up
+ an existing SA.    
+*/
+
 # Generate random text for a unique storage account name
 resource "random_id" "randomId" {
   keepers = {
@@ -79,7 +88,9 @@ resource "azurerm_storage_account" "diagstorageaccount" {
 }
 
 
-###- Put it all together and build the VM
+###
+###--- Put it all together and build the VM
+###
 resource "azurerm_linux_virtual_machine" "linuxvm01" {
   location                        = azurerm_resource_group.linuxvm_rg.location
   resource_group_name             = azurerm_resource_group.linuxvm_rg.name
@@ -104,7 +115,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
   # I keep my keys in a "global" azure folder - TBD: use Azure Keyvault
   admin_ssh_key {
     username   = var.username
-    public_key = file("../../secrets/id_rsa-X1Carbon.pub")
+    public_key = file("../../secrets/id_rsa-TestMultiple.pub")
   }
 
   # They changed the offer and sku for 20.04 - careful
@@ -126,6 +137,31 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
     storage_account_uri = azurerm_storage_account.diagstorageaccount.primary_blob_endpoint
   }
 
+  tags = {
+    # Enable/Disable hyperthreading (requires support ticket to enable feature)
+    "platformsettings.host_environment.disablehyperthreading" = "false"
+  }
+
+  /* # Get some info from VM
+  provisioner "remote-exec" {
+    connection {
+      type     = "ssh"
+      user     = var.username
+      public_key = file("../../secrets/id_rsa-TestMultiple.pub")
+    }
+
+    inline = [
+      "lscpu | grep -i model",
+
+      "sleep 5",
+
+      "cpuid -1 | egrep -i 'vbmi|gfni|vaes|mulqd|bitalg'"
+    ]
+  }  
+  */
+
+
+
 }
 ###--- End VM Creation
 
@@ -144,6 +180,23 @@ resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
   }
 }
 
+/* https://github.com/hashicorp/terraform-provider-aws/issues/10977
+resource "null_resource" "testinstance" {
+  depends_on = [aws_eip.ip-test-env, aws_instance.testinstance]
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      host        = aws_eip.ip-test-env.public_ip
+      private_key = file(var.private_key)
+      user        = var.ansible_user
+      timeout = "30"
+    }
+    inline     = ["sudo apt-get -qq install python -y"]
+    on_failure = continue
+  }
+}
+
+*/
 
 ###--- Outputs
 # What is the public IP?

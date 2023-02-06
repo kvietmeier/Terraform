@@ -6,11 +6,27 @@
 #  File:  linuxvm.network.tf
 #  Created By: Karl Vietmeier
 #
-#  Purpose: Configure networking for VMs
+#  Purpose: Configure networking for VMs  
 # 
 ###===================================================================================###
 
-/* Put Usage Documentation here */
+/* Put Usage Documentation here
+  * Subnet configuration is stored in an object list:
+    referencing: subnet_id = azurerm_subnet.subnets["name"].id
+
+  This config creates 2 vNICs
+    * external w/publicIP
+    * internal w/acc networking (all v5 instances use ACCNet by default now)
+  
+  Creates an NSG
+  peers the vnet to the hub vnet
+
+  ToDo:
+  * Use existing NSG based on region
+  * Use static IPs so they can be in Ansible inventory
+  * create subnets from cidr function based on vnet
+
+*/
 
 ###===================================================================================###
 #     Create Network Resources
@@ -30,7 +46,7 @@ resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.linuxvm_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
 
-  # Create subnets based on number of CIDRs defined in .tfvars
+  # Create subnets by looping through the map defined in .tfvars
   # for_each = { for subnet in var.subnets : subnet.name => subnet.address_prefixes }
 
   for_each         = { for each in var.subnets : each.name => each }
@@ -86,7 +102,7 @@ resource "azurerm_network_interface" "primary" {
     name                          = "primary"
     primary                       = true
     private_ip_address_allocation = "Dynamic"
-    subnet_id                     = azurerm_subnet.subnet01.id
+    subnet_id                     = azurerm_subnet.subnets["subnet00"].id
     public_ip_address_id          = azurerm_public_ip.pip.id
   }
 }
@@ -99,9 +115,9 @@ resource "azurerm_network_interface" "internal" {
 
   ip_configuration {
     name                          = "internal"
-    private_ip_address_allocation = "Dynamic"
     primary                       = false
-    subnet_id                     = azurerm_subnet.subnet02.id
+    private_ip_address_allocation = "Dynamic"
+    subnet_id                     = azurerm_subnet.subnets["subnet01"].id
   }
 }
 

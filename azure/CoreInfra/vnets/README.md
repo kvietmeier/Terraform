@@ -1,5 +1,7 @@
 ### Create a Hub-and-Spoke network topology with an existing Hub vnet
 
+Not a fully functional configuration - example code.
+
 Syntax is important here -
 
 - Refer to the "source" resources in each peering block by name and the remote vnet resource by its id.
@@ -11,7 +13,7 @@ Syntax is important here -
 
 #### License
 
-This project is licensed under the Apache License - see the [LICENSE.md](../LICENSE.md) file for details
+This project is licensed under the Apache License - see the [LICENSE.md](../../LICENSE.md) file for details
 
 #### Acknowledgments
 

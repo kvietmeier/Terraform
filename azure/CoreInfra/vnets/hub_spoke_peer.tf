@@ -4,6 +4,7 @@
 #
 #  Goal: Create a Hub-and-Spoke network topology with an existing Hub vnet
 #        --- You may have resources in the hub like an Ansible server and ADD DS  
+#        Use this code in other config files.
 # 
 #  Usage:
 #  terraform apply --auto-approve
