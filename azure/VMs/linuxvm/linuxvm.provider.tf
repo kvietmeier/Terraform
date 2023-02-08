@@ -29,5 +29,10 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+   resource_group {
+       # Go ahead and whack anything in the RG
+       prevent_deletion_if_contains_resources = false
+   }
+  }
 }
