@@ -99,6 +99,7 @@ resource "random_id" "randomId" {
 }
 
 # Create storage account for boot diagnostics
+# Needs to be a module!
 resource "azurerm_storage_account" "diagstorageaccount" {
   location                 = azurerm_resource_group.upf_rg.location
   resource_group_name      = azurerm_resource_group.upf_rg.name
