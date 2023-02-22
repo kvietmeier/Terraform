@@ -1,7 +1,12 @@
 #### Create a single Linux VM
 
-Nothing particularly special about this configuration.
+Create single Linux VM with:
 
+* 2 NICs
+* Set autoshutdown
+* Enable boot diagnotics for Serial Console
+* Public IP
+* NSG that filters on incoming IP
 
 #### License
 

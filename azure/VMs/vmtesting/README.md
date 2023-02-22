@@ -1,41 +1,19 @@
-### Create a multi-vm enviroment with 2 NICs per VM
+#### Create a single Linux VM
 
-The goal is to build a platform for investigating VM instance features/functionality and explore advanced topics like:
+## Create single Linux VM with:
 
-* Bootdiags for Serial Console access
-* cloud-init for OS setup
-* Auto Shutdown
-* Peering the vnet to existing hub vnet with Ansible/utilities server.
-* Using a json source file for the VM definitions
-* Custom tags (disable hyperthreading)
-* Run "remote_exec" scripts for post OS config not possible with cloud-init
+* 2 NICs
+* Set autoshutdown
+* Enable boot diagnotics for Serial Console
+* Public IP
+* NSG that filters on incoming IP
 
-ToDo -
+## This config is under development (ToDo):
 
-* Document key template code that is poorly documented in general.
-* Create map object(list) for the VM configs
-* Use existing NSGs
-* Add Azure Arc agent
-
-Need to document steps better  
-  
-#### Code documentation - In Progress
-
-___
-
-#### My code is Built With
-
-* [Visual Studio Code](https://code.visualstudio.com/) - Editor
-* [Terraform](https://www.terraform.io/) - Terraform
-* [Azure](portal.azure.com) - Azure Portal
-
-#### All run under PowerShell on Windows 11
-
-* [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
-
-#### Author
-
-* **Karl Vietmeier**
+* Experiment with using a json source for "multivm"
+* cleanup network config - single VM
+* Use existing NSG - test for region
+* Use "remote_exec" to run some CPUinfo commands
 
 #### License
 
@@ -43,7 +21,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 #### Acknowledgments
 
-* Intel colleagues
-* Stack Exchange
-* GitHub issues
-* Terraform documenmtation
+* None so far other than the many good examples out there.

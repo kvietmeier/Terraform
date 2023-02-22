@@ -147,29 +147,8 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
     "platformsettings.host_environment.disablehyperthreading" = "false"
   }
 
-  /* # Get some info from VM
-  provisioner "remote-exec" {
-    connection {
-      type       = "ssh"
-      user       = var.username
-      public_key = file("../../secrets/id_rsa-TestMultiple.pub")
-    }
-
-    inline = [
-      "lscpu | grep -i model",
-
-      "sleep 5",
-
-      "cpuid -1 | egrep -i 'vbmi|gfni|vaes|mulqd|bitalg'"
-    ]
-  }  
-  */
-
-
-
 }
 ###--- End VM Creation
-
 
 # Enable auto-shutdown
 # VM ID is a little tricky to sort out.
@@ -184,24 +163,6 @@ resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
     enabled = false
   }
 }
-
-/* https://github.com/hashicorp/terraform-provider-aws/issues/10977
-resource "null_resource" "testinstance" {
-  depends_on = [aws_eip.ip-test-env, aws_instance.testinstance]
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      host        = aws_eip.ip-test-env.public_ip
-      private_key = file(var.private_key)
-      user        = var.ansible_user
-      timeout = "30"
-    }
-    inline     = ["sudo apt-get -qq install python -y"]
-    on_failure = continue
-  }
-}
-
-*/
 
 ###--- Outputs
 # What is the public IP?
