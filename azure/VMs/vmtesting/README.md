@@ -1,6 +1,6 @@
 #### Create a single Linux VM
 
-## Create single Linux VM with:
+#### Create single Linux VM with:
 
 * 2 NICs
 * Set autoshutdown
@@ -8,7 +8,7 @@
 * Public IP
 * NSG that filters on incoming IP
 
-## This config is under development (ToDo):
+#### This config is under development (ToDo):
 
 * Experiment with using a json source for "multivm"
 * cleanup network config - single VM
