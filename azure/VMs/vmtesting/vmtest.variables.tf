@@ -1,4 +1,7 @@
 ###===================================================================================###
+#   Copyright (C) 2022 Intel Corporation
+#   SPDX-License-Identifier: Apache-2.0
+###===================================================================================###
 #  File:  linux.vm.variables.tf
 #  Created By: Karl Vietmeier
 #
@@ -35,9 +38,6 @@ variable "vm_name" { type = string }
 ###     Network Configurations
 ###==================================================================================###
 
-# vNet address spaces/cidrs
-variable "vnet_cidr" { type = list(string) }
-
 # Allow list for NSG
 variable "whitelist_ips" {
   description = "A list of IP CIDR ranges to allow as clients. Do not use Azure tags like `Internet`."
@@ -48,19 +48,16 @@ variable "whitelist_ips" {
 variable "hub-rg" { type = string }
 variable "hub-vnet" { type = string }
 
-###--- subnets
-# Using type = list(object({}))
-variable "subnets" {
-  description = "List of subnets to create and their address space."
-  type = list(
-    object(
-      { name = string,
-        cidr = string
-      }
-    )
-  )
-}
+# vNet address spaces/cidrs
+variable "vnet_cidr" { type = list(string) }
 
+# Simple map with a default subnet - source for cidrsubnets()
+variable "subnets" {
+  type = map(string)
+  default = {
+    "default" = "0"
+  }
+}
 
 
 ###==================================================================================###

@@ -8,7 +8,7 @@
 #### This config is under development (ToDo):
 
 * Experiment with using a json source for "multivm"
-* cleanup network config - single VM
+* cleanup network config - single NIC
 * Use existing NSG - test for region
 * Use "remote_exec" to run some CPUinfo commands
 

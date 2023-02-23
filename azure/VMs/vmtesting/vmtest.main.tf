@@ -1,20 +1,25 @@
 ###===================================================================================###
-#  File:  linuxvm.main.tf
+#   Copyright (C) 2022 Intel Corporation
+#   SPDX-License-Identifier: Apache-2.0
+###===================================================================================###
+#  File:  vmtest.main.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Template Code
 #  Purpose: Create a single Linux VM
 #
 #  Files in Module:
-#    linuxvm.main.tf
-#    linuxvm.variables.tf
-#    linuxvm.variables.tfvars
-#    linuxvm.variables.tfvars.txt
+#    vmtest.main.tf
+#    vmtest.provider.tf
+#    vmtest.network.tf
+#    vmtest.variables.tf
+#    vmtest.tfvars      (in .gitignore)
+#    vmtest.tfvars.txt  (scrubbed for github)
 #
 /* 
   Usage:
-  terraform apply --auto-approve -var-file=".\linuxvm.variables.tfvars"
-  terraform destroy --auto-approve -var-file=".\linuxvm.variables.tfvars"
+  terraform apply --auto-approve -var-file=".\vmtest.variables.tfvars"
+  terraform destroy --auto-approve -var-file=".\vmtest.variables.tfvars"
   
   VM Provider - 
   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine
@@ -33,8 +38,8 @@
 
 
 ###===================================================================================###
-#     Start creating infrastructure resources
-###===================================================================================###
+#     Start creating infrastructure resources                                           #
+#                                                                                       #
 
 resource "azurerm_resource_group" "linuxvm_rg" {
   name     = "${var.prefix}-rg"
@@ -64,13 +69,13 @@ data "template_cloudinit_config" "config" {
 }
 
 
-###===================  VM Configuration Elements ====================###`
+###===================================================================================###
+#       VM Configuration - Supporting services                                          #
+#                                                                                       #
 
-### - Storage Account
-/* 
- Need boot diags for serial console which requires a storage account
- We will create an SA for the VM so we clean up after and not clutter up
- an existing SA.    
+/* Storage Account:
+   * Need boot diags for the serial console which requires a storage account
+   * Create an SA for the VM/s so we clean up after and not clutter up an existing SA.    
 */
 
 # Generate random text for a unique storage account name
@@ -92,10 +97,25 @@ resource "azurerm_storage_account" "diagstorageaccount" {
   location                 = azurerm_resource_group.linuxvm_rg.location
 }
 
+# Enable auto-shutdown
+# VM ID is a little tricky to sort out.
+resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
+  location              = azurerm_resource_group.linuxvm_rg.location
+  virtual_machine_id    = azurerm_linux_virtual_machine.linuxvm01.id
+  enabled               = true
+  daily_recurrence_time = var.shutdown_time
+  timezone              = var.timezone
 
-###
-###--- Put it all together and build the VM
-###
+  notification_settings {
+    enabled = false
+  }
+}
+
+
+###===================================================================================###
+#       Create the VM                                                                   #
+#                                                                                       #
+
 resource "azurerm_linux_virtual_machine" "linuxvm01" {
   location                        = azurerm_resource_group.linuxvm_rg.location
   resource_group_name             = azurerm_resource_group.linuxvm_rg.name
@@ -104,7 +124,6 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
   disable_password_authentication = true
   network_interface_ids = [
     azurerm_network_interface.primary.id,
-    azurerm_network_interface.internal.id,
   ]
 
   # Reference the cloud-init file rendered earlier
@@ -150,30 +169,29 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
 }
 ###--- End VM Creation
 
-# Enable auto-shutdown
-# VM ID is a little tricky to sort out.
-resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-  location              = azurerm_resource_group.linuxvm_rg.location
-  virtual_machine_id    = azurerm_linux_virtual_machine.linuxvm01.id
-  enabled               = true
-  daily_recurrence_time = var.shutdown_time
-  timezone              = var.timezone
+###===================================================================================###
+#      Outputs                                                                          #
+#                                                                                       #
 
-  notification_settings {
-    enabled = false
-  }
-}
-
-###--- Outputs
 # What is the public IP?
 output "dns_name" {
   value = azurerm_public_ip.pip.fqdn
 }
 
+### Create some custom outputs - simple cut/paste to SSH
+output "ssh_login" {
+  value = "ssh ${var.username}@${azurerm_public_ip.pip.fqdn}"
+}
+
+output "serial_console" {
+  value = "az serial-console connect -g ${azurerm_resource_group.linuxvm_rg.name} -n ${var.vm_name}"
+}
 
 
 
 
+
+###===================================================================================###
 # Implement a remote_exec provisioner
 /*  This isn't working 
 resource "null_resource" GetCPUInfo{
