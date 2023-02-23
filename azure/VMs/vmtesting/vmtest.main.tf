@@ -194,7 +194,7 @@ output "serial_console" {
 ###===================================================================================###
 # Implement a remote_exec provisioner
 /*  This isn't working 
-resource "null_resource" GetCPUInfo{
+resource "null_resource" GetCPUInfo {
   connection {
     type        = "ssh"
     host        = azurerm_public_ip.pip.fqdn
