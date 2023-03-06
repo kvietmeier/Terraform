@@ -4,6 +4,8 @@ This repo/folder holds code related to standing up AVD infra using Terraform.
 
 Nothing is currently functional - just getting started (03/23)
 
+Question to answer - Should this be broken up into 2 seperate steps like an AKS "2 step deploy"?  You could leave the Host Pool up with no Session hosts amd add hosts when needed?
+
 #### Notes
 
 To make my code more portable across Tenants/Subscriptions I'm using the TF Environment variables set in the PowerShell profile:  
