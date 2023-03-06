@@ -12,10 +12,18 @@ TBD - will add doc references etc. here.
 
 * [Terraform Azure Provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
 * [Terraform AzureAD Provider](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs)
-* [MSLearn HowTo for AVD w/Terraform](https://learn.microsoft.com/en-us/azure/developer/terraform/configure-azure-virtual-desktop)
+* [MSLearn HowTo for AVD HostPool w/Terraform](https://learn.microsoft.com/en-us/azure/developer/terraform/configure-azure-virtual-desktop)
+* [MSLearn HowTo for AVD Session Host w/Terraform](https://learn.microsoft.com/en-us/azure/developer/terraform/create-avd-session-host)
 * [MSLearn AVD Prerequisites](https://learn.microsoft.com/en-us/azure/virtual-desktop/prerequisites)
 
-The biggest challenge standing up something from scratch you will have are the Authentication and domain join requirements:
+Creation of a complete, functional AVD infrastructure with Terraform is a several step process:
+
+* Establish prereqs (will you use existing AD/AAD services?)
+* Configure AD if required
+* Create Host Pool
+* Create session hosts and join a domain
+
+The biggest challenge standing up something from scratch you will have is the last step - the Authentication and domain join requirements:
 
 * [AVD Identity Requirements](https://learn.microsoft.com/en-us/azure/virtual-desktop/prerequisites#identity)
 
