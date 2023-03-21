@@ -1,28 +1,34 @@
 ###===================================================================================###
-#  File:  windows-vm.main.tf
+#  File:  linuxvm.main.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Template Code
 #  Purpose: Create a single Linux VM
 #
 #  Files in Module:
-#    linux.vm.main.tf
-#    linux.vm.variables.tf
-#    linux.vm.variables.tfvars
-#    linux.vm.variables.tfvars.txt
+#    linuxvm.main.tf
+#    linuxvm.variables.tf
+#    linuxvm.variables.tfvars
+#    linuxvm.variables.tfvars.txt
 #
 /* 
   Usage:
-  terraform apply --auto-approve -var-file=".\linux.vm.variables.tfvars"
-  terraform destroy --auto-approve -var-file=".\linux.vm.variables.tfvars"
-
+  terraform apply --auto-approve -var-file=".\linuxvm.variables.tfvars"
+  terraform destroy --auto-approve -var-file=".\linuxvm.variables.tfvars"
+  
+  VM Provider - 
   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine
   https://github.com/hashicorp/terraform-provider-azurerm/tree/main/examples/virtual-machines/linux
+  
+  cloud-init:
+  https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/cloudinit_config
+  https://canonical-cloud-init.readthedocs-hosted.com/en/latest/explanation/format.html#mime-multi-part-archive
 
+  
   * Hyperthreading is disabled with a tag (needs to open Support Ticket to enable feature)
 
-
 */
+
 ###--- Configure the Azure Provider in provider.tf
 
 
@@ -37,20 +43,19 @@ resource "azurerm_resource_group" "linuxvm_rg" {
 
 
 ###--- Setup a cloud-init configuration file - need both parts
-# refer to the source yaml file
+# Refer to the source yaml file
 data "template_file" "system_setup" {
   template = file("../scripts/cloud-init")
 }
 
-# Render a multi-part cloud-init config making use of the file
-# above, and other source files if required
+# Render a multi-part cloud-init config making use of the file above, and other source files if required
 data "template_cloudinit_config" "config" {
   gzip          = true
   base64_encode = true
 
   # Main cloud-config configuration file.
-  # Refer to it this way in "os_profile" 
-  # custom_data    = data.template_cloudinit_config.config.rendered
+  #   Refer to it this way in "os_profile" 
+  #   custom_data = data.template_cloudinit_config.config.rendered
   part {
     filename     = "cloud-init"
     content_type = "text/cloud-config"
@@ -115,7 +120,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
   # I keep my keys in a "global" azure folder - TBD: use Azure Keyvault
   admin_ssh_key {
     username   = var.username
-    public_key = file("../../secrets/id_rsa-TestMultiple.pub")
+    public_key = file("../../secrets/id_rsa-X1Carbon.pub")
   }
 
   # They changed the offer and sku for 20.04 - careful
@@ -142,29 +147,8 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
     "platformsettings.host_environment.disablehyperthreading" = "false"
   }
 
-  /* # Get some info from VM
-  provisioner "remote-exec" {
-    connection {
-      type     = "ssh"
-      user     = var.username
-      public_key = file("../../secrets/id_rsa-TestMultiple.pub")
-    }
-
-    inline = [
-      "lscpu | grep -i model",
-
-      "sleep 5",
-
-      "cpuid -1 | egrep -i 'vbmi|gfni|vaes|mulqd|bitalg'"
-    ]
-  }  
-  */
-
-
-
 }
 ###--- End VM Creation
-
 
 # Enable auto-shutdown
 # VM ID is a little tricky to sort out.
@@ -179,24 +163,6 @@ resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
     enabled = false
   }
 }
-
-/* https://github.com/hashicorp/terraform-provider-aws/issues/10977
-resource "null_resource" "testinstance" {
-  depends_on = [aws_eip.ip-test-env, aws_instance.testinstance]
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      host        = aws_eip.ip-test-env.public_ip
-      private_key = file(var.private_key)
-      user        = var.ansible_user
-      timeout = "30"
-    }
-    inline     = ["sudo apt-get -qq install python -y"]
-    on_failure = continue
-  }
-}
-
-*/
 
 ###--- Outputs
 # What is the public IP?

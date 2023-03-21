@@ -1,0 +1,77 @@
+###===================================================================================###
+#   Copyright (C) 2022 Intel Corporation
+#   SPDX-License-Identifier: Apache-2.0
+###===================================================================================###
+#
+#  File:  terraform.tfvars
+#  Created By: Karl Vietmeier
+#
+#  This is a "sanitized" version of the terraform.tfvars file that is excluded from the repo. 
+#  Any values that aren't sensitive are left defined, amy sensitive values are stubbed out.
+#
+#  Edit as required
+#
+###===================================================================================###
+
+
+#  Standard Values
+resource_group_name = "TF-Testing"
+location            = "westus2"
+
+# Some AKS Variables
+aks_name            = "TestCluster" 
+prefix              = "akscluster"
+kubernetes_version  = "1.23.5"
+node_count          = "1"
+vm_size             = "Standard_DS2_v2"
+
+
+### Guard These - 
+client_id     = "<keep secure>"
+client_secret = "<keep secure>"
+ssh_key       = "<keep secure>"
+
+
+###======  Examples:
+###======================== Define values for the complex variables  =======================###
+# Storage Account configurations
+storage_account_configs = [
+  {
+    name         = "files"
+    acct_kind    = "FileStorage" # Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2.
+    account_tier = "Premium"     # If "Premium" - it must be in a "FileStorage" Storage Account
+    access_temp  = "Hot"
+    replication  = "LRS"
+  },
+  {
+    name         = "blobs"
+    acct_kind    = "BlobStorage" # Valid options are BlobStorage, BlockBlobStorage, FileStorage, Storage and StorageV2.
+    account_tier = "Standard"    # 
+    access_temp  = "Hot"
+    replication  = "LRS"
+  }
+]
+
+#- Fileshares using complex object syntax
+shares = [
+  {
+    name  = "volume01",
+    quota = "100"
+  },
+  {
+    name  = "volume02",
+    quota = "150"
+  },
+  {
+    name  = "volume03",
+    quota = "200"
+  }
+]
+
+### - List/map of multiple shares - using simple map
+file_shares = {
+  "volume01" = "100",
+  "volume02" = "100",
+  "volume03" = "250"
+}
+
