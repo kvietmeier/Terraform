@@ -57,6 +57,34 @@ terraform apply --auto-approve -var-file=".\<fname>.tfvars"
 terraform destroy --auto-approve -var-file=".\<fname>.tfvars"
 ```
 
+**PowerShell Alias/Shortcuts**
+So you don't have to keep calling out the non-standard tfvars file.
+
+```powershell
+function tfapply {
+  # Run an apply using the tfvars file in the current folder
+  #Param($message)
+  $VarFile=(Get-ChildItem -Path .  -Recurse -Filter "*.tfvars")
+  terraform apply --auto-approve -var-file="$VarFile"
+}
+```
+
+```powershell
+function tfdestroy {
+  # Run a destroy using the tfvars file in the current folder 
+  #Param($message)
+  $VarFile=(Get-ChildItem -Path .  -Recurse -Filter "*.tfvars")
+  terraform destroy --auto-approve -var-file="$VarFile"
+}
+```
+
+```powershell
+function tfshow {
+  # 
+  terraform show
+}
+```
+
 ---
   
 #### My code is Built With
