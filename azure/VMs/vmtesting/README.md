@@ -5,7 +5,7 @@
 * Public IP
 * NSG that filters on incoming IP
 
-#### This config is under development (ToDo):
+#### This config is under development (ToDo)
 
 * Experiment with using a json source for "multivm"
 * cleanup network config - single NIC
@@ -14,7 +14,7 @@
 
 #### License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](..\..\LICENSE.md) file for details
 
 #### Acknowledgments
 
