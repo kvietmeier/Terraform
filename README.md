@@ -24,7 +24,7 @@ Directories
 └── README.md
 ```
 
-
+---
 **Terraform commands:**  
 A good cheat sheet I ran across  
 <https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet>
@@ -55,6 +55,33 @@ Put it all together
 ```powershell
 terraform apply --auto-approve -var-file=".\<fname>.tfvars"
 terraform destroy --auto-approve -var-file=".\<fname>.tfvars"
+```
+
+---
+**PowerShell Alias/Shortcuts**
+So you don't have to keep calling out the non-standard tfvars file.
+
+```powershell
+function tfapply {
+  # Run an apply using the tfvars file in the current folder
+  $VarFile=(Get-ChildItem -Path .  -Recurse -Filter "*.tfvars")
+  terraform apply --auto-approve -var-file="$VarFile"
+}
+```
+
+```powershell
+function tfdestroy {
+  # Run a destroy using the tfvars file in the current folder 
+  $VarFile=(Get-ChildItem -Path .  -Recurse -Filter "*.tfvars")
+  terraform destroy --auto-approve -var-file="$VarFile"
+}
+```
+
+```powershell
+function tfshow {
+  # 
+  terraform show
+}
 ```
 
 ---

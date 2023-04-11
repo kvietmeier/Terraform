@@ -46,7 +46,7 @@ resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.linuxvm_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
 
-  # Create subnets by looping through the map defined in .tfvars
+  # Create subnets by looping through the map defined in .tfvars - don't need 3 subnets just testing using a map
   # for_each = { for subnet in var.subnets : subnet.name => subnet.address_prefixes }
 
   for_each         = { for each in var.subnets : each.name => each }

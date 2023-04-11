@@ -1,0 +1,62 @@
+###===================================================================================###
+#  File:  linux.vm.variables.tfvars.txt
+#  Created By: Karl Vietmeier
+#
+#  Terraform Template Code
+#  Purpose: Create a single Linux VM
+#
+#  Files in Module:
+#    linux.vm.main.tf
+#    linux.vm.variables.tf
+#    linux.vm.variables.tfvars
+#    linux.vm.variables.tfvars.txt
+#
+#  Usage:
+#  terraform apply --auto-approve -var-file=".\linux.vm.variables.tfvars"
+#  terraform destroy --auto-approve -var-file=".\linux.vm.variables.tfvars"
+#
+###===================================================================================###
+
+# Basic Information
+region          = ""
+prefix          = ""
+vm_name         = ""
+shutdown_time   = "1800"
+timezone        = ""
+
+# OS/VM Info
+vm_size         = "Standard_D2s_v4"
+publisher       = "Canonical"
+offer           = "0001-com-ubuntu-server-focal-daily"
+sku             = "20_04-daily-lts-gen2"
+ver             = "latest"
+
+# OS Disk
+caching         = "ReadWrite"
+sa_type         = "Standard_LRS"
+
+# User Info
+username        = ""
+password        = ""
+
+###===================================================================================###
+###  Networking Configuration
+###===================================================================================###
+
+# vnet address space (no need for a /16 or a /8)
+vnet_cidr = ["0.0.0.0/22"]
+
+# Subnet address spaces
+subnet01_cidr = [
+  "0.0.1.0/24",
+]
+
+subnet02_cidr = [
+  "0.0.2.0/24",
+]
+
+# NSG Allow List
+whitelist_ips = [
+  "0.0.0.0",     # My ISP Address
+  "0.0.0.0/27",  # An IP Range
+]
