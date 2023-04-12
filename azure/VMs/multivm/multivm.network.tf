@@ -60,7 +60,7 @@ resource "azurerm_public_ip" "public_ips" {
 resource "azurerm_network_interface" "primary" {
   location                      = azurerm_resource_group.upf_rg.location
   resource_group_name           = azurerm_resource_group.upf_rg.name
-  count                         = length(var.subnet_cidrs)
+  count                         = var.node_count
   name                          = "${var.vm_prefix}-PrimaryNIC-${format("%02d", count.index)}"
   enable_accelerated_networking = "false"
 
@@ -78,7 +78,7 @@ resource "azurerm_network_interface" "primary" {
 resource "azurerm_network_interface" "internal" {
   location                      = azurerm_resource_group.upf_rg.location
   resource_group_name           = azurerm_resource_group.upf_rg.name
-  count                         = length(var.subnet_cidrs)
+  count                         = var.node_count
   name                          = "${var.vm_prefix}-InternalNIC-${format("%02d", count.index)}"
   enable_accelerated_networking = "true"
 

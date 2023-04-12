@@ -31,6 +31,8 @@ Put Usage Documentation here
 ###===================================================================================###
 
 
+### Network ========================
+### One vnet - 3 subnets
 
 resource "aws_vpc" "voltdbvpc" {
   cidr_block = "172.16.0.0/16"
@@ -63,6 +65,7 @@ resource "aws_subnet" "voltdbsubnetc" {
   vpc_id = aws_vpc.voltdbvpc.arn
 }
 
+#- Gateway?
 resource "aws_internet_gateway" "voltdbigw" {}
 
 resource "aws_vpc_dhcp_options" "voltdbdhcpopts" {
@@ -80,6 +83,8 @@ resource "aws_route_table" "voltdbrt" {
   vpc_id = aws_vpc.voltdbvpc.arn
 }
 
+######------   4xVMs
+### Create DB VM
 resource "aws_instance" "voltdbinstance1" {
   disable_api_termination = "false"
   instance_initiated_shutdown_behavior = "stop"
