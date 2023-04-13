@@ -88,22 +88,24 @@ runcmd:
   - [mandb, -c]
   - [apt-file, update]
   # Create some directories
-  - [mkdir /tmp/output]
-  - [mkdir /mnt/huge]
+  - [mkdir, /tmp/output]
+  - [mkdir, /mnt/huge]
 
 
 ###--- Users
+#---
+#--- Allows you to add more than 1 key to authorized_keys and configure sudo.
 users:
   # Keep the original default user
   - name: default
     ssh-authorized-keys:
-    - 
-    - 
+    - <put keys here>
+    - <put keys here>
   # Start adding additional users - With SSH keys added
   - name: labuser
     ssh-authorized-keys:
-    - 
-    - 
+    - <put keys here>
+    - <put keys here>
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
