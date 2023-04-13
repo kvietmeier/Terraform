@@ -58,7 +58,7 @@ resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
 ###--- Setup a cloud-init configuration file - need both parts
 # refer to the source yaml file (this file is in .gitignore)
 data "template_file" "system_setup" {
-  template = file("../scripts/cloud-init")
+  template = file("../../secrets/cloud-init")
 }
 
 # Render a multi-part cloud-init config making use of the file
