@@ -1,0 +1,83 @@
+#cloud-config
+# vim: syntax=yaml
+#
+###=============================================================================###
+# Modify grub menu from cloud-init
+# https://gist.github.com/corso75/582d03db6bb9870fbf6466e24d8e9be7
+# Untested
+# 
+###=============================================================================###
+
+# Create template for modified grub
+write_files:
+- path: /run/user/awk-add-kernel-boot-settings.txt
+  permissions: '0666'
+  content: |
+    BEGIN {
+      # The variables must be declared here, otherwise they won't be seen in the END part
+      FS="@@"
+      OFS="="
+      RS="\n"
+      gcmd="nomodeset crashkernel=auto LANG=en_US.UTF-8 console=tty0 console=ttyS0,115200n8 rhgb quiet"
+      gt="serial console"
+      gsk="serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1"
+      f_gt=0
+      f_gsk=0
+    }
+    
+    {
+    if($1 == "GRUB_CMDLINE_LINUX=" || $1 == "GRUB_CMDLINE_LINUX_DEFAULT=")
+    {
+      if (NF==1)
+        gl=sprintf("%s\"%s\"",$1,gcmd)
+      else
+        gl=sprintf("%s%s %s\"",$1,$2,gcmd)
+      print gl > "/run/user/modified_grub"
+    }
+    else if($1 == "GRUB_TERMINAL=" || $1 == "GRUB_TERMINAL_OUTPUT=")
+    {
+      f_gt=1
+      if (NF==1)
+        gl=sprintf("%s\"%s\"",$1,gt)
+      else
+        gl=sprintf("%s%s %s\"",$1,$2,gt)
+      print gl > "/run/user/modified_grub"
+    }
+    else if($1 == "GRUB_SERIAL_COMMAND=")
+    {
+      f_gsk=1
+      if (NF==1)
+        gl=sprintf("%s\"%s\"",$1,gsk)
+      else
+        gl=sprintf("%s%s %s\"",$1,$2,gsk)
+      print gl > "/run/user/modified_grub"
+    }
+    else
+      print $0 > "/run/user/modified_grub"
+    }
+    END {
+      if(f_gt==0)
+      {
+        gl=sprintf("GRUB_TERMINAL=\"%s\"",gt)
+        print gl > "/run/user/grmodified_grubub1"
+      }
+      if(f_gsk==0)
+      {
+        gl=sprintf("GRUB_SERIAL_COMMAND=\"%s\"",gsk)
+        print gl > "/run/user/modified_grub"
+      }
+    }
+
+# Edit grub menus
+runcmd:
+  - [ touch, /run/user/original_grub ]
+  - echo "Created /run/user/original_grub"
+  - [ cp, -f, /etc/default/grub, /run/user/original_grub]
+  - echo "Copied /etc/default/grub to /run/user/original_grub"
+  - [ sed, -i, -e, '/GRUB_CMDLINE_LINUX/s/"/@@"/g', /run/user/original_grub ]
+  - echo "Modified in-place /run/user/original_grub with SED"
+  - [ awk, -f, /run/user/awk-add-kernel-boot-settings.txt, /run/user/original_grub ]
+  - echo "Modified /run/user/original_grub with AWK and copied into /run/user/modified_grub"
+  - [ cp, -f, /run/user/modified_grub, /etc/default/grub ]
+  - echo "Copied /run/user/modified_grub into /etc/default/grub"
+  - [ grub2-mkconfig, -o, /boot/grub2/grub.cfg ]
