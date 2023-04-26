@@ -50,7 +50,7 @@ resource "azurerm_resource_group" "linuxvm_rg" {
 ###--- Setup a cloud-init configuration file - need both parts
 # Refer to the source yaml file
 data "template_file" "system_setup" {
-  template = file("../../secrets/cloud-init")
+  template = file("../../secrets/cloud-init-testgrub")
 }
 
 # Render a multi-part cloud-init config making use of the file above, and other source files if required
