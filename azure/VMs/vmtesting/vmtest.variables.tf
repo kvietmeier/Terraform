@@ -65,6 +65,8 @@ variable "subnets" {
 ###==================================================================================###
 
 variable "vm_size" { type = string }
+variable "cloudinit" { type = string }
+variable "ssh_key" { type = string }
 
 # OS Image and Disk
 variable "publisher" { type = string }
@@ -81,8 +83,6 @@ variable "timezone" { type = string }
 # User Info
 variable "username" { type = string }
 variable "password" { type = string }
-
-
 
 ###===================================================================================###
 #   Retrieve existing resources in Azure

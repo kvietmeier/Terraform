@@ -50,7 +50,8 @@ resource "azurerm_resource_group" "linuxvm_rg" {
 ###--- Setup a cloud-init configuration file - need both parts
 # Refer to the source yaml file
 data "template_file" "system_setup" {
-  template = file("../../secrets/cloud-init-testgrub")
+  #template = file("../../secrets/cloud-init")
+  template = file(var.cloudinit)
 }
 
 # Render a multi-part cloud-init config making use of the file above, and other source files if required
@@ -119,30 +120,33 @@ resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
 resource "azurerm_linux_virtual_machine" "linuxvm01" {
   location                        = azurerm_resource_group.linuxvm_rg.location
   resource_group_name             = azurerm_resource_group.linuxvm_rg.name
-  name                            = var.vm_name
   size                            = var.vm_size
-  disable_password_authentication = true
+  
+  # Make sure hostname matches public IP DNS name
+  name          = var.vm_name
+  computer_name = var.vm_name
+
+  # Attach NICs (created in vmtest.network)
   network_interface_ids = [
     azurerm_network_interface.primary.id,
   ]
 
   # Reference the cloud-init file rendered earlier
+  # for post bringup configuration
   custom_data = data.template_cloudinit_config.config.rendered
 
-  # Make sure hostname matches public IP DNS name
-  computer_name = var.vm_name
-
-  # Admin user
+  ###--- Admin user
   admin_username = var.username
   admin_password = var.password
+  disable_password_authentication = false
 
-  # I keep my keys in a "global" azure folder - TBD: use Azure Keyvault
   admin_ssh_key {
     username   = var.username
-    public_key = file("../../secrets/id_rsa-X1Carbon.pub")
+    public_key = file(var.ssh_key)
   }
+  ###--- End Admin User
 
-  # They changed the offer and sku for 20.04 - careful
+  ### Image and OS configuration
   source_image_reference {
     publisher = var.publisher
     offer     = var.offer
