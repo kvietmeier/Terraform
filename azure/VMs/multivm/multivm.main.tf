@@ -9,9 +9,8 @@
   Purpose: Create multiple identical VMs each with 2 NICs for dev/test activities
   ToDo:
     * Use existing NSG
-    * Scale Set?
-    * Use .pub file for PK instead of actual key
     * Use static IPs for private IP (so we can use Ansible later)
+    * Source a map of VMs so they can be different
  
   Files in Module:
     multivm.main.tf
@@ -136,13 +135,12 @@ resource "azurerm_linux_virtual_machine" "vms" {
   admin_username = var.username
   admin_password = var.password
 
-  # Password policy
-  disable_password_authentication = true
+  # Password policy - if set to true no password will be set
+  disable_password_authentication = false
 
   admin_ssh_key {
     username   = var.username
     public_key = file(var.ssh_key)
-    #public_key   = file("../../secrets/id_rsa-X1Carbon.pub")
   }
 
   # Image and Disk Info

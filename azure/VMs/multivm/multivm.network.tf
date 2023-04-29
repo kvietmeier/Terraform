@@ -32,18 +32,18 @@ resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.upf_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
 
-  # Create 2 subnets based on number of CIDRs defined in .tfvars
-  count = length(var.subnet_cidrs)
+  # Parse map of subnets
+  for_each         = var.subnets
+  name             = each.key
 
-  # Named "subnet01, subnet02" etc....  (keep number under 10)
-  name = "subnet0${count.index}"
-
-  # Using the address spaces in - subnet_cidrs
-  address_prefixes = [element(var.subnet_cidrs, count.index)]
+  # [0] use first element in cidr list, 2 each subnet is /24, the value in subnets is the index
+  address_prefixes = [cidrsubnet(var.vnet_cidr[0], 2, each.value)]
 }
+
 
 #--- Note - I am using "${var.vm_prefix}-${format("%02d", count.index)}" throughout
 #--- to create consistent naming of resources.
+#--- If I use a map, I can create named VM configs and use that
 
 # Create the Public IPs
 resource "azurerm_public_ip" "public_ips" {
@@ -68,7 +68,7 @@ resource "azurerm_network_interface" "primary" {
     primary                       = true
     name                          = "${var.vm_prefix}-PrimaryCFG-${format("%02d", count.index)}"
     private_ip_address_allocation = "Dynamic"
-    subnet_id                     = element(azurerm_subnet.subnets[*].id, 0)
+    subnet_id                     = azurerm_subnet.subnets["default"].id
     public_ip_address_id          = element(azurerm_public_ip.public_ips[*].id, count.index)
     #private_ip_address_allocation = "Static"
     #private_ip_address            = element(var.subnet1_ips[*].id, count.index)
@@ -86,7 +86,7 @@ resource "azurerm_network_interface" "internal" {
     primary                       = false
     name                          = "${var.vm_prefix}-InternalCFG-${format("%02d", count.index)}"
     private_ip_address_allocation = "Dynamic"
-    subnet_id                     = element(azurerm_subnet.subnets[*].id, 1)
+    subnet_id                     = azurerm_subnet.subnets["internal"].id
     #private_ip_address_allocation = "Static"
     #private_ip_address            = element(var.subnet2_ips[*].id, count.index)
   }
@@ -125,7 +125,7 @@ resource "azurerm_network_security_group" "upfnsg" {
 
 # Map the NSG
 resource "azurerm_subnet_network_security_group_association" "mapnsg" {
-  subnet_id                 = element(azurerm_subnet.subnets[*].id, 0)
+  subnet_id                 = azurerm_subnet.subnets["default"].id
   network_security_group_id = azurerm_network_security_group.upfnsg.id
 }
 

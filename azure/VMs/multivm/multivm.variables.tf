@@ -27,11 +27,9 @@ variable "node_count" { type = number }
 ###  Networking
 ###===================================================================================###
 
-# IP Ranges
-variable "vnet_cidr" { type = list(string) }
-variable "subnet_cidrs" { type = list(string) }
-variable "subnet1_ips" { type = list(string) }
-variable "subnet2_ips" { type = list(string) }
+# Hub resources for vnet peering
+variable "hub-rg" { type = string }
+variable "hub-vnet" { type = string }
 
 # Allow list for NSG
 variable "whitelist_ips" {
@@ -39,12 +37,22 @@ variable "whitelist_ips" {
   type        = list(string)
 }
 
-# NIC Parameters
+###--- IP Ranges
+variable "vnet_cidr" { type = list(string) }
+
+# Simple map with a default subnet - source for cidrsubnets()
+variable "subnets" {
+  type = map(string)
+  default = {
+    "default" = "0"
+  }
+}
 
 
-# Hub resources for vnet peering
-variable "hub-rg" { type = string }
-variable "hub-vnet" { type = string }
+# - not used anymore
+variable "subnet_cidrs" { type = list(string) }
+variable "subnet1_ips" { type = list(string) }
+variable "subnet2_ips" { type = list(string) }
 
 
 ###==================================================================================###
