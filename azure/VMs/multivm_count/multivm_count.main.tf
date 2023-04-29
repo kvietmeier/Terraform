@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 /* 
-  File:  multivm.main.tf
+  File:  multivm_count.main.tf
   Created By: Karl Vietmeier
 
   Purpose: Create multiple identical VMs each with 2 NICs for dev/test activities
@@ -13,18 +13,18 @@
     * Source a map of VMs so they can be different
  
   Files in Module:
-    multivm.main.tf
-    multivm.variables.tf
-    multivm.tfvars
+    multivm_count.main.tf
+    multivm_count.variables.tf
+    multivm_count.tfvars
 
   Usage:
   terraform apply --auto-approve
   terraform destroy --auto-approve
   
   If you use a nonstandard tfvars file.
-  terraform plan -var-file=".\multivm.tfvars"
-  terraform apply --auto-approve -var-file=".\multivm.tfvars"
-  terraform destroy --auto-approve -var-file=".\multivm.tfvars"
+  terraform plan -var-file=".\multivm_count.tfvars"
+  terraform apply --auto-approve -var-file=".\multivm_count.tfvars"
+  terraform destroy --auto-approve -var-file=".\multivm_count.tfvars"
  
 */
 ###===================================================================================###

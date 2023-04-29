@@ -21,15 +21,15 @@
 
 # Create the vnet
 resource "azurerm_virtual_network" "vnet" {
-  location            = azurerm_resource_group.upf_rg.location
-  resource_group_name = azurerm_resource_group.upf_rg.name
+  location            = azurerm_resource_group.multivm_rg.location
+  resource_group_name = azurerm_resource_group.multivm_rg.name
   name                = "${var.resource_prefix}-network"
   address_space       = var.vnet_cidr
 }
 
 # 2 Subnets - one for each NIC
 resource "azurerm_subnet" "subnets" {
-  resource_group_name  = azurerm_resource_group.upf_rg.name
+  resource_group_name  = azurerm_resource_group.multivm_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
 
   # Parse map of subnets
@@ -47,8 +47,8 @@ resource "azurerm_subnet" "subnets" {
 
 # Create the Public IPs
 resource "azurerm_public_ip" "public_ips" {
-  location            = azurerm_resource_group.upf_rg.location
-  resource_group_name = azurerm_resource_group.upf_rg.name
+  location            = azurerm_resource_group.multivm_rg.location
+  resource_group_name = azurerm_resource_group.multivm_rg.name
   count               = var.node_count
   allocation_method   = "Dynamic"
   name                = "${var.vm_prefix}-${format("%02d", count.index)}-PublicIP"
@@ -58,8 +58,8 @@ resource "azurerm_public_ip" "public_ips" {
 ###- Create 2 NICs - one primary w/PubIP, one internal with SRIOV enabled
 ###- Could make this a map object.
 resource "azurerm_network_interface" "primary" {
-  location                      = azurerm_resource_group.upf_rg.location
-  resource_group_name           = azurerm_resource_group.upf_rg.name
+  location                      = azurerm_resource_group.multivm_rg.location
+  resource_group_name           = azurerm_resource_group.multivm_rg.name
   count                         = var.node_count
   name                          = "${var.vm_prefix}-PrimaryNIC-${format("%02d", count.index)}"
   enable_accelerated_networking = "false"
@@ -76,8 +76,8 @@ resource "azurerm_network_interface" "primary" {
 }
 
 resource "azurerm_network_interface" "internal" {
-  location                      = azurerm_resource_group.upf_rg.location
-  resource_group_name           = azurerm_resource_group.upf_rg.name
+  location                      = azurerm_resource_group.multivm_rg.location
+  resource_group_name           = azurerm_resource_group.multivm_rg.name
   count                         = var.node_count
   name                          = "${var.vm_prefix}-InternalNIC-${format("%02d", count.index)}"
   enable_accelerated_networking = "true"
@@ -96,8 +96,8 @@ resource "azurerm_network_interface" "internal" {
 ###- Create an NSG allowing SSH from my IP
 ###- TBD - use my existing NSGs 
 resource "azurerm_network_security_group" "upfnsg" {
-  location            = azurerm_resource_group.upf_rg.location
-  resource_group_name = azurerm_resource_group.upf_rg.name
+  location            = azurerm_resource_group.multivm_rg.location
+  resource_group_name = azurerm_resource_group.multivm_rg.name
   name                = "AllowInbound"
   security_rule {
     access                     = "Allow"
@@ -140,7 +140,7 @@ resource "azurerm_subnet_network_security_group_association" "mapnsg" {
 resource "azurerm_virtual_network_peering" "spoke2hub" {
   name = "peer-spoke2hub"
   # Source resources by name
-  resource_group_name  = azurerm_resource_group.upf_rg.name
+  resource_group_name  = azurerm_resource_group.multivm_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   # Target vnet by ID
   remote_virtual_network_id = data.azurerm_virtual_network.hub-vnet.id

@@ -8,6 +8,8 @@ Create single Linux VM with:
 * Public IP
 * NSG that filters on incoming IP
 
+This is my original effort - linuxvm_2 hsa more refinements.
+
 #### License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details

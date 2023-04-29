@@ -34,7 +34,7 @@
 ###===================================================================================###
 
 # Create a resource group
-resource "azurerm_resource_group" "upf_rg" {
+resource "azurerm_resource_group" "multivm_rg" {
   location = var.region
   name     = "${var.resource_prefix}-rg"
 }
@@ -42,7 +42,7 @@ resource "azurerm_resource_group" "upf_rg" {
 # Enable auto-shutdown
 # VM ID is a little tricky to sort out.
 resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-  location              = azurerm_resource_group.upf_rg.location
+  location              = azurerm_resource_group.multivm_rg.location
   count                 = length(azurerm_linux_virtual_machine.vms.*.id)
   virtual_machine_id    = azurerm_linux_virtual_machine.vms[count.index].id
   enabled               = true
@@ -78,8 +78,8 @@ data "template_cloudinit_config" "config" {
 
 ###--- Create a Proximity Placement Group
 resource "azurerm_proximity_placement_group" "vm_prox_grp" {
-  location            = azurerm_resource_group.upf_rg.location
-  resource_group_name = azurerm_resource_group.upf_rg.name
+  location            = azurerm_resource_group.multivm_rg.location
+  resource_group_name = azurerm_resource_group.multivm_rg.name
   name                = "VMProximityPlacementGroup"
 }
 
@@ -91,7 +91,7 @@ resource "azurerm_proximity_placement_group" "vm_prox_grp" {
 resource "random_id" "randomId" {
   keepers = {
     # Generate a new ID only when a new resource group is defined
-    resource_group = azurerm_resource_group.upf_rg.name
+    resource_group = azurerm_resource_group.multivm_rg.name
   }
 
   byte_length = 8
@@ -100,8 +100,8 @@ resource "random_id" "randomId" {
 # Create storage account for boot diagnostics
 # Needs to be a module!
 resource "azurerm_storage_account" "diagstorageaccount" {
-  location                 = azurerm_resource_group.upf_rg.location
-  resource_group_name      = azurerm_resource_group.upf_rg.name
+  location                 = azurerm_resource_group.multivm_rg.location
+  resource_group_name      = azurerm_resource_group.multivm_rg.name
   name                     = "diag${random_id.randomId.hex}"
   account_tier             = "Standard"
   account_replication_type = "LRS"
@@ -110,8 +110,8 @@ resource "azurerm_storage_account" "diagstorageaccount" {
 
 ###- Put it all together and build the VM
 resource "azurerm_linux_virtual_machine" "vms" {
-  location            = azurerm_resource_group.upf_rg.location
-  resource_group_name = azurerm_resource_group.upf_rg.name
+  location            = azurerm_resource_group.multivm_rg.location
+  resource_group_name = azurerm_resource_group.multivm_rg.name
   count               = var.node_count
   name                = "${var.vm_prefix}-${format("%02d", count.index)}"
   size                = var.vm_size

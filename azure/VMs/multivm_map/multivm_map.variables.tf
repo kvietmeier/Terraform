@@ -77,6 +77,17 @@ variable "username" { type = string }
 variable "password" { type = string }
 variable "ssh_key" { type = string }
 
+variable "vmconfigs" {
+  type = map(object({
+    name = string
+    size = string
+    
+  }))
+  
+}
+
+
+
 
 ###==================================================================================###
 # Environment (Tagging)

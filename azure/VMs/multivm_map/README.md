@@ -1,5 +1,7 @@
 ### Create a multi-vm enviroment with 2 NICs per VM
 
+This example will be using a map object to create multolie unique VMs.
+
 This template will build a platform for testing Telco related workloads leveraging:
 
 * Proximity Placement Groups
@@ -15,7 +17,6 @@ ToDo -
 
 * Refactor to be module based
 * Document key template code that is poorly documented in general.
-* Create map object(list) for the NIC setup
 * Use existing NSGs
 * Add Azure Arc agent
 
