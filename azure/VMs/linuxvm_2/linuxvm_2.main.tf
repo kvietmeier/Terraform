@@ -2,24 +2,24 @@
 #   Copyright (C) 2022 Intel Corporation
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
-#  File:  vmtest.main.tf
+#  File:  linuxvm_2.main.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Template Code
 #  Purpose: Create a single Linux VM
 #
 #  Files in Module:
-#    vmtest.main.tf
-#    vmtest.provider.tf
-#    vmtest.network.tf
-#    vmtest.variables.tf
-#    vmtest.tfvars      (in .gitignore)
-#    vmtest.tfvars.txt  (scrubbed for github)
+#    linuxvm_2.main.tf
+#    linuxvm_2.provider.tf
+#    linuxvm_2.network.tf
+#    linuxvm_2.variables.tf
+#    linuxvm_2.tfvars      (in .gitignore)
+#    linuxvm_2.tfvars.txt  (scrubbed for github)
 #
 /* 
   Usage:
-  terraform apply --auto-approve -var-file=".\vmtest.variables.tfvars"
-  terraform destroy --auto-approve -var-file=".\vmtest.variables.tfvars"
+  terraform apply --auto-approve -var-file=".\linuxvm_2.variables.tfvars"
+  terraform destroy --auto-approve -var-file=".\linuxvm_2.variables.tfvars"
   
   VM Provider - 
   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine
@@ -125,7 +125,7 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
   name          = var.vm_name
   computer_name = var.vm_name
 
-  # Attach NICs (created in vmtest.network)
+  # Attach NICs (created in linuxvm_2.network)
   network_interface_ids = [
     azurerm_network_interface.primary.id,
   ]
