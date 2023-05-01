@@ -13,16 +13,20 @@
     * Use static IPs for private IP (so we can use Ansible later)
     * Source a map of VMs so they can be different
  
-  Usage:
-  terraform plan -var-file=".\multivm.tfvars"
-  terraform apply --auto-approve -var-file=".\multivm.tfvars"
-  terraform destroy --auto-approve -var-file=".\multivm.tfvars"
- 
 */
 ###===================================================================================###
 
+/* 
+  
+Usage:
+terraform plan -var-file=".\multivm_map.tfvars"
+terraform apply --auto-approve -var-file=".\multivm_map.tfvars"
+terraform destroy --auto-approve -var-file=".\multivm_map.tfvars"
+
+*/
+
 ###===================================================================================###
-#     Start creating infrastructure resources
+#                    Start creating infrastructure resources                          ###
 ###===================================================================================###
 
 # Create a resource group
@@ -30,7 +34,6 @@ resource "azurerm_resource_group" "multivm_rg" {
   location = var.region
   name     = "${var.resource_prefix}-rg"
 }
-
 
 ###--- Setup a cloud-init configuration file - need both parts
 # refer to the source yaml file (this file is in .gitignore)
@@ -77,9 +80,6 @@ resource "random_id" "randomId" {
   byte_length = 8
 }
 
-
-###===================  VM Configuration Elements ====================###`
-
 ###-- Boot diags for serial console
 # Create storage account for boot diagnostics
 # Needs to be a module!
@@ -92,7 +92,10 @@ resource "azurerm_storage_account" "diagstorageaccount" {
 }
 
 
-###- Put it all together and build the VM
+###===================================================================================###
+###                               Build the VMs                                       ###
+###===================================================================================###
+
 resource "azurerm_linux_virtual_machine" "vms" {
   location            = azurerm_resource_group.multivm_rg.location
   resource_group_name = azurerm_resource_group.multivm_rg.name
@@ -100,8 +103,8 @@ resource "azurerm_linux_virtual_machine" "vms" {
   # Loop over VM Map set name and size
   #for_each = { for each in var.vmconfigs : each.name => each }
   for_each = var.vmconfigs
-  name                = each.value.name
-  size                = each.value.size
+  name     = each.value.name
+  size     = each.value.size
 
   # Attach the 2 NICs
   network_interface_ids = [
@@ -152,7 +155,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
 }
 ###--- End VM Creation
 
-# Enable auto-shutdown
+###--- Enable auto-shutdown
 # VM ID is a little tricky to sort out.
 resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
 
