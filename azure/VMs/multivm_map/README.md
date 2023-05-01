@@ -1,4 +1,4 @@
-### Create a multi-vm enviroment with 2 NICs per VM
+### Create a multi-vm environment with 2 NICs per VM
 
 This example will be using a map object to create multolie unique VMs.
 
@@ -6,7 +6,7 @@ This template will build a platform for testing Telco related workloads leveragi
 
 * Proximity Placement Groups
 * Network Security Groups
-* 2 NICs per VM - one with a Publlic IP, one internal Only
+* 2 NICs per VM - one with a Public IP, one internal Only
 * Accelerated Networking
 * Bootdiags for Serial Console access
 * cloud-init for OS setup
@@ -18,13 +18,8 @@ ToDo -
 * Refactor to be module based
 * Document key template code that is poorly documented in general.
 * Use existing NSGs
-* Add Azure Arc agent
 
-Need to document steps better  
-
-**NOTE: Due to some logic it will only create 2 VMs!  Need to fix it.**
-
-Creating multpile VMs with 2 NICs is not as straightforward as it seems.
+Need to document some of the steps better  
 
 #### Code documentation - In Progress
 
