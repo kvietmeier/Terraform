@@ -49,42 +49,47 @@ resource "azurerm_subnet" "subnets" {
 resource "azurerm_public_ip" "public_ips" {
   location            = azurerm_resource_group.multivm_rg.location
   resource_group_name = azurerm_resource_group.multivm_rg.name
-  count               = var.node_count
-  allocation_method   = "Dynamic"
-  name                = "${var.vm_prefix}-${format("%02d", count.index)}-PublicIP"
-  domain_name_label   = "${var.vm_prefix}-${format("%02d", count.index)}"
+
+  for_each = var.vmconfigs
+  name              = "${each.value.name}-PublicIP"
+  allocation_method = "Dynamic"
+  
+  # Give it some uniqueness
+  domain_name_label   = "${each.value.name}-${random_id.pipid.hex}"
 }
 
 ###- Create 2 NICs - one primary w/PubIP, one internal with SRIOV enabled
-###- Could make this a map object.
 resource "azurerm_network_interface" "primary" {
   location                      = azurerm_resource_group.multivm_rg.location
   resource_group_name           = azurerm_resource_group.multivm_rg.name
-  count                         = var.node_count
-  name                          = "${var.vm_prefix}-PrimaryNIC-${format("%02d", count.index)}"
+
+  for_each = var.vmconfigs
+  name     = "${each.value.name}-PrimaryNIC"
   enable_accelerated_networking = "false"
 
   ip_configuration {
+    # This is the "management NIC" with a PublicIP 
     primary                       = true
-    name                          = "${var.vm_prefix}-PrimaryCFG-${format("%02d", count.index)}"
+    name                          = "${each.value.name}-PrimaryCFG"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = azurerm_subnet.subnets["default"].id
-    public_ip_address_id          = element(azurerm_public_ip.public_ips[*].id, count.index)
-    #private_ip_address_allocation = "Static"
-    #private_ip_address            = element(var.subnet1_ips[*].id, count.index)
+    public_ip_address_id          = azurerm_public_ip.public_ips[each.key].id
   }
 }
 
 resource "azurerm_network_interface" "internal" {
+  # This NIC is for internal/private networking 
   location                      = azurerm_resource_group.multivm_rg.location
   resource_group_name           = azurerm_resource_group.multivm_rg.name
-  count                         = var.node_count
-  name                          = "${var.vm_prefix}-InternalNIC-${format("%02d", count.index)}"
+  
+  for_each = var.vmconfigs
+  name     = "${each.value.name}-InternalNIC"
+  
   enable_accelerated_networking = "true"
 
   ip_configuration {
     primary                       = false
-    name                          = "${var.vm_prefix}-InternalCFG-${format("%02d", count.index)}"
+    name                          = "${each.value.name}-InternalCFG"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = azurerm_subnet.subnets["internal"].id
     #private_ip_address_allocation = "Static"

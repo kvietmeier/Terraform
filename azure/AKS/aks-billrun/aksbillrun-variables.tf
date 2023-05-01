@@ -127,10 +127,10 @@ variable "nodepools" {
   type = list(
     object(
       { 
-        name                          = string,
-        node_count                    = number,
-        vm_size                       = string,
-        os_sku                        = string
+        name       = string,
+        node_count = number,
+        vm_size    = string,
+        os_sku     = string
       }
     )
   )
@@ -285,6 +285,15 @@ variable "subnets" {
   )
 }
 
+/* 
+# Simple map with a default subnet - source for cidrsubnets()
+variable "subnets" {
+  type = map(string)
+  default = {
+    "default" = "0"
+  }
+}
+*/
 
 
 ###==============================  Secrets - in .tfvars ===============================###

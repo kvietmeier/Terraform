@@ -6,22 +6,14 @@
   File:  multivm.main.tf
   Created By: Karl Vietmeier
 
-  Purpose: Create multiple identical VMs each with 2 NICs for dev/test activities
+  Purpose: Create multiple unique VMs each with 2 NICs for dev/test activities
+  
   ToDo:
     * Use existing NSG
     * Use static IPs for private IP (so we can use Ansible later)
     * Source a map of VMs so they can be different
  
-  Files in Module:
-    multivm.main.tf
-    multivm.variables.tf
-    multivm.tfvars
-
   Usage:
-  terraform apply --auto-approve
-  terraform destroy --auto-approve
-  
-  If you use a nonstandard tfvars file.
   terraform plan -var-file=".\multivm.tfvars"
   terraform apply --auto-approve -var-file=".\multivm.tfvars"
   terraform destroy --auto-approve -var-file=".\multivm.tfvars"
@@ -39,20 +31,6 @@ resource "azurerm_resource_group" "multivm_rg" {
   name     = "${var.resource_prefix}-rg"
 }
 
-# Enable auto-shutdown
-# VM ID is a little tricky to sort out.
-resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
-  location              = azurerm_resource_group.multivm_rg.location
-  count                 = length(azurerm_linux_virtual_machine.vms.*.id)
-  virtual_machine_id    = azurerm_linux_virtual_machine.vms[count.index].id
-  enabled               = true
-  daily_recurrence_time = var.shutdown_time
-  timezone              = var.timezone
-
-  notification_settings {
-    enabled = false
-  }
-}
 
 ###--- Setup a cloud-init configuration file - need both parts
 # refer to the source yaml file (this file is in .gitignore)
@@ -83,10 +61,12 @@ resource "azurerm_proximity_placement_group" "vm_prox_grp" {
   name                = "VMProximityPlacementGroup"
 }
 
+###--- Create some random stuff
+#- Use this for Public IPs
+resource "random_id" "pipid" {
+  byte_length = 1
+}
 
-###===================  VM Configuration Elements ====================###`
-
-###-- Need boot diags for serial console
 # Generate random text for a unique storage account name
 resource "random_id" "randomId" {
   keepers = {
@@ -97,6 +77,10 @@ resource "random_id" "randomId" {
   byte_length = 8
 }
 
+
+###===================  VM Configuration Elements ====================###`
+
+###-- Boot diags for serial console
 # Create storage account for boot diagnostics
 # Needs to be a module!
 resource "azurerm_storage_account" "diagstorageaccount" {
@@ -112,21 +96,24 @@ resource "azurerm_storage_account" "diagstorageaccount" {
 resource "azurerm_linux_virtual_machine" "vms" {
   location            = azurerm_resource_group.multivm_rg.location
   resource_group_name = azurerm_resource_group.multivm_rg.name
-  count               = var.node_count
-  name                = "${var.vm_prefix}-${format("%02d", count.index)}"
-  size                = var.vm_size
+  
+  # Loop over VM Map set name and size
+  #for_each = { for each in var.vmconfigs : each.name => each }
+  for_each = var.vmconfigs
+  name                = each.value.name
+  size                = each.value.size
 
   # Attach the 2 NICs
   network_interface_ids = [
-    "${element(azurerm_network_interface.primary.*.id, count.index)}",
-    "${element(azurerm_network_interface.internal.*.id, count.index)}",
+    azurerm_network_interface.primary[each.key].id,
+    azurerm_network_interface.internal[each.key].id,
   ]
 
   # Reference the cloud-init file rendered earlier
   custom_data = data.template_cloudinit_config.config.rendered
 
   # Make sure hostname matches public IP DNS name
-  computer_name = "${var.vm_prefix}-${format("%02d", count.index)}"
+  computer_name = each.value.name
 
   # Add to proximity placement group
   proximity_placement_group_id = azurerm_proximity_placement_group.vm_prox_grp.id
@@ -152,7 +139,7 @@ resource "azurerm_linux_virtual_machine" "vms" {
   }
 
   os_disk {
-    name                 = "osdisk-${var.vm_prefix}-${format("%02d", count.index)}"
+    name                 = "osdisk-${each.value.name}"
     caching              = var.caching
     storage_account_type = var.sa_type
   }
@@ -163,6 +150,21 @@ resource "azurerm_linux_virtual_machine" "vms" {
   }
 
 }
-
 ###--- End VM Creation
 
+# Enable auto-shutdown
+# VM ID is a little tricky to sort out.
+resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
+
+  for_each = var.vmconfigs
+
+  location              = azurerm_resource_group.multivm_rg.location
+  virtual_machine_id    = azurerm_linux_virtual_machine.vms[each.key].id
+  enabled               = true
+  daily_recurrence_time = var.shutdown_time
+  timezone              = var.timezone
+
+  notification_settings {
+    enabled = false
+  }
+}

@@ -34,9 +34,19 @@ resource "azurerm_subnet" "subnets" {
   # Create subnets based on number of CIDRs defined in .tfvars
   # for_each = { for subnet in var.subnets : subnet.name => subnet.address_prefixes }
 
-   for_each = { for each in var.subnets: each.name => each }
-     name             = each.value.name
-     address_prefixes = [each.value.cidr] 
+  for_each = { for each in var.subnets: each.name => each }
+    name             = each.value.name
+    address_prefixes = [each.value.cidr]
+
+  /* Replace above -   
+  # Parse map of subnets
+  for_each         = var.subnets
+  name             = each.key
+  
+  # Calculate subnet CIDRs from vnet CIDR
+  address_prefixes = [cidrsubnet(var.vnet_cidr[0], 2, each.value)]
+  */
+
 }
 
 

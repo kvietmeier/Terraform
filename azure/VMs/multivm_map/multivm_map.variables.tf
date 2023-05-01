@@ -50,9 +50,9 @@ variable "subnets" {
 
 
 # - not used anymore
-variable "subnet_cidrs" { type = list(string) }
-variable "subnet1_ips" { type = list(string) }
-variable "subnet2_ips" { type = list(string) }
+#variable "subnet_cidrs" { type = list(string) }
+#variable "subnet1_ips" { type = list(string) }
+#variable "subnet2_ips" { type = list(string) }
 
 
 ###==================================================================================###
@@ -71,22 +71,22 @@ variable "sa_type" { type = string }
 variable "shutdown_time" { type = string }
 variable "timezone" { type = string }
 
-
 # User Info
 variable "username" { type = string }
 variable "password" { type = string }
 variable "ssh_key" { type = string }
 
+# Create map(object) for VM configs
 variable "vmconfigs" {
-  type = map(object({
-    name = string
-    size = string
-    
-  }))
-  
+  description = "List of vms to create and the configuration for each."
+  type = map(object(
+      {
+        name = string
+        size = string
+      }
+    )
+  )
 }
-
-
 
 
 ###==================================================================================###
