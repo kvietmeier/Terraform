@@ -83,6 +83,7 @@ variable "vmconfigs" {
       {
         name = string
         size = string
+        hostnum = string   # For static IP
       }
     )
   )

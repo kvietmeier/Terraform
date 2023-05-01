@@ -90,10 +90,10 @@ resource "azurerm_network_interface" "internal" {
   ip_configuration {
     primary                       = false
     name                          = "${each.value.name}-InternalCFG"
-    private_ip_address_allocation = "Dynamic"
+    #private_ip_address_allocation = "Dynamic"
     subnet_id                     = azurerm_subnet.subnets["internal"].id
-    #private_ip_address_allocation = "Static"
-    #private_ip_address            = element(var.subnet2_ips[*].id, count.index)
+    private_ip_address_allocation = "Static"
+    private_ip_address            = cidrhost(azurerm_subnet.subnets["internal"].address_prefixes[0], each.value.hostnum)
   }
 }
 
