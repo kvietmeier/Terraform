@@ -7,6 +7,7 @@ This template will build a platform for testing Telco related workloads leveragi
 * Proximity Placement Groups
 * Network Security Groups
 * 2 NICs per VM - one with a Public IP, one internal Only
+* Deterministic/static IP assigment on internal NIC
 * Accelerated Networking
 * Bootdiags for Serial Console access
 * cloud-init for OS setup
@@ -16,12 +17,23 @@ This template will build a platform for testing Telco related workloads leveragi
 ToDo -
 
 * Refactor to be module based
-* Document key template code that is poorly documented in general.
+* Document key template code that is poorly documented in general
 * Use existing NSGs
 
-Need to document some of the steps better  
-
 #### Code documentation - In Progress
+
+Static IP assignment using cidrhost() - "hostnum" is set in VM map
+
+```terraform
+  ip_configuration {
+    primary                       = false
+    name                          = "${each.value.name}-InternalCFG"
+    #private_ip_address_allocation = "Dynamic"
+    subnet_id                     = azurerm_subnet.subnets["internal"].id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = cidrhost(azurerm_subnet.subnets["internal"].address_prefixes[0], each.value.hostnum)
+  }
+```
 
 ___
 
