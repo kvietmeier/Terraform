@@ -20,6 +20,8 @@ ToDo -
 * Use existing NSGs
 * Better output
 
+___
+
 #### Code documentation - In Progress
 
 Static IP assignment using cidrhost() - "hostnum" is set in VM map
