@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  multivm.network.tf
+#  File:  multivm_map.network.tf
 #  Created By: Karl Vietmeier
 #
 #  Purpose:  Setup networking for VMs
@@ -58,21 +58,27 @@ resource "azurerm_public_ip" "public_ips" {
   domain_name_label   = "${each.value.name}-${random_id.pipid.hex}"
 }
 
-###- Create 2 NICs - one primary w/PubIP, one internal with SRIOV enabled
+/*###- Create 2 NICs
+  * Accelerated Networking explicitly enabled
+  * One w/PubIP for external access
+  * One for internal traffic
+  * Static/deterministic IP allocation
+*/
 resource "azurerm_network_interface" "primary" {
   location                      = azurerm_resource_group.multivm_rg.location
   resource_group_name           = azurerm_resource_group.multivm_rg.name
 
   for_each = var.vmconfigs
   name     = "${each.value.name}-PrimaryNIC"
-  enable_accelerated_networking = "false"
+  enable_accelerated_networking = "true"
 
   ip_configuration {
     # This is the "management NIC" with a PublicIP 
     primary                       = true
     name                          = "${each.value.name}-PrimaryCFG"
-    private_ip_address_allocation = "Dynamic"
     subnet_id                     = azurerm_subnet.subnets["default"].id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = cidrhost(azurerm_subnet.subnets["default"].address_prefixes[0], each.value.hostnum)
     public_ip_address_id          = azurerm_public_ip.public_ips[each.key].id
   }
 }
@@ -90,10 +96,9 @@ resource "azurerm_network_interface" "internal" {
   ip_configuration {
     primary                       = false
     name                          = "${each.value.name}-InternalCFG"
-    #private_ip_address_allocation = "Dynamic"
-    subnet_id                     = azurerm_subnet.subnets["internal"].id
+    subnet_id                     = azurerm_subnet.subnets["subnet01"].id
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(azurerm_subnet.subnets["internal"].address_prefixes[0], each.value.hostnum)
+    private_ip_address            = cidrhost(azurerm_subnet.subnets["subnet01"].address_prefixes[0], each.value.hostnum)
   }
 }
 

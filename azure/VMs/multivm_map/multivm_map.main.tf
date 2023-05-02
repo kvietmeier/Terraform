@@ -38,7 +38,8 @@ resource "azurerm_resource_group" "multivm_rg" {
 ###--- Setup a cloud-init configuration file - need both parts
 # refer to the source yaml file (this file is in .gitignore)
 data "template_file" "system_setup" {
-  template = file("../../secrets/cloud-init")
+  #template = file("../../secrets/cloud-init")
+  template = file(var.cloudinit)
 }
 
 # Render a multi-part cloud-init config making use of the file

@@ -70,6 +70,7 @@ variable "caching" { type = string }
 variable "sa_type" { type = string }
 variable "shutdown_time" { type = string }
 variable "timezone" { type = string }
+variable "cloudinit" { type = string }
 
 # User Info
 variable "username" { type = string }

@@ -62,7 +62,7 @@ data "template_cloudinit_config" "config" {
   #   Refer to it this way in "os_profile" 
   #   custom_data = data.template_cloudinit_config.config.rendered
   part {
-    filename     = "cloud-init"
+    filename     = "cloud-init.voltdb"
     content_type = "text/cloud-config"
     content      = data.template_file.system_setup.rendered
   }

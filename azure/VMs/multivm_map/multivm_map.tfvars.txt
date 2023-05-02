@@ -1,98 +1,85 @@
 ###==================================================================================###
-#  File:  variables.tfvars
+#  File:  variables.tfvars.txt
 #  Created By: Karl Vietmeier
 #  
 #  Assign values to the variables defined in variables.tf
 #  
-#  Template for .tfvars that is excluded from the repo - populate as required
-#  I left in some common values
+#  This should be in .gitignore
 #
 ###==================================================================================###
 
 # Basic Information
-region          = ""
-resource_prefix = ""
-vm_prefix       = ""
-shutdown_time   = ""
-timezone        = ""
-Environment     = ""
+region          = "myregion"
+resource_prefix = "foo"
+vm_prefix       = "foo.bar"
+shutdown_time   = "1800"
+timezone        = "Pacific Standard Time"
+Environment     = "IaaS Testing Platform"
+cloudinit       = "../../foobar/cloud-init.foo"
 
 # OS/VM Info
-node_count      = 2
-vm_size         = "Standard_D2s_v4"
-publisher       = "Canonical"
-offer           = "0001-com-ubuntu-server-focal-daily"
-sku             = "20_04-daily-lts-gen2"
-ver             = "latest"
+node_count = 2
+vm_size    = "Standard_D2s_v5"
+publisher  = "Canonical"
+offer      = "0001-com-ubuntu-server-focal-daily"
+sku        = "20_04-daily-lts-gen2"
+ver        = "latest"
 
 # OS Disk
-caching         = "ReadWrite"
-sa_type         = "Standard_LRS"
+caching = "ReadWrite"
+sa_type = "Standard_LRS"
 
 # User Info
-username        = ""
-password        = ""
+username = "azadmin"
+password = "<bad thing to do>"
+ssh_key  = "../../foobar/foo.pub"
+
+# VM Configs - keep it simple for now
+# map syntax
+vmconfigs = {
+  "master" = {
+    name    = "master"
+    size    = "Standard_D2s_v5"
+    hostnum = "5"
+  },
+  "worker1" = {
+    name = "worker01"
+    size = "Standard_D4ds_v5"
+    hostnum = "6"
+  },
+  "worker2" = {
+    name = "worker02"
+    size = "Standard_D4ds_v5"
+    hostnum = "7"
+  },
+  "worker3" = {
+    name = "worker03"
+    size = "Standard_D4ds_v5"
+    hostnum = "8"
+  }
+}
+
 
 ###===================================================================================###
 ###  Networking Configuration
 ###===================================================================================###
 
-# Existing vNet and Resource Group gfor peering
-hub-rg   = ""
-hub-vnet = ""
+# Existing vNet and Resource Group for peering
+hub-rg   = "CommonResources"
+hub-vnet = "corevnet"
 
 # vnet address space
-vnet_cidr = ["0.0.0.0/22"]
+vnet_cidr = ["10.###.0.0/22"]
 
-# Subnet address spaces
-subnet_cidrs = [
-  "0.0.1.0/24",
-  "0.0.2.0/24",
-]
+# Subnet info for cidrsubnet()
+subnets = {
+  default  = 0
+  subnet01 = 1
+}
 
 # NSG Allow List
 whitelist_ips = [
-  "0.0.0.0",     # My ISP Address
-  "0.0.0.0/27",  # A range of IPs
+  "###.###.###.###", # My ISP Address
+  "###.###.###.###/27" # Address space
 ]
-
-
-###---- Not using these right now.
-subnet_name = [
-  "",
-  "",
-]
-
-# Static IP Allocation
-subnet1_ips = [
-  "0.0.1.4",
-  "0.0.1.5",
-]
-
-subnet2_ips = [
-  "0.0.2.4",
-  "0.0.2.5",
-]
-
-nic_labels = [
-  "true",
-  "false",
-  "true",
-  "false",
-]
-
-ip_alloc = [
-  "Static",
-  "Static",
-  "Static",
-  "Static",
-]
-
-sriov = [
-  "false",
-  "true",
-  "false",
-  "true",
-]
-
 
