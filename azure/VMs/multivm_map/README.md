@@ -6,7 +6,7 @@ This template build a testing platform for Telco related workloads leveraging:
 * Proximity Placement Groups
 * Network Security Groups
 * 2 NICs per VM - one with a Public IP, one internal Only
-* Deterministic/static IP assigment on internal NIC
+* Deterministic/static IP assigment on NICs
 * Accelerated Networking
 * Bootdiags for Serial Console access
 * cloud-init for OS setup
@@ -24,17 +24,30 @@ ___
 
 #### Code documentation - In Progress
 
-Static IP assignment using cidrhost() - "hostnum" is set in VM map
+Static IP assignment using cidrhost() - "hostnum" for IP is set in VM map.
 
 ```terraform
+
+resource "azurerm_network_interface" "primary" {
+  location                      = azurerm_resource_group.multivm_rg.location
+  resource_group_name           = azurerm_resource_group.multivm_rg.name
+
+  for_each = var.vmconfigs
+  name     = "${each.value.name}-PrimaryNIC"
+  enable_accelerated_networking = "true"
+
   ip_configuration {
-    primary                       = false
-    name                          = "${each.value.name}-InternalCFG"
-    #private_ip_address_allocation = "Dynamic"
-    subnet_id                     = azurerm_subnet.subnets["internal"].id
+    # This is the NIC with a PublicIP - 
+    # --- only NICs flagged as primary can be accessed externally.
+    primary                       = true
+    name                          = "${each.value.name}-PrimaryCFG"
+    subnet_id                     = azurerm_subnet.subnets["default"].id
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(azurerm_subnet.subnets["internal"].address_prefixes[0], each.value.hostnum)
+    private_ip_address            = cidrhost(azurerm_subnet.subnets["default"].address_prefixes[0], each.value.hostnum)
+    public_ip_address_id          = azurerm_public_ip.public_ips[each.key].id
   }
+}
+
 ```
 
 Creating the map(object) for the VMs

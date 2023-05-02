@@ -73,7 +73,8 @@ resource "azurerm_network_interface" "primary" {
   enable_accelerated_networking = "true"
 
   ip_configuration {
-    # This is the "management NIC" with a PublicIP 
+    # This is the NIC with a PublicIP - 
+    # --- only NICs flagged as primary can be accessed externally.
     primary                       = true
     name                          = "${each.value.name}-PrimaryCFG"
     subnet_id                     = azurerm_subnet.subnets["default"].id
