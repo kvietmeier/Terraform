@@ -5,7 +5,7 @@ My ISP changes my router IP address every 3 nmonths, forcing me to update all of
 
 Doing this by hand was cumbersome.
 
-Using list variables and for_each allows me to maintain a set of N_numbder of NSG acroos regions amd update them all with a simple edit and "terraform apply"
+Using list variables and for_each allows me to maintain a set of N_numder of NSG across regions and update them all with a simple edit and "terraform apply"
 
 ```terraform
 # Create resource groups from a map
@@ -39,6 +39,22 @@ resource "azurerm_network_security_group" "default-nsg" {
 }
 ```
 
+Destination Ports:
+
+```terraform
+# Destination port list - standard services you might need
+destination_ports = [ "20", "21", "22", "45", "53", "88", "443", "3389", "8080" ]
+```
+
+IP Allow list:
+
+```terraform
+# NSG Allow List - modify as needed
+whitelist_ips = [
+  "0.0.0.0",    # My ISP Address
+  "0.0.0.0/27"  # A range of IPs
+]
+```
 
 #### Authors
 
