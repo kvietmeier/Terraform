@@ -1,11 +1,11 @@
 ### Manage a set of Network Security Groups across regions
 
 **Use Case:**  
-My ISP changes my router IP address every 3 nmonths, forcing me to update all of my NSG to change the incoming IP address filter.
+My ISP changes my router IP address every 3 months, forcing me to update all of my NSG to change the incoming IP address filter.
 
 Doing this by hand was cumbersome.
 
-Using list variables and for_each allows me to maintain a set of N_numder of NSG across regions and update them all with a simple edit and "terraform apply"
+Using list variables and for_each allows me to maintain a set of NSG across regions and update them all with a simple edit and "terraform apply"
 
 ```terraform
 # Create resource groups from a map
