@@ -71,7 +71,7 @@ resource "random_id" "pipid" {
   byte_length = 1
 }
 
-# Generate random text for a unique storage account name
+# Generate random text for unique storage account names
 resource "random_id" "randomId" {
   keepers = {
     # Generate a new ID only when a new resource group is defined
@@ -92,6 +92,16 @@ resource "azurerm_storage_account" "diagstorageaccount" {
   account_replication_type = "LRS"
 }
 
+# For added disks/fileshares
+resource "azurerm_storage_account" "attachedstorage" {
+  location                 = azurerm_resource_group.multivm_rg.location
+  resource_group_name      = azurerm_resource_group.multivm_rg.name
+  name                     = "attached${random_id.randomId.hex}"
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+
 
 ###===================================================================================###
 ###                               Build the VMs                                       ###
@@ -101,13 +111,12 @@ resource "azurerm_linux_virtual_machine" "vms" {
   location            = azurerm_resource_group.multivm_rg.location
   resource_group_name = azurerm_resource_group.multivm_rg.name
   
-  # Loop over VM Map set name and size
-  #for_each = { for each in var.vmconfigs : each.name => each }
+  # Loop over VM Map to set name and size
   for_each = var.vmconfigs
   name     = each.value.name
   size     = each.value.size
 
-  # Attach the 2 NICs
+  # Attach the 2 NICs created earlier
   network_interface_ids = [
     azurerm_network_interface.primary[each.key].id,
     azurerm_network_interface.internal[each.key].id,

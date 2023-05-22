@@ -143,7 +143,20 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
     username   = var.username
     public_key = file(var.ssh_key)
   }
-  ###--- End Admin User
+
+ ###--- End Admin User
+/*  
+  dynamic "storage_data_disk" {
+    content {
+    name = azurerm_managed_disk.lun1.name
+    managed_disk_id   = azurerm_managed_disk.lun1.id
+    disk_size_gb = azurerm_managed_disk.lun1.disk_size_gb
+    caching = "ReadWrite"
+    create_option = "Attach"
+    lun = 1
+    }
+  }
+   */
 
   ### Image and OS configuration
   source_image_reference {
@@ -171,6 +184,24 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
 
 }
 ###--- End VM Creation
+
+resource "azurerm_managed_disk" "disk1" {
+  name                 = "lun17865"
+  location             = azurerm_resource_group.linuxvm_rg.location
+  resource_group_name  = azurerm_resource_group.linuxvm_rg.name
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = "100"
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "data1" {
+  managed_disk_id    = azurerm_managed_disk.disk1.id
+  virtual_machine_id = azurerm_linux_virtual_machine.linuxvm01.id
+  lun                = "10"
+  caching            = "ReadWrite"
+}
+
+
 
 ###===================================================================================###
 #      Outputs                                                                          #
