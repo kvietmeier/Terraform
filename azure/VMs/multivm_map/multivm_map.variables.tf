@@ -82,9 +82,10 @@ variable "vmconfigs" {
   description = "List of vms to create and the configuration for each."
   type = map(object(
       {
-        name = string
-        size = string
+        name    = string
+        size    = string
         hostnum = string   # For static IP
+        #disks   = list(number)
       }
     )
   )
