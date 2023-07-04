@@ -1,0 +1,229 @@
+#cloud-config
+# vim: syntax=yaml
+#
+###=============================================================================###
+# Bootstrap setup for a Linux server
+# 
+# cloud-init docs:
+#   https://cloudinit.readthedocs.io/en/latest/index.html 
+# 
+# Examples:
+#   https://cloudinit.readthedocs.io/en/latest/topics/examples.html
+#
+#
+# Working example - 
+# Note that it will take at least 3-4min post bringup to finish installing all of the software
+#
+# ToDo - Add a reboot to enable the new grub menu.
+#
+###=============================================================================###
+
+### Upgrade the instance on first boot
+# (ie run apt-get upgrade)
+package_upgrade: true
+
+### Install additional packages on first boot
+packages:
+  # DPDK Dependencies
+  - librdmacm-dev
+  - librdmacm1
+  - libnuma-dev
+  - libmnl-dev
+  - libpcap-dev
+  - autoconf 
+  - lib32z1
+  - meson
+  - pkg-config
+  - cmake
+  - python3-pyelftools
+  - python-pyelftools
+  - python3-pip
+  # Useful stuff you need
+  - libtool
+  - screen
+  - build-essential
+  - git
+  - tree
+  - dstat
+  - slurm
+  - psmisc
+  - net-tools
+  - nfs-common
+  - sysstat
+  - dnsutils
+  - numactl
+  - apt-file
+  # Need these to support apt over http
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent
+  - software-properties-common
+
+
+### Create files in the VM
+write_files:
+# Create an empty file
+- path: /root/CONFIGURED_BY_CLOUD_INIT
+
+# Create template for modified grub
+- path: /run/user/awk-add-kernel-boot-settings.txt
+  permissions: '0666'
+  content: |
+    BEGIN {
+      # The variables must be declared here, otherwise they won't be seen in the END part
+      FS="@@"
+      OFS="="
+      RS="\n"
+      gcmd="nomodeset LANG=en_US.UTF-8 console=tty0 console=ttyS0,115200n8"
+      gt="serial console"
+      gsk="serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1"
+      f_gt=0
+      f_gsk=0
+    }
+    
+    {
+    if($1 == "GRUB_CMDLINE_LINUX=" || $1 == "GRUB_CMDLINE_LINUX_DEFAULT=")
+    {
+      if (NF==1)
+        gl=sprintf("%s\"%s\"",$1,gcmd)
+      else
+        gl=sprintf("%s%s %s\"",$1,$2,gcmd)
+      print gl > "/run/user/modified_grub"
+    }
+    else if($1 == "GRUB_TERMINAL=" || $1 == "GRUB_TERMINAL_OUTPUT=")
+    {
+      f_gt=1
+      if (NF==1)
+        gl=sprintf("%s\"%s\"",$1,gt)
+      else
+        gl=sprintf("%s%s %s\"",$1,$2,gt)
+      print gl > "/run/user/modified_grub"
+    }
+    else if($1 == "GRUB_SERIAL_COMMAND=")
+    {
+      f_gsk=1
+      if (NF==1)
+        gl=sprintf("%s\"%s\"",$1,gsk)
+      else
+        gl=sprintf("%s%s %s\"",$1,$2,gsk)
+      print gl > "/run/user/modified_grub"
+    }
+    else
+      print $0 > "/run/user/modified_grub"
+    }
+    END {
+      if(f_gt==0)
+      {
+        gl=sprintf("GRUB_TERMINAL=\"%s\"",gt)
+        print gl > "/run/user/grmodified_grubub1"
+      }
+      if(f_gsk==0)
+      {
+        gl=sprintf("GRUB_SERIAL_COMMAND=\"%s\"",gsk)
+        print gl > "/run/user/modified_grub"
+      }
+    }
+### - end grub conf
+
+
+### Run commands once on first boot
+runcmd:
+  #
+  # Needed for DPDK
+  - [pip3, install, ninja]
+  - [pip3, install, meson]
+  #
+  # Compile/install iperf3
+  - [git, clone, https://github.com/esnet/iperf.git]
+  - [cd, iperf]
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [/usr/sbin/ldconfig]
+  - [cd, ~]
+  #
+  # Compile/install sockperf
+  - [git, clone, https://github.com/mellanox/sockperf]
+  - [cd, sockperf]
+  - ['./autogen.sh']
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [cd, ~]
+  #
+  # Compile/install FIO
+  - [git, clone, https://github.com/axboe/fio.git]
+  - [cd, fio]
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [cd, ~]
+  #
+  # System cleanup
+  - [apt-get, clean, -yy]
+  - [apt-get, autoremove, -yy]
+  - [mandb, -c]
+  - [apt-file, update]
+  #
+  # Create some directories
+  - [mkdir, /tmp/output]
+  - [mkdir, /mnt/huge]
+  #
+  # Edit grub menus
+  - [ touch, /run/user/original_grub ]
+  - echo "Created /run/user/original_grub"
+  - [ cp, -f, /etc/default/grub, /run/user/original_grub]
+  - echo "Copied /etc/default/grub to /run/user/original_grub"
+  - [ sed, -i, -e, '/GRUB_CMDLINE_LINUX/s/"/@@"/g', /run/user/original_grub ]
+  - echo "Modified in-place /run/user/original_grub with SED"
+  - [ awk, -f, /run/user/awk-add-kernel-boot-settings.txt, /run/user/original_grub ]
+  - echo "Modified /run/user/original_grub with AWK and copied into /run/user/modified_grub"
+  - [ cp, -f, /run/user/modified_grub, /etc/default/grub ]
+  - echo "Copied /run/user/modified_grub into /etc/default/grub"
+  #- [ grub-mkconfig, -o, /boot/grub/grub.cfg ]
+### - End runcmd
+
+
+###--- Setup Users
+users:
+  # Keep the original default user
+  - name: default
+    ssh-authorized-keys:
+    - ssh-rsa 
+    - ssh-rsa 
+  # Start adding additional users - With SSH keys added
+  - name: labuser
+    ssh-authorized-keys:
+    - ssh-rsa 
+    - ssh-rsa 
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+### - End Users
+
+
+###--- Misc system configuration
+timezone: "America/Los_Angeles"
+
+# Use Azure host for timesync
+ntp:
+  enabled: true
+  ntp_client: chrony
+  config:
+    confpath: /etc/chrony/chrony.conf
+    packages:
+     - chrony
+    service_name: chrony
+    template: |
+       ## template:jinja
+       driftfile /var/lib/chrony/chrony.drift
+       logdir /var/log/chrony
+       maxupdateskey 100.0
+       refclock PHC /dev/ptp_hyperv poll 3 dpoll -2
+       makestep 1.0 -1
+
+
+final_message: Post creation OS config done
+
+###--- End File

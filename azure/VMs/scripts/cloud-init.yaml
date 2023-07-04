@@ -1,0 +1,254 @@
+#cloud-config
+# vim: syntax=yaml
+#
+###=============================================================================###
+# Bootstrap setup for a Linux server
+#     This entire file will take 4-5min to complete - especially compiling.
+#
+# cloud-init docs:
+#   https://cloudinit.readthedocs.io/en/latest/index.html 
+# 
+# Examples:
+#   https://cloudinit.readthedocs.io/en/latest/topics/examples.html
+#
+###=============================================================================###
+
+# Upgrade the instance on first boot
+# (ie run apt-get upgrade)
+package_upgrade: true
+
+# Add some additional repos
+apt_sources:
+  # Python
+  - source: "ppa:deadsnakes/ppa"
+  # stress-ng
+  - source: "ppa:colin-king/stress-ng"
+
+###---  Create/modify system files for tuning
+write_files:
+  # Make sure memory settings persist
+  - path: /etc/sysctl.d/99-sysctl.conf
+    content: |
+      # Added for VoltDB
+      vm.overcommit_memory=1
+      vm.max_map_count=1048576
+      vm.swappiness=0
+    permissions: 0644
+    append: true
+  - path: /etc/systemd/system/disable-thp.service
+    content: |
+      # Added for VoltDB
+
+      [Unit]
+      Description=Disable Transparent Huge Pages (THP)
+      DefaultDependencies=no
+      After=local-fs.target
+      Before=sysinit.target
+      
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/sh -c 'echo never | tee /sys/kernel/mm/transparent_hugepage/enabled > /dev/null'
+      ExecStart=/bin/sh -c 'echo never | tee /sys/kernel/mm/transparent_hugepage/defrag > /dev/null'
+      
+      [Install]
+      WantedBy=basic.target
+    permissions: 0644
+  - path: /etc/systemd/system/tune_eth0.service
+    content: |
+      # Added for VoltDB
+
+      [Unit]
+      Description=Tune the ethernet interface
+      DefaultDependencies=no
+      After=local-fs.target
+      Before=sysinit.target
+      
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/sh -c 'ethtool -K eth0 tso off'
+      ExecStart=/bin/sh -c 'ethtool -K eth0 gro off'
+      
+      [Install]
+      WantedBy=basic.target
+    permissions: 0644
+  - path: /root/CONFIGURED_BY_CLOUD_INIT
+
+###--- End write_files
+
+# Install additional packages on first boot
+packages:
+  # DPDK Dependencies
+  - librdmacm-dev
+  - librdmacm1
+  - libnuma-dev
+  - libmnl-dev
+  - libpcap-dev
+  - autoconf 
+  - lib32z1
+  - meson
+  - pkg-config
+  - cmake
+  - python3-pyelftools
+  - python-pyelftools
+  - python3-pip
+  # Useful stuff you might need/want
+  - libtool
+  - screen
+  - build-essential
+  - git
+  - tree
+  - dstat
+  - slurm
+  - psmisc
+  - net-tools
+  - nfs-common
+  - sysstat
+  - stress-ng
+  - dnsutils
+  - numactl
+  # Need these to support apt over http
+  - apt-file
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent
+  - software-properties-common
+  # Misc packages just good to have current versions
+  - openjdk-17-jre-headless
+  - python3.9
+###--- End Packages
+
+###--- Run commands once on first boot - clone and compile useful tools
+runcmd:
+  ###--- VoltDB settings - https://docs.voltactivedata.com/AdminGuide/adminmemmgt.php
+  # Need to add the ulimit commands:
+  #  ulimit -n 40000
+  #  ulimit -u 10000
+  - [echo, "never", '>', /sys/kernel/mm/transparent_hugepage/enabled] 
+  - [echo, "never", '>', /sys/kernel/mm/transparent_hugepage/defrag] 
+  - [echo, "0", '>', /proc/sys/vm/swappiness] 
+  - [sysctl, -w, vm.overcommit_memory=1]
+  - [sysctl, -w, vm.max_map_count=1048576]
+  - [sysctl, -w, vm.swappiness=0]
+  - [sysctl, -p]
+  # - need to know the interface numbers (not working)
+  #- [ethtool, -K, eth0, tso, off]
+  #- [ethtool, -K, eth0, gro, off]
+  # Works - without brackets
+  - ethtool -K eth0 tso off
+  - ethtool -K eth0 gro off
+  # Enable systemd services
+  - [systemctl, enable, tune_eth0.service]
+  - [systemctl, start, tune_eth0.service]
+  - [systemctl, enable, disable-thp.service]
+  - [systemctl, start, disable-thp.service]
+  #
+  # Grab Volt binaries/scripts and license from my blobstore
+  #
+  - [cd, /home/voltuser]
+  - [wget, -q, -P, /home/voltuser, https://kv82579public.blob.core.windows.net/publicfiles/VoltDBalldirs.tar.gz]
+  - [wget, -q, -P, /home/voltuser, https://kv82579public.blob.core.windows.net/publicfiles/VoltDBbindir.tar.gz]
+  - [wget, -q, -P, /home/voltuser, https://kv82579public.blob.core.windows.net/publicfiles/license.xml]
+  - [tar, xf, ./VoltDBalldirs.tar.gz]
+  - [tar, xf, ./VoltDBbindir.tar.gz]
+  #
+  # Link newer version of Python
+  - [rm, /usr/bin/python3]
+  - [ln, -s, /usr/bin/python3.9, /usr/bin/python3]
+  #
+  # Needed for DPDK
+  - [pip3, install, ninja]
+  - [pip3, install, meson]
+  #
+  # Create some directories
+  - [mkdir, /root/output]
+  - [mkdir, /root/voltdb]
+  #
+  ###--- Compile Software 
+  - [mkdir, /root/git]
+  # Compile/install iperf3
+  - [cd, /root/git]
+  - [git, clone, https://github.com/esnet/iperf.git]
+  - [cd, iperf]
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [/usr/sbin/ldconfig]
+  # Compile/install sockperf
+  - [cd, ..]
+  - [git, clone, https://github.com/mellanox/sockperf]
+  - [cd, sockperf]
+  - ['./autogen.sh']
+  - ['./configure']
+  - [make]
+  - [make, install]
+  # Compile/install FIO
+  - [cd, ..]
+  - [git, clone, https://github.com/axboe/fio.git]
+  - [cd, fio]
+  - ['./configure']
+  - [make]
+  - [make, install]
+  - [cd, ..]
+  # Compile Python3.10
+  #
+  #  <place holder - this is a long process - at least 4min by itself
+  #  Need to investigate, lots of options
+  #
+  ###--- System cleanup
+  - [apt-get, clean, -yy]
+  - [apt-get, autoremove, -yy]
+  - [mandb, -c]
+  - [apt-file, update]
+###--- End runcmd
+
+
+###--- Users
+users:
+  # Keep the original default user
+  - name: default
+    ssh-authorized-keys:
+    - ssh-rsa 
+    - ssh-rsa 
+    - ssh-rsa
+    - ssh-rsa 
+    - ssh-rsa 
+  # Adding VoltDB user - With SSH keys
+  - name: voltuser
+    ssh-authorized-keys:
+    - ssh-rsa 
+    - ssh-rsa 
+    - ssh-rsa 
+    - ssh-rsa 
+    - ssh-rsa 
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+###--- END Users
+
+
+###--- Misc system configuration
+# Use Azure host for timesync
+timezone: "America/Los_Angeles"
+ntp:
+  enabled: true
+  ntp_client: chrony
+  config:
+    confpath: /etc/chrony/chrony.conf
+    packages:
+     - chrony
+    service_name: chrony
+    template: |
+       ## template:jinja
+       driftfile /var/lib/chrony/chrony.drift
+       logdir /var/log/chrony
+       maxupdateskew 100.0
+       local stratum 2
+       refclock PHC /dev/ptp_hyperv poll 3 dpoll -2
+       makestep 1.0 -1
+
+###
+final_message: Post creation OS config done
+###
+
+###--- End File

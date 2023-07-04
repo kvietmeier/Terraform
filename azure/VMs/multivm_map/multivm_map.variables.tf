@@ -1,42 +1,35 @@
 ###===================================================================================###
 #   Copyright (C) 2022 Intel Corporation
 #   SPDX-License-Identifier: Apache-2.0
-###===================================================================================###
-#  File:  linux.vm.variables.tf
+###=======================================================================i===========###
+#  File:  variables.tf
 #  Created By: Karl Vietmeier
 #
-#  Terraform Template Code
-#  Purpose: Create a single Linux VM
-#
-#  Files in Module:
-#    linux.vm.main.tf
-#    linux.vm.variables.tf
-#    linux.vm.variables.tfvars
-#    linux.vm.variables.tfvars.txt
-#
-#  Usage:
-#  terraform apply --auto-approve -var-file=".\linux.vm.variables.tfvars"
-#  terraform destroy --auto-approve -var-file=".\linux.vm.variables.tfvars"
+#  Define variables used in main.tf
 #
 ###===================================================================================###
 
 
-variable "prefix" {
-  description = "The prefix which should be used for all resources in this example"
-  type        = string
-}
+###===================================================================================###
+###  Infrastructure
+###===================================================================================###
 
-variable "region" {
-  description = "The Azure Region in which all resource will be created."
-  type        = string
-}
+# Azure Region 
+variable "region" { type = string }
 
-variable "vm_name" { type = string }
+# Misc dimensioning/scale parameters
+variable "resource_prefix" { type = string }
+variable "vm_prefix" { type = string }
+variable "node_count" { type = number }
 
 
-###==================================================================================###
-###     Network Configurations
-###==================================================================================###
+###===================================================================================###
+###  Networking
+###===================================================================================###
+
+# Hub resources for vnet peering
+variable "hub-rg" { type = string }
+variable "hub-vnet" { type = string }
 
 # Allow list for NSG
 variable "whitelist_ips" {
@@ -44,11 +37,7 @@ variable "whitelist_ips" {
   type        = list(string)
 }
 
-# Hub resources for vnet peering
-variable "hub-rg" { type = string }
-variable "hub-vnet" { type = string }
-
-# vNet address spaces/cidrs
+###--- IP Ranges
 variable "vnet_cidr" { type = list(string) }
 
 # Simple map with a default subnet - source for cidrsubnets()
@@ -58,6 +47,12 @@ variable "subnets" {
     "default" = "0"
   }
 }
+
+
+# - not used anymore
+#variable "subnet_cidrs" { type = list(string) }
+#variable "subnet1_ips" { type = list(string) }
+#variable "subnet2_ips" { type = list(string) }
 
 
 ###==================================================================================###
@@ -73,14 +68,34 @@ variable "sku" { type = string }
 variable "ver" { type = string }
 variable "caching" { type = string }
 variable "sa_type" { type = string }
-
-# For Auto Shutdown
 variable "shutdown_time" { type = string }
 variable "timezone" { type = string }
+variable "cloudinit" { type = string }
 
 # User Info
 variable "username" { type = string }
 variable "password" { type = string }
+variable "ssh_key" { type = string }
+
+# Create map(object) for VM configs
+variable "vmconfigs" {
+  description = "List of vms to create and the configuration for each."
+  type = map(object(
+      {
+        name    = string
+        size    = string
+        hostnum = string   # For static IP
+        #disks   = list(number)
+      }
+    )
+  )
+}
+
+
+###==================================================================================###
+# Environment (Tagging)
+###==================================================================================###
+variable "Environment" { type = string }
 
 
 
@@ -105,5 +120,6 @@ data "azurerm_virtual_network" "hub-vnet" {
 # data.azurerm_resource_group.hub-rg.id
 # data.azurerm_virtual_network.hub-vnet.name
 # data.azurerm_virtual_network.hub-vnet.id
+
 
 

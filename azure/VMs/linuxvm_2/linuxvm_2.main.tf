@@ -2,24 +2,24 @@
 #   Copyright (C) 2022 Intel Corporation
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
-#  File:  vmtest.main.tf
+#  File:  linuxvm_2.main.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Template Code
 #  Purpose: Create a single Linux VM
 #
 #  Files in Module:
-#    vmtest.main.tf
-#    vmtest.provider.tf
-#    vmtest.network.tf
-#    vmtest.variables.tf
-#    vmtest.tfvars      (in .gitignore)
-#    vmtest.tfvars.txt  (scrubbed for github)
+#    linuxvm_2.main.tf
+#    linuxvm_2.provider.tf
+#    linuxvm_2.network.tf
+#    linuxvm_2.variables.tf
+#    linuxvm_2.tfvars      (in .gitignore)
+#    linuxvm_2.tfvars.txt  (scrubbed for github)
 #
 /* 
   Usage:
-  terraform apply --auto-approve -var-file=".\vmtest.variables.tfvars"
-  terraform destroy --auto-approve -var-file=".\vmtest.variables.tfvars"
+  terraform apply --auto-approve -var-file=".\linuxvm_2.variables.tfvars"
+  terraform destroy --auto-approve -var-file=".\linuxvm_2.variables.tfvars"
   
   VM Provider - 
   https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine
@@ -50,7 +50,7 @@ resource "azurerm_resource_group" "linuxvm_rg" {
 ###--- Setup a cloud-init configuration file - need both parts
 # Refer to the source yaml file
 data "template_file" "system_setup" {
-  template = file("../scripts/cloud-init")
+  template = file(var.cloudinit)
 }
 
 # Render a multi-part cloud-init config making use of the file above, and other source files if required
@@ -62,7 +62,7 @@ data "template_cloudinit_config" "config" {
   #   Refer to it this way in "os_profile" 
   #   custom_data = data.template_cloudinit_config.config.rendered
   part {
-    filename     = "cloud-init"
+    filename     = "cloud-init.voltdb"
     content_type = "text/cloud-config"
     content      = data.template_file.system_setup.rendered
   }
@@ -119,30 +119,46 @@ resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
 resource "azurerm_linux_virtual_machine" "linuxvm01" {
   location                        = azurerm_resource_group.linuxvm_rg.location
   resource_group_name             = azurerm_resource_group.linuxvm_rg.name
-  name                            = var.vm_name
   size                            = var.vm_size
-  disable_password_authentication = true
+  
+  # Make sure hostname matches public IP DNS name
+  name          = var.vm_name
+  computer_name = var.vm_name
+
+  # Attach NICs (created in linuxvm_2.network)
   network_interface_ids = [
     azurerm_network_interface.primary.id,
   ]
 
   # Reference the cloud-init file rendered earlier
+  # for post bringup configuration
   custom_data = data.template_cloudinit_config.config.rendered
 
-  # Make sure hostname matches public IP DNS name
-  computer_name = var.vm_name
-
-  # Admin user
+  ###--- Admin user
   admin_username = var.username
   admin_password = var.password
+  disable_password_authentication = false
 
-  # I keep my keys in a "global" azure folder - TBD: use Azure Keyvault
   admin_ssh_key {
     username   = var.username
-    public_key = file("../../secrets/id_rsa-X1Carbon.pub")
+    public_key = file(var.ssh_key)
   }
 
-  # They changed the offer and sku for 20.04 - careful
+ ###--- End Admin User
+/*  
+  dynamic "storage_data_disk" {
+    content {
+    name = azurerm_managed_disk.lun1.name
+    managed_disk_id   = azurerm_managed_disk.lun1.id
+    disk_size_gb = azurerm_managed_disk.lun1.disk_size_gb
+    caching = "ReadWrite"
+    create_option = "Attach"
+    lun = 1
+    }
+  }
+   */
+
+  ### Image and OS configuration
   source_image_reference {
     publisher = var.publisher
     offer     = var.offer
@@ -168,6 +184,24 @@ resource "azurerm_linux_virtual_machine" "linuxvm01" {
 
 }
 ###--- End VM Creation
+
+resource "azurerm_managed_disk" "disk1" {
+  name                 = "lun17865"
+  location             = azurerm_resource_group.linuxvm_rg.location
+  resource_group_name  = azurerm_resource_group.linuxvm_rg.name
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = "100"
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "data1" {
+  managed_disk_id    = azurerm_managed_disk.disk1.id
+  virtual_machine_id = azurerm_linux_virtual_machine.linuxvm01.id
+  lun                = "10"
+  caching            = "ReadWrite"
+}
+
+
 
 ###===================================================================================###
 #      Outputs                                                                          #
