@@ -1,7 +1,14 @@
-/* ###===================================================================================###
+###===================================================================================###
+#   Copyright (C) 2022 Intel Corporation
+#   SPDX-License-Identifier: Apache-2.0
+###===================================================================================###
+
+/* Documentation/Notes
+  
   File:  aadds.main.tf
   Created By: Karl Vietmeier
   From: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/active_directory_domain_service
+        https://registry.terraform.io/providers/hashicorp/azuread/latest/docs
   
   Purpose: Create an Azure Active Directory Domain Services Instance
  
@@ -32,34 +39,7 @@
     * Create Windows Server VM for mgmt host?  Or use an existing one.
  
 
-*/ ###===================================================================================###
-
-###===================================================================================###
-###===============================#===================================================###
-###--- Configure the Azure Provider
-###===================================================================================###
-# Configure the Microsoft Azure Provider
-terraform {
-  required_providers {
-    azurerm = {
-      source = "hashicorp/azurerm"
-      version = "~>2.0"
-    }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "~>2.0"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-
-# Use the Envornment Variables
-provider "azuread" { }
-
-
+*/
 
 ###===================================================================================###
 #     Start creating infrastructure resources
@@ -72,90 +52,6 @@ resource "azurerm_resource_group" "aadds-rg" {
 
 
 ###===================================================================================###
-###    Networking Section
-###    An AAD DS Instance needs a vnet and subnet that you later peer to.
-###===================================================================================###
-
-# Create a vnet with DNS servers - required for the Domain Services
-resource "azurerm_virtual_network" "aadds-vnet" {
-  name                = "${var.prefix}-vnet"
-  address_space       = "${var.vnet_cidr}"
-  dns_servers         = "${var.dns_servers}"
-  location            = azurerm_resource_group.aadds-rg.location
-  resource_group_name = azurerm_resource_group.aadds-rg.name
-}
-
-# Need a subnet too
-resource "azurerm_subnet" "aadds-subnet" {
-  name                 = "aadds-subnet"
-  address_prefixes     = "${var.subnet_cidr}"
-  resource_group_name  = azurerm_resource_group.aadds-rg.name
-  virtual_network_name = azurerm_virtual_network.aadds-vnet.name
-}
-
-# Create NSG
-resource "azurerm_network_security_group" "aadds-nsg" {
-  name                = "aadds-nsg"
-  location            = azurerm_resource_group.aadds-rg.location
-  resource_group_name = azurerm_resource_group.aadds-rg.name
-
-  security_rule {
-    name                       = "AllowSyncWithAzureAD"
-    priority                   = 101
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    source_address_prefix      = "AzureActiveDirectoryDomainServices"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "AllowRD"
-    priority                   = 201
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "3389"
-    source_address_prefix      = "CorpNetSaw"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "AllowPSRemoting"
-    priority                   = 301
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "5986"
-    source_address_prefix      = "AzureActiveDirectoryDomainServices"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "AllowLDAPS"
-    priority                   = 401
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "636"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-}
-
-# Associate the NSG to the Subnet
-resource azurerm_subnet_network_security_group_association "nsg-map" {
-  subnet_id                 = azurerm_subnet.aadds-subnet.id
-  network_security_group_id = azurerm_network_security_group.aadds-nsg.id
-}
-
-
-###===================================================================================###
 ###    AAD DS Creation Section
 ###    https://docs.microsoft.com/en-us/azure/active-directory-domain-services/powershell-create-instance
 ###    https://docs.microsoft.com/en-us/azure/active-directory-domain-services/powershell-create-instance#create-required-azure-ad-resources
@@ -163,21 +59,24 @@ resource azurerm_subnet_network_security_group_association "nsg-map" {
 
 ###--- Need this SP to add the AAD DS, it is already created
 data "azuread_service_principal" "aadds-sp" {
-  application_id = "2565bd9d-da50-47d4-8b85-4c97f669dc36" 
+  application_id = var.domain_controller_services_id
 }
 
 ###--- AAD Config
+# Create an AD Group
 resource "azuread_group" "dc_admins" {
   display_name     = "${var.aadds-group}"
+  description      = "AADDS Administrators"
   security_enabled = true
 }
 
 resource "azuread_user" "admin" {
-  user_principal_name = "${var.user_upn}"
+  user_principal_name = "${var.dcadmin_upn}"
   display_name        = "${var.display_name}"
   password            = "${var.password}"
 }
 
+# Add the DC Admin user to the Admin group
 resource "azuread_group_member" "admin" {
   group_object_id  = azuread_group.dc_admins.object_id
   member_object_id = azuread_user.admin.object_id
@@ -185,16 +84,16 @@ resource "azuread_group_member" "admin" {
 
 ###--- Create the AAD DS
 resource "azurerm_active_directory_domain_service" "aadds-dom" {
-  name                  = "aadds-domain"
   location              = azurerm_resource_group.aadds-rg.location
   resource_group_name   = azurerm_resource_group.aadds-rg.name
 
-  domain_name           = "${var.domain}"
+  name                  = "${var.aadds_name}"
+  domain_name           = "${var.domain_name}"
   sku                   = "${var.aadds_sku}"
   filtered_sync_enabled = true
 
   initial_replica_set {
-    subnet_id = azurerm_subnet.aadds-subnet.id
+    subnet_id = azurerm_subnet.aadds-subnet["default"].id
   }
 
   notifications {

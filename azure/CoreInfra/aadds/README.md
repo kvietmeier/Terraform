@@ -1,15 +1,22 @@
 ### Create an Azure Active Directory Domain Services Instance
 
-From: [AADS Terraform Registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/active_directory_domain_service)
+Why?  Because you need it for Azure Virtual Desktop
 
+Sources:
+[Azure AD Provider](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs)
+[AADS Terraform Registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/active_directory_domain_service)
+
+**Some Notes:**
 The docs are incomplete - you need to add API Permissions to the Serice Principle - See:  
 [GitHub Issue 657](https://github.com/hashicorp/terraform-provider-azuread/issues/657)  
 [Service Principle Config](https://github.com/hashicorp/terraform-provider-azuread/blob/main/docs/guides/service_principal_configuration.md)  
 [MSFT Graph Guide](https://github.com/hashicorp/terraform-provider-azuread/blob/main/docs/guides/microsoft-graph.md)  
 
-And the Service Principle must have GA permissions in the Tenant:  
+The Service Principle must have GA permissions in the Tenant:  
 <https://docs.microsoft.com/en-us/azure/active-directory-domain-services/template-create-instance>
-  
+
+- It can take an hour to complete the creation
+
 **Important:**
 
 - You need global administrator privileges in your Azure AD tenant to enable Azure AD DS.
