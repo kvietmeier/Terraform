@@ -1,15 +1,19 @@
 ### Learn to use the Terraform Azure AD provider
 
-I maintain a Tenant/Subscription for test and development amd frwquently need to add/remove other colleagues so they can access resources. To malke that easier I creasted this simple Terraform module to create and maintain a list of users stored in a csv file.  
+I maintain a Tenant/Subscription for test and development amd frequently need to add/remove other colleagues so they can access resources. To make that easier I created this simple Terraform module to create and maintain a list of users stored in a csv file.  
 This version assumes the existence of an Azure AD group with the assigned role of "Subscription Contributor" so you can automatically add a user and allow them access tyo the default Subscription.
 
 - AD Group = "Subscription Administrators"
+
+___
 
 #### Sources
 
 - [Tutorial - Manage Azure Active Directory (AD) Users and Groups](https://learn.hashicorp.com/tutorials/terraform/azure-ad)
 - [Azure AD Provider](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/domains)
 - [Azure RM Proiver](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+
+___
 
 #### Notes
 
@@ -43,23 +47,7 @@ resource "azuread_group_member" "sub_admins" {
 }
 ```
 
-
-To make my code more portable across Tenants/Subscriptions I'm using the TF Environment variables set in the PowerShell profile:  
-
-Source a "secrets file" for the variables:
-
-```powershell
-. '<drive>:\.hideme\somesecretstuff.ps1'
-```
-
-Set the variables:
-
-```powershell
-$env:ARM_TENANT_ID       ="$TFM_TenantID"
-$env:ARM_SUBSCRIPTION_ID ="$TFM_SubID"
-$env:ARM_CLIENT_ID       ="$TFM_AppID"
-$env:ARM_CLIENT_SECRET   ="$TFM_AppSecret"
-```
+___
   
 #### My code is Built With
 
