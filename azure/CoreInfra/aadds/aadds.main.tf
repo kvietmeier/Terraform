@@ -112,9 +112,11 @@ resource "azurerm_active_directory_domain_service" "aadds-dom" {
     sync_on_prem_passwords  = true
   }
 
+  /*   
   tags = {
-    Environment = "prod"
+  Environment = var.environment
   }
+  */
 
 ###--- Need this?  "depends_on" is deprecated
 #  depends_on = [

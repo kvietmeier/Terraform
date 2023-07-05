@@ -16,8 +16,8 @@ variable "region" { type = string }
 variable "prefix" { type = string }
 
 # Misc dimensioning/scale parameters
-variable "node_count" { type = number }
-variable "timezone"   { type = string }
+variable "node_count"    { type = number }
+variable "timezone"      { type = string }
 
 # Directory/User Parameters
 variable "aadds_name"   { type = string }

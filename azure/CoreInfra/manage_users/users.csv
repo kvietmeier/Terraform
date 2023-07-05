@@ -1,7 +1,8 @@
-first_name,last_name,department,job_title,company_name,enabled
-Ridley,Scott,Administration,GuestAdmin,Terraform_Managed,true
-Jim,Triestman,Administration,GuestAdmin,Terraform_Managed,true
-Mark,Henderson,Administration,GuestAdmin,Terraform_Managed,true
-Art,LabUser,DesktopUsers,GuestUsers,Terraform_Managed,false
-Bob,LabUser,DesktopUsers,GuestUsers,Terraform_Managed,false
-Cat,LabUser,DesktopUsers,GuestUsers,Terraform_Managed,false
+first_name,last_name,department,job_title,company_name,enabled,sub_admin
+Test,User,Administration,GuestAdmin,Terraform_Managed,false,false
+Ridley,Scott,Administration,GuestAdmin,Terraform_Managed,true,false
+Jim,Triestman,Administration,SubscriptionAdmin,Terraform_Managed,true,true
+Mark,Henderson,Administration,SubscriptionAdmin,Terraform_Managed,true,true
+Art,LabUser,DesktopUsers,GuestUsers,Terraform_Managed,false,false
+Bob,LabUser,DesktopUsers,GuestUsers,Terraform_Managed,false,false
+Cat,LabUser,DesktopUsers,GuestUsers,Terraform_Managed,false,false
