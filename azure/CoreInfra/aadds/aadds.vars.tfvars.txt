@@ -4,56 +4,45 @@
 #  
 #  Assign values to the variables defined in aadds.vars.tf
 #  
-#  Rename to .tfvars which is excluded from the repo by .gitignore
+#  The source is in .gitignore
 #
 ###==================================================================================###
 
 # Basic Information
-region          = ""
-resource_prefix = ""
-timezone        = ""
-Environment     = ""
+region          = "West US 2"
+prefix          = "aadds"
+timezone        = "Pacific Standard Time"
+Environment     = "AAD DS"
 
 # Count # if you need it
 node_count      = 2
 
 # User/domain Info
-aadds-group          = ""
-user_upn             = ""
-display_name         = ""
-password             = ""
+aadds_name           = "aadds-west2"
+aadds-group          = "AAD DC Administrators"
+dcadmin_upn          = "<...>"
+display_name         = "DC Administrator"
+password             = "<...>"
+
+# AAD DS Settings
+domain_controller_services_id = "<...>" 
+aadds_sku                     = "Standard"
 
 # Domain Config
-aadds_sku            = ""
-domain = ""
+domain_name = "<...>"
+
 
 # Domain info
-
-
-
 
 ###===================================================================================###
 ###  Networking Configuration
 ###===================================================================================###
 
 # vnet address space - one up high so we won't have conflicts
-vnet_cidr = ["0.0.0.0/22"]
+vnet_cidr = ["###.###.###.###/22"]
 
-# Subnet address spaces
-subnet_cidrs = [
-  "0.0.0.0/24",
-  "0.0.0.0/24",
-]
-
-# NSG Allow List
-whitelist_ips = [
-  "0.0.0.0",     # My ISP Address
-  "0.0.0.0",
-]
-
-###---- Not using these right now.
-subnet_name = [
-  "",
-  "",
-]
-
+# Subnet address spaces - create subnet from vnet cidr
+# Subnet info for cidrsubnet()
+subnets = {
+  domain_services  = 0
+}
