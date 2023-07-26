@@ -145,10 +145,10 @@ resource "azurerm_linux_virtual_machine" "vms" {
 
   # Image and Disk Info
   source_image_reference {
-    publisher = var.publisher
-    offer     = var.offer
-    sku       = var.sku
-    version   = var.ver
+    publisher = each.value.publisher
+    offer     = each.value.offer
+    sku       = each.value.sku
+    version   = each.value.ver
   }
 
   os_disk {

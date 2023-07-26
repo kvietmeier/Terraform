@@ -59,33 +59,33 @@ variable "subnets" {
 ###     VM specific information
 ###==================================================================================###
 
-variable "vm_size" { type = string }
+#variable "vm_size" { type = string }
 
 # OS Image and Disk
-variable "publisher" { type = string }
-variable "offer" { type = string }
-variable "sku" { type = string }
-variable "ver" { type = string }
-variable "caching" { type = string }
-variable "sa_type" { type = string }
+variable "caching"       { type = string }
+variable "sa_type"       { type = string }
 variable "shutdown_time" { type = string }
-variable "timezone" { type = string }
-variable "cloudinit" { type = string }
+variable "timezone"      { type = string }
+variable "cloudinit"     { type = string }
 
 # User Info
 variable "username" { type = string }
 variable "password" { type = string }
-variable "ssh_key" { type = string }
+variable "ssh_key"  { type = string }
 
 # Create map(object) for VM configs
 variable "vmconfigs" {
-  description = "List of vms to create and the configuration for each."
+  description = "List of vms to create and a unique configuration for each."
   type = map(object(
       {
-        name    = string
-        size    = string
-        hostnum = string   # For static IP
-        #disks   = list(number)
+        name      = string
+        size      = string
+        publisher = string
+        offer     = string
+        sku       = string
+        ver       = string
+        hostnum   = string   # For static IP
+        #disks     = list(number)
       }
     )
   )
