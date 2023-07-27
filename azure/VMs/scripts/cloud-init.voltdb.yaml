@@ -2,8 +2,9 @@
 # vim: syntax=yaml
 #
 ###=============================================================================###
-# Bootstrap setup for a Linux server
-#     This entire file will take 4-5min to complete - especially compiling.
+# Bootstrap setup for a Linux server to run VoltDB
+# 
+# NOTE: This entire file/process will take 4-5min to complete - especially compiling.
 #
 # cloud-init docs:
 #   https://cloudinit.readthedocs.io/en/latest/index.html 
@@ -11,6 +12,11 @@
 # Examples:
 #   https://cloudinit.readthedocs.io/en/latest/topics/examples.html
 #
+#--- VoltDB settings:
+#    https://docs.voltactivedata.com/AdminGuide/adminmemmgt.php
+
+
+
 ###=============================================================================###
 
 # Upgrade the instance on first boot
@@ -142,7 +148,7 @@ packages:
 
 ###--- Run commands once on first boot - clone and compile useful tools
 runcmd:
-  ###--- VoltDB settings - https://docs.voltactivedata.com/AdminGuide/adminmemmgt.php
+  ###--- VoltDB System Tuning
   # Need to add the ulimit commands:
   #  ulimit -n 40000
   #  ulimit -u 10000
@@ -163,20 +169,16 @@ runcmd:
   - [systemctl, start, disable-thp.service]
   #
   # Grab Volt binaries/scripts and license from my blobstore
-  #
-  #
   - [cd, /home/azureuser]
-  - [wget, -q, -P, /home/azureuser, https://<file>]
-  - [wget, -q, -P, /home/azureuser, https://<file>]
-  - [tar, xf, ./VoltDBbindir.tar.gz]
+  - [wget, -q, -P, /home/azureuser, https://blobstore/<file>]
+  - [wget, -q, -P, /home/azureuser, https://blobstore/<file>]
+  - [tar, xf, ./VoltDBStuff.tar.gz]
   - [chown, -R, azureuser:azureuser, ./bin]
-  #$- [cd, /home/ubuntu]
-  #$- [wget, -q, -P, /home/ubuntu, https://kv82579public.blob.core.windows.net/publicfiles/VoltDBDemoFiles.tar.gz]
-  #$- [wget, -q, -P, /home/ubuntu, https://kv82579public.blob.core.windows.net/publicfiles/license.xml]
-  #$- [tar, xf, ./VoltDBDemoFiles.tar.gz]
-  #
-  # Link newer version of Python
-  # Reference:  https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg
+  ###--- End VolDB Tuning
+  # 
+  ###--- Install System/Testing Tools
+  #- Link newer version of Python
+  #- Reference:  https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg
   - [rm, /usr/bin/python3]
   - [ln, -s, /usr/bin/python3.9, /usr/bin/python3]
   - [ln, -s, /usr/lib/python3/dist-packages/apt_pkg.cpython-38-x86_64-linux-gnu.so, /usr/lib/python3/dist-packages/apt_pkg.cpython-39-x86_64-linux-gnu.so]
@@ -219,7 +221,7 @@ runcmd:
   #
   #  <place holder - this is a long process - at least 4min by itself
   #  Need to investigate, lots of options
-  #
+  ###--- End SW Compile
   ###--- System cleanup
   # So we only have one JDK version - ant/Volt is picky
   - [apt, remove, openjdk-11-jre-headless, -y]
@@ -227,7 +229,7 @@ runcmd:
   - [apt-get, autoremove, -yy]
   - [mandb, -c]
   - [apt-file, update]
-###--- End runcmd
+###--- End runcmd ---###
 
 
 ###--- Users
