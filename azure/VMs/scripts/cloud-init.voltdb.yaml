@@ -153,9 +153,7 @@ runcmd:
   - [sysctl, -w, vm.max_map_count=1048576]
   - [sysctl, -w, vm.swappiness=0]
   - [sysctl, -p]
-  # - need to know the interface numbers (not working)
-  #- [ethtool, -K, eth0, tso, off]
-  #- [ethtool, -K, eth0, gro, off]
+  # - need to know the interface numbers 
   - ethtool -K eth0 tso off
   - ethtool -K eth0 gro off
   # Enable systemd services
@@ -168,8 +166,8 @@ runcmd:
   #
   #
   - [cd, /home/azureuser]
-  - [wget, -q, -P, /home/azureuser, https://kv82579public.blob.core.windows.net/publicfiles/VoltDBbindir.tar.gz]
-  - [wget, -q, -P, /home/azureuser, https://kv82579public.blob.core.windows.net/publicfiles/license.xml]
+  - [wget, -q, -P, /home/azureuser, https://<file>]
+  - [wget, -q, -P, /home/azureuser, https://<file>]
   - [tar, xf, ./VoltDBbindir.tar.gz]
   - [chown, -R, azureuser:azureuser, ./bin]
   #$- [cd, /home/ubuntu]
