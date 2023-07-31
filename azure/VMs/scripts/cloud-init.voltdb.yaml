@@ -14,9 +14,7 @@
 #
 #--- VoltDB settings:
 #    https://docs.voltactivedata.com/AdminGuide/adminmemmgt.php
-
-
-
+#
 ###=============================================================================###
 
 # Upgrade the instance on first boot
