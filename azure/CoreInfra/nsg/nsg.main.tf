@@ -8,18 +8,10 @@
 #  Terraform Template Code
 #  Purpose: Manage the Network Security Groups in a Subscription
 #
-#  Usage (if you name the .tfvars file "terraform.tfvars" you don't need to name it explicitly):
-#  terraform apply --auto-approve 
-#  terraform destroy --auto-approve
-#
 #  This module uses map variables and for_each
 # 
 ###===================================================================================###
 
-
-###===================================================================================###
-#     Start creating infrastructure resources
-###===================================================================================###
 
 # Create resource groups from a map
 resource "azurerm_resource_group" "regionalrgs" {
