@@ -29,7 +29,7 @@ output "public_ip_address" {
 
 output "network_interface_private_ip" {
   description = "private ip addresses of the vm nics"
-  value       = values(azurerm_network_interface.internal)[*].private_ip_address
+  value       = values(azurerm_network_interface.primary)[*].private_ip_address
 }
 
 

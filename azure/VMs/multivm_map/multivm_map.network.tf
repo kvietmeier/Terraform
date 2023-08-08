@@ -40,22 +40,18 @@ resource "azurerm_subnet" "subnets" {
   address_prefixes = [cidrsubnet(var.vnet_cidr[0], 2, each.value)]
 }
 
-
-#--- Note - I am using "${var.vm_prefix}-${format("%02d", count.index)}" throughout
-#--- to create consistent naming of resources.
-#--- If I use a map, I can create named VM configs and use that
-
 # Create the Public IPs
 resource "azurerm_public_ip" "public_ips" {
   location            = azurerm_resource_group.multivm_rg.location
   resource_group_name = azurerm_resource_group.multivm_rg.name
 
-  for_each = var.vmconfigs
+  for_each          = var.vmconfigs
   name              = "${each.value.name}-PublicIP"
   allocation_method = "Dynamic"
   
   # Give it some uniqueness
-  domain_name_label   = "${each.value.name}-${random_id.pipid.hex}"
+  #domain_name_label   = "${each.value.name}-${random_id.pipid.hex}"
+  domain_name_label   = "${each.value.name}-ksv"
 }
 
 /*###- Create 2 NICs
@@ -70,6 +66,7 @@ resource "azurerm_network_interface" "primary" {
 
   for_each = var.vmconfigs
   name     = "${each.value.name}-PrimaryNIC"
+  
   enable_accelerated_networking = "true"
 
   ip_configuration {
@@ -140,12 +137,15 @@ resource "azurerm_subnet_network_security_group_association" "mapnsg" {
   network_security_group_id = azurerm_network_security_group.externalnsg.id
 }
 
-### Create a vnet peer to the hub vnet
-#   (Optional) - I do this because I have a "Linux Tools" VM in my hub vnet. 
-# Syntax is important here -
-# 1) Refer to the "source" resources in each peering block by name and the remote v
-#    net resource by its id.
-# 2) You match the vnet with its resource group in each peering block
+###===================================================================================###
+###                        Create a vnet peer to the hub vnet                         ###
+###       (Optional) - I do this because I have a "Linux Tools" VM in my hub vnet.    ###
+# 
+#  Syntax is important here -
+#   1) Refer to the "source" resources in each peering block by name and the remote v
+#      net resource by its id.
+#   2) You match the vnet with its resource group in each peering block
+#
 
 # Spoke-2-Hub Peer
 resource "azurerm_virtual_network_peering" "spoke2hub" {
