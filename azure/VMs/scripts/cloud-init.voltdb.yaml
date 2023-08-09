@@ -2,18 +2,14 @@
 # vim: syntax=yaml
 #
 ###=============================================================================###
-# Bootstrap setup for a Linux server to run VoltDB
-# 
-# NOTE: This entire file/process will take 4-5min to complete - especially compiling.
+# Bootstrap setup for a Linux server
+#     This entire file will take 4-5min to complete - especially compiling.
 #
 # cloud-init docs:
 #   https://cloudinit.readthedocs.io/en/latest/index.html 
 # 
 # Examples:
 #   https://cloudinit.readthedocs.io/en/latest/topics/examples.html
-#
-#--- VoltDB settings:
-#    https://docs.voltactivedata.com/AdminGuide/adminmemmgt.php
 #
 ###=============================================================================###
 
@@ -97,9 +93,11 @@ packages:
   - meson
   - pkg-config
   - cmake
+  # Python3
   - python3-pyelftools
   - python-pyelftools
   - python3-pip
+  - python3.9
   # Useful stuff you might need/want
   - libtool
   - screen
@@ -117,20 +115,19 @@ packages:
   - numactl
   - ifstat
   - curl
-  ### For Volt
+  ### For compiling Volt
   - tcptrack
   - bmon
   - prometheus
   - maven
   - ant 
   - ant-optional 
-  - openjdk-8-jdk
   - valgrind
   - ccache
-  - cmake
   - python-httplib2 
   - python-setuptools
   - apt-show-versions
+  #- openjdk-8-jdk
   # Need these to support apt over http
   - apt-file
   - apt-transport-https
@@ -138,15 +135,13 @@ packages:
   - curl
   - gnupg-agent
   - software-properties-common
-  # Misc packages just good to have current versions
   # Opensource Volt needs 1.8 SDK to compile
-  #- openjdk-17-jre-headless
-  - python3.9
+  - openjdk-17-jre-headless
 ###--- End Packages
 
 ###--- Run commands once on first boot - clone and compile useful tools
 runcmd:
-  ###--- VoltDB System Tuning
+  ###--- VoltDB settings - https://docs.voltactivedata.com/AdminGuide/adminmemmgt.php
   # Need to add the ulimit commands:
   #  ulimit -n 40000
   #  ulimit -u 10000
@@ -157,7 +152,9 @@ runcmd:
   - [sysctl, -w, vm.max_map_count=1048576]
   - [sysctl, -w, vm.swappiness=0]
   - [sysctl, -p]
-  # - need to know the interface numbers 
+  # - need to know the interface numbers (not working)
+  #- [ethtool, -K, eth0, tso, off]
+  #- [ethtool, -K, eth0, gro, off]
   - ethtool -K eth0 tso off
   - ethtool -K eth0 gro off
   # Enable systemd services
@@ -165,31 +162,57 @@ runcmd:
   - [systemctl, start, tune_eth0.service]
   - [systemctl, enable, disable-thp.service]
   - [systemctl, start, disable-thp.service]
-  #
-  # Grab Volt binaries/scripts and license from my blobstore
+  ###
+  #   Grab Volt binaries/scripts and license from a blobstore
+  ###
   - [cd, /home/azureuser]
-  - [wget, -q, -P, /home/azureuser, https://blobstore/<file>]
-  - [wget, -q, -P, /home/azureuser, https://blobstore/<file>]
-  - [tar, xf, ./VoltDBStuff.tar.gz]
+  - [wget, -q, -P, /home/azureuser, <URI>]
+  - [wget, -q, -P, /home/azureuser, <URI>]
+  - [wget, -q, -P, /home/azureuser, <URI>]
+  - [wget, -q, -P, /home/azureuser, <URI>]
+  - [tar, xf, ./VoltDBbindir.tar.gz]
   - [chown, -R, azureuser:azureuser, ./bin]
-  ###--- End VolDB Tuning
-  # 
-  ###--- Install System/Testing Tools
-  #- Link newer version of Python
-  #- Reference:  https://stackoverflow.com/questions/13708180/python-dev-installation-error-importerror-no-module-named-apt-pkg
-  - [rm, /usr/bin/python3]
-  - [ln, -s, /usr/bin/python3.9, /usr/bin/python3]
-  - [ln, -s, /usr/lib/python3/dist-packages/apt_pkg.cpython-38-x86_64-linux-gnu.so, /usr/lib/python3/dist-packages/apt_pkg.cpython-39-x86_64-linux-gnu.so]
+  - [tar, xf, ./voltdb-ent-11.4.tar.gz]
+  - [rm, ./voltdb-ent-11.4.tar.gz]
+  - [rm, ./VoltDBbindir.tar.gz]
+  - [chown, -R, azureuser:azureuser, ./voltdb-ent-11.4]
+  - [chown, -R, azureuser:azureuser, ./license.xml]
+  - [chown, -R, azureuser:azureuser, ./deployment-default.xml]
+  - [cd, /home/ubuntu]
+  - [wget, -q, -P, /home/ubuntu, <URI>]
+  - [wget, -q, -P, /home/ubuntu, <URI>]
+  - [wget, -q, -P, /home/ubuntu, <URI>]
+  - [wget, -q, -P, /home/ubuntu, <URI>]
+  - [tar, xf, ./VoltDBbindir.tar.gz]
+  - [chown, -R, ubuntu:ubuntu, ./bin]
+  - [tar, xf, ./voltdb-ent-11.4.tar.gz]
+  - [rm, ./voltdb-ent-11.4.tar.gz]
+  - [rm, ./VoltDBbindir.tar.gz]
+  - [chown, -R, ubuntu:ubuntu, ./voltdb-ent-11.4]
+  - [chown, -R, ubuntu:ubuntu, ./license.xml]
+  - [chown, -R, ubuntu:ubuntu, ./deployment-default.xml]
+  # Put a backup copy in /root
+  - [wget, -q, -P, /root, <URI>]
+  - [wget, -q, -P, /root, <URI>]
+  - [wget, -q, -P, /root, <URI>]
+  - [wget, -q, -P, /root, <URI>]
   #
-  # Needed for DPDK
+  ###--- Needed for DPDK
   - [pip3, install, ninja]
   - [pip3, install, meson]
   #
-  # Create some directories
+  # Create some default project directories for the users
   - [mkdir, /root/output]
-  - [mkdir, /root/voltdb]
+  - [mkdir, /home/azureuser/output]
+  - [mkdir, /home/azureuser/scripts]
+  - [chown, azureuser:azureuser, /home/azureuser/output]
+  - [chown, azureuser:azureuser, /home/azureuser/scripts]
+  - [mkdir, /home/ubuntu/output]
+  - [mkdir, /home/ubuntu/scripts]
+  - [chown, ubuntu:ubuntu, /home/ubuntu/output]
+  - [chown, ubuntu:ubuntu, /home/ubuntu/scripts]
   #
-  ###--- Compile Software 
+  ###--- Compile Testing Software 
   - [mkdir, /root/git]
   # Compile/install iperf3
   - [cd, /root/git]
@@ -219,32 +242,31 @@ runcmd:
   #
   #  <place holder - this is a long process - at least 4min by itself
   #  Need to investigate, lots of options
-  ###--- End SW Compile
+  #
   ###--- System cleanup
-  # So we only have one JDK version - ant/Volt is picky
-  - [apt, remove, openjdk-11-jre-headless, -y]
+  ### apt housekeeping
   - [apt-get, clean, -yy]
   - [apt-get, autoremove, -yy]
   - [mandb, -c]
   - [apt-file, update]
-###--- End runcmd ---###
+###--- End runcmd
 
 
 ###--- Users
 users:
-  # Keep the original default user (azureuser)
+  # Configure defined "default" user with additional keys and sudo access
   - name: default
     ssh-authorized-keys:
-    - ssh-rsa <key>
-    - ssh-rsa <key>
+    - ssh-rsa  <key1>
+    - ssh-rsa  <key2>
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
-  # Adding VoltDB user - With SSH keys
-  - name: voltdbuser
+  # Configure Azure added user - With additional SSH keys
+  - name: ubuntu
     ssh-authorized-keys:
-    - ssh-rsa <key>
-    - ssh-rsa <key>
+    - ssh-rsa  <key1>
+    - ssh-rsa  <key2>
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
