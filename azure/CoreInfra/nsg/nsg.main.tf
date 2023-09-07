@@ -30,11 +30,11 @@ resource "azurerm_network_security_group" "default-nsg" {
 # A "bulk" rule to allow access to a set of standard services (FTP, SSH, RDP, SMB, etc)
 # We want the same rule for all regions - this rule filters incoming traffic on the source IP
   security_rule {
-    name                        = "CommonServices"
+    name                        = "InterNetFilter"
     access                      = "Allow"
     direction                   = "Inbound"
     priority                    = 100
-    protocol                    = "Tcp"
+    protocol                    = "*"
     source_port_range           = "*"
     source_address_prefixes     = "${var.whitelist_ips}"
     destination_port_ranges     = "${var.destination_ports}"
