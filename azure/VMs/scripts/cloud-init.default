@@ -31,26 +31,36 @@ apt:
 
 # Install additional packages on first boot
 packages:
-  # DPDK Dependencies
+  # Development Tools
   - librdmacm-dev
   - librdmacm1
   - libnuma-dev
   - libmnl-dev
   - libpcap-dev
-  - autoconf 
+  - libssl-dev
+  - libcurl4-gnutls-dev
+  - libjson-c-dev
+  - uuid-dev
+  - libglib2.0-dev
+  - libgtk2.0-dev
   - lib32z1
+  - libsctp1
+  - libtool
+  - autoconf 
+  - automake 
   - meson
   - pkg-config
   - cmake
+  - build-essential
     # Python3
   - python3-pyelftools
-  #- python-pyelftools
   - python3-pip
-  # For iperf3
-  - libsctp1
+  # For TPM
+  - tpm2-tools
+  # Install perf utilities
+  - linux-tools-generic
+  - linux-tools-azure
   # Useful stuff you need
-  - build-essential
-  - libtool
   - screen
   - git
   - tree
@@ -70,10 +80,7 @@ packages:
   - wget
   - jq
   - software-properties-common
-  # Install perf utilities
-  - linux-tools-generic
-  - linux-tools-azure
-  #zure perf/system related tools
+  # perf/system related tools
   - dstat
   - numactl
   - cpuinfo
