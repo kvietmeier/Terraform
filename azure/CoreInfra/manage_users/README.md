@@ -1,7 +1,7 @@
 ### Learn to use the Terraform Azure AD provider
 
 I maintain a Tenant/Subscription for test and development amd frequently need to add/remove other colleagues so they can access resources. To make that easier I created this simple Terraform module to create and maintain a list of users stored in a csv file.  
-This version assumes the existence of an Azure AD group with the assigned role of "Subscription Contributor" so you can automatically add a user and allow them access tyo the default Subscription.
+This version assumes the existence of an Azure AD group with the assigned role of "Subscription Contributor" so you can automatically add a user and allow them access to the default Subscription.
 
 - AD Group = "Subscription Administrators"
 

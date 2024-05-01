@@ -1,12 +1,12 @@
 ### Create a multi-vm environment with 2 NICs per VM
 
-This template build a testing platform for Telco related workloads leveraging:
+This template builds a testing platform for distributed IaaS workloads leveraging:
 
 * VMs configured in a map(object) so they can have different configs
 * Proximity Placement Groups
 * Network Security Groups
 * 2 NICs per VM - one with a Public IP, one internal Only
-* Deterministic/static IP assigment on NICs
+* Deterministic/static IP assigment on NICs (For Ansible later)
 * Accelerated Networking
 * Bootdiags for Serial Console access
 * cloud-init for OS setup
@@ -16,9 +16,11 @@ This template build a testing platform for Telco related workloads leveraging:
 ToDo -
 
 * Refactor to be module based
+* Add data disks
 * Document key template code that is poorly documented in general
 * Use existing NSGs
 * Better output
+* Create storage - Azure Files or ANF
 
 ___
 
@@ -50,7 +52,7 @@ resource "azurerm_network_interface" "primary" {
 
 ```
 
-Creating the map(object) for the VMs
+Creating the map(object) for the VMs in variables file
 
 ```terraform
 # Create map(object) for VM configs
@@ -67,10 +69,11 @@ variable "vmconfigs" {
 }
 ```
 
-Definition in tfvars:
+Definition in tfvars - VMs can have different configurations:
 
 ```terraform
 # VM Configs - keep it simple for now
+# hostnum is for the static IP
 # map syntax
 vmconfigs = {
   "master" = {
@@ -104,7 +107,7 @@ ___
 * [Terraform](https://www.terraform.io/) - Terraform
 * [Azure](portal.azure.com) - Azure Portal
 
-#### All run under PowerShell on Windows 10
+#### All run under PowerShell on Windows 11
 
 * [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
 
@@ -121,4 +124,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 * Intel colleagues
 * Stack Exchange
 * GitHub issues
-* Terraform documenmtation
+* Terraform documentation
