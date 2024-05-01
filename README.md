@@ -10,7 +10,7 @@ Terraform projects for Azure.
 
 * InstallUpgradeTerraform.ps1 is a small PS script I wrote to upgrade the Terraform binary
 
-Directories
+#### Directories
 
 ```text
 ├── scripts
