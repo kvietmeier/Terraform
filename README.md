@@ -13,10 +13,11 @@ Directories
 ```text
 ├── azure
 │   │── AKS          (AKS cluster projects)
-│   │── CoreInfra    (Production modules to manage my infrastructure)
+│   │── AVD          (AVD projects - placeholder)
 │   │── VMs          (What it says)
+│   │── CoreInfra    (Production modules to manage my infrastructure)
 │   │── samples      (Non-functional code samples)
-│   │── secrets      (in .gitignore)
+│   │── secrets      (certs, cloud-init files, etc in .gitignore)
 │   │── templates    (templates for new projects)
 │   │── testing      (Primary working Directory)
 │   |── README.md
