@@ -92,7 +92,7 @@ function tfshow {
 * [Terraform](https://www.terraform.io/) - Terraform
 * [Azure](portal.azure.com) - Azure Portal
 
-#### All run under PowerShell on Windows 10
+#### All run under PowerShell on Windows 11
 
 * [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
 
