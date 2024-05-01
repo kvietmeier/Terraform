@@ -1,6 +1,6 @@
 ### Terraform Projects
 
-Terraform projects. Only the Azure folder is currently under active development.
+Terraform projects for Azure.
 
 #### Installing
 
@@ -11,6 +11,8 @@ Terraform projects. Only the Azure folder is currently under active development.
 Directories
 
 ```text
+├── scripts
+│   │── InstallUpgradeTerraform.ps1
 ├── azure
 │   │── AKS          (AKS cluster projects)
 │   │── AVD          (AVD projects - placeholder)
