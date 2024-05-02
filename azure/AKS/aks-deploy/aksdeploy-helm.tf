@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  aks2-helm.tf
+#  File:  aksdeploy-helm.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Module Code

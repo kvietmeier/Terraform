@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  variables.tf
+#  File:  aksdeploy-variables.tf
 #  Created By: Karl Vietmeier
 #
 #  Variable definitions with defaults

@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  outputs.tf
+#  File:  aksbillrun-outputs.tf
 #  Created By: Karl Vietmeier
 #
 #  Output cluster information

@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  provider.tf
+#  File:  aksdeploy-provider.tf
 #  Created By: Karl Vietmeier
 #
 #  Purpose: Configure Provider

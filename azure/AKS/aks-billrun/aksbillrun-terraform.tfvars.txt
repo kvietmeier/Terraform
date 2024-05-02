@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  terraform.tfvars
+#  File:  aksbillrun-terraform.tfvars.txt
 #  Created By: Karl Vietmeier
 #  
 #  Sanitized version of .tfvars for posting up to the repo.

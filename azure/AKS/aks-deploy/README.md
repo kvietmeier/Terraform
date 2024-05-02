@@ -2,7 +2,15 @@
 
 **----  Working  ----**
 
-To install Cilium with Helm charts you can use the Helm provider. Look at aks2-helm.tf for the full code.
+To install Cilium with Helm charts you can use the Helm provider. Look at aksdeploy-helm.tf for the full code.
+
+#### To Do:
+
+Refactor to use the new integrated cilium CNI
+
+--
+
+#### Example code -
 
 ```terraform
 ###----- Helm Charts

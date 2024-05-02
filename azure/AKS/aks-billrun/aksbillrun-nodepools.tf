@@ -3,7 +3,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  aks2-nodepools.tf
+#  File:  aksbillrun-nodepools.tf
 #  Created By: Karl Vietmeier
 #
 #  Purpose:  Create additional nodepools for the cluster
