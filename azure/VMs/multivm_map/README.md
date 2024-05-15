@@ -28,6 +28,8 @@ ___
 
 Static IP assignment using cidrhost() - "hostnum" for IP is set in VM map.
 
+We do this so we can prepopulate the Ansible inventory file with known IPs.
+
 ```terraform
 
 resource "azurerm_network_interface" "primary" {
