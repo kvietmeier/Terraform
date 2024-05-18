@@ -2,7 +2,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  multivm.outputs.tf
+#  File:  db_benchmarking.outputs.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Module Code

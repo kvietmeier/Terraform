@@ -2,7 +2,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  multivm_map.network.tf
+#  File:  db_benchmarking.network.tf
 #  Created By: Karl Vietmeier
 #
 #  Purpose:  Setup networking for VMs

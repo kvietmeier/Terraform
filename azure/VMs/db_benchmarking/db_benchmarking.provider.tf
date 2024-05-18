@@ -2,7 +2,7 @@
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  multivm.provider.tf
+#  File:  db_benchmarking.provider.tf
 #  Created By: Karl Vietmeier
 #
 #  Purpose:  Configure the Azure Provider
