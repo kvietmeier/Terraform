@@ -1,0 +1,87 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "disks_lun17865_name": {
+            "value": null
+        },
+        "virtualMachines_mgmt01_name": {
+            "value": null
+        },
+        "virtualMachines_dbase01_name": {
+            "value": null
+        },
+        "virtualMachines_dbase02_name": {
+            "value": null
+        },
+        "virtualMachines_dbase03_name": {
+            "value": null
+        },
+        "virtualNetworks_iaastest_network_name": {
+            "value": null
+        },
+        "publicIPAddresses_mgmt01_PublicIP_name": {
+            "value": null
+        },
+        "networkSecurityGroups_AllowInbound_name": {
+            "value": null
+        },
+        "publicIPAddresses_dbase01_PublicIP_name": {
+            "value": null
+        },
+        "publicIPAddresses_dbase02_PublicIP_name": {
+            "value": null
+        },
+        "publicIPAddresses_dbase03_PublicIP_name": {
+            "value": null
+        },
+        "networkInterfaces_mgmt01_PrimaryNIC_name": {
+            "value": null
+        },
+        "networkInterfaces_dbase01_PrimaryNIC_name": {
+            "value": null
+        },
+        "networkInterfaces_dbase02_PrimaryNIC_name": {
+            "value": null
+        },
+        "networkInterfaces_dbase03_PrimaryNIC_name": {
+            "value": null
+        },
+        "networkInterfaces_mgmt01_InternalNIC_name": {
+            "value": null
+        },
+        "storageAccounts_diag665ec5419670d527_name": {
+            "value": null
+        },
+        "networkInterfaces_dbase01_InternalNIC_name": {
+            "value": null
+        },
+        "networkInterfaces_dbase02_InternalNIC_name": {
+            "value": null
+        },
+        "networkInterfaces_dbase03_InternalNIC_name": {
+            "value": null
+        },
+        "schedules_shutdown_computevm_mgmt01_name": {
+            "value": null
+        },
+        "schedules_shutdown_computevm_dbase01_name": {
+            "value": null
+        },
+        "schedules_shutdown_computevm_dbase02_name": {
+            "value": null
+        },
+        "schedules_shutdown_computevm_dbase03_name": {
+            "value": null
+        },
+        "storageAccounts_attached665ec5419670d527_name": {
+            "value": null
+        },
+        "proximityPlacementGroups_VMProximityPlacementGroup_name": {
+            "value": null
+        },
+        "virtualNetworks_corevnet01_wus2_externalid": {
+            "value": null
+        }
+    }
+}
