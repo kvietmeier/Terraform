@@ -22,7 +22,7 @@
 #return
 
 # What version are we downloading?
-$TFVer    = "1.6.6"
+$TFVer    = "1.8.3"
 $TFUrl    = "https://releases.hashicorp.com/terraform/"
 $VaultVer = "1.16.2"
 $VaultURL = "https://releases.hashicorp.com/vault/"
