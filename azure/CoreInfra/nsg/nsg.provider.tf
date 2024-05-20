@@ -20,12 +20,12 @@ terraform {
       version = "~>2.0"
     }
   }
-  cloud {
-    organization = "kcvconsulting"
-    workspaces {
-      name = "coreinfra"
-    }
-  }
+  #cloud {
+  #  organization = "kcvconsulting"
+  #  workspaces {
+    # name = "coreinfra"
+   # }
+  #}
 }
 
 provider "azurerm" {
