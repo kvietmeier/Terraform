@@ -1,4 +1,4 @@
-### Create a multi-vm environment with 2 NICs per VM
+### Linux Database IaaS Infrastructure - multiple VMs 
 
 This template builds a testing platform for distributed IaaS workloads leveraging:
 
@@ -10,23 +10,24 @@ This template builds a testing platform for distributed IaaS workloads leveragin
 * Accelerated Networking
 * Bootdiags for Serial Console access
 * cloud-init for OS setup
-* Auto Shutdown enabled
-* Peer vnet to existing hub vnet with Ansible/utilities server.
+* Auto Shutdown enabled (during testing - keep costs down)
+* Use existing Resources in Azure - Peer vnet to existing hub vnet with Ansible/utilities server.
 
 ToDo -
 
 * Refactor to be module based
-* Add data disks
-* Document key template code that is poorly documented in general
 * Use existing NSGs
 * Better output
-* Create storage - Azure Files or ANF
+* Map storage - Disks, Azure Files, or ANF  (creation is easy - attaching trickier)
+* Improve documentation - some tricky template code is poorly explained
 
 ___
 
 #### Code documentation - In Progress
 
-Static IP assignment using cidrhost() - "hostnum" for IP is set in VM map.
+Static IP assignment using cidrhost() - "hostnum" for IP is set in VM map to "attach" an IP address to the VM.
+
+We do this so we can prepopulate the Ansible inventory file with known IPs and use a static hosts file.
 
 ```terraform
 
@@ -88,12 +89,12 @@ vmconfigs = {
   },
   "worker2" = {
     name = "worker02"
-    size = "Standard_D4ds_v5"
+    size = "Standard_D8ds_v5"
     hostnum = "7"
   },
   "worker3" = {
     name = "worker03"
-    size = "Standard_D4ds_v5"
+    size = "Standard_D16ds_v5"
     hostnum = "8"
   }
 }

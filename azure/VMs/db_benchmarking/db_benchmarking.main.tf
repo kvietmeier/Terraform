@@ -1,9 +1,8 @@
 ###===================================================================================###
-#   Copyright (C) 2022 Intel Corporation
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 /* 
-  File:  multivm.main.tf
+  File:  db_benchmarking.main.tf
   Created By: Karl Vietmeier
 
   Purpose: Create multiple unique VMs each with 2 NICs for dev/test activities

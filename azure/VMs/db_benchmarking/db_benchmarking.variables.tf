@@ -1,8 +1,7 @@
 ###===================================================================================###
-#   Copyright (C) 2022 Intel Corporation
 #   SPDX-License-Identifier: Apache-2.0
 ###=======================================================================i===========###
-#  File:  variables.tf
+#  File:  db_benchmarking.variables.tf
 #  Created By: Karl Vietmeier
 #
 #  Define variables used in main.tf

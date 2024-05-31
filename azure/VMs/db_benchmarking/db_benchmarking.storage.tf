@@ -1,9 +1,8 @@
 ###===================================================================================###
-#   Copyright (C) 2022 Intel Corporation
 #   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
 #
-#  File:  multivm_map.storage.tf
+#  File:  db_benchmarking.storage.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Module Code

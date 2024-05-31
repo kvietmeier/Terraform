@@ -8,6 +8,12 @@
   Assumes:
     * You want to use C:\Temp as a target
     * You have a C:\Users\$UserName\bin dir for standalone binaries
+  
+  Vault URL:
+  https://releases.hashicorp.com/vault/1.16.2/vault_1.16.2_windows_amd64.zip
+
+  ToDo:
+  Add code to download/upgrade Vault
 
 ####################################################################################>
 
@@ -16,7 +22,7 @@
 #return
 
 # What version are we downloading?
-$TFVer       = "1.8.3"
+$TFVer       = "1.6.6"
 $TFUrl       = "https://releases.hashicorp.com/terraform/"
 
 # Uncomment to get all of the available versions:

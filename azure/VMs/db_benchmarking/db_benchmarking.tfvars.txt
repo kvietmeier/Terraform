@@ -1,5 +1,5 @@
 ###==================================================================================###
-#  File:  variables.tfvars.txt
+#  File:  db_benchmarking.tfvars.txt
 #  Created By: Karl Vietmeier
 #  
 #  Assign values to the variables defined in variables.tf
