@@ -8,13 +8,14 @@ Terraform projects for Azure.
 
 #### Notes
 
-* InstallUpgradeTerraform.ps1 is a small PS script I wrote to upgrade the Terraform binary
+* InstallUpgradeTerraform.ps1 is a small PS script I wrote to upgrade/install the Terraform binary
 
 #### Directories
 
 ```text
 ├── scripts
 │   │── InstallUpgradeTerraform.ps1
+|
 ├── azure
 │   │── AKS          (AKS cluster projects)
 │   │── AVD          (AVD projects - placeholder)
@@ -25,6 +26,10 @@ Terraform projects for Azure.
 │   │── templates    (templates for new projects)
 │   │── testing      (Primary working Directory)
 │   |── README.md
+|
+├── gcp
+│   |── README.md
+|
 ├── LICENSE.md
 └── README.md
 ```

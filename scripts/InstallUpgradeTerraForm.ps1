@@ -22,7 +22,8 @@
 #return
 
 # What version are we downloading?
-$TFVer       = "1.6.6"
+# https://releases.hashicorp.com/terraform/
+$TFVer       = "1.9.5"
 $TFUrl       = "https://releases.hashicorp.com/terraform/"
 
 # Uncomment to get all of the available versions:
