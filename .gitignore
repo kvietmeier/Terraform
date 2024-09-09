@@ -1,0 +1,84 @@
+###====================================================================================###
+###    Stuff to exclude from the remote repo
+###====================================================================================###
+
+# exclude the ignore file
+#.gitignore
+
+###==========================  Terraform Specific
+# Local .terraform directories
+**/.terraform/*
+
+# Misc scratch directories
+**/samples/*
+**/secrets/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+.terraform.lock.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Cloud init - can have SSH keys in it
+cloud-init
+
+# Exclude all .tfvars files, which are likely to contain sentitive data, such as
+# password, private keys, and other secrets. These should not be part of version
+# control as they are data points which are potentially sensitive and subject
+# to change depending on the environment.
+#
+*.tfvars
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+#
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+# example: *tfplan*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+
+###========================== Default entries
+HISTORY.txt
+README.txt
+
+# Ignore "Private" files directories
+/Private/
+
+# Ignore the azure_arc repo
+/azure_arc/
+
+# Ignore temporary or scratch files
+**/foo*
+**/*.log
+[Tt]emp/
+*.log
+*.bak
+*.[Tt]emp
+*.tmp
+*[Ss]cratch*
+
+# Ignore possibly very large files
+*.iso
+*.vhdx
+*.vhd
+*.zip
+
+# Exclude vim swap files and backups
+*.swap
+*.sw
+*~
+ 
