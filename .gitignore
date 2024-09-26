@@ -13,6 +13,8 @@
 **/samples/*
 **/secrets/*
 
+**/vast/**
+
 # .tfstate files
 *.tfstate
 *.tfstate.*

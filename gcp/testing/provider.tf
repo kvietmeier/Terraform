@@ -7,9 +7,21 @@
 # 
 ###===================================================================================###
 
-#locals {
-# terraform_service_account = "karlv-servacct-tf@karlv-landingzone.iam.gserviceaccount.com"
-#}
+/*
+locals {
+ terraform_service_account = "karlv-servacct-tform@clouddev-itdesk124.iam.gserviceaccount.com"
+}
+*/
+
+/*
+# Get access token
+data "google_service_account_access_token" "default" {
+  provider               	= google.impersonation
+  target_service_account 	= "karlv-servacct-tform@clouddev-itdesk124.iam.gserviceaccount.com"
+  scopes                 	= ["userinfo-email", "cloud-platform"]
+  lifetime               	= "1200s"
+}
+*/
 
 terraform {
   required_providers {
@@ -28,18 +40,11 @@ provider "google" {
  ]
 }
 
-# Get access token
-#data "google_service_account_access_token" "default" {
-# provider               	= google.impersonation
-# target_service_account 	= "karlv-servacct-tf@karlv-landingzone.iam.gserviceaccount.com"
-# scopes                 	= ["userinfo-email", "cloud-platform"]
-# lifetime               	= "1200s"
-#}
-
 # Configuration Options:
 provider "google" {
-  project = "karlv-landingzone"
+  project = "clouddev-itdesk124"
   region  = "us-west2"
   zone    = "us-west2-a"
-  impersonate_service_account = "karlv-servacct-tf@karlv-landingzone.iam.gserviceaccount.com"
+  #impersonate_service_account = "karlv-servacct-tform@clouddev-itdesk124.iam.gserviceaccount.com"
 }
+
