@@ -95,6 +95,13 @@ variable "subnet_cidr" {
 }
 
 ###--- Firewall
+
+# FW Name
+variable "fw_rule_name" {
+  description = "Name for rule"
+  type        = string
+}
+
 # Allow list for Firewall Rules
 variable whitelist_ips {
   description = "A list of IP CIDR ranges to allow as clients. Do not use Azure tags like `Internet`."

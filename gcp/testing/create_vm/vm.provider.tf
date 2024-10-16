@@ -19,15 +19,6 @@ terraform {
   }
 }
 
-/*
-provider "google" {
-  project   = "clouddev-itdesk124"
-  #project   = "913067105288"
-  region    = "us-west2"
-  zone      = "us-west2-a"
-}
-*/
-
 provider "google" {
   project = "clouddev-itdesk124"
   region  = "us-west2"

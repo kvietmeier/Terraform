@@ -27,6 +27,18 @@ Put Usage Documentation here
 #     Start creating infrastructure resources
 ###===================================================================================###
 
+# Setup cloud-init
+data "cloudinit_config" "conf" {
+  gzip = false
+  base64_encode = false
+
+  part {
+    content_type = "text/cloud-config"
+    content = file("../../secrets/cloud-init-dnfbased.default.yaml")
+    filename = "conf.yaml"
+  }
+}
+
 
 # Network resource (optional: create a new VPC)
 resource "google_compute_network" "vpc_network" {
@@ -44,7 +56,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 
 # Firewall rule to allow only specific IP addresses
 resource "google_compute_firewall" "allow_specific_ip" {
-  name    = "allow-specific-ip"
+  name    = var.fw_rule_name
   network = google_compute_network.vpc_network.id
 
   allow {
@@ -77,7 +89,9 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   metadata = {
-    ssh-keys = "${var.ssh_user}:${local.ssh_key_content}"
+    user-data          = "${data.cloudinit_config.conf.rendered}"
+    ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
+    serial-port-enable = true # Enable serial port access for debugging
   }
 
   tags = ["kv-linux", "kv-infra"]
