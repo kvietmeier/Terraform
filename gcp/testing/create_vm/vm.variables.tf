@@ -67,14 +67,9 @@ variable "ssh_key_file" {
 
 
 ###--- Network
-# Source IP allowed in the firewall rule
-variable "source_ip" {
-  description = "The IP address allowed in the firewall rule"
-  type        = string
-}
 
 # Network name
-variable "vpc_network" {
+variable "vpc_name" {
   description = "The name of the VPC network"
   type        = string
   default     = "custom-network"
@@ -87,15 +82,26 @@ variable "subnet_name" {
   default     = "custom-subnet"
 }
 
+/*
 # Subnet CIDR range
 variable "subnet_cidr" {
   description = "CIDR range for the subnet"
   type        = string
   default     = "10.0.0.0/24"
 }
+*/
+
+###=================          Locals                ==================###
+
+# Read the SSH public key
+locals {
+  ssh_key_content = file(var.ssh_key_file)
+}
+
+
 
 ###--- Firewall
-
+/*
 # FW Name
 variable "fw_rule_name" {
   description = "Name for rule"
@@ -120,17 +126,7 @@ variable "net_protocol" {
   type        = string
   default     = "tcp"
 }
-
-
-
-
-
-###=================          Locals                ==================###
-
-# Read the SSH public key
-locals {
-  ssh_key_content = file(var.ssh_key_file)
-}
+*/
 
 
 
