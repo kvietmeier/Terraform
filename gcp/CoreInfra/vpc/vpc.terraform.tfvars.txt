@@ -1,0 +1,33 @@
+###===================================================================================###
+#
+#  File:  terraform.tfvars
+#  Created By: Karl Vietmeier
+#
+#  This is a "sanitized" version of the terraform.tfvars file that is excluded from the repo. 
+#  Any values that aren't sensitive are left defined, amy sensitive values are stubbed out.
+#
+#  Edit as required
+#
+###===================================================================================###
+
+# Project Info
+project_id      = 
+region          = 
+zone            =
+
+# VPC Config
+vpc_name    = "default"
+
+###--- Firewall
+fw_rule_name      = "default_services"
+net_protocol      = "tcp"
+
+# Destination port list - standard services you might need
+tcp_ports = [ "20", "21", "22", "45", "53", "88", "80", "119", "443", "563", "3389", "8080" ]
+udp_ports = [ "53", "67", "68" ]  # DNS and DHCP
+
+# NSG Allow List - modify as needed
+whitelist_ips = [
+  "35.191.0.0/16",    # GCP services range for health checks and managed services
+  "130.211.0.0/22"    # GCP services range for health checks and managed services
+]

@@ -74,7 +74,7 @@ variable "source_ip" {
 }
 
 # Network name
-variable "network_name" {
+variable "vpc_network" {
   description = "The name of the VPC network"
   type        = string
   default     = "custom-network"

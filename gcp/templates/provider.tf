@@ -6,32 +6,30 @@
 #  Purpose: Configure Provider
 # 
 ###===================================================================================###
-# Configure the Microsoft Azure Provider TerraForm
+###===================================================================================###
+#
+#  File:  provider.tf
+#  Created By: Karl Vietmeier
+#
+#  Purpose: Configure the GCP Provider TerraForm
+# 
+#  Google defaults set as Env: vars
+#
+###===================================================================================###
+
 
 terraform {
-  required_version = ">=1.4"
-
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~>3.56"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~>3.0"
+  google = {
+      source  = "hashicorp/google"
+      version = "4.51.0"
     }
   }
 }
 
-provider "azurerm" {
-  features {
-   resource_group {
-       # Go ahead and whack anything in the RG
-       prevent_deletion_if_contains_resources = false
-   }
-  }
-}
-
-provider "azurerm" {
-  features {}
+# Set these vars
+provider "google" {
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
 }

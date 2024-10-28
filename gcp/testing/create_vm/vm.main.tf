@@ -83,6 +83,7 @@ resource "google_compute_instance" "vm_instance" {
   network_interface {
     network     = google_compute_network.vpc_network.id
     subnetwork  = google_compute_subnetwork.subnetwork.id
+    
     access_config {    # This gives the VM a public IP
       nat_ip = google_compute_address.vm_public_ip.address
     }
