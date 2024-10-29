@@ -42,10 +42,15 @@ provider "google" {
 ###===================================================================================###
 
 
+###--- Create the FW Rule/s
 resource "google_compute_firewall" "default_vpc_firewall" {
   name        = var.fw_rule_name
   network     = var.vpc_name            # Set to Default VPC network
   description = var.description
+
+  # Define the direction of traffic
+  direction = var.rule_direction
+  priority  = var.rule_priority
 
   allow {
     protocol = "tcp"
@@ -63,5 +68,5 @@ resource "google_compute_firewall" "default_vpc_firewall" {
 
   source_ranges = var.allowed_ranges    # Ingress filter
 
-  target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
+  #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
 }

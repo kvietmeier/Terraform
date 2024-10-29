@@ -38,8 +38,20 @@ variable "fw_rule_name" {
 }
 
 variable "description" {
-  description = "explanation"
+  description = "Setup standard default ports and filters"
   type        = string
+}
+
+variable "rule_direction" {
+  description = "Ingress or Egress"
+  type        = string
+  default     = "INGRESS"
+}
+
+variable "rule_priority" {
+  description = "Priority on stack"
+  type        = string
+  default     = "500"
 }
 
 
