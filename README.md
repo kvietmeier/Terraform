@@ -19,15 +19,19 @@ Terraform projects for Azure.
 ├── azure
 │   │── AKS          (AKS cluster projects)
 │   │── AVD          (AVD projects - placeholder)
-│   │── VMs          (What it says)
 │   │── CoreInfra    (Production modules to manage my infrastructure)
 │   │── samples      (Non-functional code samples)
 │   │── secrets      (certs, cloud-init files, etc in .gitignore)
 │   │── templates    (templates for new projects)
 │   │── testing      (Primary working Directory)
+│   │── VMs          (What it says)
 │   |── README.md
 |
 ├── gcp
+│   │── CoreInfra    (Production modules to manage my infrastructure)
+│   │── scripts      (Misc scripts and config files)
+│   │── templates    (templates for new projects)
+│   │── testing      (Primary working Directory for new projects)
 │   |── README.md
 |
 ├── LICENSE.md
@@ -100,7 +104,6 @@ function tfshow {
 
 * [Visual Studio Code](https://code.visualstudio.com/) - Editor
 * [Terraform](https://www.terraform.io/) - Terraform
-* [Azure](portal.azure.com) - Azure Portal
 
 #### All run under PowerShell on Windows 11
 
