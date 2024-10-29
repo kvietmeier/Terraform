@@ -5,6 +5,7 @@
 #
 #  Terraform Module Code
 #  Purpose:  Create a VM
+#            With basic settings
 # 
 #  Files in Module:
 #    main.tf
