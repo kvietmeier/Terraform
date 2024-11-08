@@ -60,9 +60,14 @@ variable "ssh_user" {
   type        = string
 }
 
-variable "ssh_key_file" {
-  description = "Path to the SSH public key file"
+#variable "ssh_key_file" {
+#  description = "Path to the SSH public key file"
+#  type        = string
+#}
+#
+variable "ssh_public_key" {
   type        = string
+  description = "A public SSH key that will be used for user centos"
 }
 
 
@@ -94,9 +99,9 @@ variable "subnet_cidr" {
 ###=================          Locals                ==================###
 
 # Read the SSH public key
-locals {
-  ssh_key_content = file(var.ssh_key_file)
-}
+#locals {
+#  ssh_key_content = file(var.ssh_key_file)
+#}
 
 
 

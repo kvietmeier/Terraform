@@ -42,19 +42,23 @@ provider "google" {
 ###===================================================================================###
 
 
-###--- Create the FW Rule/s
 resource "google_compute_firewall" "default_vpc_firewall" {
   name        = var.fw_rule_name
   network     = var.vpc_name            # Set to Default VPC network
   description = var.description
 
   # Define the direction of traffic
-  direction = var.rule_direction
+  direction = "INGRESS"
   priority  = var.rule_priority
 
   allow {
     protocol = "tcp"
     ports    = var.tcp_ports
+  }
+  
+  allow {
+    protocol = "tcp"
+    ports    = var.app_ports
   }
 
   allow {
@@ -70,3 +74,72 @@ resource "google_compute_firewall" "default_vpc_firewall" {
 
   #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
 }
+
+/*  Breaking up rules
+###--- Create the FW Rule/s
+resource "google_compute_firewall" "defaultvpc_stdservices_rules" {
+  name        = var.stdservices_rules_name
+  network     = var.vpc_name            # Set to Default VPC network
+  description = var.description
+
+  # Define the direction of traffic
+  direction = "INGRESS"
+  priority    = var.rule_priority_services
+
+  allow {
+    protocol = "tcp"
+    ports    = var.tcp_ports_stdservices
+  }
+  
+  allow {
+    protocol = "udp"
+    ports    = var.udp_ports_stdservices
+  }
+
+  allow {
+    protocol = "icmp"                   # ICMP for ping/diagnostic
+  }
+
+  source_ranges = var.allowed_services    # Ingress filter
+
+}
+
+resource "google_compute_firewall" "defaultvpc_app_rules" {
+  name        = var.app_rules_name
+  network     = var.vpc_name            # Set to Default VPC network
+  description = var.description
+
+  # Define the direction of traffic
+  direction = "INGRESS"
+  priority  = var.rule_priority_app
+
+  allow {
+    protocol = "tcp"
+    ports    = var.tcp_app_ports
+  }
+
+  source_ranges = var.allowed_app    # Ingress filter
+
+  #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
+}
+*/
+
+
+
+
+
+###-----   For testing - allow everything
+/*
+resource "google_compute_firewall" "allow_ingress_everything" {
+  name    = "allow-ingress-everything"
+  network = "default"                     # Change if using a different network
+
+  allow {
+    protocol = "all"
+  }
+
+  direction     = "INGRESS"
+  source_ranges = ["0.0.0.0/0"]
+  priority      = 100
+}
+*/
