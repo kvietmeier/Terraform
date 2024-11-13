@@ -41,7 +41,7 @@ provider "google" {
 #     Start creating infrastructure resources
 ###===================================================================================###
 
-
+/*
 resource "google_compute_firewall" "default_vpc_firewall" {
   name        = var.fw_rule_name
   network     = var.vpc_name            # Set to Default VPC network
@@ -74,6 +74,7 @@ resource "google_compute_firewall" "default_vpc_firewall" {
 
   #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
 }
+*/
 
 /*  Breaking up rules
 ###--- Create the FW Rule/s
@@ -129,17 +130,26 @@ resource "google_compute_firewall" "defaultvpc_app_rules" {
 
 
 ###-----   For testing - allow everything
-/*
 resource "google_compute_firewall" "allow_ingress_everything" {
   name    = "allow-ingress-everything"
   network = "default"                     # Change if using a different network
 
   allow {
-    protocol = "all"
+    protocol = "tcp"
+    ports =  ["0-65535"]
+  }
+
+  allow {
+    protocol = "udp"
+    ports =  ["0-65535"]
+  }
+
+  allow {
+    protocol = "icmp"                   # ICMP for ping/diagnostic
   }
 
   direction     = "INGRESS"
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = var.allowed_ranges    # Ingress filter
+  #source_ranges = ["0.0.0.0/0"]
   priority      = 100
 }
-*/
