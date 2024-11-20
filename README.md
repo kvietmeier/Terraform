@@ -10,6 +10,39 @@ Terraform projects for Azure.
 
 * InstallUpgradeTerraform.ps1 is a small PS script I wrote to upgrade/install the Terraform binary
 
+* Terraform can now be installed and maintained with winget
+  
+  ```powershell
+  KV C:\Users\karl.vietmeier\repos> winget list terraform
+  Name                Id                  Version Available Source
+  ----------------------------------------------------------------
+  Hashicorp Terraform Hashicorp.Terraform 1.9.5   1.9.8     winget
+  ```
+
+  Upgrade it
+  
+  ```powershell
+  KV C:\Users\karl.vietmeier\repos> winget update terraform
+  Found Hashicorp Terraform [Hashicorp.Terraform] Version 1.9.8
+  This application is licensed to you by its owner.
+  Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+  Downloading https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_windows_amd64.zip
+  ██████████████████████████████  26.0 MB / 26.0 MB
+  Successfully verified installer hash
+  Extracting archive...
+  Successfully extracted archive
+  Starting package install...
+  Command line alias added: "terraform"
+  Successfully installed
+
+  KV C:\Users\karl.vietmeier\repos> winget list terraform
+  Name                Id                  Version Source
+  -------------------------------------------------------
+  Hashicorp Terraform Hashicorp.Terraform 1.9.8   winget
+  
+  KV C:\Users\karl.vietmeier\repos>
+  ```
+
 #### Directories
 
 ```text

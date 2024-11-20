@@ -1,6 +1,10 @@
 ###=====================================================================================###
 #
-#   OpenSSH configuration file for GCP Private DNS
+#   OpenSSH Configuration File
+#   
+#   Includes:
+#    GCP Private DNS entries
+#    Azure public IP/DNS
 #
 #   https://www.ssh.com/academy/ssh/config
 #
@@ -9,23 +13,19 @@
 ###=====================================================================================###
 
 Host linux01
-    HostName linux01.c.clouddev-itdesk124.internal
-    User labuser
-    PasswordAuthentication no
-
+  HostName linux01.c.clouddev-itdesk124.internal
+  User labuser
+  PasswordAuthentication no
 
 Host linux02
-    HostName linux02.c.clouddev-itdesk124.internal
-    User labuser
-    PasswordAuthentication no
-
+  HostName linux02.c.clouddev-itdesk124.internal
+  User labuser
+  PasswordAuthentication no
 
 Host linux03
-    HostName linux03.c.clouddev-itdesk124.internal
-    User labuser
-    PasswordAuthentication no
-
-
+  HostName linux03.c.clouddev-itdesk124.internal
+  User labuser
+  PasswordAuthentication no
 
 
 ###=====================================================================================###

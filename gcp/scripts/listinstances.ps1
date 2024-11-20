@@ -1,3 +1,23 @@
+###====================================================================================###
+<#   
+  FileName: listinstances.ps1
+  Created By: Karl Vietmeier
+    
+  Description:
+   Private IPs and private DNS
+   Format - 
+   "<vmname>.c.<projectID>.internal"
+
+   Source:  https://cloud.google.com/compute/docs/internal-dns
+   
+   * gcloud commands
+   gcloud compute instances list --format="value(name,networkInterfaces[0].networkIP,zone)"
+   gcloud compute instances list --format="table(name, networkInterfaces[0].accessConfigs[0].natIP, networkInterfaces[0].networkIP, zone)"
+
+#>
+###====================================================================================###
+
+
 # Get the list of instances
 $instances = gcloud compute instances list --format="value(name,networkInterfaces[0].networkIP,zone)"
 
