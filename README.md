@@ -1,12 +1,10 @@
 ### Terraform Projects
 
-Terraform projects for Azure.
+Terraform projects - recently added GCP.
 
-#### Installing
+#### Installing Terraform
 
 [Hashicorp Learn Install Tutorial](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/certification-associate-tutorials)
-
-#### Notes
 
 * InstallUpgradeTerraform.ps1 is a small PS script I wrote to upgrade/install the Terraform binary
 
@@ -43,6 +41,8 @@ Terraform projects for Azure.
   KV C:\Users\karl.vietmeier\repos>
   ```
 
+---
+
 #### Directories
 
 ```text
@@ -72,6 +72,9 @@ Terraform projects for Azure.
 ```
 
 ---
+
+#### Terraform Notes
+
 **Terraform commands:**  
 A good cheat sheet I ran across  
 <https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet>
