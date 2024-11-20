@@ -1,0 +1,45 @@
+###=====================================================================================###
+#
+#   OpenSSH configuration file for GCP Private DNS
+#
+#   https://www.ssh.com/academy/ssh/config
+#
+###=====================================================================================###
+#                         Aliases for private hosts
+###=====================================================================================###
+
+Host linux01
+    HostName linux01.c.clouddev-itdesk124.internal
+    User labuser
+    PasswordAuthentication no
+
+
+Host linux02
+    HostName linux02.c.clouddev-itdesk124.internal
+    User labuser
+    PasswordAuthentication no
+
+
+Host linux03
+    HostName linux03.c.clouddev-itdesk124.internal
+    User labuser
+    PasswordAuthentication no
+
+
+
+
+###=====================================================================================###
+#                         Common Settings for all SSH targets
+###=====================================================================================###
+
+Host *
+  # Effect is to not populate the known_hosts file every time you connect to a new server
+  UserKnownHostsFile /dev/null
+  # Don't verify that the the key matches a known_host - useful when you rebuild hosts frequently
+  StrictHostKeyChecking no
+  IdentitiesOnly no
+  LogLevel FATAL
+  ForwardX11 yes
+  ForwardAgent yes
+  # Send a null packet every 120s
+  ServerAliveInterval 120

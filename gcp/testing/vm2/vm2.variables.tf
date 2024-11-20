@@ -50,7 +50,7 @@ variable "os_image" {
 variable "bootdisk_size" {
   description = "Size of boot disk in GB"
   type        = string
-  default     = "40"
+  default     = "150"
 }
 
 ###--- VM Metadata
@@ -60,14 +60,9 @@ variable "ssh_user" {
   type        = string
 }
 
-#variable "ssh_key_file" {
-#  description = "Path to the SSH public key file"
-#  type        = string
-#}
-#
-variable "ssh_public_key" {
+variable "ssh_key_file" {
+  description = "Path to the SSH public key file"
   type        = string
-  description = "A public SSH key that will be used for user centos"
 }
 
 
@@ -77,14 +72,32 @@ variable "ssh_public_key" {
 variable "vpc_name" {
   description = "The name of the VPC network"
   type        = string
-  default     = "custom-network"
+  default     = "default"
 }
 
 # Subnet name
 variable "subnet_name" {
   description = "The name of the subnetwork"
   type        = string
-  default     = "custom-subnet"
+  default     = "default"
+}
+
+variable "public_ip_name" {
+  description = "Name for Private IP"
+  type        = string
+  default     = "karlv-pubip"
+}
+
+variable "private_ip_name" {
+  description = "Name for Public IP"
+  type        = string
+  default     = "karlv-pubip"
+}
+
+variable "private_ip" {
+  description = "Static Private IP"
+  type        = string
+  default     = "karlv-pubip"
 }
 
 /*
@@ -99,9 +112,9 @@ variable "subnet_cidr" {
 ###=================          Locals                ==================###
 
 # Read the SSH public key
-#locals {
-#  ssh_key_content = file(var.ssh_key_file)
-#}
+locals {
+  ssh_key_content = file(var.ssh_key_file)
+}
 
 
 

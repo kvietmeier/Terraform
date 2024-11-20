@@ -7,18 +7,11 @@
 #  Purpose:   Configure Firewall rules in the default VPC
 # 
 #  Files in Module:
-#    vpc.main.tf
-#    vpc.variables.tf
-#    vpc.terraform.tfvars
+#    fw.main.tf
+#    fw.variables.tf
+#    fw.terraform.tfvars
 #
 ###===================================================================================###
-
-/* 
-
-Put Usage Documentation here
-
-*/
-
 
 ###--- Provider
 terraform {
@@ -40,6 +33,36 @@ provider "google" {
 ###===================================================================================###
 #     Start creating infrastructure resources
 ###===================================================================================###
+
+
+###-----   For testing - allow everything
+resource "google_compute_firewall" "allow_ingress_everything" {
+  name    = "allow-ingress-everything"
+  network = "default"                     # Change if using a different network
+
+  allow {
+    protocol = "tcp"
+    ports =  ["0-65535"]
+  }
+
+  allow {
+    protocol = "udp"
+    ports =  ["0-65535"]
+  }
+
+  allow {
+    protocol = "icmp"                   # ICMP for ping/diagnostic
+  }
+
+  direction     = "INGRESS"
+  source_ranges = var.allowed_ranges    # Ingress filter
+  #source_ranges = ["0.0.0.0/0"]
+  priority      = 100
+}
+
+
+
+
 
 /*
 resource "google_compute_firewall" "default_vpc_firewall" {
@@ -128,28 +151,3 @@ resource "google_compute_firewall" "defaultvpc_app_rules" {
 
 
 
-
-###-----   For testing - allow everything
-resource "google_compute_firewall" "allow_ingress_everything" {
-  name    = "allow-ingress-everything"
-  network = "default"                     # Change if using a different network
-
-  allow {
-    protocol = "tcp"
-    ports =  ["0-65535"]
-  }
-
-  allow {
-    protocol = "udp"
-    ports =  ["0-65535"]
-  }
-
-  allow {
-    protocol = "icmp"                   # ICMP for ping/diagnostic
-  }
-
-  direction     = "INGRESS"
-  source_ranges = var.allowed_ranges    # Ingress filter
-  #source_ranges = ["0.0.0.0/0"]
-  priority      = 100
-}

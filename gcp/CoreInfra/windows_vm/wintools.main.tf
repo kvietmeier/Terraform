@@ -42,17 +42,17 @@ data "cloudinit_config" "conf" {
 
 # Reserve a specific static external (public) IP address
 resource "google_compute_address" "my_public_ip" {
-  name         = "karlv-public-ip2"
+  name         = "karlv-public-ip"
   address_type = "EXTERNAL"
   region       = var.region
 }
 
 resource "google_compute_address" "my_private_ip" {
-  name         = "karlv-private-ip2"
+  name         = "karlv-private-ip"
   address_type = "INTERNAL"
   subnetwork   = var.subnet_name
   region       = var.region
-  #address      = "10.111.1.5" # Replace with your desired static private IP
+  address      = "10.111.1.4" # Replace with your desired static private IP
 }
 
 # Google Cloud VM instance with public IP
@@ -73,15 +73,15 @@ resource "google_compute_instance" "vm_instance" {
     subnetwork    = var.subnet_name
     network_ip    = google_compute_address.my_private_ip.address  # Specified static private IP
 
-    #access_config {                         # Enables a public IP address
-    #  nat_ip = google_compute_address.my_public_ip.address       # Specified static public IP
-    #}
+    access_config {                         # Enables a public IP address
+      nat_ip = google_compute_address.my_public_ip.address       # Specified static public IP
+    }
   }
 
   metadata = {
-    user-data          = "${data.cloudinit_config.conf.rendered}"
+    #user-data          = "${data.cloudinit_config.conf.rendered}"
     #ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
-    ssh-keys           = "${var.ssh_user}:${var.ssh_public_key}"
+    ssh-keys           = "${file(var.ssh_key_file)}"
     serial-port-enable = true # Enable serial port access for debugging
   }
 
