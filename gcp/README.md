@@ -9,23 +9,35 @@ Terraform templates for creating infrastructure in Azure.
 - [Google Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
 - [Google Module Registry](https://registry.terraform.io/providers/hashicorp/google/latest)
 
+---
+
 #### Misc Notes
 
-To make my code more portable across Tenants/Subscriptions I'm using the TF Environment variables set in the PowerShell profile:  
+---
 
-Source a "secrets file" for the variables:
+#### GCP Quirks
 
-```powershell
-. '<drive>:\.hideme\somesecretstuff.ps1'
-```
-
-Set the variables for GCP (need settings):
-
-```powershell
-$env:[]
-$env:[]
-```
+- Linux images provided on GCP do not have cloud-init installed!
+  You will need to use the metadata block in the VM resource to run a startup scrupt to install it
   
+  This code runs a small script to install cloud-init and reboot then adds SSH keys to authorized_keys, enables serial port access and then adds the cloud-init.yml to configure the system.
+
+  ```terraform
+  metadata = {
+    # Install cloud-init if not available yet
+    startup-script = <<-EOT
+    #!/bin/bash
+    command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
+    EOT
+    
+    ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
+    serial-port-enable = true # Enable serial port access for debugging
+    user-data          = "${data.cloudinit_config.system_setup.rendered}"
+  }
+  ```
+
+---
+
 #### My code is Built With
 
 - [Visual Studio Code](https://code.visualstudio.com/) - Editor
