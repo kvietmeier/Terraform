@@ -25,17 +25,17 @@ Put Usage Documentation here
 #     Start creating infrastructure resources
 ###===================================================================================###
 
-/* # Setup cloud-init (doesn't work in GCP)
-data "cloudinit_config" "conf" {
+# Setup cloud-init (doesn't work in GCP)
+data "cloudinit_config" "system_setup" {
   gzip = false
   base64_encode = false
 
   part {
     content_type = "text/cloud-config"
-    content = file("../../secrets/cloud-init-dnfbased.default.yaml")
-    filename = "conf.yaml"
+    content      = "${local.cloudinit_config}"
+    filename     = "conf.yaml"
   }
-} */
+}
 
 
 # Reserve a specific static external (public) IP address
@@ -77,9 +77,16 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   metadata = {
-    #user-data          = "${data.cloudinit_config.conf.rendered}"
+    # Install cloud-init if not available yet
+    startup-script = <<-EOT
+      #!/bin/bash
+      command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
+    EOT
+    
     ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
     serial-port-enable = true # Enable serial port access for debugging
+
+    user-data          = "${data.cloudinit_config.system_setup.rendered}"
   }
 
   tags = ["kv-linux", "kv-infra"]

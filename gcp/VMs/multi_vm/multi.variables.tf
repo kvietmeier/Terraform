@@ -71,6 +71,11 @@ variable "ssh_key_file" {
   type        = string
 }
 
+variable "cloudinit_configfile" {
+  description = "Path to the cloud-init yaml"
+  type        = string
+}
+
 
 ###--- Network
 
@@ -103,6 +108,12 @@ variable "public_ip_name" {
 locals {
   ssh_key_content = file(var.ssh_key_file)
 }
+
+# cloud-init file
+locals {
+  cloudinit_config = file(var.cloudinit_configfile)
+}
+
 
 
 

@@ -29,14 +29,14 @@ Put Usage Documentation here
 ###===================================================================================###
 
 # Setup cloud-init
-data "cloudinit_config" "conf" {
+data "cloudinit_config" "system_setup" {
   gzip = false
   base64_encode = false
 
   part {
     content_type = "text/cloud-config"
-    content = file("../../secrets/cloud-init-dnfbased.default.yaml")
-    filename = "conf.yaml"
+    content      = "${local.cloudinit_config}"
+    filename     = "conf.yaml"
   }
 }
 
@@ -46,14 +46,6 @@ resource "google_compute_address" "my_public_ip" {
   name         = "karlv-public-ip"
   address_type = "EXTERNAL"
   region       = var.region
-}
-
-resource "google_compute_address" "my_private_ip" {
-  name         = "karlv-private-ip"
-  address_type = "INTERNAL"
-  subnetwork   = var.subnet_name
-  region       = var.region
-  address      = "10.111.1.4" # Replace with your desired static private IP
 }
 */
 
@@ -83,9 +75,16 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   metadata = {
+    # Install cloud-init if not available yet
+    startup-script = <<-EOT
+      #!/bin/bash
+      command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
+    EOT
+    
     ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
-    #ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
     serial-port-enable = true # Enable serial port access for debugging
+    user-data          = "${data.cloudinit_config.system_setup.rendered}"
+
   }
 
   tags = ["kv-linux", "kv-infra"]
