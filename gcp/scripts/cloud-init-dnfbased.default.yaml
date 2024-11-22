@@ -107,7 +107,8 @@ write_files:
     git clone https://github.com/breuner/elbencho.git
     cd elbencho
     make -j $(nproc)
-    dnf install ./packaging/RPMS/x86_64/elbencho*.rpm
+    make rpm
+    dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
     cd ~
     echo "script ran" >> /tmp/foobar.txt
 
