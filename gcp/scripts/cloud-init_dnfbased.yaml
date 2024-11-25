@@ -18,6 +18,7 @@
 ###=============================================================================###
 
 # Upgrade the instance on first boot
+package_update: true
 package_upgrade: true
 
 # Set default user to "someuser"  (modify as required)
@@ -58,17 +59,17 @@ packages:
 
 ###--- Create and/or modify files on the system
 write_files:
-# Append settings to .bashrc
-#--- Not working for some reason
+#--- Append settings to .bashrc
+#--- For labuser 
 - path: /home/labuser/.bashrc
   content: |
     
     # Added by cloud-init
+    alias la="ls -A"
+    alias ls="ls -hF --color=auto"
     alias l="ls -CF"
     alias ll="ls -l"
-    alias lla="ls -la"
-    alias la="ls -A"
-    alias ls="ls -F --color=auto"
+    alias lla='ls -alhvF --group-directories-first'
     alias egrep='egrep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias grep='grep --color=auto'
@@ -77,8 +78,8 @@ write_files:
   owner: labuser:labuser
   append: true
   defer: true
-#--- This works
-- path: /etc/profile
+#--- For root
+- path: /root/.bashrc
   content: |
     
     ####
@@ -88,37 +89,45 @@ write_files:
     alias la="ls -A"
     alias ll='ls -lhvF --group-directories-first'
     alias lla='ls -alhvF --group-directories-first'
-    alias lla="ls -lah"
     alias egrep='egrep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias grep='grep --color=auto'
 
     set -o vi
+
   owner: root:root
   append: true
-# Testing different way to compile tools during install
+#
+# Compile and install ElBencho - need NumCPU
 - path: /tmp/install_tools.sh
   content: |
     #!/bin/bash
-
     cd /root
     mkdir git
     cd git
     git clone https://github.com/breuner/elbencho.git
     cd elbencho
     make -j $(nproc)
-    dnf install ./packaging/RPMS/x86_64/elbencho*.rpm
+    make rpm
+    dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
     cd ~
-    echo "script ran" >> /tmp/foobar.txt
-
-    echo "" >> /root/.bashrc
-    echo "set -o vi" >> /root/.bashrc
-
-
+    echo "script ran" >> /tmp/bootscript.txt
   permissions: '0755'
-- path: /root/.CONFIGURED_BY_CLOUD_INIT
+- path: /root/CONFIGURED_BY_CLOUD_INIT
+# Setup chrony for gZCP
+- path: /etc/chrony/chrony.conf
+  content: |
+    # Chrony configuration for GCP
+    server metadata.google.internal iburst
+    driftfile /var/lib/chrony/drift
+    makestep 1.0 3
+    rtcsync
+    logdir /var/log/chrony
+    allow 0.0.0.0/0
+    bindcmdaddress 127.0.0.1
+    bindcmdaddress ::1
 ###--- End write_files
-
+###--- Start runcmd
 runcmd:
   # Run commands once on first boot - clone and compile useful tools
   # DNF based systems don't like the [,,,] runcmd syntax
@@ -131,9 +140,11 @@ runcmd:
   - pip3 install ninja
   - pip3 install meson
   #
-  ## Create some directories
-  - mkdir /tmp/output
-  - mkdir /mnt/huge
+  # Clone scripts directory to labuser
+  - cd /home/labuser/
+  - git clone https://github.com/kvietmeier/scripts.git
+  - chown -R labuser:labuser /home/labuser/scripts
+  - cd ~
   #
   # Run our install script
   - bash /tmp/install_tools.sh
@@ -178,9 +189,15 @@ runcmd:
   - make install
   - cd .. 
   #
-  ## System cleanup
+  ## System cleanup/config
+  - systemctl enable chronyd
+  - systemctl restart chronyd
   - dnf clean packages
   - mandb
+  ## Create some directories
+  - mkdir /home/labuser/output
+  - chown labuser:labuser /home/labuser/output
+  - mkdir /mnt/huge
 ###--- End runcmd
 
 ###--- Users - Leave here for now

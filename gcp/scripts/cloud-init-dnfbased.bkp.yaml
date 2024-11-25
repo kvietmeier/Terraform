@@ -58,17 +58,17 @@ packages:
 
 ###--- Create and/or modify files on the system
 write_files:
-# Append settings to .bashrc
-#--- Not working for some reason
+#--- Append settings to .bashrc
+#--- For labuser 
 - path: /home/labuser/.bashrc
   content: |
     
     # Added by cloud-init
+    alias la="ls -A"
+    alias ls="ls -hF --color=auto"
     alias l="ls -CF"
     alias ll="ls -l"
-    alias lla="ls -la"
-    alias la="ls -A"
-    alias ls="ls -F --color=auto"
+    alias lla='ls -alhvF --group-directories-first'
     alias egrep='egrep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias grep='grep --color=auto'
@@ -77,8 +77,8 @@ write_files:
   owner: labuser:labuser
   append: true
   defer: true
-#--- This works
-- path: /etc/profile
+#--- For root
+- path: /root/.bashrc
   content: |
     
     ####
@@ -88,15 +88,16 @@ write_files:
     alias la="ls -A"
     alias ll='ls -lhvF --group-directories-first'
     alias lla='ls -alhvF --group-directories-first'
-    alias lla="ls -lah"
     alias egrep='egrep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias grep='grep --color=auto'
 
     set -o vi
+
   owner: root:root
   append: true
-# Testing different way to compile tools during install
+#
+# Compile and install ElBencho - need NumCPU
 - path: /tmp/install_tools.sh
   content: |
     #!/bin/bash
@@ -110,14 +111,9 @@ write_files:
     make rpm
     dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
     cd ~
-    echo "script ran" >> /tmp/foobar.txt
-
-    echo "" >> /root/.bashrc
-    echo "set -o vi" >> /root/.bashrc
-
-
+    echo "script ran" >> /tmp/bootscript.txt
   permissions: '0755'
-- path: /root/.CONFIGURED_BY_CLOUD_INIT
+- path: /root/CONFIGURED_BY_CLOUD_INIT
 ###--- End write_files
 
 runcmd:
@@ -133,8 +129,13 @@ runcmd:
   - pip3 install meson
   #
   ## Create some directories
-  - mkdir /tmp/output
+  - mkdir /home/labuser/output
+  - chown labuser:labuser /home/labuser/output
   - mkdir /mnt/huge
+  #
+  # Clone scripts directory to labuser
+  - git clone https://github.com/kvietmeier/scripts.git /home/labuser/
+  - chown -R labuser:labuser /home/labuser/scripts
   #
   # Run our install script
   - bash /tmp/install_tools.sh
