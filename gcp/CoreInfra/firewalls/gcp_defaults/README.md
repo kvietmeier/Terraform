@@ -1,14 +1,44 @@
-### Create Default GCP Firewall Rules
+### README.md Template
 
-Recreate the default GCP firewall rules
-
----
+Terraform templates for creating infrastructure in GCP.
 
 #### Notes
 
 Put Notes Here
 
 ---
+
+#### Code Samples
+
+PowerShell
+
+```powershell
+. '<drive>:\.hideme\somesecretstuff.ps1'
+```
+
+Set the variables:
+
+```powershell
+$env:
+```
+
+Terraform:
+
+```terraform
+resource "google_compute_firewall" "allow_all_ports" {
+  name    = "allow-all-ports"
+  network = "default"                     # Change if using a different network
+
+  allow {
+    protocol = "tcp"
+    ports =  ["0-65535"]
+  }
+```
+
+
+
+
+
 
 #### My code is Built With
 

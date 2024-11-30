@@ -7,6 +7,8 @@
 #
 ###===================================================================================###
 
+
+###--- Provider Info
 variable "region" {
   description = "Region to deploy resources"
 }
@@ -19,7 +21,10 @@ variable "project_id" {
   description = "GCP Project ID"
 }
 
+
+###--- VPC Setup
 variable "vpc_name" {
-  description = "Default VPC"
+  description = "Name of VPC"
+  type        = string
   default     = "default"
 }

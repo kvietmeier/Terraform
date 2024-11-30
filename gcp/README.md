@@ -31,12 +31,15 @@ Terraform templates for creating infrastructure in Azure.
     EOT
     
     ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
-    serial-port-enable = true # Enable serial port access for debugging
     user-data          = "${data.cloudinit_config.system_setup.rendered}"
+    serial-port-enable = true
   }
   ```
 
 ---
+
+
+
 
 #### My code is Built With
 

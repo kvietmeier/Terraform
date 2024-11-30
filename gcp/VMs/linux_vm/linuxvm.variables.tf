@@ -34,12 +34,6 @@ variable "machine_type" {
   default     = "e2-medium"
 }
 
-variable "vm_names" {
-  type    = list(string)
-  default = ["linux01", "linux2", "linux03"]
-}
-
-
 # VM instance name
 variable "vm_name" {
   description = "Name of the VM instance"
@@ -94,10 +88,33 @@ variable "subnet_name" {
 }
 
 variable "public_ip_name" {
-  description = "Path to the SSH public key file"
+  description = "Name for Private IP"
   type        = string
   default     = "karlv-pubip"
 }
+
+variable "private_ip_name" {
+  description = "Name for Public IP"
+  type        = string
+  default     = "karlv-pubip"
+}
+
+variable "private_ip" {
+  description = "Static Private IP"
+  type        = string
+  default     = "karlv-pubip"
+}
+
+/*
+# Subnet CIDR range
+variable "subnet_cidr" {
+  description = "CIDR range for the subnet"
+  type        = string
+  default     = "10.0.0.0/24"
+}
+*/
+
+###=================          Locals                ==================###
 
 # Read the SSH public key
 locals {
@@ -112,23 +129,8 @@ locals {
 
 
 
-
-###=================          unused                ==================###
-/*
-# Subnet CIDR range
-variable "subnet_cidr" {
-  description = "CIDR range for the subnet"
-  type        = string
-  default     = "10.0.0.0/24"
-}
-*/
-
-###=================          Locals                ==================###
-
-
-
-/*
 ###--- Firewall
+/*
 # FW Name
 variable "fw_rule_name" {
   description = "Name for rule"

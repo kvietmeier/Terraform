@@ -5,6 +5,8 @@
 #
 #  Variable definitions with defaults
 #
+#  Added code to create VMs from a map
+#
 ###===================================================================================###
 
 # Project ID
@@ -27,36 +29,26 @@ variable "zone" {
 
 
 ###--- VM Info
-# Machine type for the VM
-variable "machine_type" {
-  description = "The machine type for the VM"
+
+
+# Base name for VMs
+variable "base_name" {
   type        = string
-  default     = "e2-medium"
+  description = "Base name for all VM instances"
+  default     = "base-vm"
 }
 
-variable "vm_names" {
-  type    = list(string)
-  default = ["linux01", "linux2", "linux03"]
-}
-
-
-# VM instance name
-variable "vm_name" {
-  description = "Name of the VM instance"
-  type        = string
-  default     = "my-vm"
-}
-
-variable "os_image" {
-  description = "OS Image to use"
-  type        = string
-  default     = "centos-stream-9-v20241009"
-}
-
-variable "bootdisk_size" {
-  description = "Size of boot disk in GB"
-  type        = string
-  default     = "150"
+# Define the map
+variable "vm_instances" {
+  type = map(object({
+    machine_type = string
+    zone         = string
+    disk_size_gb = number
+    os_image     = string
+    network      = string
+    subnetwork   = string
+    #cloudinit    = string
+  }))
 }
 
 ###--- VM Metadata
@@ -86,6 +78,12 @@ variable "vpc_name" {
   default     = "default"
 }
 
+variable "gcp_priv_dns" {
+  description = "Private FQDN"
+  type        = string
+  default     = "c.clouddev-itdesk124.internal"
+}
+
 # Subnet name
 variable "subnet_name" {
   description = "The name of the subnetwork"
@@ -94,7 +92,7 @@ variable "subnet_name" {
 }
 
 variable "public_ip_name" {
-  description = "Path to the SSH public key file"
+  description = "name for a public IP"
   type        = string
   default     = "karlv-pubip"
 }
