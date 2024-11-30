@@ -1,6 +1,6 @@
-### Create Default GCP Firewall Rules
+### Create GCP Firewall Rules
 
-Recreate the default GCP firewall rules
+Create custom GCP firewall rules
 
 ---
 
