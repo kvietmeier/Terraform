@@ -2,11 +2,28 @@
 
 Sometimes you just need to open up everything
 
+**This is a really, really, BAD Idea!  Use only for testing.**
+
 ---
 
-#### Notes
+*Code:*
 
-This is a really, really, BAD Idea!  Use only for testing.
+```terraform
+
+resource "google_compute_firewall" "allow_all" {
+  name    = "allow-all-traffic"
+  network = "default" # Replace with your network name if different
+
+  direction = "INGRESS"
+  priority  = 10
+
+  source_ranges = ["0.0.0.0/0"] # Allow traffic from all IPs (external and internal)
+
+  allow {
+    protocol = "all" # Allow all protocols
+  }
+}
+```
 
 ---
 
