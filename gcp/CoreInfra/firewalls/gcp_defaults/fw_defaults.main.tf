@@ -1,27 +1,25 @@
 ###===================================================================================###
 #
-#  File:  Template.tf
+#  File:  fw_defaults.main.tf
 #  Created By: Karl Vietmeier
 #
-#  Terraform Module Code
-#  Purpose:  Blank Template
+#  Purpose:  Create default GCP Firewall rules
 # 
 #  Files in Module:
 #    main.tf
 #    variables.tf
 #    variables.tfvars
 #
-#  Usage:
-#  terraform apply --auto-approve
-#  terraform destroy --auto-approve
 ###===================================================================================###
 
 /* 
-
-Put Usage Documentation here
+  
+Usage:
+terraform plan -var-file=".\fw_defaults.tfvars"
+terraform apply --auto-approve -var-file=".\fw_defaults.tfvars"
+terraform destroy --auto-approve -var-file=".\fw_defaults.tfvars"
 
 */
-
 
 ###===================================================================================###
 #     Start creating infrastructure resources

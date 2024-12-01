@@ -1,6 +1,6 @@
-### Create Default GCP Firewall Rules
+### README Template
 
-Recreate the default GCP firewall rules
+Description
 
 ---
 

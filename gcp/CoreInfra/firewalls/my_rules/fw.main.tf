@@ -3,8 +3,7 @@
 #  File:  fw.main.tf
 #  Created By: Karl Vietmeier
 #
-#  Terraform Module Code
-#  Purpose:   Configure Firewall rules in the default VPC
+#  Purpose:   Configure custom firewall rules in the default VPC
 # 
 #  Files in Module:
 #    fw.main.tf
@@ -12,6 +11,15 @@
 #    fw.terraform.tfvars
 #
 ###===================================================================================###
+
+/* 
+  
+Usage:
+terraform plan -var-file=".\fw.terraform.tfvars"
+terraform apply --auto-approve -var-file=".\fw.terraform.tfvars"
+terraform destroy --auto-approve -var-file=".\fw.terraform.tfvars"
+
+*/
 
 ###--- Provider
 terraform {

@@ -3,18 +3,8 @@
 #  File:  provider.tf
 #  Created By: Karl Vietmeier
 #
-#  Purpose: Configure Provider
+#  Purpose: Configure the GCP TerraForm Provider 
 # 
-###===================================================================================###
-###===================================================================================###
-#
-#  File:  provider.tf
-#  Created By: Karl Vietmeier
-#
-#  Purpose: Configure the GCP Provider TerraForm
-# 
-#  Google defaults set as Env: vars
-#
 ###===================================================================================###
 
 
