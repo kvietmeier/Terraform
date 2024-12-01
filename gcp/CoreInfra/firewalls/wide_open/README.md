@@ -1,6 +1,4 @@
-### Firewall rule to open eveything up for testing.
-
-Sometimes you just need to open up everything
+## Firewall rule to open eveything up for testing.
 
 **This is a really, really, BAD Idea!  Use only for testing.**
 
