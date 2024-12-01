@@ -6,7 +6,7 @@ Sometimes you just need to open up everything
 
 #### Notes
 
-Put Notes Here
+This is a really, really, BAD Idea!  Use only for testing.
 
 ---
 
