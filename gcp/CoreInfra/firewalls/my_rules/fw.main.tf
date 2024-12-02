@@ -42,11 +42,10 @@ provider "google" {
 #     Start creating infrastructure resources
 ###===================================================================================###
 
-/*
 ###--- Create the FW Rule/s
-resource "google_compute_firewall" "defaultvpc_stdservices_rules" {
+resource "google_compute_firewall" "default_services_rules" {
   name        = var.stdservices_rules_name
-  network     = var.vpc_name                     # Set to Default VPC network
+  network     = var.vpc_name              
   description = var.description
 
   # Define the direction of traffic
@@ -59,21 +58,29 @@ resource "google_compute_firewall" "defaultvpc_stdservices_rules" {
   }
   
   allow {
+    protocol = "tcp"
+    ports    = var.app_tcp
+  }
+
+  allow {
     protocol = "udp"
     ports    = var.udp_ports
   }
 
   allow {
-    protocol = "icmp"                   # ICMP for ping/diagnostic
+    protocol = "icmp"                    # ICMP for ping/diagnostic
   }
 
-  source_ranges = var.ingress_filter    # CIDR - Ingress filter
+  source_ranges = var.ingress_filter     # CIDR - Ingress filter
+  
+  #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
 
 }
 
-resource "google_compute_firewall" "defaultvpc_app_rules" {
+/*
+resource "google_compute_firewall" "application_rules" {
   name        = var.app_rules_name
-  network     = var.vpc_name            # Set to Default VPC network
+  network     = var.vpc_name        
   description = var.app_description
 
   # Define the direction of traffic
@@ -91,7 +98,7 @@ resource "google_compute_firewall" "defaultvpc_app_rules" {
 }
 */
 
-
+/*
 ###-----   For testing - Open all of the ports
 resource "google_compute_firewall" "allow_all_ports" {
   name    = "allow-all-ports"
@@ -117,6 +124,6 @@ resource "google_compute_firewall" "allow_all_ports" {
   
   #target_tags = ["standard-services", "voc-health-check"]   # Tag for instances needing this firewall rule
 }
-
+*/
 
 
