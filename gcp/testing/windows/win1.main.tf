@@ -32,7 +32,10 @@ resource "google_compute_address" "my_public_ip" {
   region       = var.region
 }
 
-# Google Cloud VM instance with public IP
+
+#
+###=================   Create VM instance with public IP   ===================###
+#
 resource "google_compute_instance" "vm_instance" {
   zone         = var.zone             # Use the zone variable
   name         = var.vm_name          # Use the vm_name variable
@@ -40,7 +43,7 @@ resource "google_compute_instance" "vm_instance" {
 
   boot_disk {
     initialize_params {
-      image    = var.os_image  # Replace with your preferred image
+      image    = var.os_image         # Replace with your preferred image
       size     = var.bootdisk_size
     }
   }
@@ -58,38 +61,36 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   metadata = {
-    # Windows post config
-    enable-windows-automatic-updates = "true"
-    windows-startup-script-ps1 = file("../../scripts/windows-startup-config.ps1")
-    #metadata_startup_script = <<-EOT
-    #Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Bypass -Force
-    #EOT
-    admin-password             = "Chalc0pyr1te123$"
-  
+    # Windows post install config
+    #enable-windows-automatic-updates = "true"
+    windows-startup-script-ps1       = file("../../scripts/windows-startup-config.ps1")
+    admin-password                   = "Chalc0pyr1te123$"  
   }
 
-  tags = ["kv-windows", "kv-infra"]
+  tags = var.vm_tags
   
   service_account {
     # Google recommends custom service accounts with `cloud-platform` scope with
     # specific permissions granted via IAM Roles.
-    email  = "913067105288-compute@developer.gserviceaccount.com"
-    scopes = ["cloud-platform"]
+    email  = var.sa_email
+    scopes = var.sa_scopes
   }
 }
+#
+###===================       End VM Resource Block       ===================###
+#
+
 
 ###===================   Outputs  ===================###
+
+# Output the public IP address
 output "public_ip" {
   value       = google_compute_address.my_public_ip.address
   description = "Reserved public IP address for the VM"
 }
 
-# Output the IP addresses
-#output "instance_private_ip" {
-#  value = google_compute_address.my_private_ip.address
-#}
-
-#output "windows_vm_ip" {
-#  value = google_compute_instance.windows_vm.network_interface[0].access_config[0].nat_ip
-#  description = "Public IP address of the Windows VM"
-#}
+# Output the private IP address
+output "private_ip" {
+  value = google_compute_instance.vm_instance.network_interface[0].network_ip
+  description = "The private IP address of the VM instance."
+}

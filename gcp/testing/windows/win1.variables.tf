@@ -25,6 +25,17 @@ variable "zone" {
   type        = string
 }
 
+# Service Account
+variable "sa_email" {
+  description = "Service Account email"
+  type        = string
+}
+
+variable "sa_scopes" {
+  description = "Scope for Service Account"
+  type        = list(string)
+}
+
 
 ###--- VM Info
 # Machine type for the VM
@@ -57,6 +68,11 @@ variable "bootdisk_size" {
 variable "windows-startup-script" {
   description = "Windows config script"
   type        = string
+}
+
+variable vm_tags {
+  description = "Tags"
+  type        = list(string)
 }
 
 

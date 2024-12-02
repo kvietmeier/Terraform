@@ -1,19 +1,4 @@
-### Terraform for GCP Projects
-
-Terraform templates for creating infrastructure in Azure.
-
-#### Documentation Links
-
-- [Terraform on GCP](https://cloud.google.com/docs/terraform)
-- [HashiLearn - GCP](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started)
-- [Google Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
-- [Google Module Registry](https://registry.terraform.io/providers/hashicorp/google/latest)
-
----
-
-#### Misc Notes
-
----
+### Create VMs
 
 #### GCP Quirks
 
@@ -37,18 +22,6 @@ Terraform templates for creating infrastructure in Azure.
   ```
 
 ---
-
-
-
-
-#### My code is Built With
-
-- [Visual Studio Code](https://code.visualstudio.com/) - Editor
-- [Terraform](https://www.terraform.io/) - Terraform
-
-#### All run under PowerShell on Windows 10/11
-
-- [Use Windows Terminal Console](https://docs.microsoft.com/en-us/windows/terminal/)
 
 #### Author/s
 

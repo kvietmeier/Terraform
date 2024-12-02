@@ -85,7 +85,6 @@ resource "google_compute_instance" "vm_instance" {
     
     ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
     serial-port-enable = true # Enable serial port access for debugging
-
     user-data          = "${data.cloudinit_config.system_setup.rendered}"
   }
 
