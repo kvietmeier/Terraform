@@ -12,35 +12,24 @@
 
 
 # Project Info
-project_id      = "clouddev-itdesk124"
+project_id      = "My_projectID"
 region          = "us-west2"
 zone            = "us-west2-a"
 
 # VPC Config
 vpc_name        = "default"
-description     = "Setup common ports and service FW rules for default VPC"
-app_description = "Ports for Vast on Cloud"
+description     = "Open up ports"
 
 ###--- Firewall and Rules
-fw_rule_name           = "defaultservices"
-stdservices_rules_name = "defaultservices"
-app_rules_name         = "apprules"
 rule_direction         = "INGRESS"
-svcs_priority          = "500"
-app_priority           = "501"
+rule_priority          = "10"
 
 # Destination port list - standard services you might need
-tcp_ports = [ "20", "21", "45", "53", "88", "119", "563", "3389", "8080" ]
-udp_ports = [ "53", "67", "68" ]  # DNS and DHCP
-
-# Found in checker script
-app_tcp = [
-  #Portlist
-  "1",
-  "2"
-]
+ports = [ "0-65535" ]
 
 ingress_filter = [
-  #"0.0.0.0/27"       # A range of IPs
+  #"0.0.0.0/27",       # A range of IPs
+  #"0.0.0.0/27",       # A range of IPs
+  #"0.0.0.0/27"        # A range of IPs
 ]
 

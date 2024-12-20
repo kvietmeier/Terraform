@@ -22,7 +22,9 @@ terraform destroy --auto-approve -var-file=".\fw_defaults.tfvars"
 
 */
 
+###===================================================================================###
 ###--- Provider
+###===================================================================================###
 terraform {
   required_providers {
   google = {
@@ -38,9 +40,34 @@ provider "google" {
   zone    = var.zone
 }
 
+###===================================================================================###
+#     Variables
+###===================================================================================###
+
+###--- Provider Info
+variable "region" {
+  description = "Region to deploy resources"
+}
+
+variable "zone" {
+  description = "Availbility Zone"
+}
+
+variable "project_id" {
+  description = "GCP Project ID"
+}
+
+
+###--- VPC Setup
+variable "vpc_name" {
+  description = "Name of VPC"
+  type        = string
+  default     = "default"
+}
+
 
 ###===================================================================================###
-#     Start creating infrastructure resources
+#     Create Resources
 ###===================================================================================###
 
 resource "google_compute_firewall" "allow_all" {

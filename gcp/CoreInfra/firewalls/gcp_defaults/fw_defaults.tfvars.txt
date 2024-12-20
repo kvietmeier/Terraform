@@ -19,6 +19,3 @@ zone            = "us-west2-a"
 
 # VPC Config
 vpc_name        = "default"
-
-
-###======  Examples:
