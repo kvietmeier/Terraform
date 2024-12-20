@@ -77,53 +77,31 @@ resource "google_compute_firewall" "default_services_rules" {
 
 }
 
-/*
-resource "google_compute_firewall" "application_rules" {
-  name        = var.app_rules_name
-  network     = var.vpc_name        
-  description = var.app_description
 
-  # Define the direction of traffic
-  direction = "INGRESS"
-  priority  = var.app_priority
+resource "google_compute_firewall" "allow_replication_between_addc" {
+  ###--- Rules for Active Directory
+
+  name    = "allow-replication-between-addc"
+  network = var.vpc_name              
 
   allow {
-    protocol = "tcp"
-    ports    = var.app_tcp
+    protocol = "icmp"
   }
 
-  source_ranges = var.ingress_filter    # Ingress filter
-
-  #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
-}
-*/
-
-/*
-###-----   For testing - Open all of the ports
-resource "google_compute_firewall" "allow_all_ports" {
-  name    = "allow-all-ports"
-  network = "default"                     # Change if using a different network
-
   allow {
     protocol = "tcp"
-    ports =  ["0-65535"]
+    ports    = var.addc_tcp_ports
   }
 
   allow {
     protocol = "udp"
-    ports =  ["0-65535"]
+    ports    = var.addc_udp_ports
   }
 
-  allow {
-    protocol = "icmp"                   # ICMP for ping/diagnostic
-  }
-
-  direction     = "INGRESS"
-  source_ranges = var.ingress_filter    # Ingress filter
-  priority      = 100
+  direction     = var.rule_direction
+  priority      = var.addc_priority
+  source_ranges = var.ingress_filter     # CIDR - Ingress filter
   
-  #target_tags = ["standard-services", "voc-health-check"]   # Tag for instances needing this firewall rule
+  source_tags   = ["ad-domaincontroller"]
+  target_tags   = ["ad-domaincontroller"]
 }
-*/
-
-

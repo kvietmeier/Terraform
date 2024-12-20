@@ -1,16 +1,4 @@
-###===================================================================================###
-#
-#  Create a Domain Controller on GCP
-#  Created By: Karl Vietmeier
-#
-#  From: https://cloud.google.com/architecture/deploy-an-active-directory-forest-on-compute-engine?hl=en
-###===================================================================================###
-
-
-
-###===================================================================================###
-#     Begin
-###===================================================================================###
+'
 $ErrorActionPreference = "Stop"
 
 #
@@ -101,3 +89,4 @@ New-ItemProperty `
 
 Write-Host "Restarting to apply all settings..."
 Restart-Computer
+' | Out-File dc-startup.ps1 -Encoding ASCII

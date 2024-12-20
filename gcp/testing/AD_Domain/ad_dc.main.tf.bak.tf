@@ -35,102 +35,14 @@ resource "google_compute_network" "vpc" {
 }
 */
 
-/* resource "google_compute_subnetwork" "domain_controllers" {
+# Subnet for DCs
+resource "google_compute_subnetwork" "domain_controllers" {
   name          = "domain-controllers"
   ip_cidr_range = var.subnet_range_domain_controllers
   network       = google_compute_network.vpc.id
   region        = var.region
   enable_private_ip_google_access = true
-}
-*/
 
-resource "google_compute_subnetwork" "resources" {
-  name          = "resources"
-  ip_cidr_range = var.subnet_range_resources
-  network       = google_compute_network.vpc.id
-  region        = var.region
-  enable_private_ip_google_access = true
-}
-
-/* 
-resource "google_compute_firewall" "allow_rdp_ingress_from_iap" {
-  name    = "allow-rdp-ingress-from-iap"
-  network = google_compute_network.vpc.id
-
-  allow {
-    protocol = "tcp"
-    ports    = ["3389"]
-  }
-
-  source_ranges  = ["35.235.240.0/20"]
-  direction      = "INGRESS"
-  enable_logging = true
-  priority       = 10000
-}
-
-resource "google_compute_firewall" "allow_dns_ingress_from_clouddns" {
-  name    = "allow-dns-ingress-from-clouddns"
-  network = google_compute_network.vpc.id
-
-  allow {
-    protocol = "tcp"
-    ports    = ["53"]
-  }
-
-  allow {
-    protocol = "udp"
-    ports    = ["53"]
-  }
-
-  source_ranges = ["35.199.192.0/19"]
-  target_tags   = ["ad-domaincontroller"]
-  direction     = "INGRESS"
-  enable_logging = true
-  priority      = 10000
-}
-*/
-/* 
-resource "google_compute_firewall" "allow_replication_between_addc" {
-  name    = "allow-replication-between-addc"
-  network = google_compute_network.vpc.id
-
-  allow {
-    protocol = "icmp"
-  }
-
-  allow {
-    protocol = "tcp"
-    ports    = ["53", "88", "135", "389", "445", "49152-65535"]
-  }
-
-  allow {
-    protocol = "udp"
-    ports    = ["53", "88", "123", "389", "445"]
-  }
-
-  source_tags   = ["ad-domaincontroller"]
-  target_tags   = ["ad-domaincontroller"]
-  direction     = "INGRESS"
-  enable_logging = true
-  priority      = 10000
-}
-
-resource "google_compute_firewall" "allow_ldaps_ingress_to_addc" {
-  name    = "allow-ldaps-ingress-to-addc"
-  network = google_compute_network.vpc.id
-
-  allow {
-    protocol = "tcp"
-    ports    = ["636"]
-  }
-
-  source_ranges  = [var.subnet_range_resources]
-  target_tags    = ["ad-domaincontroller"]
-  direction      = "INGRESS"
-  enable_logging = true
-  priority       = 10000
-}
-*/
 
 resource "google_compute_instance" "dc_1" {
   name         = "dc-1"

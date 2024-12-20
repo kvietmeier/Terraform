@@ -76,6 +76,12 @@ variable "app_priority" {
   default     = "500"
 }
 
+variable "addc_priority" {
+  description = "AD rule priority on stack"
+  type        = string
+  default     = "501"
+}
+
 variable ingress_filter {
   description = "A list of IPs and CIDR ranges to allow"
   type        = list(string)
@@ -88,6 +94,16 @@ variable tcp_ports {
 }
 
 variable udp_ports {
+  description = "A list of standard network services: SSH, FTP, RDP, SMP, etc."
+  type        = list(string)
+}
+
+variable addc_tcp_ports {
+  description = "A list of standard network services: SSH, FTP, RDP, SMP, etc."
+  type        = list(string)
+}
+
+variable addc_udp_ports {
   description = "A list of standard network services: SSH, FTP, RDP, SMP, etc."
   type        = list(string)
 }

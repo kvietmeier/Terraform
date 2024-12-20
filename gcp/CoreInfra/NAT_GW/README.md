@@ -1,6 +1,6 @@
 ### Create NAT Gateways
 
-You need a NAT Gateway amd router in every region you have subnets  
+You need a NAT Gateway and router in every region you have subnets  
 This module creates gateways using the "regions()" list
 
 ---
