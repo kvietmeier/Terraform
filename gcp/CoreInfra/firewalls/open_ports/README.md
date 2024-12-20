@@ -1,6 +1,12 @@
-### Create Custom GCP Firewall Rules
+### Create GCP Firewall Rules
 
-This set of rules will open a specific set of ports for common services and additional ports for applications and filter incoming traffic on public interfaces to specific IPs and/or IP ranges
+Create custom GCP firewall rules
+
+---
+
+#### Notes
+
+Put Notes Here
 
 ---
 

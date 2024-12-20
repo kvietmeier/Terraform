@@ -12,14 +12,14 @@
 
 
 # Project Info
-project_id      = "My_ProjectName"
+project_id      = "clouddev-itdesk124"
 region          = "us-west2"
 zone            = "us-west2-a"
 
 # VPC Config
 vpc_name        = "default"
 description     = "Setup common ports and service FW rules for default VPC"
-app_description = "Ports for Applications"
+app_description = "Ports for Vast on Cloud"
 
 ###--- Firewall and Rules
 fw_rule_name           = "defaultservices"

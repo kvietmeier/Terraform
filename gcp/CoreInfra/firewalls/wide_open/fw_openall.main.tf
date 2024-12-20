@@ -6,12 +6,11 @@
 #  Purpose:  Create default GCP Firewall rules
 #
 #  This is a really bad idea!!!
-# 
-#  Files in Module:
-#    main.tf
-#    variables.tf
-#    variables.tfvars
 #
+# 
+###===================================================================================###
+###                        !!!This is a really bad idea!!!                            ###
+###                       ----  USE ONLY IN AN EMERGENCY  ----                        ###
 ###===================================================================================###
 
 /* 
