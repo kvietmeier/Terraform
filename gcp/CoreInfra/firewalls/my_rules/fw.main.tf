@@ -44,24 +44,18 @@ provider "google" {
 
 ###--- Create the FW Rule/s
 resource "google_compute_firewall" "default_services_rules" {
-  name        = var.stdservices_rules_name
+  
+  name        = var.myrules_name
   network     = var.vpc_name              
   description = var.description
-
-  # Define the direction of traffic
-  direction = "INGRESS"
-  priority    = var.rule_priority_services
+  priority    = var.svcs_priority
+  direction   = var.rule_direction
 
   allow {
     protocol = "tcp"
     ports    = var.tcp_ports
   }
   
-  allow {
-    protocol = "tcp"
-    ports    = var.app_tcp
-  }
-
   allow {
     protocol = "udp"
     ports    = var.udp_ports
@@ -77,12 +71,39 @@ resource "google_compute_firewall" "default_services_rules" {
 
 }
 
+###--- Create the FW Rule/s
+resource "google_compute_firewall" "custom_app_rules" {
+  
+  name        = var.apprules_name
+  network     = var.vpc_name              
+  description = var.description
+  direction   = var.rule_direction
+  priority    = var.app_priority
 
-resource "google_compute_firewall" "allow_replication_between_addc" {
+  
+  allow {
+    protocol = "tcp"
+    ports    = var.app_tcp
+  }
+
+  allow {
+    protocol = "icmp"                    # ICMP for ping/diagnostic
+  }
+
+  source_ranges = var.ingress_filter     # CIDR - Ingress filter
+  
+  #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
+
+}
+
+resource "google_compute_firewall" "addc_rules" {
+  
   ###--- Rules for Active Directory
-
-  name    = "allow-replication-between-addc"
-  network = var.vpc_name              
+  name        = var.addc_name
+  network     = var.vpc_name              
+  description = var.description
+  direction   = var.rule_direction
+  priority    = var.addc_priority
 
   allow {
     protocol = "icmp"
@@ -98,10 +119,9 @@ resource "google_compute_firewall" "allow_replication_between_addc" {
     ports    = var.addc_udp_ports
   }
 
-  direction     = var.rule_direction
-  priority      = var.addc_priority
   source_ranges = var.ingress_filter     # CIDR - Ingress filter
   
+  # Limit scope
   source_tags   = ["ad-domaincontroller"]
   target_tags   = ["ad-domaincontroller"]
 }

@@ -30,27 +30,6 @@ variable "vpc_name" {
 
 
 ###--- Firewall
-# Firewall Rule Names
-variable "stdservices_rules_name" {
-  description = "Standard TCP/UDP services"
-  type        = string
-}
-
-variable "app_rules_name" {
-  description = "Specific rule for apps"
-  type        = string
-}
-
-variable "description" {
-  description = "Setup ports and filters"
-  type        = string
-}
-
-variable "app_description" {
-  description = "Setup ports and filters"
-  type        = string
-}
-
 
 variable "rule_direction" {
   description = "Ingress or Egress"
@@ -58,12 +37,34 @@ variable "rule_direction" {
   default     = "INGRESS"
 }
 
-variable "rule_priority_services" {
-  description = "Priority on stack"
+variable "description" {
+  description = "Setup ports and filters"
   type        = string
-  default     = "500"
 }
 
+variable ingress_filter {
+  description = "A list of IPs and CIDR ranges to allow"
+  type        = list(string)
+}
+
+# Firewall Rule Names
+variable "myrules_name" {
+  description = "Standard TCP/UDP services"
+  type        = string
+}
+
+variable "addc_name" {
+  description = "Standard TCP/UDP services"
+  type        = string
+}
+
+variable "apprules_name" {
+  description = "Standard TCP/UDP services"
+  type        = string
+}
+
+
+###--- Priorities
 variable "svcs_priority" {
   description = "Priority on stack"
   type        = string
@@ -80,11 +81,6 @@ variable "addc_priority" {
   description = "AD rule priority on stack"
   type        = string
   default     = "501"
-}
-
-variable ingress_filter {
-  description = "A list of IPs and CIDR ranges to allow"
-  type        = list(string)
 }
 
 ###--- Destination Port lists
