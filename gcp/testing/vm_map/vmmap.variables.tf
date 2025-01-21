@@ -9,6 +9,19 @@
 #
 ###===================================================================================###
 
+###=================          Locals                ==================###
+locals {
+  # Read the SSH public key
+  ssh_key_content = file(var.ssh_key_file)
+  
+  # cloud-init file
+  cloudinit_config = file(var.cloudinit_configfile)
+}
+
+###===================================================================###
+
+
+### Basic Provider Info
 # Project ID
 variable "project_id" {
   description = "The GCP project ID"
@@ -29,8 +42,6 @@ variable "zone" {
 
 
 ###--- VM Info
-
-
 # Base name for VMs
 variable "base_name" {
   type        = string
@@ -97,19 +108,6 @@ variable "public_ip_name" {
   default     = "karlv-pubip"
 }
 
-# Read the SSH public key
-locals {
-  ssh_key_content = file(var.ssh_key_file)
-}
-
-# cloud-init file
-locals {
-  cloudinit_config = file(var.cloudinit_configfile)
-}
-
-
-
-
 
 ###=================          unused                ==================###
 /*
@@ -124,76 +122,3 @@ variable "subnet_cidr" {
 ###=================          Locals                ==================###
 
 
-
-/*
-###--- Firewall
-# FW Name
-variable "fw_rule_name" {
-  description = "Name for rule"
-  type        = string
-}
-
-# Allow list for Firewall Rules
-variable whitelist_ips {
-  description = "A list of IP CIDR ranges to allow as clients. Do not use Azure tags like `Internet`."
-  type        = list(string)
-}
-
-# Destination Port list
-variable destination_ports {
-  description = "A list of standard network services: SSH, FTP, RDP, SMP, etc."
-  type        = list(string)
-}
-
-# Network Protocol
-variable "net_protocol" {
-  description = "Network protocol"
-  type        = string
-  default     = "tcp"
-}
-*/
-
-
-
-###=================  Examples of complex variables: =================###
-
-###---  Storage Account Info
-# Using type = list(object({}))
-# Usage:  for_each = { for each in var.storage_account_configs : each.name => each }
-# Referencing: storage_account_name = azurerm_storage_account.storage_acct["files"].name
-/*
-variable "storage_account_configs" {
-  description = "Storage Account Definition"
-  type = list(
-    object(
-      { name         = string,
-        acct_kind    = string,
-        account_tier = string,
-        access_temp  = string,
-        replication  = string
-      }
-    )
-  )
-}
-
-###--- Fileshares
-# Using type = list(object({}))
-variable "shares" {
-  description = "List of shares to create and their quotas."
-  type = list(
-    object(
-      { name = string,
-        quota = number 
-      }
-    )
-  )
-}
-
-
-# Same thing but a list/map of multiple shares (simple key:value)
-variable "file_shares" {
-  description = "List of shares to create and their quotas."
-  type        = map(any)
-}
-
-*/

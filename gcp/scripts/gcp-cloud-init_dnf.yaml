@@ -132,7 +132,7 @@ runcmd:
   # Run commands once on first boot - clone and compile useful tools
   # DNF based systems don't like the [,,,] runcmd syntax
   # Install software development tools
-  - yum groupinstall -y "Development Tools"
+  - dnf group install -y "Development Tools"
   - echo "Development tools installed successfully." >> /var/log/cloud-init-output.log
   #
   # Needed for DPDK
