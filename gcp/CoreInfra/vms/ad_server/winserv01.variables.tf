@@ -25,6 +25,17 @@ variable "zone" {
   type        = string
 }
 
+# Service Account
+variable "sa_email" {
+  description = "Service Account email"
+  type        = string
+}
+
+variable "sa_scopes" {
+  description = "Scope for Service Account"
+  type        = list(string)
+}
+
 
 ###--- VM Info
 # Machine type for the VM
@@ -44,25 +55,24 @@ variable "vm_name" {
 variable "os_image" {
   description = "OS Image to use"
   type        = string
-  default     = "centos-stream-9-v20241009"
+  default     = "windows-server-2022-dc-v20241115"
 }
 
 variable "bootdisk_size" {
   description = "Size of boot disk in GB"
   type        = string
-  default     = "40"
+  default     = "150"
 }
 
 ###--- VM Metadata
-# SSH 
-variable "ssh_user" {
-  description = "User to SSH in as"
+variable "windows-sysprep-script" {
+  description = "Windows config script"
   type        = string
 }
 
-variable "ssh_key_file" {
-  description = "Path to the SSH public key file"
-  type        = string
+variable vm_tags {
+  description = "Tags"
+  type        = list(string)
 }
 
 
@@ -72,27 +82,47 @@ variable "ssh_key_file" {
 variable "vpc_name" {
   description = "The name of the VPC network"
   type        = string
-  default     = "custom-network"
+  default     = "default"
 }
 
 # Subnet name
 variable "subnet_name" {
   description = "The name of the subnetwork"
   type        = string
-  default     = "custom-subnet"
+  default     = "default"
 }
 
+variable "public_ip_name" {
+  description = "Name for Private IP"
+  type        = string
+  default     = "karlv-pubip"
+}
+
+variable "private_ip_name" {
+  description = "Name for Public IP"
+  type        = string
+}
+
+variable "private_ip" {
+  description = "Static Private IP"
+  type        = string
+}
+
+/*
 # Subnet CIDR range
 variable "subnet_cidr" {
   description = "CIDR range for the subnet"
   type        = string
   default     = "10.0.0.0/24"
 }
+*/
 
 ###=================          Locals                ==================###
 
-# Read the SSH public key
-#locals {
-#  ssh_key_content = file(var.ssh_key_file)
-#}
+
+# cloud-init file
+locals {
+  windows-sysprep = file(var.windows-sysprep-script)
+}
+
 

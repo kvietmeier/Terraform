@@ -42,14 +42,14 @@ provider "google" {
 #     Start creating infrastructure resources
 ###===================================================================================###
 
-###--- Create the FW Rule/s
+###--- Create the FW Rule/s for standard services
 resource "google_compute_firewall" "default_services_rules" {
   
   name        = var.myrules_name
   network     = var.vpc_name              
   description = var.description
   priority    = var.svcs_priority
-  direction   = var.rule_direction
+  direction   = var.ingress_rule
 
   allow {
     protocol = "tcp"
@@ -71,13 +71,13 @@ resource "google_compute_firewall" "default_services_rules" {
 
 }
 
-###--- Create the FW Rule/s
+###--- Create the FW Rule/s for Applications
 resource "google_compute_firewall" "custom_app_rules" {
   
   name        = var.apprules_name
   network     = var.vpc_name              
   description = var.description
-  direction   = var.rule_direction
+  direction   = var.ingress_rule
   priority    = var.app_priority
 
   
@@ -96,13 +96,14 @@ resource "google_compute_firewall" "custom_app_rules" {
 
 }
 
+###--- Create the FW Rule/s for Active Directory
 resource "google_compute_firewall" "addc_rules" {
   
   ###--- Rules for Active Directory
   name        = var.addc_name
   network     = var.vpc_name              
   description = var.description
-  direction   = var.rule_direction
+  direction   = var.ingress_rule
   priority    = var.addc_priority
 
   allow {
@@ -122,6 +123,24 @@ resource "google_compute_firewall" "addc_rules" {
   source_ranges = var.ingress_filter     # CIDR - Ingress filter
   
   # Limit scope
-  source_tags   = ["ad-domaincontroller"]
-  target_tags   = ["ad-domaincontroller"]
+  #source_tags   = ["ad-domaincontroller"]
+  #target_tags   = ["ad-domaincontroller"]
 }
+
+/*
+# WIP - egress rule 
+resource "google_compute_firewall" "egress_rules" {
+  ###--- Rules for egress
+  name        = var.egress_rule
+  network     = var.vpc_name              
+  description = var.egress_desc
+  direction   = var.egress_rule
+  priority    = var.egress_priority
+
+  source_ranges = var.egress_filter     # CIDR - Ingress filter
+
+  allow {
+    protocol = var.egress_ports
+  }
+}
+*/

@@ -31,10 +31,16 @@ variable "vpc_name" {
 
 ###--- Firewall
 
-variable "rule_direction" {
-  description = "Ingress or Egress"
+variable "ingress_rule" {
+  description = "Ingress"
   type        = string
   default     = "INGRESS"
+}
+
+variable "egress_rule" {
+  description = "Egress"
+  type        = string
+  default     = "ERESS"
 }
 
 variable "description" {
@@ -83,7 +89,19 @@ variable "addc_priority" {
   default     = "501"
 }
 
+variable "egress_priority" {
+  description = "Priority for egress rules"
+  type        = string
+  default     = "1000"
+}
+
 ###--- Destination Port lists
+variable all_ports {
+  description = "For egress - everything"
+  type        = string
+  default     = "ALL"
+}
+
 variable tcp_ports {
   description = "A list of standard network services: SSH, FTP, RDP, SMP, etc."
   type        = list(string)
@@ -95,12 +113,12 @@ variable udp_ports {
 }
 
 variable addc_tcp_ports {
-  description = "A list of standard network services: SSH, FTP, RDP, SMP, etc."
+  description = "TCP Ports for Active Directory"
   type        = list(string)
 }
 
 variable addc_udp_ports {
-  description = "A list of standard network services: SSH, FTP, RDP, SMP, etc."
+  description = "UDP Ports for Active Directory"
   type        = list(string)
 }
 
