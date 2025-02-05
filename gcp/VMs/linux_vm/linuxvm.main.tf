@@ -75,6 +75,8 @@ resource "google_compute_instance" "vm_instance" {
       nat_ip = google_compute_address.my_public_ip.address        # Specified static public IP
     }
   }
+  
+  can_ip_forward = true
 
   metadata = {
     # Install cloud-init if not available yet

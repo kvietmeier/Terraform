@@ -66,7 +66,6 @@ Remove-Item $outputPath
 
 
 ###========================================     Registry Settings     =========================================###
-<# 
 ###--- Registry Keys to create or set
 $RDPRegPath     = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services'
 $TaskBarReg     = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
@@ -75,7 +74,7 @@ $ServMgrRegPath = 'HKLM:\Software\Microsoft\ServerManager'
 
 ###--- Add or set registry values
 
-# Define an array of variable names
+<# # Define an array of variable names
 $RegKeys = @("RDPRegPath", "TaskBarReg", "ServMgrRegPath") 
 
 # Loop through the array of variable names
@@ -99,6 +98,7 @@ foreach ($Key in $RegKeys) {
       write-host "$RegPath exists"
    }
 }
+#>
 
 # Disable Server Manager at logon for everyone
 Set-ItemProperty -Path $ServMgrRegPath -Name "DoNotOpenServerManagerAtLogon" -Value 1 -Type DWORD -Force
@@ -110,4 +110,53 @@ Set-ItemProperty -Path $RDPRegPath -Name "MaxDisconnectionTime" -Type "DWORD" -V
 # Make Taskbar Icons small
 New-Itemproperty -Path $TaskBarReg -Name TaskbarSmallIcons -PropertyType DWORD -Value 1 -Force
 
- #>
+
+###======================================================================================================###
+###                                      System Tuning
+###======================================================================================================###
+# DisableBandwidthThrottling
+# HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\DisableBandwidthThrottling
+# The default is 0
+# Consider setting this value to 1
+
+New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters" `
+    -Name "DisableBandwidthThrottling" -PropertyType DWORD -Value 1 `
+    -Force    
+
+# FileInfoCacheEntriesMax
+# HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\FileInfoCacheEntriesMax
+# The default is 64
+# Try increasing this value to 1024
+
+New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters" `
+    -Name "FileInfoCacheEntriesMax" -PropertyType DWORD -Value 1024 `
+    -Force    
+
+# DirectoryCacheEntriesMax
+# HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\DirectoryCacheEntriesMax
+# The default is 16
+# Consider increasing this value to 1024
+
+New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters" `
+    -Name "DirectoryCacheEntriesMax" -PropertyType DWORD -Value 1024 `
+    -Force    
+
+# FileNotFoundCacheEntriesMax
+# HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\FileNotFoundCacheEntriesMax
+# The default is 128
+# Consider increasing this value to 2048
+
+New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters" `
+    -Name "FileNotFoundCacheEntriesMax" -PropertyType DWORD -Value 2048 `
+    -Force    
+
+# DormantFileLimit
+# HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\DormantFileLimit
+# The default is 1023
+# Consider reducing this value to 256
+
+New-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters" `
+    -Name "DormantFileLimit" -PropertyType DWORD -Value 256 `
+    -Force    
+
+###---- End Tuning
