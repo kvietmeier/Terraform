@@ -1,27 +1,13 @@
 ###===================================================================================###
 #
-#  File:  Template.tf
+#  File:  main.tf
 #  Created By: Karl Vietmeier
 #
 #  Terraform Module Code
 #  Purpose:  
+#     Create objects in a VAST cluster
 # 
-#  Files in Module:
-#    main.tf
-#    variables.tf
-#    variables.tfvars
-#
 ###===================================================================================###
-
-
-/* 
-  
-Usage:
-terraform plan -var-file=".\multivm_map.tfvars"
-terraform apply --auto-approve -var-file=".\multivm_map.tfvars"
-terraform destroy --auto-approve -var-file=".\multivm_map.tfvars"
-
-*/
 
 
 ###===================================================================================###
@@ -33,14 +19,19 @@ data "vastdata_vip_pool" "protocolsVIP" {
     name = "protocolsPool"
 }
 
+# Need a View Policy
 resource "vastdata_view_policy" "ViewPolicy01" {
   name          = "ViewPolicy01"
   vip_pools     = [data.vastdata_vip_pool.protocolsVIP.id]
   tenant_id     = data.vastdata_vip_pool.protocolsVIP.tenant_id
   flavor        = "NFS"
-  nfs_no_squash = ["10.0.0.1", "10.0.0.2"]
+  nfs_no_squash = ["client-vm1.c.clouddev-itdesk124.internal",
+                   "client-vm2.c.clouddev-itdesk124.internal",
+                   "client-vm3.c.clouddev-itdesk124.internal"
+                  ]
 }
 
+# Create the View
 resource "vastdata_view" "elbencho_view" {
   path       = "/vast/share01"
   policy_id  = vastdata_view_policy.ViewPolicy01.id
@@ -52,7 +43,7 @@ resource "vastdata_view" "elbencho_view" {
 
 
 ###===================================================================================###
-#     Output info about it
+#     Output info about it - place holder code
 ###===================================================================================###
 output "protocols_vip_pool_id" {
   value = data.vastdata_vip_pool.protocolsVIP.id
@@ -73,9 +64,6 @@ output "protocols_vip_pool_cluster" {
   value = data.vastdata_vip_pool.protocolsVIP.cluster
   description = "The cluster associated with the protocols VIP pool."
 }
-
-
-
 
 
 ###===================================================================================###
