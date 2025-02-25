@@ -9,18 +9,41 @@ Setting up VAST clusters with Terraform.
 
 #### Notes
 
-Put Notes Here
+Example: Create a View using existing VIP Pool.
+
+``` terraform
+data "vastdata_vip_pool" "protocolsVIP" {
+    name = "protocolsPool"
+}
+
+```
+
+Output/Data available:
+
+``` terraform
+
+output "protocols_vip_pool_id" {
+  value = data.vastdata_vip_pool.protocolsVIP.id
+  description = "The ID of the protocols VIP pool."
+}
+
+output "protocols_vip_pool_name" {
+  value = data.vastdata_vip_pool.protocolsVIP.name
+  description = "The name of the protocols VIP pool."
+}
+
+output "protocols_vip_pool_tenant_id" {
+  value = data.vastdata_vip_pool.protocolsVIP.tenant_id
+  description = "The tenant ID associated with the protocols VIP pool."
+}
+
+output "protocols_vip_pool_cluster" {
+  value = data.vastdata_vip_pool.protocolsVIP.cluster
+  description = "The cluster associated with the protocols VIP pool."
+}
+```
 
 ---
-
-#### My code is Built With
-
-* [Visual Studio Code](https://code.visualstudio.com/) - Editor
-* [Terraform](https://www.terraform.io/) - Terraform
-
-#### All run under PowerShell on Windows 11
-
-* [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
 
 #### Author/s
 
