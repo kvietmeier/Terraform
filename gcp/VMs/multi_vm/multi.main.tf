@@ -4,17 +4,9 @@
 #  Created By: Karl Vietmeier
 #
 #  Terraform Module Code
-#  Purpose:  Create a VM
-#            With basic settings
+#  Purpose:  Create multiple identical VMs from a simple list
+#  vm_names             = ["linux01", "linux02", "linux03"]
 # 
-#  Files in Module:
-#    main.tf
-#    variables.tf
-#    variables.tfvars
-#
-#  Usage:
-#  terraform apply --auto-approve
-#  terraform destroy --auto-approve
 ###===================================================================================###
 
 /* 
@@ -76,10 +68,11 @@ resource "google_compute_instance" "vm_instance" {
 
   metadata = {
     # Install cloud-init if not available yet
-    startup-script = <<-EOT
-      #!/bin/bash
-      command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
-    EOT
+    startup-script = <<-CLOUDINIT
+    #!/bin/bash
+    sleep 30
+    command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
+    CLOUDINIT
     
     ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
     serial-port-enable = true # Enable serial port access for debugging
@@ -87,7 +80,7 @@ resource "google_compute_instance" "vm_instance" {
 
   }
 
-  tags = ["kv-linux", "kv-infra"]
+  #tags = ["kv-linux", "kv-infra"]
 }
 
 output "vm_private_ips" {

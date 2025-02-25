@@ -1,0 +1,239 @@
+#cloud-config
+# vim: syntax=yaml
+#
+###=============================================================================###
+# Bootstrap setup for a dnf/yum based Linux server
+# 
+# Make sure you have all of the tools you need!
+# 
+# cloud-init docs:
+#   https://cloudinit.readthedocs.io/en/latest/index.html 
+# 
+# Examples:
+#   https://cloudinit.readthedocs.io/en/latest/topics/examples.html
+#
+# 
+#   --- Modified for Azure Rocky Linux ---
+#
+###=============================================================================###
+
+# Upgrade the instance on first boot
+package_update: true
+package_upgrade: true
+
+# Set default user to "someuser"  (modify as required)
+# Does not reliably work
+#system_info:
+#  default_user:
+#    name: someuser
+
+packages:
+  # Install additional packages on first boot
+  - librdmacm
+  - libaio-devel
+  - libtool
+  - autoconf 
+  - pkg-config
+  - cmake
+  - tmux
+  - git
+  - tree
+  - numactl
+  - wget
+  - traceroute
+  - nmap
+  - dnsutils
+  - perf
+  - bcc-tools
+  - blktrace
+  - sysstat
+  - stress-ng
+  - pciutils
+  - nvme-cli
+  - nfs-utils
+  # For development
+  - boost-devel
+  - ncurses-devel
+  - numactl-devel
+###--- End packages
+
+###--- Create and/or modify files on the system
+write_files:
+#--- Append settings to .bashrc
+#--- For labuser 
+- path: /home/labuser/.bashrc
+  content: |
+    
+    # Added by cloud-init
+    alias la="ls -A"
+    alias ls="ls -hF --color=auto"
+    alias l="ls -CF"
+    alias ll="ls -l"
+    alias lla='ls -alhvF --group-directories-first'
+    alias egrep='egrep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias grep='grep --color=auto'
+
+    set -o vi
+  owner: labuser:labuser
+  append: true
+  defer: true
+#--- For root
+- path: /root/.bashrc
+  content: |
+    
+    ####
+    # Added by cloud-init
+    alias ls="ls -hF --color=auto"
+    alias l="ls -CF"
+    alias la="ls -A"
+    alias ll='ls -lhvF --group-directories-first'
+    alias lla='ls -alhvF --group-directories-first'
+    alias egrep='egrep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias grep='grep --color=auto'
+
+    set -o vi
+
+  owner: root:root
+  append: true
+#
+# Compile and install ElBencho - need NumCPU
+- path: /tmp/install_tools.sh
+  content: |
+    #!/bin/bash
+    cd /root
+    mkdir git
+    cd git
+    git clone https://github.com/breuner/elbencho.git
+    cd elbencho
+    make -j $(nproc)
+    make rpm
+    dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
+    cd ~
+    echo "script ran" >> /tmp/bootscript.txt
+  permissions: '0755'
+- path: /root/CONFIGURED_BY_CLOUD_INIT
+###--- End write_files
+###--- Start runcmd
+runcmd:
+  # Run commands once on first boot - clone and compile useful tools
+  # DNF based systems don't like the [,,,] runcmd syntax
+  # Install software development tools
+  - dnf group install -y "Development Tools"
+  - echo "Development tools installed successfully." >> /var/log/cloud-init-output.log
+  #
+  # Needed for DPDK
+  - dnf install python3-pip -y
+  - pip3 install ninja
+  - pip3 install meson
+  #
+  # Clone scripts directory to labuser
+  - cd /home/labuser/
+  - git clone https://github.com/kvietmeier/scripts.git
+  - chown -R labuser:labuser /home/labuser/scripts
+  - cd ~
+  #
+  # Run our install script
+  - bash /tmp/install_tools.sh
+  #
+  ###------------ Compile Software ------------###
+  # dool
+  # FIO
+  # iperf3
+  # sockperf
+  #
+  - cd /root/git
+  #
+  ## Compile dool
+  - git clone https://github.com/scottchiefbaker/dool.git
+  - cd dool
+  - ./install.py
+  - cd ..
+  #
+  ## Compile FIO
+  - git clone https://github.com/axboe/fio.git
+  - cd fio
+  - ./configure
+  - make
+  - make install
+  - cd ..
+  #
+  # Compile/install iperf3
+  - git clone "https://github.com/esnet/iperf.git"
+  - cd iperf
+  - ./configure
+  - make
+  - make install
+  - /usr/sbin/ldconfig
+  - cd ..
+  #  
+  ## Compile/install sockperf
+  - git clone "https://github.com/mellanox/sockperf"
+  - cd sockperf
+  - ./autogen.sh
+  - ./configure
+  - make
+  - make install
+  - cd .. 
+  #
+  ## System cleanup/config
+  - systemctl enable chronyd
+  - systemctl restart chronyd
+  - dnf clean packages
+  - mandb
+  ###--- Create some directories
+  - mkdir -p /home/labuser/output
+  - chown labuser:labuser /home/labuser/output
+  # For huge pages
+  - mkdir -p /mount/huge
+  # NFS mount points
+  - mkdir -p /mount/nfs1
+  - mkdir -p /mount/nfs2
+  - mkdir -p /mount/nfs3
+###--- End runcmd
+
+###--- Users - Leave here for now
+#      Need to add your keys - will populate .ssh/authorized_keys
+users:
+#  # Keep and update the original default user (centos or ubuntu for example)
+  - name: default
+#    ssh_authorized_keys:
+#      - ssh-rsa 
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: sudo
+    shell: /bin/bash
+#    # Configure an added user - With additional SSH keys
+#  - name: labuser
+#    ssh_authorized_keys:
+#      - ssh-rsa 
+#    shell: /bin/bash
+#    groups: sudo
+#    sudo: ALL=(ALL) NOPASSWD:ALL  
+
+
+###--- Misc system configuration
+timezone: "America/Los_Angeles"
+
+# Use Azure host for timesync
+ntp:
+  enabled: true
+  ntp_client: chrony
+  config:
+    confpath: /etc/chrony/chrony.conf
+    packages:
+     - chrony
+    service_name: chrony
+    template: |
+       ## template:jinja
+       driftfile /var/lib/chrony/chrony.drift
+       logdir /var/log/chrony
+       maxupdateskew 100.0
+       local stratum 2
+       refclock PHC /dev/ptp_hyperv poll 3 dpoll -2
+       makestep 1.0 -1
+
+
+final_message: Post creation OS config done
+
+###--- End File

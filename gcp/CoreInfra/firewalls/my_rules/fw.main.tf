@@ -127,6 +127,38 @@ resource "google_compute_firewall" "addc_rules" {
   #target_tags   = ["ad-domaincontroller"]
 }
 
+
+/* 
+###--- Create the FW Rule/s for standard services
+resource "google_compute_firewall" "ipv6_default_services_rules" {
+  
+  name        = var.ipv6_myrules_name
+  network     = var.vpc_name              
+  description = var.ipv6_description
+  priority    = var.svcs_priority
+  direction   = var.ingress_rule
+
+  allow {
+    protocol = "tcp"
+    ports    = var.tcp_ports
+  }
+  
+  allow {
+    protocol = "udp"
+    ports    = var.udp_ports
+  }
+
+  allow {
+    protocol = "icmp"                    # ICMP for ping/diagnostic
+  }
+
+  source_ranges = var.ipv6_ingress_filter     # CIDR - Ingress filter
+  
+  #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
+
+}
+ */
+
 /*
 # WIP - egress rule 
 resource "google_compute_firewall" "egress_rules" {

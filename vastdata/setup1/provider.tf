@@ -1,8 +1,8 @@
 ###
-###======================= Confgure Provider =======================###
+###======================= Confgure vAST Cluster Provider =======================###
 ###
 
-
+# Define the required providers
 terraform {
     required_version = ">=1.4"
 
@@ -13,6 +13,7 @@ terraform {
   }
 }
 
+# Provider Configuration
 provider vastdata {
   username = "admin"
   port = "3333"

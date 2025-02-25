@@ -59,6 +59,11 @@ variable "myrules_name" {
   type        = string
 }
 
+#variable "ipv6_myrules_name" {
+#  description = "Standard TCP/UDP services"
+#  type        = string
+#}
+
 variable "addc_name" {
   description = "Standard TCP/UDP services"
   type        = string
