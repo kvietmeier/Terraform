@@ -1,6 +1,19 @@
-### Setup VAST Data Clusters
+### Setup a View on a VAST Data Cluster
 
-Setting up VAST clusters with Terraform.
+setup1:  Using the VAST Data provider to setup a View with an existing VIP Pool.
+
+```text
+.
+├── README.md
+└── setup1
+    ├── main.tf
+    ├── provider.tf
+    ├── terraform.tfvars
+    └── variables.tf
+```
+
+---
+#### Docs
 
 * [VAST Data GitHub](https://github.com/vast-data)
 * [Terraform Provider](https://github.com/vast-data/terraform-provider-vastdata)
