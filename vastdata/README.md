@@ -11,7 +11,7 @@ Setting up VAST clusters with Terraform.
 
 Example: Create a View using existing VIP Pool.
 
-``` shell
+``` terraform
 data "vastdata_vip_pool" "protocolsVIP" {
     name = "protocolsPool"
 }
@@ -20,7 +20,7 @@ data "vastdata_vip_pool" "protocolsVIP" {
 
 Output/Data available:
 
-``` json
+``` terraform
 
 output "protocols_vip_pool_id" {
   value = data.vastdata_vip_pool.protocolsVIP.id
@@ -44,7 +44,7 @@ output "protocols_vip_pool_cluster" {
 ```
 
 Output - 
-``` shell
+``` terraform
 Outputs:
 
 protocols_vip_pool_cluster = "vastoncloud-gcp02"
