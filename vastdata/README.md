@@ -1,5 +1,15 @@
 ### Using the VAST Data Provider
 
+---
+#### Docs
+
+* [VAST Data GitHub](https://github.com/vast-data)
+* [Terraform Provider](https://github.com/vast-data/terraform-provider-vastdata)
+
+---
+
+#### Configurations
+
 setup1:  Using the VAST Data provider to setup a View with an existing VIP Pool.
 
 ```text
@@ -11,14 +21,6 @@ setup1:  Using the VAST Data provider to setup a View with an existing VIP Pool.
     ├── terraform.tfvars
     └── variables.tf
 ```
-
----
-#### Docs
-
-* [VAST Data GitHub](https://github.com/vast-data)
-* [Terraform Provider](https://github.com/vast-data/terraform-provider-vastdata)
-
----
 
 #### Notes
 
