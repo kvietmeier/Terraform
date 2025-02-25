@@ -25,10 +25,7 @@ resource "vastdata_view_policy" "ViewPolicy01" {
   vip_pools     = [data.vastdata_vip_pool.protocolsVIP.id]
   tenant_id     = data.vastdata_vip_pool.protocolsVIP.tenant_id
   flavor        = "NFS"
-  nfs_no_squash = ["client-vm1.c.clouddev-itdesk124.internal",
-                   "client-vm2.c.clouddev-itdesk124.internal",
-                   "client-vm3.c.clouddev-itdesk124.internal"
-                  ]
+  nfs_no_squash = [ "10.111.1.28", "10.111.1.26", "10.111.1.27" ]
 }
 
 # Create the View
