@@ -14,10 +14,10 @@ terraform {
 }
 
 provider vastdata {
-  username = "admin"
-  port = "3333"
-  password = "123456"
-  host = "0.0.0.0"
-  skip_ssl_verify = true
-  version_validation_mode = "warn"
+  username = var.vast_user
+  port = var.vast_port
+  password = var.vast_passwd
+  host = var.vast_host
+  skip_ssl_verify = var.skip_ssl
+  version_validation_mode = var.validation_mode
 }

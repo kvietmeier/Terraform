@@ -7,7 +7,7 @@
 #
 ###===================================================================================###
 
-###--- VAST Provider metadata
+###--- VAST Provider metadata ---###
 variable "vast_user" {
   description = "Admin User for VAST"
   default     = "admin"
@@ -15,6 +15,7 @@ variable "vast_user" {
 
 variable "vast_port" {
   description = "Port VMS is using"
+  default     = "443"
 }
 
 variable "vast_passwd" {
@@ -22,7 +23,7 @@ variable "vast_passwd" {
 }
 
 variable "vast_host" {
-  description = "resolvable address of VMS admin port"
+  description = "Resolvable address of the Cluster"
 }
 
 variable "skip_ssl" {
