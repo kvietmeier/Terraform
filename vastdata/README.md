@@ -9,11 +9,33 @@ Setting up VAST clusters with Terraform.
 
 #### Notes
 
-Example: Create a View using existing VIP Pool.
+Example: Use existing VIP Pool for resources like Views.
 
 ``` terraform
 data "vastdata_vip_pool" "protocolsVIP" {
     name = "protocolsPool"
+}
+
+```
+
+Use the VIP Pool - 
+
+``` terraform
+# Need a View Policy
+resource "vastdata_view_policy" "ViewPolicy01" {
+  name          = "ViewPolicy01"
+  vip_pools     = [data.vastdata_vip_pool.protocolsVIP.id]
+  tenant_id     = data.vastdata_vip_pool.protocolsVIP.tenant_id
+  flavor        = "NFS"
+  nfs_no_squash = [ "10.111.1.28", "10.111.1.26", "10.111.1.27" ]
+}
+
+# Create the View
+resource "vastdata_view" "elbencho_view" {
+  path       = "/vast/share01"
+  policy_id  = vastdata_view_policy.ViewPolicy01.id
+  create_dir = "true"
+  protocols  = ["NFS", "NFS4"]
 }
 
 ```
