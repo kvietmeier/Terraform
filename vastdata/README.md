@@ -1,4 +1,4 @@
-### Setup a View on a VAST Data Cluster
+### Using the VAST Data Provider
 
 setup1:  Using the VAST Data provider to setup a View with an existing VIP Pool.
 
