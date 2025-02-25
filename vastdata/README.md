@@ -4,7 +4,8 @@
 #### Docs
 
 * [VAST Data GitHub](https://github.com/vast-data)
-* [Terraform Provider](https://github.com/vast-data/terraform-provider-vastdata)
+* [Terraform Provider (GitHub)](https://github.com/vast-data/terraform-provider-vastdata)
+* [Terraform Provider (Registry)](https://registry.terraform.io/providers/vast-data/vastdata/latest/docs)
 
 ---
 
