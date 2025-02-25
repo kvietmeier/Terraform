@@ -1,6 +1,6 @@
 ### Terraform Projects
 
-Terraform projects - recently added GCP.
+Terraform projects - recently added VAST Data.
 
 #### Installing Terraform
 
