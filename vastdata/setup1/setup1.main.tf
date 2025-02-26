@@ -5,7 +5,7 @@
 #
 #  Terraform Module Code
 #  Purpose:  
-#     Create objects in a VAST cluster
+#     Create a View Policy amd a View
 # 
 ###===================================================================================###
 
