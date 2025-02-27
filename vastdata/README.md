@@ -23,6 +23,7 @@ setup1:  Using the VAST Data provider to setup a View with an existing VIP Pool.
     └── variables.tf
 ```
 
+---
 #### Notes
 
 Example: Use existing VIP Pool for resources like Views.
@@ -31,7 +32,6 @@ Example: Use existing VIP Pool for resources like Views.
 data "vastdata_vip_pool" "protocolsVIP" {
     name = "protocolsPool"
 }
-
 ```
 
 Use the VIP Pool - you need the tenantID that owns the Pool and the PoolID.
@@ -56,9 +56,11 @@ resource "vastdata_view" "elbencho_view" {
 
 ```
 
+---
+
 These are the object metada available:
 
-VIP Poool ID:
+*VIP Poool ID:*
 ``` terraform
 output "protocols_vip_pool_id" {
   value = data.vastdata_vip_pool.protocolsVIP.id
@@ -66,7 +68,7 @@ output "protocols_vip_pool_id" {
 }
 ```
 
-VIP Pool Name:
+*VIP Pool Name:*
 ``` terraform
 output "protocols_vip_pool_name" {
   value = data.vastdata_vip_pool.protocolsVIP.name
@@ -74,7 +76,7 @@ output "protocols_vip_pool_name" {
 }
 ```
 
-Tenant ID that owns the VIP Pool
+*Tenant ID that owns the VIP Pool*
 ``` terraform
 output "protocols_vip_pool_tenant_id" {
   value = data.vastdata_vip_pool.protocolsVIP.tenant_id
@@ -82,7 +84,7 @@ output "protocols_vip_pool_tenant_id" {
 }
 ```
 
-Cluster Name where the VIP Pool lives:
+*Cluster Name where the VIP Pool lives:*
 ``` terraform
 output "protocols_vip_pool_cluster" {
   value = data.vastdata_vip_pool.protocolsVIP.cluster
