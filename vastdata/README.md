@@ -34,7 +34,7 @@ data "vastdata_vip_pool" "protocolsVIP" {
 
 ```
 
-Use the VIP Pool - 
+Use the VIP Pool - you need the tenantID that owns the Pool and the PoolID.
 
 ``` terraform
 # Need a View Policy
@@ -56,25 +56,34 @@ resource "vastdata_view" "elbencho_view" {
 
 ```
 
-Output/Data available:
+These are the object metada available:
 
+VIP Poool ID:
 ``` terraform
-
 output "protocols_vip_pool_id" {
   value = data.vastdata_vip_pool.protocolsVIP.id
   description = "The ID of the protocols VIP pool."
 }
+```
 
+VIP Pool Name:
+``` terraform
 output "protocols_vip_pool_name" {
   value = data.vastdata_vip_pool.protocolsVIP.name
   description = "The name of the protocols VIP pool."
 }
+```
 
+Tenant ID that owns the VIP Pool
+``` terraform
 output "protocols_vip_pool_tenant_id" {
   value = data.vastdata_vip_pool.protocolsVIP.tenant_id
   description = "The tenant ID associated with the protocols VIP pool."
 }
+```
 
+Cluster Name where the VIP Pool lives:
+``` terraform
 output "protocols_vip_pool_cluster" {
   value = data.vastdata_vip_pool.protocolsVIP.cluster
   description = "The cluster associated with the protocols VIP pool."
