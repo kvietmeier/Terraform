@@ -5,7 +5,8 @@
 #
 #  Terraform Module Code
 #  Purpose:  
-#     Create objects in a VAST cluster
+#    Testing Provider setup
+#
 # 
 ###===================================================================================###
 
@@ -15,20 +16,27 @@
 ###===================================================================================###
 
 # Want to use existing VIP Pool
-data "vastdata_vip_pool" "protocolsVIP" {
+data "vastdata_vip_pool" "GCPprotocolsVIP" {
     name = "protocolsPool"
+    provider = vastdata.GCPCluster
 }
 
+data "vastdata_vip_pool" "RemoteprotocolsVIP" {
+    name = "protocolsPool"
+    provider = vastdata.RemoteCluster
+}
+
+
+    #provider = vastdata.GCPCluster
+
+/* 
 # Need a View Policy
 resource "vastdata_view_policy" "ViewPolicy01" {
   name          = "ViewPolicy01"
   vip_pools     = [data.vastdata_vip_pool.protocolsVIP.id]
   tenant_id     = data.vastdata_vip_pool.protocolsVIP.tenant_id
   flavor        = "NFS"
-  nfs_no_squash = ["client-vm1.c.clouddev-itdesk124.internal",
-                   "client-vm2.c.clouddev-itdesk124.internal",
-                   "client-vm3.c.clouddev-itdesk124.internal"
-                  ]
+  nfs_no_squash = [ "10.111.1.28", "10.111.1.26", "10.111.1.27" ]
 }
 
 # Create the View
@@ -38,11 +46,10 @@ resource "vastdata_view" "elbencho_view" {
   create_dir = "true"
   protocols  = ["NFS", "NFS4"]
 }
+*/
 
 
-
-
-###===================================================================================###
+/* ###===================================================================================###
 #     Output info about it - place holder code
 ###===================================================================================###
 output "protocols_vip_pool_id" {
@@ -65,7 +72,7 @@ output "protocols_vip_pool_cluster" {
   description = "The cluster associated with the protocols VIP pool."
 }
 
-
+ */
 ###===================================================================================###
 /*
 ###--- These weren't valid
