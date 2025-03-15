@@ -13,18 +13,20 @@
 ###===================================================================================###
 
 
-# Create resource groups from a map
+/* # Create resource groups from a map
 resource "azurerm_resource_group" "regionalrgs" {
   for_each  = var.region_map
   location  = "${each.value}"
   name      = "${var.prefix}-${each.key}-${var.suffix}"
-}
+*/
+
 
 # Create the NSG resources for each resource group/region
 resource "azurerm_network_security_group" "default-nsg" {
   for_each             = var.region_map
   location             = "${each.value}"
-  resource_group_name  = azurerm_resource_group.regionalrgs[each.key].name
+  resource_group_name  = var.resource_group
+  #resource_group_name  = azurerm_resource_group.regionalrgs[each.key].name
   name                 = "${each.key}-InboundNSG"
 
 # A "bulk" rule to allow access to a set of standard services (FTP, SSH, RDP, SMB, etc)

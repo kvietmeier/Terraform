@@ -150,14 +150,14 @@ users:
   # Keep the original default user (azureuser)
   - name: default
     ssh-authorized-keys:
-    - ssh-rsa 
+    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOVhK8T5vJgKqXzSgDryh1EQEReE1lU9CvlBK8v4bG+eTjhPqacXqPkUWPlnM+kA1l3xe/GBxbIeoJ/WruUZV58SBjUUEMYN0qyKVwl+G5GqhijGAsWNC1KsfpTHNRRplZWAkKajAzb57kCzdNvFmOi86ENhn4gYFTWqAPEYALMnq6T1D52SELJGs/A3fwDEE99nTjcZ4/Huv1z+WWJmZEkSRWNtYLD/mx+cP41UHKCEIgsffvKH3o/IHgpsDGi5sQ8AKHChNkHb3vWQVPHx1BZDwxEUG7SPjY4gc/wRtrdauzMvdKvm9AUi1paY2PCGViLcysv619hQj02k/OQBJBy7MqplB1waoisxDuxKMSKjeKTyMGbMfv+MCrQd1iT+qdQtQImvyxRtQnYnbNMjnLPYUey7/kTkb4Xggm/hhuJOxnFqH/9WILDb81I4jElis+raXh0Vnt7gQ7OAO74osiLqD7uGuhytRCLqnU5VQmEAGdpxahxtirRu0eVQr/Ncs= karl.vietmeier@Tandaloor"
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
     # Configure Azure added user - With additional SSH keys
   - name: ubuntu
     ssh-authorized-keys:
-    - ssh-rsa 
+    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOVhK8T5vJgKqXzSgDryh1EQEReE1lU9CvlBK8v4bG+eTjhPqacXqPkUWPlnM+kA1l3xe/GBxbIeoJ/WruUZV58SBjUUEMYN0qyKVwl+G5GqhijGAsWNC1KsfpTHNRRplZWAkKajAzb57kCzdNvFmOi86ENhn4gYFTWqAPEYALMnq6T1D52SELJGs/A3fwDEE99nTjcZ4/Huv1z+WWJmZEkSRWNtYLD/mx+cP41UHKCEIgsffvKH3o/IHgpsDGi5sQ8AKHChNkHb3vWQVPHx1BZDwxEUG7SPjY4gc/wRtrdauzMvdKvm9AUi1paY2PCGViLcysv619hQj02k/OQBJBy7MqplB1waoisxDuxKMSKjeKTyMGbMfv+MCrQd1iT+qdQtQImvyxRtQnYnbNMjnLPYUey7/kTkb4Xggm/hhuJOxnFqH/9WILDb81I4jElis+raXh0Vnt7gQ7OAO74osiLqD7uGuhytRCLqnU5VQmEAGdpxahxtirRu0eVQr/Ncs= karl.vietmeier@Tandaloor"
     shell: /bin/bash
     groups: sudo
     sudo: ALL=(ALL) NOPASSWD:ALL  

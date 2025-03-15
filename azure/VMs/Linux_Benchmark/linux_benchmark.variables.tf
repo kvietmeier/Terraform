@@ -27,8 +27,8 @@ variable "node_count" { type = number }
 ###===================================================================================###
 
 # Hub resources for vnet peering
-variable "hub-rg" { type = string }
-variable "hub-vnet" { type = string }
+variable "existing-rg" { type = string }
+variable "existing-vnet" { type = string }
 
 # Allow list for NSG
 variable "whitelist_ips" {
@@ -46,12 +46,6 @@ variable "subnets" {
     "default" = "0"
   }
 }
-
-
-# - not used anymore
-#variable "subnet_cidrs" { type = list(string) }
-#variable "subnet1_ips" { type = list(string) }
-#variable "subnet2_ips" { type = list(string) }
 
 
 ###==================================================================================###
@@ -102,16 +96,16 @@ variable "Environment" { type = string }
 #   Retrieve existing resources in Azure
 ###===================================================================================###
 
-### Right now we just need the Hub vNet to peer to.
-# Resource Groups
-data "azurerm_resource_group" "hub-rg" {
-  name = var.hub-rg
+### Restricted to one Resource Group
+# Resource Group
+data "azurerm_resource_group" "existing-rg" {
+  name = var.existing-rg
 }
 
-# Hub vNet to peer to
-data "azurerm_virtual_network" "hub-vnet" {
-  resource_group_name = data.azurerm_resource_group.hub-rg.name
-  name                = var.hub-vnet
+# Hub vNet
+data "azurerm_virtual_network" "existing-vnet" {
+  resource_group_name = data.azurerm_resource_group.existing-rg.name
+  name                = var.existing-vnet
 }
 
 # Refer to them in maint.tf using: 
@@ -119,6 +113,3 @@ data "azurerm_virtual_network" "hub-vnet" {
 # data.azurerm_resource_group.hub-rg.id
 # data.azurerm_virtual_network.hub-vnet.name
 # data.azurerm_virtual_network.hub-vnet.id
-
-
-
