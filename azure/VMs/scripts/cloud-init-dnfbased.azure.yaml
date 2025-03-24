@@ -61,21 +61,22 @@ packages:
 write_files:
 #--- Append settings to .bashrc
 #--- For labuser 
-- path: /home/labuser/.bashrc
+- path: /home/azureuser/.bashrc
   content: |
     
     # Added by cloud-init
     alias la="ls -A"
     alias ls="ls -hF --color=auto"
     alias l="ls -CF"
-    alias ll="ls -l"
+    alias ll='ls -lhvF --group-directories-first'
+    alias lv="ls -lv"
     alias lla='ls -alhvF --group-directories-first'
     alias egrep='egrep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias grep='grep --color=auto'
 
     set -o vi
-  owner: labuser:labuser
+  owner: azureuser:azureuser
   append: true
   defer: true
 #--- For root
@@ -87,6 +88,7 @@ write_files:
     alias ls="ls -hF --color=auto"
     alias l="ls -CF"
     alias la="ls -A"
+    alias lv="ls -lv"
     alias ll='ls -lhvF --group-directories-first'
     alias lla='ls -alhvF --group-directories-first'
     alias egrep='egrep --color=auto'
@@ -94,7 +96,6 @@ write_files:
     alias grep='grep --color=auto'
 
     set -o vi
-
   owner: root:root
   append: true
 #

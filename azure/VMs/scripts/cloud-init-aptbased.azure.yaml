@@ -40,6 +40,7 @@ packages:
   - libssl-dev
   - libcurl4-gnutls-dev
   - libjson-c-dev
+  - libaio-dev
   - uuid-dev
   - libglib2.0-dev
   - libgtk2.0-dev
@@ -151,6 +152,7 @@ users:
   - name: default
     ssh-authorized-keys:
     - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOVhK8T5vJgKqXzSgDryh1EQEReE1lU9CvlBK8v4bG+eTjhPqacXqPkUWPlnM+kA1l3xe/GBxbIeoJ/WruUZV58SBjUUEMYN0qyKVwl+G5GqhijGAsWNC1KsfpTHNRRplZWAkKajAzb57kCzdNvFmOi86ENhn4gYFTWqAPEYALMnq6T1D52SELJGs/A3fwDEE99nTjcZ4/Huv1z+WWJmZEkSRWNtYLD/mx+cP41UHKCEIgsffvKH3o/IHgpsDGi5sQ8AKHChNkHb3vWQVPHx1BZDwxEUG7SPjY4gc/wRtrdauzMvdKvm9AUi1paY2PCGViLcysv619hQj02k/OQBJBy7MqplB1waoisxDuxKMSKjeKTyMGbMfv+MCrQd1iT+qdQtQImvyxRtQnYnbNMjnLPYUey7/kTkb4Xggm/hhuJOxnFqH/9WILDb81I4jElis+raXh0Vnt7gQ7OAO74osiLqD7uGuhytRCLqnU5VQmEAGdpxahxtirRu0eVQr/Ncs= karl.vietmeier@Tandaloor"
+    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCrgMEIKQNTg1l121V6P3Lgv+JDK6ePvN+Yh0H9C6W0Ymu4h0fnjutZb4d/VRXCp1SpFNF13VsrQKMvk5Y5PxsvjXdAYTDp4RKvwsNYjis+nL3vtAc3G/vUNxBXP6XtuCx8H0j63Z20UfXHLAC7V7/7Ki34KzNxLRTRaTx8nmhhwJ3qHNbzWsTCm9W+FmR5QOeIW3XIb9DkS1ph9CHFya4gObWChBmxcsfM09buvwahQaeZQvsjgkVHUirigb1IyU3J2VZKY8NMrpunmAto7cWBhH4Ig0mGCekwFuNUxuZznljoIHJSbVGuB9cSPRRg5Zb+GR2/irLnLHJgp79flVQXr8pfhGepFf4uoaqJRQ3hhGGYyEffX41BwDW2k4O7ql+X/RNh7mGQ/gXpAllTc5dBl+scI60k7237y+12vglj/5C9g8LwEl9+36glsBBtfZ/wY2393pV3JO291QwXcMYsK6Ox54xnXfd8o0Gx2XJcyrYno2Z+wjAAtnYReFAqSrM= azureuser@LinuxTools01"
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     groups: sudo
     shell: /bin/bash
@@ -158,6 +160,7 @@ users:
   - name: ubuntu
     ssh-authorized-keys:
     - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOVhK8T5vJgKqXzSgDryh1EQEReE1lU9CvlBK8v4bG+eTjhPqacXqPkUWPlnM+kA1l3xe/GBxbIeoJ/WruUZV58SBjUUEMYN0qyKVwl+G5GqhijGAsWNC1KsfpTHNRRplZWAkKajAzb57kCzdNvFmOi86ENhn4gYFTWqAPEYALMnq6T1D52SELJGs/A3fwDEE99nTjcZ4/Huv1z+WWJmZEkSRWNtYLD/mx+cP41UHKCEIgsffvKH3o/IHgpsDGi5sQ8AKHChNkHb3vWQVPHx1BZDwxEUG7SPjY4gc/wRtrdauzMvdKvm9AUi1paY2PCGViLcysv619hQj02k/OQBJBy7MqplB1waoisxDuxKMSKjeKTyMGbMfv+MCrQd1iT+qdQtQImvyxRtQnYnbNMjnLPYUey7/kTkb4Xggm/hhuJOxnFqH/9WILDb81I4jElis+raXh0Vnt7gQ7OAO74osiLqD7uGuhytRCLqnU5VQmEAGdpxahxtirRu0eVQr/Ncs= karl.vietmeier@Tandaloor"
+    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCrgMEIKQNTg1l121V6P3Lgv+JDK6ePvN+Yh0H9C6W0Ymu4h0fnjutZb4d/VRXCp1SpFNF13VsrQKMvk5Y5PxsvjXdAYTDp4RKvwsNYjis+nL3vtAc3G/vUNxBXP6XtuCx8H0j63Z20UfXHLAC7V7/7Ki34KzNxLRTRaTx8nmhhwJ3qHNbzWsTCm9W+FmR5QOeIW3XIb9DkS1ph9CHFya4gObWChBmxcsfM09buvwahQaeZQvsjgkVHUirigb1IyU3J2VZKY8NMrpunmAto7cWBhH4Ig0mGCekwFuNUxuZznljoIHJSbVGuB9cSPRRg5Zb+GR2/irLnLHJgp79flVQXr8pfhGepFf4uoaqJRQ3hhGGYyEffX41BwDW2k4O7ql+X/RNh7mGQ/gXpAllTc5dBl+scI60k7237y+12vglj/5C9g8LwEl9+36glsBBtfZ/wY2393pV3JO291QwXcMYsK6Ox54xnXfd8o0Gx2XJcyrYno2Z+wjAAtnYReFAqSrM= azureuser@LinuxTools01"
     shell: /bin/bash
     groups: sudo
     sudo: ALL=(ALL) NOPASSWD:ALL  
@@ -185,10 +188,50 @@ ntp:
        makestep 1.0 -1
 
 
-# Create empty files on the system
+# Edit files
 write_files:
 - path: /root/CONFIGURED_BY_CLOUD_INIT
+#--- For root
+- path: /root/.bashrc
+  content: |
+    
+    ####
+    # Added by cloud-init
+    alias ls="ls -hF --color=auto"
+    alias l="ls -CF"
+    alias la="ls -A"
+    alias lv="ls -lv"
+    alias ll='ls -lhvF --group-directories-first'
+    alias lla='ls -alhvF --group-directories-first'
+    alias egrep='egrep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias grep='grep --color=auto'
 
+    set -o vi
+
+  owner: root:root
+  append: true
+#--- Append settings to .bashrc
+#--- For azureuser 
+- path: /home/azureuser/.bashrc
+  content: |
+    
+    # Added by cloud-init
+    alias la="ls -A"
+    alias ls="ls -hF --color=auto"
+    alias l="ls -CF"
+    alias ll='ls -lhvF --group-directories-first'
+    alias lv="ls -lv"
+    alias lla='ls -alhvF --group-directories-first'
+    alias egrep='egrep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias grep='grep --color=auto'
+
+    set -o vi
+  owner: azureuser:azureuser
+
+
+#
 
 
 final_message: Post creation OS config done
