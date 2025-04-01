@@ -9,85 +9,63 @@
 # 
 ###===================================================================================###
 
-
-###===================================================================================###
-#     Start creating infrastructure resources
-###===================================================================================###
-
-# Want to use existing VIP Pool
-data "vastdata_vip_pool" "protocolsVIP" {
-    name = "protocolsPool"
+terraform {
+  required_providers {
+    vastdata = {
+      source  = "vast-data/vastdata"
+      version = "1.4.0"
+    }
+  }
 }
 
-# Need a View Policy
-resource "vastdata_view_policy" "ViewPolicy01" {
-  name          = "ViewPolicy01"
-  vip_pools     = [data.vastdata_vip_pool.protocolsVIP.id]
-  tenant_id     = data.vastdata_vip_pool.protocolsVIP.tenant_id
-  flavor        = "NFS"
-  nfs_no_squash = [ "10.111.1.28", "10.111.1.26", "10.111.1.27" ]
+provider "vastdata" {
+  username                = "admin"
+  port                    = "443"
+  password                = "123456"
+  host                    = "10.100.2.30"
+  skip_ssl_verify         = true
+  version_validation_mode = "warn"
+  alias                   = "GCPCluster"
+}
+/* 
+provider "vastdata" {
+  username                = "admin"
+  port                    = 443
+  password                = "123456"
+  host                    = "10.100.2.10"
+  skip_ssl_verify         = true
+  version_validation_mode = "warn"
+  alias                   = "RemoteCluster"
 }
 
-# Create the View
-resource "vastdata_view" "elbencho_view" {
-  path       = "/vast/share01"
-  policy_id  = vastdata_view_policy.ViewPolicy01.id
-  create_dir = "true"
-  protocols  = ["NFS", "NFS4"]
+ */
+###=================================================
+data "vastdata_vip_pool" "pool1_gcp" {
+  provider = vastdata.GCPCluster
+  name     = "protocolsPool"
 }
 
-
-
-
-###===================================================================================###
-#     Output info about it - place holder code
-###===================================================================================###
-output "protocols_vip_pool_id" {
-  value = data.vastdata_vip_pool.protocolsVIP.id
-  description = "The ID of the protocols VIP pool."
+###
+output "vip_pool_id_gcp" {
+  value = data.vastdata_vip_pool.pool1_gcp.id
 }
 
-output "protocols_vip_pool_name" {
-  value = data.vastdata_vip_pool.protocolsVIP.name
-  description = "The name of the protocols VIP pool."
-}
-
-output "protocols_vip_pool_tenant_id" {
-  value = data.vastdata_vip_pool.protocolsVIP.tenant_id
-  description = "The tenant ID associated with the protocols VIP pool."
-}
-
-output "protocols_vip_pool_cluster" {
-  value = data.vastdata_vip_pool.protocolsVIP.cluster
-  description = "The cluster associated with the protocols VIP pool."
+output "vip_pool_name_gcp" {
+  value = data.vastdata_vip_pool.pool1_gcp.name
 }
 
 
-###===================================================================================###
-/*
-###--- These weren't valid
-output "protocols_vip_pool_cluster_id" {
-  value = data.vastdata_vip_pool.protocolsVIP.cluster_id
-  description = "The cluster ID associated with the protocols VIP pool."
+/* 
+data "vastdata_vip_pool" "pool1_remote" {
+  provider = vastdata.RemoteCluster
+  name     = "replicationPool"
 }
 
-output "protocols_vip_pool_cidr" {
-  value = data.vastdata_vip_pool.protocolsVIP.cidr
-  description = "The CIDR of the protocols VIP pool."
+output "vip_pool_id_remote" {
+  value = data.vastdata_vip_pool.pool1_remote.id
 }
 
-output "protocols_vip_pool_gateway" {
-  value = data.vastdata_vip_pool.protocolsVIP.gateway
-  description = "The gateway of the protocols VIP pool."
-}
-
-output "protocols_vip_pool_ips" {
-  value = data.vastdata_vip_pool.protocolsVIP.ips
-  description = "The list of IP addresses in the protocols VIP pool."
-}
-
-output "protocols_vip_pool_tenant_name" {
-  value = data.vastdata_vip_pool.protocolsVIP.tenant_name
-  description = "The tenant name associated with the protocols VIP pool."
-}
+output "vip_pool_name_remote" {
+  value = data.vastdata_vip_pool.pool1_remote.name
+} 
 */
