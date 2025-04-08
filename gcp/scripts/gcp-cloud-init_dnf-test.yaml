@@ -52,7 +52,7 @@ packages:
   - sysstat
   - stress-ng
   - pciutils
-  - nvme-cli
+  #- nvme-cli
   - nfs-utils
   # For development
   - boost-devel
@@ -114,23 +114,26 @@ write_files:
 # Script:
 # Compile and install ElBencho - need NumCPU
 # Download and untar NFS driver
-- path: /tmp/install_tools.sh
+- path: /tmp/install_nfs_driver.sh
   permissions: '0755'
   content: |
     #!/bin/bash
-    # Compile elbencho and download VAST NFS driver
+
+    # NFS Driver
     cd /root
-    mkdir git
-    cd git
-    git clone https://github.com/breuner/elbencho.git
-    cd elbencho
-    make -j $(nproc)
-    make rpm
-    dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
-    cd ~
     filename=$(curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh | bash -s -- | grep "Downloaded:" | awk '{print $2}')
     tar xf $filename
     curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh -o /root/downloadnfsdrsiver.sh
+    nfsdir="${filename%.tar.xz}"
+ 
+    cd ${nfsdir}
+    echo "Attempting to run build.sh in ${nfsdir}" >> /tmp/cloud-init-out.txt
+    ls -la "${nfsdir}" >> /tmp/cloud-init-out.txt
+
+    ./build.sh bin >> /tmp/cloud-init-out.txt 2>&1
+    echo "build.sh completed with exit code $?" >> /tmp/cloud-init-out.txt
+
+    ./build.sh bin
     echo "script install_tools.sh ran" >> /tmp/cloud-init-out.txt
 #
 # Create script to install software and modify grub
@@ -143,18 +146,21 @@ write_files:
   permissions: '0755'
   content: |
     #!/bin/bash
+    echo "compiletools.sh started at $(date)" >> /tmp/cloud-init-out.txt
+
     dnf group install -y "Development Tools"
     echo "Development tools installed successfully." >> /var/log/cloud-init-output.log
+    
+    # Don't need these
     #dnf install python3-pip -y
     #pip3 install ninja meson
     
-    # Scripts for labuser
-    cd /home/labuser/
-    git clone https://github.com/kvietmeier/scripts.git
-    chown -R labuser:labuser /home/labuser/scripts
+    # Prep folders
+    cd /root
+    mkdir -p .local/bin
+    mkdir git && cd git
 
     # Compile dool
-    cd /root/git || mkdir -p /root/git && cd /root/git
     git clone https://github.com/scottchiefbaker/dool.git
     cd dool && ./install.py && cd ..
 
@@ -169,7 +175,25 @@ write_files:
     # Compile sockperf
     git clone https://github.com/mellanox/sockperf
     cd sockperf && ./autogen.sh && ./configure && make && make install && cd ..
+    
+    git clone https://github.com/breuner/elbencho.git
+    cd elbencho && make -j $(nproc) && make rpm
+    dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
+    cd /root 
+    
+    # Scripts for labuser
+    cd /home/labuser/
+    git clone https://github.com/kvietmeier/scripts.git
+    chown -R labuser:labuser /home/labuser/scripts
+    
+    # NFS Driver
+    cd /root
+    filename=$(curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh | bash -s -- | grep "Downloaded:" | awk '{print $2}')
+    tar xf $filename
+    curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh -o /root/downloadnfsdrsiver.sh
+    nfsdir="${filename%.tar.xz}"
 
+    # Enable chronyd
     systemctl enable chronyd
     systemctl restart chronyd
 
@@ -185,7 +209,7 @@ write_files:
     grubby --set-default "$NEW_KERNEL"
     
     echo "Rebooting into new kernel: $NEW_KERNEL" | tee /var/log/cloud-init-kernel.log
-    echo "script setuptools.sh ran" >> /tmp/cloud-init-out.txt
+    echo "script compiletools.sh ran" >> /tmp/cloud-init-out.txt
     reboot
 #
 # Setup chrony for GCP
@@ -208,13 +232,13 @@ write_files:
 #
 ###--- Start runcmd
 runcmd:
-  # Run our install scripts
-  - bash /tmp/install_tools.sh
-  - bash /tmp/compiletools.sh
   # Enable GCP Ops Agent
   - curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
   - bash add-google-cloud-ops-agent-repo.sh --also-install
   - systemctl restart google-cloud-ops-agent
+  # Run our install scripts
+  #- bash /tmp/install_tools.sh
+  - bash /tmp/compiletools.sh
 ###--- End runcmd
 
 ###--- Users - Leave here for now
