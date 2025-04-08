@@ -12,8 +12,11 @@
 # Examples:
 #   https://cloudinit.readthedocs.io/en/latest/topics/examples.html
 #
-# 
 #   --- Modified for GCP Rocky Linux ---
+#
+#  Uses install scripts for greater portability
+# 
+#  Whole thing will take at least 7-10 minutes and reboot once
 #
 ###=============================================================================###
 
@@ -112,8 +115,10 @@ write_files:
 # Compile and install ElBencho - need NumCPU
 # Download and untar NFS driver
 - path: /tmp/install_tools.sh
+  permissions: '0755'
   content: |
     #!/bin/bash
+    # Compile elbencho and download VAST NFS driver
     cd /root
     mkdir git
     cd git
@@ -125,11 +130,66 @@ write_files:
     cd ~
     filename=$(curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh | bash -s -- | grep "Downloaded:" | awk '{print $2}')
     tar xf $filename
-    curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh -o downloadnfsdrsiver.sh
-    echo "script ran" >> /tmp/bootscript.txt
+    curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh -o /root/downloadnfsdrsiver.sh
+    echo "script install_tools.sh ran" >> /tmp/cloud-init-out.txt
+#
+# Create script to install software and modify grub
+# dool
+# FIO
+# iperf3
+# sockperf
+#
+- path: /tmp/compiletools.sh
   permissions: '0755'
-- path: /root/CONFIGURED_BY_CLOUD_INIT
+  content: |
+    #!/bin/bash
+    dnf group install -y "Development Tools"
+    echo "Development tools installed successfully." >> /var/log/cloud-init-output.log
+    #dnf install python3-pip -y
+    #pip3 install ninja meson
+    
+    # Scripts for labuser
+    cd /home/labuser/
+    git clone https://github.com/kvietmeier/scripts.git
+    chown -R labuser:labuser /home/labuser/scripts
+
+    # Compile dool
+    cd /root/git || mkdir -p /root/git && cd /root/git
+    git clone https://github.com/scottchiefbaker/dool.git
+    cd dool && ./install.py && cd ..
+
+    # Compile FIO
+    git clone https://github.com/axboe/fio.git
+    cd fio && ./configure && make && make install && cd ..
+
+    # Compile iperf
+    git clone https://github.com/esnet/iperf.git
+    cd iperf && ./configure && make && make install && cd ..
+
+    # Compile sockperf
+    git clone https://github.com/mellanox/sockperf
+    cd sockperf && ./autogen.sh && ./configure && make && make install && cd ..
+
+    systemctl enable chronyd
+    systemctl restart chronyd
+
+    dnf clean packages
+    mandb
+
+    mkdir -p /home/labuser/output 
+    chown labuser:labuser /home/labuser/output
+    
+    # Update grub to boot from new kernel version
+    grub2-mkconfig -o /boot/grub2/grub.cfg
+    NEW_KERNEL=$(rpm -q --qf "/boot/vmlinuz-%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel | sort -V | tail -1)
+    grubby --set-default "$NEW_KERNEL"
+    
+    echo "Rebooting into new kernel: $NEW_KERNEL" | tee /var/log/cloud-init-kernel.log
+    echo "script setuptools.sh ran" >> /tmp/cloud-init-out.txt
+    reboot
+#
 # Setup chrony for GCP
+#
 - path: /etc/chrony/chrony.conf
   content: |
     # Chrony configuration for GCP
@@ -141,77 +201,20 @@ write_files:
     allow 0.0.0.0/0
     bindcmdaddress 127.0.0.1
     bindcmdaddress ::1
+#
+- path: /root/CONFIGURED_BY_CLOUD_INIT
+#
 ###--- End write_files
+#
 ###--- Start runcmd
 runcmd:
-  # Run commands once on first boot - clone and compile useful tools
-  # DNF based systems don't like the [,,,] runcmd syntax
-  # Install software development tools
-  - dnf group install -y "Development Tools"
-  - echo "Development tools installed successfully." >> /var/log/cloud-init-output.log
-  #
-  # Needed for DPDK
-  - dnf install python3-pip -y
-  - pip3 install ninja
-  - pip3 install meson
-  #
-  # Clone scripts directory to labuser
-  - cd /home/labuser/
-  - git clone https://github.com/kvietmeier/scripts.git
-  - chown -R labuser:labuser /home/labuser/scripts
-  - cd ~
-  #
-  # Run our install script
+  # Run our install scripts
   - bash /tmp/install_tools.sh
-  ###------------ Compile Software ------------###
-  # dool
-  # FIO
-  # iperf3
-  # sockperf
-  #
-  - cd /root/git
-  #
-  ## Compile dool
-  - git clone https://github.com/scottchiefbaker/dool.git
-  - cd dool
-  - ./install.py
-  - cd ..
-  #
-  ## Compile FIO
-  - git clone https://github.com/axboe/fio.git
-  - cd fio
-  - ./configure
-  - make
-  - make install
-  - cd ..
-  #
-  # Compile/install iperf3
-  - git clone "https://github.com/esnet/iperf.git"
-  - cd iperf
-  - ./configure
-  - make
-  - make install
-  - /usr/sbin/ldconfig
-  - cd ..
-  #  
-  ## Compile/install sockperf
-  - git clone "https://github.com/mellanox/sockperf"
-  - cd sockperf
-  - ./autogen.sh
-  - ./configure
-  - make
-  - make install
-  - cd .. 
-  #
-  ## System cleanup/config
-  - systemctl enable chronyd
-  - systemctl restart chronyd
-  - dnf clean packages
-  - mandb
-  ## Create some directories
-  - mkdir /home/labuser/output
-  - chown labuser:labuser /home/labuser/output
-  - mkdir /mnt/huge
+  - bash /tmp/compiletools.sh
+  # Enable GCP Ops Agent
+  - curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+  - bash add-google-cloud-ops-agent-repo.sh --also-install
+  - systemctl restart google-cloud-ops-agent
 ###--- End runcmd
 
 ###--- Users - Leave here for now
