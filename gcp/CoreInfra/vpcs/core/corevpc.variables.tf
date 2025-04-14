@@ -34,6 +34,11 @@ variable "subnets" {
   }))
 }
 
+variable "nat_enabled_regions" {
+  description = "List of regions to deploy Cloud NAT"
+  type        = list(string)
+  default     = []
+}
 
 variable ingress_filter {
   description = "A list of IPs and CIDR ranges to allow"

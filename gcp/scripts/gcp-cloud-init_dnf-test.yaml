@@ -133,8 +133,6 @@ write_files:
     ./build.sh bin >> /tmp/cloud-init-out.txt 2>&1
     echo "build.sh completed with exit code $?" >> /tmp/cloud-init-out.txt
 
-    ./build.sh bin
-    echo "script install_tools.sh ran" >> /tmp/cloud-init-out.txt
 #
 # Create script to install software and modify grub
 # dool
@@ -187,11 +185,11 @@ write_files:
     chown -R labuser:labuser /home/labuser/scripts
     
     # NFS Driver
-    cd /root
-    filename=$(curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh | bash -s -- | grep "Downloaded:" | awk '{print $2}')
-    tar xf $filename
-    curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh -o /root/downloadnfsdrsiver.sh
-    nfsdir="${filename%.tar.xz}"
+    #cd /root
+    #filename=$(curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh | bash -s -- | grep "Downloaded:" | awk '{print $2}')
+    #tar xf $filename
+    #curl -sSf https://vast-nfs.s3.amazonaws.com/download.sh -o /root/downloadnfsdrsiver.sh
+    #nfsdir="${filename%.tar.xz}"
 
     # Enable chronyd
     systemctl enable chronyd
