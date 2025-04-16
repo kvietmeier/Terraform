@@ -13,7 +13,7 @@ terraform {
     required_providers {
       vastdata = {
         source  = "vast-data/vastdata"
-        version = "1.3.3"
+        version = "1.4.1"
     }
   }
 }
