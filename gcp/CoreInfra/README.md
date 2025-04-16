@@ -2,6 +2,28 @@
 
 This is fully functional production code to maintain core services and VMs.
 
+* Infrastructure created/maintained
+
+  ```shell
+  C:.
+  ├───firewalls
+  │   ├───gcp_defaults
+  │   ├───my_rules
+  │   ├───open_ports
+  │   └───wide_open
+  │
+  ├───nat_gw
+  │
+  ├───vms
+  │   ├───ad_server
+  │   └───linux_vm
+  │ 
+  └───vpcs
+      ├───core
+      └───testvpc01
+
+```shell
+
 #### Documentation Links
 
 - [Terraform on GCP](https://cloud.google.com/docs/terraform)

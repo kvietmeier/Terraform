@@ -66,6 +66,17 @@ resource "google_compute_instance" "vm_instance" {
     }
   }
 
+  service_account {
+    # Needed for the monitoring agent
+    email  = "913067105288-compute@developer.gserviceaccount.com"   # Replace with your service account email
+    scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+      "https://www.googleapis.com/auth/monitoring.write",
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/bigquery"
+    ]
+  }
+  
   # Configure the network interface with the specified private and public IPs
   network_interface {
     subnetwork    = var.subnet_name
