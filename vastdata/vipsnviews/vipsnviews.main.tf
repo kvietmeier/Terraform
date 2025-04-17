@@ -11,7 +11,7 @@ provider "vastdata" {
   username                = "admin"
   port                    = "443"
   password                = "123456"
-  host                    = "10.100.2.12"
+  host                    = "10.100.2.86"
   skip_ssl_verify         = true
   version_validation_mode = "warn"
   alias                   = "GCPCluster"
