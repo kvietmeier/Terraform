@@ -241,21 +241,15 @@ runcmd:
 
 ###--- Users - Leave here for now
 #      Need to add your keys - will populate .ssh/authorized_keys
-#users:
-#  # Keep and update the original default user (centos or ubuntu for example)
-#  - name: default
-#    ssh_authorized_keys:
-#      - ssh-rsa 
-#    sudo: ALL=(ALL) NOPASSWD:ALL
-#    groups: sudo
-#    shell: /bin/bash
-#    # Configure an added user - With additional SSH keys
-#  - name: labuser
-#    ssh_authorized_keys:
-#      - ssh-rsa 
-#    shell: /bin/bash
-#    groups: sudo
-#    sudo: ALL=(ALL) NOPASSWD:ALL  
+users:
+  - name: labuser
+    gecos: Lab User
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDj/oqU+Kjs/sLN67JZ798S42efzK/jBKE3RWj4n9SJR6FYaijoy46qXWoC26ibOKhsO01g4OPeZAoUJq39hwsWNw/bTFKsjBuO6jRaNroybK2/lzQuX2oku0pclreXjPy/x0Mrf9ZD6Jzm0sbr9bk52KUdy6cPjFBIvVUNGXRLFm6AKggqWDzY3+9ONLyAihginw9N+yF28bQYjUwUbuy4k9gkD+cTWKNl1Al58rOAuifAJDMAA7CrlsNXK3nf4VtaURh4n3CbOoJI+auRiPfO4EoJGYVYVFy6V2NeSDV52q+7SUXXclb6c6DEVxLu2YAe9sMmUkL/N62uKAxrOqX+qJHXdOm/TOcHB+tw/jTDafRSJcPZ+EuGw4FjROEtEAMHus2poHN0qF0vdTm0DuNWHtH+ABpCHP8rvQeybkR3yFjStTyJlTLPTnY0/8gt8ykLWFyYtZott+hszXe6NM8lQlK9BiRi6e3F+LRBr1fMpQtOV0gemhaqYwCRdZKckqM= karlv@linuxtools
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOVhK8T5vJgKqXzSgDryh1EQEReE1lU9CvlBK8v4bG+eTjhPqacXqPkUWPlnM+kA1l3xe/GBxbIeoJ/WruUZV58SBjUUEMYN0qyKVwl+G5GqhijGAsWNC1KsfpTHNRRplZWAkKajAzb57kCzdNvFmOi86ENhn4gYFTWqAPEYALMnq6T1D52SELJGs/A3fwDEE99nTjcZ4/Huv1z+WWJmZEkSRWNtYLD/mx+cP41UHKCEIgsffvKH3o/IHgpsDGi5sQ8AKHChNkHb3vWQVPHx1BZDwxEUG7SPjY4gc/wRtrdauzMvdKvm9AUi1paY2PCGViLcysv619hQj02k/OQBJBy7MqplB1waoisxDuxKMSKjeKTyMGbMfv+MCrQd1iT+qdQtQImvyxRtQnYnbNMjnLPYUey7/kTkb4Xggm/hhuJOxnFqH/9WILDb81I4jElis+raXh0Vnt7gQ7OAO74osiLqD7uGuhytRCLqnU5VQmEAGdpxahxtirRu0eVQr/Ncs= karl.vietmeier@Tandaloor
 
 
 ###--- Misc system configuration

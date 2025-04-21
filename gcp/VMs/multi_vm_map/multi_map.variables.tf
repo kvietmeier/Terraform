@@ -7,6 +7,13 @@
 #
 ###===================================================================================###
 
+# Get subnet CIDR
+data "google_compute_subnetwork" "my_subnet" {
+  name    = var.subnet_name
+  region  = var.region
+}
+
+
 # Project ID
 variable "project_id" {
   description = "The GCP project ID"
@@ -36,28 +43,17 @@ variable "service_account" {
   })
 }
 
-# Machine type for the VM
-variable "machine_type" {
-  description = "The machine type for the VM"
-  type        = string
-  default     = "e2-medium"
+# VM Config
+variable "vms" {
+  description = "Map of VM configurations"
+  type = map(object({
+    machine_type  = string
+    bootdisk_size = string
+    os_image      = string
+    ip_octet      = string
+  }))
 }
 
-# VM instance names
-variable "vm_names" {
-  type    = list(string)
-}
-
-variable "os_image" {
-  description = "OS Image to use"
-  type        = string
-}
-
-variable "bootdisk_size" {
-  description = "Size of boot disk in GB"
-  type        = string
-  default     = "150"
-}
 
 ###--- VM Metadata
 # SSH 

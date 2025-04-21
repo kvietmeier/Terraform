@@ -1,0 +1,37 @@
+###===================================================================================###
+#
+#  File:  dns1.terraform.tfvars
+#  Created By: Karl Vietmeier
+#
+#  This creates A records for a reserved CIDR in GCP for VAST VIP addresses
+#
+###===================================================================================###
+
+# terraform.tfvars
+project_id      = "your-project-id"
+region          = "us-west3"
+zone            = "us-west3-a"
+
+dns_name   = "your-domain.com."
+description = "VIP Pool IPs"
+
+networks = [
+  "default",
+  "your-vpc-name"
+]
+
+a_records = {
+  "protocolvip1"   = ["your-ip-address"],
+  "protocolvip2"   = ["your-ip-address"],
+  "protocolvip3"   = ["your-ip-address"],
+  "repvip1"        = ["your-ip-address"],
+  "repvip2"        = ["your-ip-address"],
+  "repvip3"        = ["your-ip-address"],
+  "repvip4"        = ["your-ip-address"],
+  "vastdata1" = [
+    "Use IPs from the list above",
+    "Use IPs from the list above",
+    "Use IPs from the list above",
+    "Use IPs from the list above"
+  ]
+}

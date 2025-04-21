@@ -28,16 +28,16 @@ data "cloudinit_config" "system_setup" {
 
 # Google Cloud VM instance with public IP
 resource "google_compute_instance" "vm_instance" {
-  zone         = var.zone             # Use the zone variable
-  machine_type = var.machine_type     # Use the machine_type variable
-  
-  for_each     = toset(var.vm_names)
-  name         = each.value
+  for_each     = var.vms
+
+  name         = each.key
+  zone         = var.zone
+  machine_type = each.value.machine_type
 
   boot_disk {
     initialize_params {
-      image    = var.os_image  # Replace with your preferred image
-      size     = var.bootdisk_size
+      image = each.value.os_image
+      size  = each.value.bootdisk_size
     }
   }
 
@@ -45,33 +45,25 @@ resource "google_compute_instance" "vm_instance" {
     email  = var.service_account.email
     scopes = var.service_account.scopes
   }
-
-  # Configure the network interface with the specified private and public IPs
+  
   network_interface {
     subnetwork    = var.subnet_name
-    #network_ip    = google_compute_address.my_private_ip.address  # Specified static private IP
-
-    #access_config {                         # Enables a public IP address
-    #  nat_ip = google_compute_address.my_public_ip.address       # Specified static public IP
-    #}
+    network_ip    = cidrhost(data.google_compute_subnetwork.my_subnet.ip_cidr_range, each.value.ip_octet)  # Use ip_octet for fourth octet
   }
 
   metadata = {
-    # Install cloud-init if not available yet
-    startup-script = <<-CLOUDINIT
+    startup-script      = <<-CLOUDINIT
     #!/bin/bash
     sleep 30
     command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
     CLOUDINIT
-    
-    ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
-    serial-port-enable = true # Enable serial port access for debugging
-    user-data          = "${data.cloudinit_config.system_setup.rendered}"
 
+    ssh-keys            = "${var.ssh_user}:${local.ssh_key_content}"
+    serial-port-enable  = true
+    user-data           = "${data.cloudinit_config.system_setup.rendered}"
   }
-
-  #tags = ["kv-linux", "kv-infra"]
 }
+
 
 output "vm_private_ips" {
   value = [for vm in google_compute_instance.vm_instance : vm.network_interface[0].network_ip]

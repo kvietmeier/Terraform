@@ -1,0 +1,32 @@
+###===================================================================================###
+#
+#  File:  terraform.tfvars
+#  Created By: Karl Vietmeier
+#
+#  This file should be excluded from GitHub.
+#
+###===================================================================================###
+
+# Project Info
+project_id      = "your-project-id"
+region          = "us-west2"
+zone            = "us-west2-b"
+
+# Service Account/s
+sa_email        = "your-sa@your-project-id.iam.gserviceaccount.com"
+sa_scopes       = ["cloud-platform"]
+
+# VM Info
+private_ip      = "10.x.x.x"
+public_ip_name  = "your-vm-public-ip"
+private_ip_name = "your-vm-private-ip"
+vm_name         = "your-vm-name"
+machine_type    = "c2-standard-4"
+os_image        = "windows-server-2022-dc-vYYYYMMDD"
+bootdisk_size   = "300"
+vm_tags         = [ "your-tag-1", "your-tag-2", "your-tag-3" ]
+windows-sysprep-script = "../../scripts/windows-sysprep-test.ps1"
+
+# VPC Config - existing
+vpc_name        = "default"
+subnet_name     = "your-subnet-name"
