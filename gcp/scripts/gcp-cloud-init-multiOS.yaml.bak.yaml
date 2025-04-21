@@ -1,18 +1,13 @@
 #cloud-config
 # vim: syntax=yaml
 #
-# ------------------------------------------------------------------------------
-# Created by: Karl Vietmeier / KCV Consulting
-#
-# This cloud-init config bootstraps a RHEL/CentOS or Debian/Ubuntu instance.
-# It updates packages, installs common dev tools, compiles and installs FIO,
-# iPerf, DOOL, SockPerf, and Elbencho from source, sets up labuser, enables NTP,
-# and configures a user-friendly shell environment.
+###=============================================================================###
+# Bootstrap setup for a dnf/yum or apt based Linux server
 #
 # cloud-init docs:
 #   https://cloudinit.readthedocs.io/en/latest/index.html
 #
-# ------------------------------------------------------------------------------
+###=============================================================================###
 
 # Upgrade the instance on first boot
 package_update: true
@@ -67,11 +62,7 @@ write_files:
             nfs-common \
             cmake \
             dkms \
-            autoconf \
-            # Need for elbencho S3 support
-            libcurl4-openssl-dev \
-            uuid-dev \
-            zlib1g-dev
+            autoconf
 
       # RedHat, Centos, Rocky etc.
       elif [ -f /etc/redhat-release ]; then
@@ -92,14 +83,7 @@ write_files:
             bind-utils \
             nfs-utils \
             cmake \
-            rdma-core \
-            # Need for elbencho S3 support
-            libcurl4-openssl-dev \
-            libcurl-devel \
-            libuuid-devel \
-            zlib \ 
-            zlib-devel \
-            libarchive
+            rdma-core
       fi
 
       cd /root
@@ -119,24 +103,37 @@ write_files:
 
       # DOOL
       git clone https://github.com/scottchiefbaker/dool.git
+      log_and_continue "Cloned DOOL repository"
       cd dool
+      log_and_continue "Changed to DOOL directory"
       ./install.py
+      log_and_continue "DOOL installation"
       cd ..
 
       # FIO
       git clone https://github.com/axboe/fio.git
+      log_and_continue "Cloned FIO repository"
       cd fio
+      log_and_continue "Changed to FIO directory"
       ./configure
+      log_and_continue "FIO configure"
       make
+      log_and_continue "FIO make"
       make install
+      log_and_continue "FIO install"
       cd ..
 
       # iPerf
       git clone https://github.com/esnet/iperf.git
+      log_and_continue "Cloned iPerf repository"
       cd iperf
+      log_and_continue "Changed to iPerf directory"
       ./configure
+      log_and_continue "iPerf configure"
       make
+      log_and_continue "iPerf make"
       make install
+      log_and_continue "iPerf install"
       cd ..
       # Fix for missing libiperf.so.0 after build
       echo "/usr/local/lib" > /etc/ld.so.conf.d/iperf.conf && log_and_continue "Added /usr/local/lib to ld.so.conf.d"
@@ -144,22 +141,31 @@ write_files:
 
       # SockPerf
       git clone https://github.com/mellanox/sockperf
+      log_and_continue "Cloned SockPerf repository"
       cd sockperf
+      log_and_continue "Changed to SockPerf directory"
       ./autogen.sh
+      log_and_continue "SockPerf autogen"
       ./configure
+      log_and_continue "SockPerf configure"
       make
+      log_and_continue "SockPerf make"
       make install
+      log_and_continue "SockPerf install"
       cd ..
 
-      # Elbencho (add S3 support)
+      # Elbencho
       git clone https://github.com/breuner/elbencho.git
+      log_and_continue "Cloned Elbencho repository"
       cd elbencho
-      make S3_SUPPORT=1 -j "$(nproc)"
+      log_and_continue "Changed to Elbencho directory"
+      make -j "$(nproc)"
+      log_and_continue "Elbencho make"
 
       if [ -f /etc/redhat-release ]; then
         make rpm && dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
       elif [ -f /etc/debian_version ]; then
-        make install
+        make install && log_and_continue "Elbencho installed manually on Debian-based system"
       fi
 
       cd /root
@@ -200,6 +206,17 @@ write_files:
       alias df='df -kh'
       alias du='du -h'
 
+      ### History
+      # Append to the history file, don't overwrite it
+      shopt -s histappend
+
+      # Immediately save commands to history file after each command
+      PROMPT_COMMAND="history -a; history -n"
+
+      # Set a large number of history lines
+      export HISTSIZE=100000
+      export HISTFILESIZE=200000
+
       set -o vi
       bind 'set bell-style none'
 
@@ -224,6 +241,17 @@ write_files:
       alias cdu='cd ..'
       alias df='df -kh'
       alias du='du -h'
+
+      ### History
+      # Append to the history file, don't overwrite it
+      shopt -s histappend
+
+      # Immediately save commands to history file after each command
+      PROMPT_COMMAND="history -a; history -n"
+
+      # Set a large number of history lines
+      export HISTSIZE=100000
+      export HISTFILESIZE=200000
 
       set -o vi
       bind 'set bell-style none'
