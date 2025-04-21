@@ -1,0 +1,40 @@
+###===================================================================================###
+#
+#  File:  terraform.tfvars
+#  Created By: Karl Vietmeier
+#
+#  Stubbed version for GitHub – Fill in before use
+#
+###===================================================================================###
+
+# Project Info
+project_id           = "REPLACE_ME_PROJECT_ID"
+region               = "REPLACE_ME_REGION"            # e.g., "us-west2"
+zone                 = "REPLACE_ME_ZONE"              # e.g., "us-west2-c"
+
+# VPC Config - existing
+vpc_name             = "default"
+subnet_name          = "REPLACE_ME_SUBNET_NAME"       # e.g., "infrasubnet01"
+
+# VM Info
+machine_type         = "REPLACE_ME_MACHINE_TYPE"      # e.g., "n2-standard-16"
+#os_image            = "centos-stream-9-v20241009"
+os_image             = "REPLACE_ME_OS_IMAGE"          # e.g., "rocky-linux-9-v20250212"
+bootdisk_size        = "REPLACE_ME_BOOTDISK_SIZE"     # e.g., "150"
+ssh_user             = "REPLACE_ME_SSH_USER"
+ssh_key_file         = "REPLACE_ME_SSH_KEY_PATH"      # e.g., "../../../secrets/ssh_keys.txt"
+cloudinit_configfile = "REPLACE_ME_CLOUDINIT_PATH"    # e.g., "../../scripts/gcp-cloud-init.yaml"
+
+# List of VM instance names
+vm_names             = ["REPLACE_ME_VM_NAMES"]        # e.g., ["linux01", "linux02"]
+
+# Service account config
+service_account = {
+  email  = "REPLACE_ME_SERVICE_ACCOUNT_EMAIL"
+  scopes = [
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/monitoring.write",
+    "https://www.googleapis.com/auth/logging.write",
+    "https://www.googleapis.com/auth/bigquery"
+  ]
+}

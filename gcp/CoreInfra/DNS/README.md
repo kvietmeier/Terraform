@@ -1,6 +1,8 @@
-### README Template
+### Create a Private DNS Domain
 
-Description
+Creates a private DNS domain with at least one A record pointing to a group of IPs.
+
+I'm using this to maintain DNS records for VAST VMS VIP Pools.
 
 ---
 

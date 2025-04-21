@@ -1,0 +1,275 @@
+#cloud-config
+# vim: syntax=yaml
+#
+###=============================================================================###
+# Bootstrap setup for a dnf/yum or apt based Linux server
+#
+# cloud-init docs:
+#   https://cloudinit.readthedocs.io/en/latest/index.html
+#
+###=============================================================================###
+
+# Upgrade the instance on first boot
+package_update: true
+package_upgrade: true
+
+# Packages to install on first boot on both distros
+packages:
+  - libtool
+  - tmux
+  - git
+  - tree
+  - numactl
+  - wget
+  - traceroute
+  - nmap
+  - sysstat
+  - bc
+  - jq
+  - pkg-config
+
+write_files:
+  ###--- Setup script to install tools and compile software
+  - path: /tmp/compiletools.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      exec > >(tee -a /tmp/compiletools-out.log) 2>&1
+      echo "compiletools.sh started at $(date)" 
+      
+      # Check OS version and install required dependencies
+      # Need a bunch dev libraries for FIO, elbencho, etc.
+      
+      # Ubuntu/Deb?
+      if [ -f /etc/debian_version ]; then
+         apt-get update -y
+         DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            build-essential \
+            debhelper \
+            libboost-dev \
+            libboost-program-options-dev \
+            libboost-system-dev \
+            libboost-thread-dev \
+            libssl-dev \
+            libncurses-dev \
+            libnuma-dev \
+            libaio-dev \
+            librdmacm1 \
+            bpfcc-tools \
+            man-db \
+            chrony \
+            dnsutils \
+            nfs-common \
+            cmake \
+            dkms \
+            autoconf
+
+      # RedHat, Centos, Rocky etc.
+      elif [ -f /etc/redhat-release ]; then
+          dnf groupinstall -y "Development Tools"
+          dnf install -y \
+            epel-release \
+            numactl-devel \
+            libaio-devel \
+            boost-devel \
+            boost-program-options \
+            boost-system \
+            boost-thread \
+            ncurses-devel \
+            openssl-devel \
+            bcc-tools \
+            man-db \
+            chrony \
+            bind-utils \
+            nfs-utils \
+            cmake \
+            rdma-core
+      fi
+
+      cd /root
+      mkdir -p .local/bin
+      mkdir -p git && cd git
+
+      #!/bin/bash
+      LOG_FILE="/tmp/cloud-init-out.txt"
+
+      # Function to log a message, including errors, but continue execution
+      log_and_continue() {
+        echo "$1" >> "$LOG_FILE"
+        if [ $? -ne 0 ]; then
+            echo "Warning: $1 failed!" >> "$LOG_FILE"
+        fi
+      }
+
+      # DOOL
+      git clone https://github.com/scottchiefbaker/dool.git
+      log_and_continue "Cloned DOOL repository"
+      cd dool
+      log_and_continue "Changed to DOOL directory"
+      ./install.py
+      log_and_continue "DOOL installation"
+      cd ..
+
+      # FIO
+      git clone https://github.com/axboe/fio.git
+      log_and_continue "Cloned FIO repository"
+      cd fio
+      log_and_continue "Changed to FIO directory"
+      ./configure
+      log_and_continue "FIO configure"
+      make
+      log_and_continue "FIO make"
+      make install
+      log_and_continue "FIO install"
+      cd ..
+
+      # iPerf
+      git clone https://github.com/esnet/iperf.git
+      log_and_continue "Cloned iPerf repository"
+      cd iperf
+      log_and_continue "Changed to iPerf directory"
+      ./configure
+      log_and_continue "iPerf configure"
+      make
+      log_and_continue "iPerf make"
+      make install
+      log_and_continue "iPerf install"
+      cd ..
+      # Fix for missing libiperf.so.0 after build
+      echo "/usr/local/lib" > /etc/ld.so.conf.d/iperf.conf && log_and_continue "Added /usr/local/lib to ld.so.conf.d"
+      ldconfig && log_and_continue "Ran ldconfig to refresh library links"
+
+      # SockPerf
+      git clone https://github.com/mellanox/sockperf
+      log_and_continue "Cloned SockPerf repository"
+      cd sockperf
+      log_and_continue "Changed to SockPerf directory"
+      ./autogen.sh
+      log_and_continue "SockPerf autogen"
+      ./configure
+      log_and_continue "SockPerf configure"
+      make
+      log_and_continue "SockPerf make"
+      make install
+      log_and_continue "SockPerf install"
+      cd ..
+
+      # Elbencho
+      git clone https://github.com/breuner/elbencho.git
+      log_and_continue "Cloned Elbencho repository"
+      cd elbencho
+      log_and_continue "Changed to Elbencho directory"
+      make -j "$(nproc)"
+      log_and_continue "Elbencho make"
+
+      if [ -f /etc/redhat-release ]; then
+        make rpm && dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
+      elif [ -f /etc/debian_version ]; then
+        make install && log_and_continue "Elbencho installed manually on Debian-based system"
+      fi
+
+      cd /root
+
+      # Setup labuser scripts and folders
+      mkdir -p /home/labuser/output
+      chown -R labuser:labuser /home/labuser/output
+      cd /home/labuser
+      git clone https://github.com/kvietmeier/scripts.git
+      chown -R labuser:labuser /home/labuser/scripts
+
+
+      if [ -f /etc/debian_version ]; then
+          systemctl enable chrony
+          systemctl restart chrony
+      elif [ -f /etc/redhat-release ]; then
+          systemctl enable chronyd
+          systemctl restart chronyd
+      fi
+
+      echo "compiletools.sh completed at $(date)" >> /tmp/cloud-init-out.txt
+
+  ###--- Setup shell environment
+  - path: /home/labuser/.bashrc
+    content: |
+
+      # Added by cloud-init
+      alias la="ls -Av"
+      alias ls="ls -hF --color=auto"
+      alias l="ls -CFv"
+      alias ll='ls -lhvF --group-directories-first'
+      alias lla='ls -alhvF --group-directories-first'
+      alias egrep='egrep --color=auto'
+      alias fgrep='fgrep --color=auto'
+      alias grep='grep --color=auto'
+      alias cdb='cd -'
+      alias cdu='cd ..'
+      alias df='df -kh'
+      alias du='du -h'
+
+      set -o vi
+      bind 'set bell-style none'
+
+    owner: labuser:labuser
+    append: true
+    defer: true
+
+  - path: /root/.bashrc
+    content: |
+
+      ####
+      # Added by cloud-init
+      alias ls="ls -hFv --color=auto"
+      alias l="ls -CFv"
+      alias la="ls -Av"
+      alias ll='ls -lhvF --group-directories-first'
+      alias lla='ls -alhvF --group-directories-first'
+      alias egrep='egrep --color=auto'
+      alias fgrep='fgrep --color=auto'
+      alias grep='grep --color=auto'
+      alias cdb='cd -'
+      alias cdu='cd ..'
+      alias df='df -kh'
+      alias du='du -h'
+
+      set -o vi
+      bind 'set bell-style none'
+
+    owner: root:root
+    append: true
+
+  ###--- Setup time keeping
+  - path: /etc/chrony/chrony.conf
+    content: |
+      server metadata.google.internal iburst
+      driftfile /var/lib/chrony/drift
+      makestep 1.0 3
+      rtcsync
+      logdir /var/log/chrony
+      allow 0.0.0.0/0
+      bindcmdaddress 127.0.0.1
+      bindcmdaddress ::1
+
+  ###--- Flag file
+  - path: /root/CONFIGURED_BY_CLOUD_INIT
+
+runcmd:
+  - curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+  - bash add-google-cloud-ops-agent-repo.sh --also-install
+  - systemctl restart google-cloud-ops-agent
+  - bash /tmp/compiletools.sh
+
+###--- Users - Leave here for now
+#      Need to add your keys - will populate .ssh/authorized_keys
+users:
+  - name: labuser
+    gecos: Lab User
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDj/oqU+Kjs/sLN67JZ798S42efzK/jBKE3RWj4n9SJR6FYaijoy46qXWoC26ibOKhsO01g4OPeZAoUJq39hwsWNw/bTFKsjBuO6jRaNroybK2/lzQuX2oku0pclreXjPy/x0Mrf9ZD6Jzm0sbr9bk52KUdy6cPjFBIvVUNGXRLFm6AKggqWDzY3+9ONLyAihginw9N+yF28bQYjUwUbuy4k9gkD+cTWKNl1Al58rOAuifAJDMAA7CrlsNXK3nf4VtaURh4n3CbOoJI+auRiPfO4EoJGYVYVFy6V2NeSDV52q+7SUXXclb6c6DEVxLu2YAe9sMmUkL/N62uKAxrOqX+qJHXdOm/TOcHB+tw/jTDafRSJcPZ+EuGw4FjROEtEAMHus2poHN0qF0vdTm0DuNWHtH+ABpCHP8rvQeybkR3yFjStTyJlTLPTnY0/8gt8ykLWFyYtZott+hszXe6NM8lQlK9BiRi6e3F+LRBr1fMpQtOV0gemhaqYwCRdZKckqM= karlv@linuxtools
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOVhK8T5vJgKqXzSgDryh1EQEReE1lU9CvlBK8v4bG+eTjhPqacXqPkUWPlnM+kA1l3xe/GBxbIeoJ/WruUZV58SBjUUEMYN0qyKVwl+G5GqhijGAsWNC1KsfpTHNRRplZWAkKajAzb57kCzdNvFmOi86ENhn4gYFTWqAPEYALMnq6T1D52SELJGs/A3fwDEE99nTjcZ4/Huv1z+WWJmZEkSRWNtYLD/mx+cP41UHKCEIgsffvKH3o/IHgpsDGi5sQ8AKHChNkHb3vWQVPHx1BZDwxEUG7SPjY4gc/wRtrdauzMvdKvm9AUi1paY2PCGViLcysv619hQj02k/OQBJBy7MqplB1waoisxDuxKMSKjeKTyMGbMfv+MCrQd1iT+qdQtQImvyxRtQnYnbNMjnLPYUey7/kTkb4Xggm/hhuJOxnFqH/9WILDb81I4jElis+raXh0Vnt7gQ7OAO74osiLqD7uGuhytRCLqnU5VQmEAGdpxahxtirRu0eVQr/Ncs= karl.vietmeier@Tandaloor
+
+timezone: "America/Los_Angeles"
+
+final_message: Post creation OS config done

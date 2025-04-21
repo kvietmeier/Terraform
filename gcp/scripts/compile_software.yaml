@@ -1,0 +1,104 @@
+write_files:
+  ###--- Setup script to install tools and compile software
+  - path: /tmp/compiletools.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      echo "compiletools.sh started at $(date)" >> /tmp/cloud-init-out.txt
+
+      if [ -f /etc/debian_version ]; then
+         apt-get update -y
+         DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            build-essential \
+            libboost-dev \
+            libncurses-dev \
+            libaio-dev \
+            librdmacm1 \
+            bpfcc-tools \
+            man-db \
+            chrony \
+            dnsutils \
+            nfs-common \
+            cmake \
+            autoconf
+
+      elif [ -f /etc/redhat-release ]; then
+          dnf groupinstall -y "Development Tools"
+          dnf install -y \
+              boost-devel \
+              ncurses-devel \
+              bcc-tools \
+              man-db \
+              chrony \
+              bind-utils \
+              nfs-utils \
+              cmake \
+              libaio-devel \
+              rdma-core
+      fi
+
+      cd /root
+      mkdir -p .local/bin
+      mkdir -p git && cd git
+
+      LOG_FILE="/tmp/cloud-init-out.txt"
+
+      # Log and continue function, command and log on the same line
+      log_and_continue() {
+        "$@" >> "$LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            echo "Warning: $1 failed!" >> "$LOG_FILE"
+        fi
+      }
+
+      # DOOL
+      log_and_continue git clone https://github.com/scottchiefbaker/dool.git
+      log_and_continue cd dool
+      log_and_continue ./install.py
+      log_and_continue cd ..
+
+      # FIO
+      log_and_continue git clone https://github.com/axboe/fio.git
+      log_and_continue cd fio
+      log_and_continue ./configure
+      log_and_continue make
+      log_and_continue make install
+      log_and_continue cd ..
+
+      # iPerf
+      log_and_continue git clone https://github.com/esnet/iperf.git
+      log_and_continue cd iperf
+      log_and_continue ./configure
+      log_and_continue make
+      log_and_continue make install
+      log_and_continue cd ..
+
+      # SockPerf
+      log_and_continue git clone https://github.com/mellanox/sockperf
+      log_and_continue cd sockperf
+      log_and_continue ./autogen.sh
+      log_and_continue ./configure
+      log_and_continue make
+      log_and_continue make install
+      log_and_continue cd ..
+
+      # Elbencho
+      log_and_continue git clone https://github.com/breuner/elbencho.git
+      log_and_continue cd elbencho
+      log_and_continue make -j "$(nproc)"
+      log_and_continue make rpm && dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
+
+      cd /root
+
+      # Setup labuser scripts and folders
+      log_and_continue mkdir -p /home/labuser/output
+      log_and_continue chown -R labuser:labuser /home/labuser/output
+      log_and_continue cd /home/labuser
+      log_and_continue git clone https://github.com/kvietmeier/scripts.git
+      log_and_continue chown -R labuser:labuser /home/labuser/scripts
+
+      # Enable and restart chronyd
+      log_and_continue systemctl enable chronyd
+      log_and_continue systemctl restart chronyd
+
+      echo "compiletools.sh completed at $(date)" >> /tmp/cloud-init-out.txt
