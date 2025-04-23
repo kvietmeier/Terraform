@@ -53,10 +53,12 @@ resource "vastdata_view_policy" "vpolicy1" {
   auth_source   = "RPC_AND_PROVIDERS"
   access_flavor = "ALL"
 
-  # Need at least one no_squash for NFS - even if is no_squash
-  nfs_no_squash = ["0.0.0.0/0"]  # Or a specific IP like "10.100.2.50"
-
-
+  # Required NFS squash/no-squash settings
+  nfs_no_squash      = ["0.0.0.0/0"]
+  nfs_read_write     = ["0.0.0.0/0"] # Match the behavior of ['*'] in your vcli config
+  nfs_read_only      = []
+  smb_read_write     = []
+  smb_read_only      = []
 
   vippool_permissions {
     vippool_id          = vastdata_vip_pool.protocols.id
