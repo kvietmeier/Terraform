@@ -47,59 +47,60 @@ write_files:
       
       # Ubuntu/Deb?
       if [ -f /etc/debian_version ]; then
-         apt-get update -y
-         DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            build-essential \
-            debhelper \
-            libboost-dev \
-            libboost-program-options-dev \
-            libboost-system-dev \
-            libboost-thread-dev \
-            libssl-dev \
-            libncurses-dev \
-            libnuma-dev \
-            libaio-dev \
-            librdmacm1 \
-            bpfcc-tools \
-            man-db \
-            chrony \
-            dnsutils \
-            nfs-common \
-            cmake \
-            dkms \
-            autoconf \
-            # Need for elbencho S3 support
-            libcurl4-openssl-dev \
-            uuid-dev \
-            zlib1g-dev
+        apt-get update -y
+        chmod -x /etc/update-motd.d/*
+        DEBIAN_FRONTEND=noninteractive apt-get install -y \
+          build-essential \
+          debhelper \
+          libboost-dev \
+          libboost-program-options-dev \
+          libboost-system-dev \
+          libboost-thread-dev \
+          libssl-dev \
+          libncurses-dev \
+          libnuma-dev \
+          libaio-dev \
+          librdmacm1 \
+          bpfcc-tools \
+          man-db \
+          chrony \
+          dnsutils \
+          nfs-common \
+          cmake \
+          dkms \
+          autoconf \
+          # Need for elbencho S3 support
+          libcurl4-openssl-dev \
+          uuid-dev \
+          zlib1g-dev
 
       # RedHat, Centos, Rocky etc.
       elif [ -f /etc/redhat-release ]; then
-          dnf groupinstall -y "Development Tools"
-          dnf install -y \
-            epel-release \
-            numactl-devel \
-            libaio-devel \
-            boost-devel \
-            boost-program-options \
-            boost-system \
-            boost-thread \
-            ncurses-devel \
-            openssl-devel \
-            bcc-tools \
-            man-db \
-            chrony \
-            bind-utils \
-            nfs-utils \
-            cmake \
-            rdma-core \
-            # Need for elbencho S3 support
-            libcurl4-openssl-dev \
-            libcurl-devel \
-            libuuid-devel \
-            zlib \ 
-            zlib-devel \
-            libarchive
+        dnf groupinstall -y "Development Tools"
+        dnf install -y \
+          epel-release \
+          numactl-devel \
+          libaio-devel \
+          boost-devel \
+          boost-program-options \
+          boost-system \
+          boost-thread \
+          ncurses-devel \
+          openssl-devel \
+          bcc-tools \
+          man-db \
+          chrony \
+          bind-utils \
+          nfs-utils \
+          cmake \
+          rdma-core \
+          # Need for elbencho S3 support
+          libcurl4-openssl-dev \
+          libcurl-devel \
+          libuuid-devel \
+          zlib \ 
+          zlib-devel \
+          libarchive
       fi
 
       cd /root
@@ -251,6 +252,7 @@ runcmd:
   - bash add-google-cloud-ops-agent-repo.sh --also-install
   - systemctl restart google-cloud-ops-agent
   - bash /tmp/compiletools.sh
+  - echo "cloud-init completed successfully at $(date)" > /tmp/cloud-init-completed.txt
 
 ###--- Users - Leave here for now
 #      Need to add your keys - will populate .ssh/authorized_keys
@@ -266,4 +268,4 @@ users:
 
 timezone: "America/Los_Angeles"
 
-final_message: Post creation OS config done
+final_message: =========  Post Install cloud-init Completed  =========
