@@ -26,14 +26,15 @@
 
 # Use existing VIP Pool
 data "vastdata_vip_pool" "protocolsVIP" {
-    name = var.vip_pool_existing
+  provider      = vastdata.GCPCluster
+  name = var.vip_pool_existing
 }
 
 # View Policy
 resource "vastdata_view_policy" "ViewPolicy01" {
+  provider      = vastdata.GCPCluster
   vip_pools     = [data.vastdata_vip_pool.protocolsVIP.id]
   tenant_id     = data.vastdata_vip_pool.protocolsVIP.tenant_id
-  provider      = vastdata.GCPCluster
   name          = var.view_policy_name
   flavor        = var.policy_flavor
   nfs_no_squash = var.nfs_clients
