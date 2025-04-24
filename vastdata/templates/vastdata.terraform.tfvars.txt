@@ -10,12 +10,14 @@
 #
 ###===================================================================================###
 
+###===================================================================================###
+###                       VAST Cluster Provider Variable Values                       ###
+###===================================================================================###
 
-###--- VAST Provider metadata
-vast_version     = "1.3.3"
-vast_user        = "admin"
-vast_port        = "443"
-vast_passwd      = ""
-vast_host        = ""
-skip_ssl         = "true"
-validation_mode  = "warn"
+vast_version     = "1.2.3"              # Replace with the required provider version
+vast_user        = "admin"              # Replace with your VAST username
+vast_passwd      = "SuperSecretPass"    # Replace with your VAST password
+vast_host        = "192.168.1.100"      # Replace with your VAST Cluster IP or hostname
+vast_port        = 443
+skip_ssl         = true                 # Set to false if SSL verification is required
+validation_mode  = "strict"             # Options: "strict", "loose", etc.
