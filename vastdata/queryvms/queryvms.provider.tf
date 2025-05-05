@@ -9,7 +9,7 @@ terraform {
     required_providers {
       vastdata = {
         source  = "vast-data/vastdata"
-        version = var.vast_version
+        version = "1.6.0"
     }
   }
 }
@@ -23,4 +23,5 @@ provider vastdata {
   host                    = var.vast_host
   skip_ssl_verify         = var.skip_ssl
   version_validation_mode = var.validation_mode
+  alias                   = "GCPCluster"
 }
