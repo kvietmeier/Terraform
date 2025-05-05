@@ -31,6 +31,7 @@ variable "subnets" {
     name          = string
     region        = string
     ip_cidr_range = string
+    ipv6_cidr_range   = optional(string)
   }))
 }
 

@@ -23,7 +23,11 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "4.51.0"
+      version = ">= 5.9.0"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 5.9.0"
     }
   }
 }
@@ -33,6 +37,7 @@ provider "google" {
   region  = var.region
   zone    = var.zone
 }
+
 
 ###===================================================================================###
 #                               Start creating infrastructure resources
@@ -44,9 +49,17 @@ locals {
 
 # --- VPC Configuration ---
 resource "google_compute_network" "custom_vpc" {
-  name                    = var.vpc_name
-  auto_create_subnetworks = false
+  provider                 = google-beta
+  name                     = var.vpc_name
+  auto_create_subnetworks  = false
+  enable_ula_internal_ipv6 = true  # REQUIRED to use INTERNAL IPv6 in subnets
 }
+
+/* 
+resource "google_compute_network_ipv6_ula_allocation" "custom_vpc_ula" {
+  network = google_compute_network.custom_vpc.name
+}
+*/
 
 # --- Subnets with Private Google Access ---
 resource "google_compute_subnetwork" "subnets" {
@@ -57,6 +70,11 @@ resource "google_compute_subnetwork" "subnets" {
   ip_cidr_range            = each.value.ip_cidr_range
   network                  = google_compute_network.custom_vpc.id
   private_ip_google_access = true
+  
+  # Enable internal IPv6 if name ends in "ipv6"
+  stack_type        = can(regex("ipv6$", each.value.name)) ? "IPV4_IPV6" : "IPV4_ONLY"
+  ipv6_access_type  = can(regex("ipv6$", each.value.name)) ? "INTERNAL" : null
+
 }
 
 # --- Routers per Region (only if NAT is enabled) ---
@@ -76,6 +94,11 @@ resource "google_compute_router_nat" "nats" {
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 
+  # Avoid potential race condition  
+  depends_on = [
+      google_compute_router.routers
+  ]
+
   log_config {
     enable = true
     filter = "ERRORS_ONLY"
@@ -85,7 +108,7 @@ resource "google_compute_router_nat" "nats" {
 # --- Firewall Rule to Allow Internal Traffic ---
 resource "google_compute_firewall" "allow_internal" {
   name    = "allow-all-ports"
-  network = google_compute_network.custom_vpc.name
+  network = google_compute_network.custom_vpc.id
 
   allow {
     protocol = "tcp"
