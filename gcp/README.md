@@ -1,4 +1,5 @@
 ### Create VMs
+---
 
 #### GCP Quirks
 
@@ -20,6 +21,14 @@
     serial-port-enable = true
   }
   ```
+
+- Adding more than one SSH Key to a Linux host
+  By default you can only add one but Terraform and GCP allow you to reference a file with multiple keys in it.
+
+  You need to reference it in 3 places:
+
+  "metadata" - see user-data the line in the code above
+  As a variable in variables and tfvars
 
 ---
 

@@ -33,7 +33,6 @@ data "cloudinit_config" "system_setup" {
   }
 }
 
-
 # Reserve External (Public) IP Address
 # Allocates a static external IP address in the specified region.
 resource "google_compute_address" "vm_public_ip" {
@@ -78,17 +77,17 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   metadata = {
-    startup-script = <<-CLOUDINIT
-      #!/bin/bash
-      sleep 30
-      command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
+    startup-script      = <<-CLOUDINIT
+    #!/bin/bash
+    sleep 30
+    command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
     CLOUDINIT
 
-    ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
-    serial-port-enable = true
-    user-data          = "${data.cloudinit_config.system_setup.rendered}"
+    ssh-keys            = "${var.ssh_user}:${local.ssh_key_content}"
+    serial-port-enable  = true
+    user-data           = "${data.cloudinit_config.system_setup.rendered}"
   }
-
+  
   service_account {
     email  = var.sa_email
     scopes = var.sa_scopes

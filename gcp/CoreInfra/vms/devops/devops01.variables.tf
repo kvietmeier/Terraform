@@ -97,14 +97,14 @@ variable "ssh_key_file" {
   type        = string
 }
 
-variable "vm_tags" {
-  description = "Tags to assign to the VM for network/firewall configuration"
-  type        = list(string)
-}
-
 variable "cloudinit_configfile" {
   description = "Path to the cloud-init YAML configuration file"
   type        = string
+}
+
+variable "vm_tags" {
+  description = "Tags to assign to the VM for network/firewall configuration"
+  type        = list(string)
 }
 
 

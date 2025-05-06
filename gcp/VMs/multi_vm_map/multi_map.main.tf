@@ -13,7 +13,9 @@
 ###===================================================================================###
 ###                  Start creating infrastructure resources                          ###
 
-# Setup cloud-init
+# Cloud-Init Configuration
+# This block loads the cloud-init configuration that is passed to the VM at boot time.
+# It enables automatic configuration like user setup, package installation, etc.
 data "cloudinit_config" "system_setup" {
   gzip = false
   base64_encode = false
