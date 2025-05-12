@@ -26,12 +26,16 @@ variable "vpc_name" {
 }
 
 variable "subnets" {
-  description = "List of subnets with name, region, and CIDR"
+  description = "List of subnets with name, region, CIDR, and secondary cidr ranges"
   type = list(object({
-    name          = string
-    region        = string
-    ip_cidr_range = string
-    ipv6_cidr_range   = optional(string)
+    name                = string
+    region              = string
+    ip_cidr_range       = string
+    ipv6_cidr_range     = optional(string)
+    secondary_ip_ranges = optional(list(object({
+      range_name    = string
+      ip_cidr_range = string
+    })))
   }))
 }
 
@@ -39,9 +43,4 @@ variable "nat_enabled_regions" {
   description = "List of regions to deploy Cloud NAT"
   type        = list(string)
   default     = []
-}
-
-variable ingress_filter {
-  description = "A list of IPs and CIDR ranges to allow"
-  type        = list(string)
 }

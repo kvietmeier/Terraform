@@ -40,14 +40,21 @@ provider "google" {
 
 
 ###===================================================================================###
-#                               Start creating infrastructure resources
+#                          Start creating infrastructure resources
 ###===================================================================================###
+
 
 locals {
   unique_regions = distinct([for subnet in var.subnets : subnet.region])
 }
 
+
+###===================================================================================###
+#                           Private Service Access Peering Setup
+###===================================================================================###
+
 # --- VPC Configuration ---
+# Need the beta provider to enable IPv6 ULA
 resource "google_compute_network" "custom_vpc" {
   provider                 = google-beta
   name                     = var.vpc_name
@@ -55,7 +62,25 @@ resource "google_compute_network" "custom_vpc" {
   enable_ula_internal_ipv6 = true  # REQUIRED to use INTERNAL IPv6 in subnets
 }
 
-/* 
+# Reserve IP range for Private Service Access (used by Cloud SQL, Memorystore, etc.)
+resource "google_compute_global_address" "private_service_range" {
+  name          = "private-service-access"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.custom_vpc.self_link
+  address       = null  # Auto-assigned by GCP
+}
+
+# Enable the Service Networking API
+resource "google_project_service" "servicenetworking" {
+  project = var.project_id
+  service = "servicenetworking.googleapis.com"
+}
+
+
+/*
+# Doesn't work yet 
 resource "google_compute_network_ipv6_ula_allocation" "custom_vpc_ula" {
   network = google_compute_network.custom_vpc.name
 }
@@ -74,6 +99,18 @@ resource "google_compute_subnetwork" "subnets" {
   # Enable internal IPv6 if name ends in "ipv6"
   stack_type        = can(regex("ipv6$", each.value.name)) ? "IPV4_IPV6" : "IPV4_ONLY"
   ipv6_access_type  = can(regex("ipv6$", each.value.name)) ? "INTERNAL" : null
+  
+  # If there are secondary IP ranges configured for the subnet, create them.
+  dynamic "secondary_ip_range" {
+    for_each = try(
+      [for r in each.value.secondary_ip_ranges : r if r != null],
+      []
+    )
+    content {
+      range_name    = secondary_ip_range.value.range_name
+      ip_cidr_range = secondary_ip_range.value.ip_cidr_range
+    }
+  }
 
 }
 
@@ -105,29 +142,17 @@ resource "google_compute_router_nat" "nats" {
   }
 }
 
-# --- Firewall Rule to Allow Internal Traffic ---
-resource "google_compute_firewall" "allow_internal" {
-  name    = "allow-all-ports"
-  network = google_compute_network.custom_vpc.id
+# Create the VPC peering with service networking
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = google_compute_network.custom_vpc.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_service_range.name]
 
-  allow {
-    protocol = "tcp"
-    ports    = ["0-65535"]
-  }
-
-  allow {
-    protocol = "udp"
-    ports    = ["0-65535"]
-  }
-
-  allow {
-    protocol = "icmp"
-  }
-
-  direction     = "INGRESS"
-  source_ranges = var.ingress_filter
-  priority      = 1000
+  depends_on = [
+    google_project_service.servicenetworking
+  ]
 }
+
 
 ###===================================================================================###
 #                                    Outputs
@@ -140,4 +165,9 @@ output "nat_enabled_regions" {
 output "subnet_cidrs" {
   description = "List of CIDR blocks for the subnets"
   value       = [for subnet in var.subnets : subnet.ip_cidr_range]
+}
+
+output "service_networking_connection" {
+  description = "Peering connection to servicenetworking.googleapis.com"
+  value       = google_service_networking_connection.private_vpc_connection.network
 }
