@@ -31,6 +31,7 @@ provider "google" {
   project = var.project_id
   region  = var.region
   zone    = var.zone
+  #impersonate_service_account = "terraform-sa@clouddev-itdesk124.iam.gserviceaccount.com"
 }
 
 ###===================================================================================###
@@ -45,11 +46,6 @@ resource "google_dns_managed_zone" "vastclusters" {
 
   # Configure private visibility for the DNS zone
   private_visibility_config {
-    # Define the default network for DNS visibility
-    networks {
-      network_url = "https://www.googleapis.com/compute/v1/projects/${var.project_id}/global/networks/default"
-    }
-
     # Dynamically add networks from the `var.networks` variable
     dynamic "networks" {
       for_each = var.networks
