@@ -1,30 +1,50 @@
 ###===================================================================================###
-#
 #  File:  terraform.tfvars
-#  Created By: Karl Vietmeier
-#
+#  Purpose: Set input variables for the VAST Data vipsnviews Terraform module
+#  Author: Karl Vietmeier
 ###===================================================================================###
-# Provider values (set via environment variables or .tfvars for local use)
-vast_username                 = "REPLACE_ME"
-vast_password                 = "REPLACE_ME"
-vast_host                    = "REPLACE_ME"
+
+# =============================
+# VAST Cluster Authentication
+# =============================
+vast_username                = "<YOUR_USERNAME>"
+vast_password                = "<YOUR_PASSWORD>"
+vast_host                    = "<VAST_CLUSTER_HOST>"
 vast_port                    = "443"
 vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
-#vast_provider_alias          = "GCPCluster"
 
-# Infrastructure values
-vip1_name     = "DataSharesPool"
-vip2_name     = "ReplicationPool"
-cidr          = "24"
-gw1           = "33.20.1.1"
-gw2           = "33.21.1.1"
-vip1_startip  = "33.20.1.10"
-vip1_endip    = "33.20.1.21"
-vip2_startip  = "33.21.1.10"
-vip2_endip    = "33.21.1.15"
-role1         = "PROTOCOLS"
-role2         = "REPLICATION"
-policy_name   = "NFS_policy"
-num_views     = 6
-path_name     = "share"
+# =============================
+# Existing VIP Pool Name
+# =============================
+vip_pool_existing           = "<VIP_POOL_NAME>"
+
+# =============================
+# VIP Pool Permissions
+# =============================
+vippool_permission_mode     = "RW"
+
+# =============================
+# View Policy Configuration
+# =============================
+policy_name                 = "vpolicy-nfs"
+view_policy_flavor          = "MIXED_LAST_WINS"
+use_auth_provider           = false
+auth_source                 = "RPC_AND_PROVIDERS"
+access_flavor               = "ALL"  # Allowed: NFS, SMB, or ALL
+
+# =============================
+# View Creation Configuration
+# =============================
+num_views                   = "8"
+path_name                   = "nfs"
+
+# =============================
+# Protocol Access Lists
+# =============================
+nfs_no_squash               = ["0.0.0.0/0"]
+nfs_read_write              = ["*"]
+nfs_read_only               = []
+
+smb_read_write              = []
+smb_read_only               = []
