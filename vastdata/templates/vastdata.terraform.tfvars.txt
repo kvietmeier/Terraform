@@ -1,22 +1,50 @@
 ###===================================================================================###
-#
 #  File:  terraform.tfvars
-#  Created By: Karl Vietmeier
-#
-#  This is a "sanitized" version of the terraform.tfvars file that is excluded from the repo. 
-#  Any values that aren't sensitive are left defined, amy sensitive values are stubbed out.
-#
-#  Edit as required
-#
+#  Purpose: Set input variables for the VAST Data vipsnviews Terraform module
+#  Author: Karl Vietmeier
 ###===================================================================================###
 
-###===================================================================================###
-###                       VAST Cluster Provider Variable Values                       ###
-###===================================================================================###
+# =============================
+# VAST Cluster Authentication
+# =============================
+vast_username                = "<YOUR_USERNAME>"
+vast_password                = "<YOUR_PASSWORD>"
+vast_host                    = "<VAST_CLUSTER_HOST>"
+vast_port                    = "443"
+vast_skip_ssl_verify         = true
+vast_version_validation_mode = "warn"
 
-vast_user        = "admin"              # Replace with your VAST username
-vast_passwd      = "SuperSecretPass"    # Replace with your VAST password
-vast_host        = "192.168.1.100"      # Replace with your VAST Cluster IP or hostname
-vast_port        = 443
-skip_ssl         = true                 # Set to false if SSL verification is required
-validation_mode  = "strict"             # Options: "strict", "loose", etc.
+# =============================
+# Existing VIP Pool Name
+# =============================
+vip_pool_existing           = "<VIP_POOL_NAME>"
+
+# =============================
+# VIP Pool Permissions
+# =============================
+vippool_permission_mode     = "RW"
+
+# =============================
+# View Policy Configuration
+# =============================
+policy_name                 = "vpolicy-nfs"
+view_policy_flavor          = "MIXED_LAST_WINS"
+use_auth_provider           = false
+auth_source                 = "RPC_AND_PROVIDERS"
+access_flavor               = "ALL"  # Allowed: NFS, SMB, or ALL
+
+# =============================
+# View Creation Configuration
+# =============================
+num_views                   = "8"
+path_name                   = "nfs"
+
+# =============================
+# Protocol Access Lists
+# =============================
+nfs_no_squash               = ["0.0.0.0/0"]
+nfs_read_write              = ["*"]
+nfs_read_only               = []
+
+smb_read_write              = []
+smb_read_only               = []

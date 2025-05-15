@@ -4,27 +4,47 @@
 #  Created By: Karl Vietmeier
 #
 ###===================================================================================###
-# Provider values (set via environment variables or .tfvars for local use)
-vast_username                 = "REPLACE_ME"
-vast_password                 = "REPLACE_ME"
-vast_host                    = "REPLACE_ME"
-vast_port                    = "443"
-vast_skip_ssl_verify         = true
-vast_version_validation_mode = "warn"
-#vast_provider_alias          = "GCPCluster"
+# ------------------------------------------------------------------------------
+# Provider Configuration (example values only)
+# ------------------------------------------------------------------------------
 
-# Infrastructure values
-vip1_name     = "DataSharesPool"
-vip2_name     = "ReplicationPool"
-cidr          = "24"
-gw1           = "33.20.1.1"
-gw2           = "33.21.1.1"
-vip1_startip  = "33.20.1.10"
-vip1_endip    = "33.20.1.21"
-vip2_startip  = "33.21.1.10"
-vip2_endip    = "33.21.1.15"
-role1         = "PROTOCOLS"
-role2         = "REPLICATION"
-policy_name   = "NFS_policy"
-num_views     = 6
-path_name     = "share"
+vast_username              = "your_vast_username"
+vast_password              = "your_vast_password"   # <-- Sensitive, don't commit to source control
+vast_host                  = "vast-cluster.example.com"
+vast_port                  = "443"
+vast_skip_ssl_verify       = true
+vast_version_validation_mode = "warn"
+
+# ------------------------------------------------------------------------------
+# VIP Pool 1 Configuration
+# ------------------------------------------------------------------------------
+
+vip1_name      = "vip-pool-1"
+vip1_startip   = "10.0.1.10"
+vip1_endip     = "10.0.1.20"
+gw1            = "10.0.1.1"
+role1          = "role-frontend-1"
+
+# ------------------------------------------------------------------------------
+# VIP Pool 2 Configuration
+# ------------------------------------------------------------------------------
+
+vip2_name      = "vip-pool-2"
+vip2_startip   = "10.0.2.10"
+vip2_endip     = "10.0.2.20"
+gw2            = "10.0.2.1"
+role2          = "role-frontend-2"
+
+# ------------------------------------------------------------------------------
+# Shared Network Settings
+# ------------------------------------------------------------------------------
+
+cidr           = "10.0.0.0/16"
+
+# ------------------------------------------------------------------------------
+# View Policy and NFS View Settings
+# ------------------------------------------------------------------------------
+
+policy_name    = "example-nfs-policy"
+num_views      = 3
+path_name      = "nfs_share_"

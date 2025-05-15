@@ -4,20 +4,12 @@
 #  Created By: Karl Vietmeier
 #
 #  Terraform Module Code
-#  * VIP Pools (Removed Creation — Now using Data Source)
-#
+#  
 #  Resources Created:
 #    * View Policy
 #    * Views
 # 
 ###===================================================================================###
-
-# Replace creation with a data source (already defined earlier)
-# Example:
-# data "vastdata_vip_pool" "protocolsVIP" {
-#   provider = vastdata.GCPCluster
-#   name     = var.vip_pool_existing
-# }
 
 
 # Use existing VIP Pool
@@ -25,6 +17,7 @@ data "vastdata_vip_pool" "protocolsVIP" {
   provider      = vastdata.GCPCluster
   name = var.vip_pool_existing
 }
+
 
 
 # ======================

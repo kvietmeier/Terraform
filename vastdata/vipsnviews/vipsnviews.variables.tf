@@ -1,36 +1,122 @@
-###===================================================================================###
+##===================================================================================
+# File:        vipsnviews.variables.tf
+# Created By:  Karl Vietmeier
 #
-#  File:  vipsnviews.variables.tf
-#  Created By: Karl Vietmeier
-#
-#   Variables
-# 
-###===================================================================================###
+# Description: Terraform variable definitions for VAST VIPs and views.
+#===================================================================================
 
+#------------------------------------------------------------------------------
+# Provider Configuration Variables
+#------------------------------------------------------------------------------
 
-# Provider variables
-variable "vast_username" {}
-variable "vast_password" {}
-variable "vast_host" {}
-variable "vast_port" { default = "443" }
-variable "vast_skip_ssl_verify" { default = true }
-variable "vast_version_validation_mode" { default = "warn" }
+variable "vast_username" {
+  description = "Username for VAST Data API access"
+  type        = string
+}
 
-# Variables not allowed for Alias
-#variable "vast_provider_alias" { default = "GCPCluster" }
+variable "vast_password" {
+  description = "Password for VAST Data API access"
+  type        = string
+  sensitive   = true
+}
 
-# Infrastructure variables
-variable "vip1_name" {}
-variable "vip2_name" {}
-variable "cidr" {}
-variable "gw1" {}
-variable "gw2" {}
-variable "vip1_startip" {}
-variable "vip1_endip" {}
-variable "vip2_startip" {}
-variable "vip2_endip" {}
-variable "role1" {}
-variable "role2" {}
-variable "policy_name" {}
-variable "num_views" {}
-variable "path_name" {}
+variable "vast_host" {
+  description = "VAST cluster hostname or IP address"
+  type        = string
+}
+
+variable "vast_port" {
+  description = "VAST cluster API port"
+  type        = string
+  default     = "443"
+}
+
+variable "vast_skip_ssl_verify" {
+  description = "Skip SSL verification for the VAST provider"
+  type        = bool
+  default     = true
+}
+
+variable "vast_version_validation_mode" {
+  description = "API version validation mode (strict, warn, or none)"
+  type        = string
+  default     = "warn"
+}
+
+#------------------------------------------------------------------------------
+# VIP Pool Configuration Variables
+#------------------------------------------------------------------------------
+
+variable "vip1_name" {
+  description = "Name of the first VIP Pool"
+  type        = string
+}
+
+variable "vip2_name" {
+  description = "Name of the second VIP Pool"
+  type        = string
+}
+
+variable "cidr" {
+  description = "CIDR block for VIP subnets"
+  type        = string
+}
+
+variable "gw1" {
+  description = "Gateway for the first subnet"
+  type        = string
+}
+
+variable "gw2" {
+  description = "Gateway for the second subnet"
+  type        = string
+}
+
+variable "vip1_startip" {
+  description = "Start IP for VIP Pool 1"
+  type        = string
+}
+
+variable "vip1_endip" {
+  description = "End IP for VIP Pool 1"
+  type        = string
+}
+
+variable "vip2_startip" {
+  description = "Start IP for VIP Pool 2"
+  type        = string
+}
+
+variable "vip2_endip" {
+  description = "End IP for VIP Pool 2"
+  type        = string
+}
+
+#------------------------------------------------------------------------------
+# View Policy and View Configuration Variables
+#------------------------------------------------------------------------------
+
+variable "role1" {
+  description = "Role name for VIP Pool 1"
+  type        = string
+}
+
+variable "role2" {
+  description = "Role name for VIP Pool 2"
+  type        = string
+}
+
+variable "policy_name" {
+  description = "Name of the VAST view policy"
+  type        = string
+}
+
+variable "num_views" {
+  description = "Number of views to create"
+  type        = number
+}
+
+variable "path_name" {
+  description = "Base path name for views"
+  type        = string
+}
