@@ -10,23 +10,28 @@
 
 variable "vast_username" {
   description = "Username for authenticating with the VAST Data cluster."
+  type        = string
 }
 
 variable "vast_password" {
   description = "Password for authenticating with the VAST Data cluster."
+  type        = string
 }
 
 variable "vast_host" {
   description = "Hostname or IP address of the VAST Data cluster."
+  type        = string
 }
 
 variable "vast_port" {
   description = "Port used to connect to the VAST Data API."
   default     = "443"
+  type        = string
 }
 
 variable "vast_skip_ssl_verify" {
   description = "Whether to skip SSL verification for the VAST provider."
+  type        = bool
   default     = true
 }
 
@@ -46,26 +51,31 @@ variable "vip_pool_existing" {
 
 variable "policy_name" {
   description = "Name for the VAST view policy to be created."
+  type        = string
 }
 
 variable "view_policy_flavor" {
   description = "The view policy flavor (e.g., MIXED_LAST_WINS, NFS, SMB)."
   default     = "MIXED_LAST_WINS"
+  type        = string
 }
 
 variable "use_auth_provider" {
   description = "Whether to use an authentication provider."
   default     = true
+  type        = string
 }
 
 variable "auth_source" {
   description = "The authentication source used by the view policy."
   default     = "RPC_AND_PROVIDERS"
+  type        = string
 }
 
 variable "access_flavor" {
   description = "Access flavor for the view policy (e.g., ALL, NFS, SMB)."
   default     = "ALL"
+  type        = string
 }
 
 variable "nfs_no_squash" {
@@ -101,6 +111,7 @@ variable "smb_read_only" {
 variable "vippool_permission_mode" {
   description = "Permissions to grant on the VIP pool (e.g., RW, RO)."
   default     = "RW"
+  type        = string
 }
 
 ###===================================================================================###
@@ -109,10 +120,12 @@ variable "vippool_permission_mode" {
 
 variable "num_views" {
   description = "Number of NFS views to create."
+  type        = string
 }
 
 variable "path_name" {
   description = "Base name for the paths used in NFS views."
+  type        = string
 }
 
 ###===================================================================================###
