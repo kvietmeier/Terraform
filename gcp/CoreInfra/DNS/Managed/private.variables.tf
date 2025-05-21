@@ -42,3 +42,9 @@ variable "a_records" {
   description = "A map of subdomains to lists of IP addresses."
   type        = map(list(string))
 }
+
+variable "vastcluser_dns" {
+description = "DNS server on VAST cluster"
+type = string
+
+}

@@ -74,16 +74,16 @@ resource "google_compute_firewall" "default_services_rules" {
 ###--- Create the FW Rule/s for Applications
 resource "google_compute_firewall" "custom_app_rules" {
   
-  name        = var.apprules_name
+  name        = var.vast_rules_name
   network     = var.vpc_name              
   description = var.description
   direction   = var.ingress_rule
-  priority    = var.app_priority
+  priority    = var.vast_priority
 
   
   allow {
     protocol = "tcp"
-    ports    = var.app_tcp
+    ports    = var.vast_tcp
   }
 
   allow {

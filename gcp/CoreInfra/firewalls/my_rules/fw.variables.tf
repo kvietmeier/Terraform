@@ -69,7 +69,7 @@ variable "addc_name" {
   type        = string
 }
 
-variable "apprules_name" {
+variable "vast_rules_name" {
   description = "Standard TCP/UDP services"
   type        = string
 }
@@ -82,7 +82,7 @@ variable "svcs_priority" {
   default     = "500"
 }
 
-variable "app_priority" {
+variable "vast_priority" {
   description = "Priority on stack"
   type        = string
   default     = "500"
@@ -127,7 +127,7 @@ variable addc_udp_ports {
   type        = list(string)
 }
 
-variable app_tcp {
-  description = "A list of ports needed for Apps"
+variable vast_tcp {
+  description = "A list of ports needed for VAST Data"
   type        = list(string)
 }

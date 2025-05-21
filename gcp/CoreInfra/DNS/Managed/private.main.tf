@@ -3,16 +3,10 @@
 #  Created By: Karl Vietmeier
 #
 #  Terraform Module Code
-#  Purpose: Create Private DNS Zone 
+#  Purpose: Create and modify a Private DNS Zone in GCP 
 #
 ###===================================================================================###
 
-/* 
-Usage:
-terraform plan -var-file=".\<file>.tfvars"
-terraform apply --auto-approve -var-file=".\<file>.tfvars"
-terraform destroy --auto-approve -var-file=".\<file>.tfvars"
-*/
 
 ###===================================================================================###
 #                                 Provider Configuration
@@ -31,7 +25,6 @@ provider "google" {
   project = var.project_id
   region  = var.region
   zone    = var.zone
-  #impersonate_service_account = "terraform-sa@clouddev-itdesk124.iam.gserviceaccount.com"
 }
 
 ###===================================================================================###
