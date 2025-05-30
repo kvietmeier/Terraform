@@ -1,4 +1,4 @@
-### Create a Private DNS Domain
+### Create a Private DNS Forwarding Domain
 
 Creates a private DNS domain with at least one NS record pointing to a target DNS server.
 
