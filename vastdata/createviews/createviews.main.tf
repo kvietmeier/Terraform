@@ -3,7 +3,7 @@
 #  File:  vipsnviews.main.tf
 #  Created By: Karl Vietmeier
 #
-#  Terraform Module Code
+#  For vAST on Cloud - uses existing "protocolsPool"
 #  
 #  Resources Created:
 #    * View Policy
@@ -12,7 +12,7 @@
 ###===================================================================================###
 
 
-# Use existing VIP Pool
+# Use existing VIP Pool "protocolsVIP"
 data "vastdata_vip_pool" "protocolsVIP" {
   provider      = vastdata.GCPCluster
   name = var.vip_pool_existing

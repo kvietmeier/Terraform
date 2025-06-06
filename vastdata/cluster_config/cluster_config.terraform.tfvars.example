@@ -1,0 +1,125 @@
+###===================================================================================###
+# VAST Data VIP Pools and NFS View Configuration
+# --role: PROTOCOLS | REPLICATION | VAST_CATALOG
+#
+# This file defines:
+# - VAST provider connection settings
+# - Two VIP Pools:
+#     - sharesPool (role: PROTOCOLS)
+#     - targetPool (role: REPLICATION)
+# - Shared network settings
+# - NFS view policy configuration
+###===================================================================================###
+
+
+# ------------------------------------------------------------------------------
+# Provider Configuration
+# ------------------------------------------------------------------------------
+
+vast_username                = "youruser"
+vast_password                = "yourpassword"
+vast_host                    = "vms"
+vast_port                    = "443"
+vast_skip_ssl_verify         = true
+vast_version_validation_mode = "warn"
+
+# ------------------------------------------------------------------------------
+# VIP Pool 1 Configuration
+# ------------------------------------------------------------------------------
+vip1_name      = "sharesPool"
+vip1_startip   = "33.20.1.11"
+vip1_endip     = "33.20.1.21"
+gw1            = "33.20.1.1"
+role1          = "PROTOCOLS"
+
+# ------------------------------------------------------------------------------
+# VIP Pool 2 Configuration
+# ------------------------------------------------------------------------------
+vip2_name      = "targetPool"
+vip2_startip   = "33.21.1.11"
+vip2_endip     = "33.21.1.21"
+gw2            = "33.21.1.1"
+role2          = "REPLICATION"
+
+# ------------------------------------------------------------------------------
+# Shared Network Settings
+# ------------------------------------------------------------------------------
+
+cidr           = "24"
+
+# ------------------------------------------------------------------------------
+# NFS View Policy Settings
+# ------------------------------------------------------------------------------
+
+policy_name         = "nfs-view-policy"
+flavor              = "MIXED_LAST_WINS"
+use_auth_provider   = true
+auth_source         = "RPC_AND_PROVIDERS"
+access_flavor       = "ALL"
+nfs_no_squash       = ["0.0.0.0/0"]
+nfs_read_write      = ["0.0.0.0/0"]
+nfs_read_only       = []
+smb_read_write      = []
+smb_read_only       = []
+vippool_permissions = "RW"
+
+
+# ------------------------------------------------------------------------------
+# NFS View Settings
+# ------------------------------------------------------------------------------
+num_views         = 11
+path_name         = "nfs_share_"
+protocols         = ["NFS"]
+create_dir        = true
+
+
+# ------------------------------------------------------------------------------
+# DNS Settings
+# ------------------------------------------------------------------------------
+dns_name          = "vastdns"
+dns_vip           = "172.1.4.15"
+port_type         = "NORTH_PORT"
+dns_domain_suffix = "busab.org"
+dns_enabled       = true
+#vip_gateway       = "172.1.4.1"
+
+
+# ------------------------------------------------------------------------------
+# User/Tenant Settings
+# ------------------------------------------------------------------------------
+
+tenants = [
+  {
+    name             = "sardukar"
+    client_ip_ranges = ["0.0.0.0/0"]
+  },
+  {
+    name             = "gowachin"
+    client_ip_ranges = ["0.0.0.0/0"]
+  },
+  {
+    name             = "fremen"
+    client_ip_ranges = ["0.0.0.0/0"]
+  }
+]
+
+groups = [
+  { name = "s3users", gid  = 1000 },
+  { name = "nfsusers", gid = 1100 },
+  { name = "allusers", gid = 1200 }
+]
+
+users = [
+  {
+    name                 = "nfsuser1"
+    uid                  = 2111
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+  },
+  {
+    name                 = "s3user1"
+    uid                  = 2112
+    leading_group_name   = "s3users"
+    supplementary_groups = ["allusers", "nfsusers"]
+  }
+]

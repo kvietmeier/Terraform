@@ -15,17 +15,29 @@
 #     Query infrastructure resources
 ###===================================================================================###
 
-# Use existing VIP Pool
+/* # Use existing VIP Pool
 data "vastdata_vip_pool" "protocolsVIP" {
   provider      = vastdata.GCPCluster
   name = var.vip_pool_existing
 }
+
+ */
+
+data "vastdata_tenant" "default" {
+  name = "default"
+}
+
 
 
 
 ###===================================================================================###
 #     Output Data
 ###===================================================================================###
+
+
+
+
+/* 
 output "protocols_vip_pool_id" {
   value = data.vastdata_vip_pool.protocolsVIP.id
   description = "The ID of the protocols VIP pool."
@@ -45,7 +57,7 @@ output "protocols_vip_pool_cluster" {
   value = data.vastdata_vip_pool.protocolsVIP.cluster
   description = "The cluster associated with the protocols VIP pool."
 }
-
+ */
 
 ###===================================================================================###
 /*
