@@ -15,15 +15,6 @@
 #
 ###===================================================================================###
 
-/* 
-  
-Usage:
-terraform plan -var-file=".\multivm_map.tfvars"
-terraform apply --auto-approve -var-file=".\multivm_map.tfvars"
-terraform destroy --auto-approve -var-file=".\multivm_map.tfvars"
-
-*/
-
 ###===================================================================================###
 #     Provider
 ###===================================================================================###

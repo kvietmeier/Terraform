@@ -3,24 +3,12 @@
 #  File:  fw_openall.main.tf
 #  Created By: Karl Vietmeier
 #
-#  Purpose:  Create default GCP Firewall rules
+#  Purpose:  Create Ffirewall rules to allow everything
 #
-#  This is a really bad idea!!!
-#
-# 
 ###===================================================================================###
 ###                        !!!This is a really bad idea!!!                            ###
 ###                       ----  USE ONLY IN AN EMERGENCY  ----                        ###
 ###===================================================================================###
-
-/* 
-  
-Usage:
-terraform plan -var-file=".\fw_defaults.tfvars"
-terraform apply --auto-approve -var-file=".\fw_defaults.tfvars"
-terraform destroy --auto-approve -var-file=".\fw_defaults.tfvars"
-
-*/
 
 ###===================================================================================###
 ###--- Provider
