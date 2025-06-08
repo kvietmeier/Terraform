@@ -1,11 +1,16 @@
 ###===================================================================================###
+# VAST Data VIP Pools and NFS View Configuration
+# --role: PROTOCOLS | REPLICATION | VAST_CATALOG
 #
-#  File:  vipsnviews.outputs.tf
-#  Created By: Karl Vietmeier
-#
-#     Data Sources & Output
-# 
-###===================================================================================####
+# This file defines:
+# - VAST provider connection settings
+# - Two VIP Pools:
+#     - sharesPool (role: PROTOCOLS)
+#     - targetPool (role: REPLICATION)
+# - Shared network settings
+# - NFS view policy configuration
+###===================================================================================###
+
 
 /*
 data "vastdata_vip_pool" "pool1_gcp" {

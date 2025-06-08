@@ -1,9 +1,16 @@
-##===================================================================================
-# File:        vipsnviews.variables.tf
-# Created By:  Karl Vietmeier
+###===================================================================================###
+# VAST Data VIP Pools and NFS View Configuration
+# --role: PROTOCOLS | REPLICATION | VAST_CATALOG
 #
-# Description: Terraform variable definitions for VAST VIPs and views.
-#===================================================================================
+# This file defines:
+# - VAST provider connection settings
+# - Two VIP Pools:
+#     - sharesPool (role: PROTOCOLS)
+#     - targetPool (role: REPLICATION)
+# - Shared network settings
+# - NFS view policy configuration
+###===================================================================================###
+
 
 #------------------------------------------------------------------------------
 # Provider Configuration Variables
