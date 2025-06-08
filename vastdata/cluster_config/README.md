@@ -1,4 +1,4 @@
-# VAST Data Cluster Demo/POC Setup
+### VAST Data Cluster Demo/POC Setup
 
 This repository contains Terraform configurations to automate the setup of a basic VAST Data cluster environment for **demo or proof-of-concept (POC)** scenarios. The configuration includes:
 
@@ -10,42 +10,41 @@ This repository contains Terraform configurations to automate the setup of a bas
 - Basic multi-tenant setup with users and groups
 
 ---
+### Elements Created
 
-## ️ Components Overview
-
-###  Provider Configuration
+####  Provider Configuration
 Establishes a connection to a VAST Data cluster using credentials and API endpoint info.
 
-###  VIP Pools
+####  VIP Pools
 Defines two VIP Pools:
 - `sharesPool`: Assigned the `PROTOCOLS` role
 - `targetPool`: Assigned the `REPLICATION` role
 
-###  Network Settings
+####  Network Settings
 Common subnet CIDR and gateway values applied across VIP Pools.
 
-###  Tenants, Groups, and Users
+####  Tenants, Groups, and Users
 - Dynamically creates tenants from a list.
 - Groups and users are provisioned with specified GIDs/UIDs and group relationships.
 
-###  View Policy
+####  View Policy
 Creates a VAST NFS view policy with:
 - Authentication sources
 - Read/write permissions
 - VIP pool assignment
 
-###  NFS Views
+####  NFS Views
 Provisioned using a loop, each with:
 - Path prefix (e.g., `/nfs_share_1`, `/nfs_share_2`)
 - Backed by the defined view policy
 - Optionally creates a backing directory
 
-###  DNS
+####  DNS
 Defines internal DNS mappings for the VAST cluster, using the `busab.org` domain suffix and specified VIP address.
 
 ---
 
-##  Key Resources
+###  Key Resources
 
 | Resource               | Purpose                                 |
 |------------------------|------------------------------------------|
@@ -59,9 +58,7 @@ Defines internal DNS mappings for the VAST cluster, using the `busab.org` domain
 
 ---
 
-##  Deployment
-
-### Prerequisites
+#### Prerequisites
 - Terraform installed
 - VAST provider plugin installed
 - Access to a VAST Data cluster (on GCP or other supported platforms)
