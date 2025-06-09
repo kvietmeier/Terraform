@@ -290,3 +290,70 @@ variable "users" {
     }
   ]
 }
+
+#------------------------------------------------------------------------------
+# Active Directory
+#------------------------------------------------------------------------------
+
+variable "ou_name" {
+  description = "Machine account name used to join the AD domain"
+  type        = string
+}
+
+variable "ad_ou" {
+  description = "Distinguished name of the OU in Active Directory"
+  type        = string
+}
+
+variable "use_ad" {
+  description = "Enable Active Directory integration"
+  type        = bool
+  default     = true
+}
+
+variable "bind_dn" {
+  description = "Bind DN used to connect to Active Directory"
+  type        = string
+}
+
+variable "bindpw" {
+  description = "Password for the bind DN"
+  type        = string
+  sensitive   = true
+}
+
+variable "ldap" {
+  description = "Use LDAPS (true) or LDAP (false)"
+  type        = bool
+  default     = true
+}
+
+variable "ad_domain" {
+  description = "FQDN of the Active Directory domain"
+  type        = string
+}
+
+variable "method" {
+  description = "Authentication method (e.g., simple or sasl)"
+  type        = string
+  default     = "simple"
+}
+
+variable "query_mode" {
+  description = "Group membership query mode"
+  type        = string
+  default     = "tokenGroups"
+}
+
+variable "use_tls" {
+  description = "Use StartTLS with LDAP"
+  type        = bool
+  default     = true
+}
+
+# Optional
+variable "ldap_urls" {
+  description = "List of LDAP/LDAPS URLs for manual configuration"
+  type        = list(string)
+  default     = []
+}
