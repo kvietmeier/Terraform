@@ -3,7 +3,7 @@
 #  Created By: Karl Vietmeier
 #
 #  Terraform Module Code
-#  Purpose: Create and modify a Private DNS Zone in GCP 
+#  Purpose: Create and modify a Private DNS Zone in GCP for Active Directory
 #
 ###===================================================================================###
 
@@ -51,8 +51,7 @@ resource "google_dns_managed_zone" "dns_forwarder" {
   # Setup this domain up with a forwarder for VAST DNS
   forwarding_config {
     target_name_servers {
-      ipv4_address    = var.vastcluser_dns
-      forwarding_path = var.forwarding_path
+      ipv4_address = var.fw_target
     }
   }
 }
