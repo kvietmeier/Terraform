@@ -42,12 +42,8 @@ variable "networks" {
   type        = list(string)
 }
 
-variable "vastcluser_dns" {
+variable "fw_target" {
 description = "DNS server on VAST cluster"
 type = string
-}
 
-variable "forwarding_path" {
-description = "Explicit;y make it private"
-type = string
 }
