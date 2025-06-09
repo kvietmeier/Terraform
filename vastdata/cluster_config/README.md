@@ -10,6 +10,12 @@ This repository contains Terraform configurations to automate the setup of a bas
 - Basic multi-tenant setup with users and groups
 
 ---
+
+### Prerequisites
+- Terraform installed
+- VAST provider plugin initialized
+- Access to a VAST Data cluster (on GCP or other supported platforms)
+
 ### Elements Created
 
 ####  Provider Configuration
@@ -19,9 +25,6 @@ Establishes a connection to a VAST Data cluster using credentials and API endpoi
 Defines two VIP Pools:
 - `sharesPool`: Assigned the `PROTOCOLS` role
 - `targetPool`: Assigned the `REPLICATION` role
-
-####  Network Settings
-Common subnet CIDR and gateway values applied across VIP Pools.
 
 ####  Tenants, Groups, and Users
 - Dynamically creates tenants from a list.
@@ -57,8 +60,3 @@ Defines internal DNS mappings for the VAST cluster, using the `busab.org` domain
 | `vastdata_dns`         | DNS setup for VAST domain resolution     |
 
 ---
-
-#### Prerequisites
-- Terraform installed
-- VAST provider plugin installed
-- Access to a VAST Data cluster (on GCP or other supported platforms)
