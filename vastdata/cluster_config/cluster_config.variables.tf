@@ -54,28 +54,19 @@ variable "vast_version_validation_mode" {
 # VIP Pool Configuration Variables
 #------------------------------------------------------------------------------
 
-variable "vip1_name" {
-  description = "Name of the first VIP Pool"
-  type        = string
-}
-
-variable "vip2_name" {
-  description = "Name of the second VIP Pool"
-  type        = string
-}
-
 variable "cidr" {
   description = "CIDR block for VIP subnets"
   type        = string
 }
 
-variable "gw1" {
-  description = "Gateway for the first subnet"
+# VIP 1
+variable "vip1_name" {
+  description = "Name of the first VIP Pool"
   type        = string
 }
 
-variable "gw2" {
-  description = "Gateway for the second subnet"
+variable "gw1" {
+  description = "Gateway for the first subnet"
   type        = string
 }
 
@@ -86,6 +77,23 @@ variable "vip1_startip" {
 
 variable "vip1_endip" {
   description = "End IP for VIP Pool 1"
+  type        = string
+}
+
+variable "dns_shortname" {
+  description = "Prefix for DNS domain"
+  type        = string
+}
+
+
+# VIP 2
+variable "vip2_name" {
+  description = "Name of the second VIP Pool"
+  type        = string
+}
+
+variable "gw2" {
+  description = "Gateway for the second subnet"
   type        = string
 }
 
@@ -100,7 +108,7 @@ variable "vip2_endip" {
 }
 
 #------------------------------------------------------------------------------
-# View Policy Configuration Variables
+# NFS View Policy Configuration Variables
 #------------------------------------------------------------------------------
 
 variable "role1" {
@@ -180,7 +188,55 @@ variable "vippool_permissions" {
 
 
 #------------------------------------------------------------------------------
-# View Configuration Variables
+# S3 View Policy Configuration Variables
+#------------------------------------------------------------------------------
+/* 
+variable "policy_name" {
+  description = "Name of the S3 view policy"
+  type        = string
+  default     = "s3-policy-default"
+}
+
+variable "enable_s3" {
+  description = "Enable S3 protocol in the policy"
+  type        = bool
+  default     = true
+}
+
+variable "enable_nfs" {
+  description = "Enable NFS protocol in the policy"
+  type        = bool
+  default     = false
+}
+
+variable "enable_smb" {
+  description = "Enable SMB protocol in the policy"
+  type        = bool
+  default     = false
+}
+
+variable "s3_all_buckets" {
+  description = "Allow S3 access to all buckets"
+  type        = bool
+  default     = false
+}
+
+
+variable "s3_root_access" {
+  description = "Allow S3 root access"
+  type        = bool
+  default     = true
+}
+
+variable "use_ldap_auth" {
+  description = "Enable LDAP authentication"
+  type        = bool
+  default     = false
+}
+*/
+
+#------------------------------------------------------------------------------
+# NFS View Configuration Variables
 #------------------------------------------------------------------------------
 
 variable "num_views" {
@@ -204,6 +260,45 @@ variable "create_dir" {
   type        = bool
   default     = true
 }
+
+###------------------------------------------------------------------------------
+#    S3 View Configuration Variables
+####------------------------------------------------------------------------------
+variable "s3_view_name" {
+  description = "Name of the S3 view"
+  type        = string
+  default     = "s3bucket01"
+}
+
+variable "s3_view_path" {
+  description = "Filesystem path for the S3 view"
+  type        = string
+  default     = "/s3bucket01"
+}
+
+variable "s3_view_protocol" {
+  description = "Protocol for the view (usually 'S3')"
+  type        = string
+  default     = "S3"
+}
+
+variable "s3_view_create_dir" {
+  description = "Whether to create the directory if it does not exist"
+  type        = bool
+  default     = true
+}
+
+variable "s3_view_allow_s3_anonymous" {
+  description = "Allow anonymous S3 access"
+  type        = bool
+  default     = false
+}
+
+#variable "tenant" {
+#  description = "Tenant name to associate with the view"
+#  type        = string
+#  default     = ""
+#}
 
 
 #------------------------------------------------------------------------------
