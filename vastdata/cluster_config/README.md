@@ -100,28 +100,66 @@ You will need the AD PowerShell Modules but most AD domain conmtrollres should h
 
 - Domain Information
 
-```powershell
-   PS C:\ > (Get-ADDomain).DistinguishedName
-   DC=ginaz,DC=org
-```
+  ```powershell
+     PS C:\> (Get-ADDomain).DistinguishedName
+     DC=ginaz,DC=org
+  ```
 
-- OUs for adding Servers
-
+- OUs for adding Servers (VAST was added)
 
   ```powershell
-     PS C:\ > Get-ADOrganizationalUnit -Filter * | Select-Object Name, DistinguishedName
+     PS C:\> Get-ADOrganizationalUnit -Filter * | Select-Object Name, DistinguishedName
     
-    Name               DistinguishedName                    
-    ----               -----------------                    
-    Domain Controllers OU=Domain Controllers,DC=ginaz,DC=org
-    VAST               OU=VAST,DC=ginaz,DC=org              
+     Name               DistinguishedName                    
+     ----               -----------------                    
+     Domain Controllers OU=Domain Controllers,DC=ginaz,DC=org
+     VAST               OU=VAST,DC=ginaz,DC=org              
+  ```
+
+- Find the Admin users
+
+```powershell
+	PS C:\> Get-ADGroupMember -Identity "Domain Admins" -Recursive | Select-Object Name, SamAccountName, ObjectClass
+	
+	Name          SamAccountName ObjectClass
+	----          -------------- -----------
+    Administrator Administrator  user       
 ```
 
+- Get the Bind DN for an Admin user that can add servers (clusters) to a domain
 
+  ```powershell
+      PS C:\> Get-ADUser -Identity "Administrator" | Select-Object DistinguishedName
+    
+      DistinguishedName                        
+      -----------------                        
+      CN=Administrator,CN=Users,DC=ginaz,DC=org
+  ```
 
+If you have access to the Domain Controllers or the customer is intersted, you can add a new OU for VAST clusters.  
 
+- Create a new OU with a different name (VAST):
 
+  ```powershell
+     New-ADOrganizationalUnit -Name "VAST" -Path "DC=ginaz,DC=org"
+  ```
 
+- Redirect new VAST Cludtyree to the OU when they are added:
+
+  ```powershell
+     redircmp "OU=VAST,DC=ginaz,DC=org"
+  ```
+
+- Move existing ones to the new OU (careful with this one - it needs to be more selective - use at your own risk):
+
+  ```powershell
+      Get-ADComputer -SearchBase "CN=Computers,DC=ginaz,DC=org" -Filter * |
+      ForEach-Object {
+        Move-ADObject -Identity $_.DistinguishedName -TargetPath "OU=Workstations,DC=ginaz,DC=org"
+      }
+  ```
+
+---
 
 ###  Key Resources
 
