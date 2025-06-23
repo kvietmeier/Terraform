@@ -85,6 +85,11 @@ variable "dns_shortname" {
   type        = string
 }
 
+variable "role1" {
+  description = "Role name for VIP Pool 1"
+  type        = string
+}
+
 
 # VIP 2
 variable "vip2_name" {
@@ -107,25 +112,13 @@ variable "vip2_endip" {
   type        = string
 }
 
-#------------------------------------------------------------------------------
-# NFS View Policy Configuration Variables
-#------------------------------------------------------------------------------
-
-variable "role1" {
-  description = "Role name for VIP Pool 1"
-  type        = string
-}
-
 variable "role2" {
   description = "Role name for VIP Pool 2"
   type        = string
 }
 
-variable "policy_name" {
-  description = "Name of the VAST view policy"
-  type        = string
-}
 
+### Common View/Policy Settings
 variable "flavor" {
   description = "Specifies the view policy flavor"
   type        = string
@@ -148,6 +141,22 @@ variable "access_flavor" {
   description = "Access flavor setting"
   type        = string
   default     = "ALL"
+}
+
+variable "vippool_permissions" {
+  description = "Permissions for the VIP pool (e.g., RW or RO)"
+  type        = string
+  default     = "RW"
+}
+
+
+#------------------------------------------------------------------------------
+# NFS View Policy Configuration Variables
+#------------------------------------------------------------------------------
+### NFS Specific
+variable "nfs_default_policy_name" {
+  description = "Name of the VAST view policy"
+  type        = string
 }
 
 variable "nfs_no_squash" {
@@ -180,60 +189,6 @@ variable "smb_read_only" {
   default     = []
 }
 
-variable "vippool_permissions" {
-  description = "Permissions for the VIP pool (e.g., RW or RO)"
-  type        = string
-  default     = "RW"
-}
-
-
-#------------------------------------------------------------------------------
-# S3 View Policy Configuration Variables
-#------------------------------------------------------------------------------
-/* 
-variable "policy_name" {
-  description = "Name of the S3 view policy"
-  type        = string
-  default     = "s3-policy-default"
-}
-
-variable "enable_s3" {
-  description = "Enable S3 protocol in the policy"
-  type        = bool
-  default     = true
-}
-
-variable "enable_nfs" {
-  description = "Enable NFS protocol in the policy"
-  type        = bool
-  default     = false
-}
-
-variable "enable_smb" {
-  description = "Enable SMB protocol in the policy"
-  type        = bool
-  default     = false
-}
-
-variable "s3_all_buckets" {
-  description = "Allow S3 access to all buckets"
-  type        = bool
-  default     = false
-}
-
-
-variable "s3_root_access" {
-  description = "Allow S3 root access"
-  type        = bool
-  default     = true
-}
-
-variable "use_ldap_auth" {
-  description = "Enable LDAP authentication"
-  type        = bool
-  default     = false
-}
-*/
 
 #------------------------------------------------------------------------------
 # NFS View Configuration Variables
@@ -264,12 +219,30 @@ variable "create_dir" {
 ###------------------------------------------------------------------------------
 #    S3 View Configuration Variables
 ####------------------------------------------------------------------------------
-variable "s3_view_name" {
-  description = "Name of the S3 view"
+
+###--- Default View Policy
+
+variable "s3_default_policy_name" {
+  description = "Name of the VAST S3 view policy"
   type        = string
-  default     = "s3bucket01"
 }
 
+variable "s3_flavor" {
+  description = "Specifies the view policy flavor"
+  type        = string
+  default     = "S3_NATIVE"
+}
+
+variable "s3_special_chars_support" {
+  description = "This will enable object names that contain “//“ or “/../“ and are incompatible with other protocols"
+  type        = bool
+  default     = true
+}
+
+
+
+
+###--- Default View
 variable "s3_view_path" {
   description = "Filesystem path for the S3 view"
   type        = string
@@ -277,9 +250,32 @@ variable "s3_view_path" {
 }
 
 variable "s3_view_protocol" {
-  description = "Protocol for the view (usually 'S3')"
+  description = "Protocol for the View - S3"
+  type        = list(string)
+  default     = ["S3"]
+}
+
+variable "s3_view_name" {
+  description = "Name of the S3 view"
   type        = string
-  default     = "S3"
+  default     = "s3view01"
+}
+
+variable "s3_bucket_name" {
+  description = "Name of the S3 view"
+  type        = string
+  default     = "bucket01"
+}
+
+variable "s3_default_owner" {
+  description = "Name of the S3 Owner"
+  type        = string
+}
+
+variable "s3_use_ldap_auth" {
+  description = "Enable LDAP authentication for S3"
+  type        = bool
+  default     = false
 }
 
 variable "s3_view_create_dir" {
@@ -293,6 +289,21 @@ variable "s3_view_allow_s3_anonymous" {
   type        = bool
   default     = false
 }
+
+
+###--- User View Policy in json
+variable "s3_policy1_file" {
+  description = "Path to the S3 policy JSON file"
+  type        = string
+  default     = "s3Policy1.json"
+}
+
+variable "s3_user_policy_name" {
+  description = "Name of the S3 view"
+  type        = string
+  default     = "s3bucket01"
+}
+
 
 #variable "tenant" {
 #  description = "Tenant name to associate with the view"

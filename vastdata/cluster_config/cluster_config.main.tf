@@ -14,9 +14,9 @@
 # - DNS
 ###===================================================================================###
 
-# ======================
-# VIP Pools
-# ======================
+###===================================================================================###
+#   VIP Pools
+###===================================================================================###
 resource "vastdata_vip_pool" "protocols" {
   provider     = vastdata.GCPCluster
   name         = var.vip1_name
@@ -44,12 +44,14 @@ resource "vastdata_vip_pool" "replication" {
   }
 }
 
-# ======================
-# NFS View Policy
-# ======================
-resource "vastdata_view_policy" "vpolicy1" {
+###===================================================================================###
+#   NFS Configuration
+###===================================================================================###
+
+###--- Policies
+resource "vastdata_view_policy" "nfs_default_policy" {
   provider          = vastdata.GCPCluster
-  name              = var.policy_name
+  name              = var.nfs_default_policy_name
   #vip_pools         = [vastdata_vip_pool.protocols.id]
   flavor            = var.flavor
   use_auth_provider = var.use_auth_provider
@@ -69,86 +71,83 @@ resource "vastdata_view_policy" "vpolicy1" {
   }
 }
 
-# ======================
-# S3 View Policy - standard defaults
-# ======================
-/* 
-resource "vast_view_policy" "s3_default_policy" {
-  provider           = vastdata.GCPCluster
-  name               = var.policy_name
-  enable_s3          = var.enable_s3
-  enable_nfs         = var.enable_nfs
-  enable_smb         = var.enable_smb
-  s3_all_buckets     = var.s3_all_buckets
-  s3_root_access     = var.s3_root_access
-  use_ldap_auth      = var.use_ldap_auth
-}
-*/
-
-resource "vastdata_s3_policy" "s3policy" {
-  name     = "s3policy1"
-  provider = vastdata.GCPCluster
-  policy   = <<EOT
-        {
-   "Version":"2012-10-17",
-   "Statement":[
-      {
-         "Effect":"Allow",
-         "Action": "s3:ListAllMyBuckets",
-         "Resource":"*"
-      },
-      {
-         "Effect":"Allow",
-         "Action":["s3:ListObjects","s3:GetBucketLocation"],
-         "Resource":"arn:aws:s3:::DOC-EXAMPLE-BUCKET1"
-      },
-      {
-         "Effect":"Allow",
-         "Action":[
-            "s3:PutObject",
-            "s3:PutObjectAcl",
-            "s3:GetObject",
-            "s3:GetObjectAcl",
-            "s3:DeleteObject"
-         ],
-         "Resource":"arn:aws:s3:::DOC-EXAMPLE-BUCKET1/*"
-      }
-   ]
-}
-        EOT
-  enabled = true
-}
-
-# ======================
-# Views
-# ======================
-
-### - NFS
+###--- Views
 resource "vastdata_view" "nfs_views" {
   count      = var.num_views
   provider   = vastdata.GCPCluster
-  policy_id  = vastdata_view_policy.vpolicy1.id
+  policy_id  = vastdata_view_policy.nfs_default_policy.id
   path       = "/${var.path_name}${count.index + 1}"
   protocols  = var.protocols
   create_dir = var.create_dir
 }
 
-### - S3
-resource "vast_view" "s3_view" {
-  provider           = vastdata.GCPCluster
-  name               = var.s3_view_name
-  path               = var.s3_view_path
-  policy             = vastdata_s3_policy.s3policy.id
-  protocols          = var.s3_view_protocol
-  #tenant             = var.s3tenant
-  create_dir         = var.s3_view_create_dir
-  allow_s3_anonymous = var.s3_view_allow_s3_anonymous
+
+###===================================================================================###
+#   S3 Configuration
+###===================================================================================###
+
+###--- Policies
+
+resource "vastdata_view_policy" "s3_default_policy" {
+  provider                 = vastdata.GCPCluster
+  name                     = var.s3_default_policy_name
+  flavor                   = var.s3_flavor
+  s3_special_chars_support = var.s3_special_chars_support
+  
+  # Common values
+  use_auth_provider  = var.use_auth_provider
+  auth_source        = var.auth_source
+  access_flavor      = var.access_flavor
+  
+  # Required NFS squash/no-squash settings - will fail apply without these
+  nfs_no_squash     = var.nfs_no_squash
+  nfs_read_write    = var.nfs_read_write
+  nfs_read_only     = var.nfs_read_only
+  smb_read_write    = var.smb_read_write
+  smb_read_only     = var.smb_read_only
+  
+
+  vippool_permissions {
+    vippool_id          = vastdata_vip_pool.protocols.id
+    vippool_permissions = var.vippool_permissions
+  }
 }
 
 
-# ======================
+# This is a "user" policy!  It gets associated to a user.
+resource "vastdata_s3_policy" "s3policy_user_policy1" {
+  provider = vastdata.GCPCluster
+  name     = var.s3_user_policy_name
+  policy   = file("${path.module}/${var.s3_policy1_file}")
+  enabled  = true
+}
+
+###--- Views
+resource "vastdata_view" "s3_view" {
+  provider                  = vastdata.GCPCluster
+  policy_id                 = vastdata_view_policy.s3_default_policy.id
+  name                      = var.s3_view_name
+  bucket                    = var.s3_bucket_name
+  path                      = var.s3_view_path
+  protocols                 = var.s3_view_protocol
+  create_dir                = var.s3_view_create_dir
+  allow_s3_anonymous_access = var.s3_view_allow_s3_anonymous
+  bucket_owner              = var.s3_default_owner
+  #tenant                    = var.s3_default_tenant
+  
+  # Need a local user for owner
+  depends_on = [vastdata_user.users]
+  
+}
+
+
+###===================================================================================###
+#   Misc Custer Configuration
+###===================================================================================###
+
+#======================
 #  Create DNS Service
-# ======================
+#======================
 resource "vastdata_dns" "protocol_dns" {
   provider      = vastdata.GCPCluster
   name          = var.dns_name
