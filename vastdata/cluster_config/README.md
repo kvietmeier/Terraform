@@ -5,6 +5,7 @@ This repository contains Terraform configurations to automate the setup of a bas
 - VAST Provider and authentication
 - VIP Pools for `PROTOCOLS` and `REPLICATION`
 - NFS view policy and NFS views
+- S3 view policy and NFS views
 - DNS configuration
 - Basic multi-tenant setup with users and groups
 - Active Directory integration
@@ -90,6 +91,36 @@ Setting up DNS is a good example. It isn'tclear from hte documenbtration that yo
   ```
 
 ---
+
+### Gettingg Active Directory information for configuring the cluster
+
+Sometimes it can be difficult to get the exact information you need through GUIs or asking questions.  Fortunately there are a few PowerShell commands you can use.  
+
+You will need the AD PowerShell Modules but most AD domain conmtrollres should have them installed.  
+
+- Domain Information
+
+```powershell
+   PS C:\ > (Get-ADDomain).DistinguishedName
+   DC=ginaz,DC=org
+```
+
+- OUs for adding Servers
+
+
+  ```powershell
+     PS C:\ > Get-ADOrganizationalUnit -Filter * | Select-Object Name, DistinguishedName
+    
+    Name               DistinguishedName                    
+    ----               -----------------                    
+    Domain Controllers OU=Domain Controllers,DC=ginaz,DC=org
+    VAST               OU=VAST,DC=ginaz,DC=org              
+```
+
+
+
+
+
 
 
 ###  Key Resources
