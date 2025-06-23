@@ -92,11 +92,11 @@ Setting up DNS is a good example. It isn'tclear from hte documenbtration that yo
 
 ---
 
-### Gettingg Active Directory information for configuring the cluster
+### Getting Active Directory Information for Configuring a Cluster
 
-Sometimes it can be difficult to get the exact information you need through GUIs or asking questions.  Fortunately there are a few PowerShell commands you can use.  
+Sometimes it can be difficult to get the exact information you need through GUIs or asking questions. Fortunately there are a few PowerShell commands you can use.  
 
-You will need the AD PowerShell Modules but most AD domain conmtrollres should have them installed.  
+NOTE: You will need the AD PowerShell Modules but most AD domain controllers should have them installed.  
 
 - Domain Information
 
@@ -144,7 +144,7 @@ If you have access to the Domain Controllers or the customer is intersted, you c
      New-ADOrganizationalUnit -Name "VAST" -Path "DC=ginaz,DC=org"
   ```
 
-- Redirect new VAST Cludtyree to the OU when they are added:
+- Redirect new VAST Clusters you add to the OU:
 
   ```powershell
      redircmp "OU=VAST,DC=ginaz,DC=org"
