@@ -70,7 +70,7 @@ Setting up DNS is a good example. It isn'tclear from hte documenbtration that yo
     enabled       = var.dns_enabled
   }
   ```
-- In the VIP Pool resource it is confusing because the attribute you need to set is named incorrectly - it is called the "*domain_name*" when it is more correctly refered to as the "*short or host name*".  Not sure it is required but just in case I added a dependency on DNS being setup first:
+- In the VIP Pool resource it is confusing because the attribute you need to set is named incorrectly - it is called the "*domain_name*" when it is more correctly refered to as the "*short or host name*". *Not sure it is required but just in case I added a dependency on DNS being setup first*:
 
   ```hcl
   resource "vastdata_vip_pool" "protocols" {
@@ -89,6 +89,7 @@ Setting up DNS is a good example. It isn'tclear from hte documenbtration that yo
   }
   ```
 
+---
 
 
 ###  Key Resources
