@@ -52,6 +52,45 @@ Configure Active Directory integration to join the `ginaz.org` domain.
 
 ---
 
+### Examples:
+
+The online documentation doesn't have very good examples of things like DNS and setting up S3 and the LLMs do not have correct information on the Provider. As I figure out how to configure them I will try to put some examples here with explantions.
+
+Setting up DNS is a good example. It isn'tclear from hte documenbtration that you need to configure it in 2 places to get a complete implementation.  
+
+- In the DNS resource "*domain_suffix*" is the root domain of the FQDN or properly the "*domain name*":
+
+  ```hcl
+  resource "vastdata_dns" "protocol_dns" {
+    provider      = vastdata.GCPCluster
+    name          = var.dns_name
+    vip           = var.dns_vip
+    net_type      = var.port_type
+    domain_suffix = var.dns_domain_suffix
+    enabled       = var.dns_enabled
+  }
+  ```
+- in the VIP Pool resource it is confusing because the attribute you need to set is named incorrectly - it is called the "*domain_name*" when it is more ciorrectly called the "*short or host name*". Not sure it is required but just in case I added a dependency on DNS being setup first.:
+
+  ```hcl
+  resource "vastdata_vip_pool" "protocols" {
+  provider     = vastdata.GCPCluster
+  name         = var.vip1_name
+  domain_name  = var.dns_shortname
+  role         = var.role1
+  subnet_cidr  = var.cidr
+  gw_ip        = var.gw1
+  ip_ranges {
+        start_ip = var.vip1_startip
+        end_ip   = var.vip1_endip
+    }
+    
+  depends_on = [vastdata_dns.protocol_dns]
+  }
+  ```
+
+
+
 ###  Key Resources
 
 | Resource                              | Purpose                                           |
