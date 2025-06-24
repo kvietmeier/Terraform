@@ -15,7 +15,8 @@
 ###===================================================================================###
 
 
-/* #Create a tenant with the name tenent01 with client_ip_ranges
+/* 
+#Create a tenant with the name tenent01 with client_ip_ranges
 resource "vastdata_tenant" "tenant1" {
   provider     = vastdata.GCPCluster
   name         = var.tenant1_name

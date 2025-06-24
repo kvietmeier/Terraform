@@ -11,83 +11,75 @@
 # - NFS view policy configuration
 ###===================================================================================###
 
-
-# ------------------------------------------------------------------------------
 # Provider Configuration
-# ------------------------------------------------------------------------------
-
-vast_username                = "youruser"
-vast_password                = "yourpassword"
+vast_username                = "admin"
+vast_password                = "123456"
 vast_host                    = "vms"
 vast_port                    = "443"
 vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
 
-# ------------------------------------------------------------------------------
 # VIP Pool 1 Configuration
-# ------------------------------------------------------------------------------
-vip1_name      = "sharesPool"
-vip1_startip   = "33.20.1.11"
-vip1_endip     = "33.20.1.21"
-gw1            = "33.20.1.1"
-role1          = "PROTOCOLS"
+vip1_name     = "sharesPool"
+vip1_startip  = "33.20.1.11"
+vip1_endip    = "33.20.1.13"
+gw1           = "33.20.1.1"
+role1         = "PROTOCOLS"
+dns_shortname = "sharespool"
 
-# ------------------------------------------------------------------------------
 # VIP Pool 2 Configuration
-# ------------------------------------------------------------------------------
-vip2_name      = "targetPool"
-vip2_startip   = "33.21.1.11"
-vip2_endip     = "33.21.1.21"
-gw2            = "33.21.1.1"
-role2          = "REPLICATION"
+vip2_name     = "targetPool"
+vip2_startip  = "33.21.1.11"
+vip2_endip    = "33.21.1.13"
+gw2           = "33.21.1.1"
+role2         = "REPLICATION"
 
-# ------------------------------------------------------------------------------
 # Shared Network Settings
-# ------------------------------------------------------------------------------
+cidr = "24"
 
-cidr           = "24"
+# Common View Policy Settings
+flavor            = "MIXED_LAST_WINS"
+use_auth_provider = true
+auth_source       = "RPC_AND_PROVIDERS"
+access_flavor     = "ALL"
 
-# ------------------------------------------------------------------------------
 # NFS View Policy Settings
-# ------------------------------------------------------------------------------
+nfs_default_policy_name = "nfs-view-policy"
+nfs_no_squash           = ["0.0.0.0/0"]
+nfs_read_write          = ["0.0.0.0/0"]
+nfs_read_only           = []
+smb_read_write          = []
+smb_read_only           = []
+vippool_permissions     = "RW"
 
-policy_name         = "nfs-view-policy"
-flavor              = "MIXED_LAST_WINS"
-use_auth_provider   = true
-auth_source         = "RPC_AND_PROVIDERS"
-access_flavor       = "ALL"
-nfs_no_squash       = ["0.0.0.0/0"]
-nfs_read_write      = ["0.0.0.0/0"]
-nfs_read_only       = []
-smb_read_write      = []
-smb_read_only       = []
-vippool_permissions = "RW"
-
-
-# ------------------------------------------------------------------------------
 # NFS View Settings
-# ------------------------------------------------------------------------------
-num_views         = 11
-path_name         = "nfs_share_"
-protocols         = ["NFS"]
-create_dir        = true
+num_views   = 3
+path_name   = "nfs_share_"
+protocols   = ["NFS"]
+create_dir  = true
 
+# S3 View Policy
+s3_policy1_file            = "s3Policy1.json"
+s3_default_policy_name     = "DefaultS3Policy"
+s3_flavor                  = "S3_NATIVE"
+s3_special_chars_support   = true
 
-# ------------------------------------------------------------------------------
+# S3 View Settings
+s3_view_name     = "s3bucket01"
+s3_view_path     = "/s3bucket01"
+s3_bucket_name   = "bucket01"
+s3_view_protocol = ["S3"]
+s3_enable        = true
+s3_default_owner = "s3user1"
+
 # DNS Settings
-# ------------------------------------------------------------------------------
 dns_name          = "vastdns"
-dns_vip           = "172.1.4.15"
+dns_vip           = "172.1.4.110"
 port_type         = "NORTH_PORT"
 dns_domain_suffix = "busab.org"
 dns_enabled       = true
-#vip_gateway       = "172.1.4.1"
 
-
-# ------------------------------------------------------------------------------
-# User/Tenant Settings
-# ------------------------------------------------------------------------------
-
+# Tenants
 tenants = [
   {
     name             = "sardukar"
@@ -103,12 +95,14 @@ tenants = [
   }
 ]
 
+# Groups
 groups = [
-  { name = "s3users", gid  = 1000 },
+  { name = "s3users",  gid = 1000 },
   { name = "nfsusers", gid = 1100 },
   { name = "allusers", gid = 1200 }
 ]
 
+# Users
 users = [
   {
     name                 = "nfsuser1"
@@ -123,3 +117,16 @@ users = [
     supplementary_groups = ["allusers", "nfsusers"]
   }
 ]
+
+# Active Directory
+ou_name    = "voc-cluster01"
+ad_ou      = "OU=VAST,DC=ginaz,DC=org "
+bind_dn    = "CN=Administrator,CN=Users,DC=ginaz,DC=org"
+bindpw     = "Chalc0pyr1te!123"
+ad_domain  = "ginaz.org"
+method     = "simple"
+query_mode = "COMPATIBLE"
+use_ad     = false
+use_tls    = false
+ldap       = false
+ldap_urls  = ["ldap://172.20.16.3"]
