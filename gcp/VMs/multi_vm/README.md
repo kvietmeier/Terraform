@@ -34,7 +34,7 @@ network_ip = cidrhost(
   data.google_compute_subnetwork.my_subnet.ip_cidr_range,
   var.ip_start_offset + index(local.vm_names, each.value)
 )
-
+```
 
 ### Explanation of Static IP Assignment with `cidrhost()`
 
@@ -45,11 +45,9 @@ network_ip = cidrhost(
 | `var.ip_start_offset`                                    | The starting offset within the subnet to assign IPs (e.g., 90 means starting at `.90`)    |
 | `index(local.vm_names, each.value)`                      | Finds the position (0-based index) of the current VM name in the `vm_names` list          |
 | `var.ip_start_offset + index(...)`                       | Adds the index to the starting offset to get the host number for the IP                   |
-| `cidrhost(...)`                                i         | Combines the subnet and calculated host number to return the final static IP address      |
+| `cidrhost(...)`                                          | Combines the subnet and calculated host number to return the final static IP address      |
 
----
-
-### Example
+#### Eample Results - 
 
 Assuming:
 
