@@ -1,6 +1,7 @@
 ### Core GCP Infrastructutre Folders
 
-This is fully functional production code to maintain core services and VMs.
+This is fully functional production code to maintain core services and VMs.  
+They could be combined to fully configure a Project.  
 
 * Infrastructure created/maintained
 
@@ -14,12 +15,18 @@ This is fully functional production code to maintain core services and VMs.
   │
   ├───nat_gw
   │
+  ├───DNS
+  │   ├───AD-Forwarder
+  │   └───Forwarder
+  │   └───Managed
+  │
   ├───vms
   │   ├───ad_server
   │   └───linux_vm
   │ 
   └───vpcs
       ├───core
+      ├───spoke1
       └───testvpc01
 
 ```shell

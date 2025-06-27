@@ -1,0 +1,70 @@
+{
+  "vms": {
+    "linux01": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 91
+    },
+    "linux02": {
+      "machine_type": "e2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 92
+    },
+    "linux03": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 93
+    },
+    "linux04": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 94
+    },
+    "linux05": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 95
+    },
+    "linux06": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 96
+    },
+    "linux07": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 97
+    },
+    "linux08": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 98
+    },
+    "linux09": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 99
+    },
+    "linux10": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 100
+    },
+    "linux11": {
+      "machine_type": "n2-standard-8",
+      "bootdisk_size": "100",
+      "os_image": "rocky-linux-9-v20250212",
+      "ip_octet": 101
+    }
+  }
+}

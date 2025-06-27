@@ -1,14 +1,25 @@
 ###===================================================================================###
 #
-#  File:  multi.main.tf
-#  Created By: Karl Vietmeier
+#  File:        multi.main.tf
+#  Created By:  Karl Vietmeier
 #
-#  Terraform Module Code
-#  Purpose:  Create multiple identical VMs from a simple list
-#  vm_names             = ["linux01", "linux02", "linux03"]
-# 
+#  Description: 
+#    This Terraform configuration dynamically provisions multiple Google Cloud VMs 
+#    with consistent naming (e.g., linux01, linux02, ...) and assigns each instance 
+#    a static private IP address within a subnet using a configurable starting offset. 
+#    The static IPs are calculated using cidrhost() and the VM index.
+#
+#  Inputs:
+#    - vm_count:         Number of VMs to create
+#    - vm_base_name:     Base name used for VM instances
+#    - ip_start_offset:  Starting IP host offset within the subnet
+#
+#  Behavior:
+#    - VM names are auto-generated using the base name and a 2-digit suffix
+#    - Static IPs are assigned incrementally from the starting offset
+#    - Cloud-init is used for OS configuration at startup
+#
 ###===================================================================================###
-
 
 ###===================================================================================###
 ###                  Start creating infrastructure resources                          ###
@@ -28,12 +39,12 @@ data "cloudinit_config" "system_setup" {
 
 # Google Cloud VM instance with public IP
 resource "google_compute_instance" "vm_instance" {
+  for_each     = toset(local.vm_names)
+  name         = each.value
+  
   zone         = var.zone             # Use the zone variable
   machine_type = var.machine_type     # Use the machine_type variable
   
-  for_each     = toset(var.vm_names)
-  name         = each.value
-
   boot_disk {
     initialize_params {
       image    = var.os_image  # Replace with your preferred image
@@ -48,12 +59,10 @@ resource "google_compute_instance" "vm_instance" {
 
   # Configure the network interface with the specified private and public IPs
   network_interface {
-    subnetwork    = var.subnet_name
-    #network_ip    = google_compute_address.my_private_ip.address  # Specified static private IP
-
-    #access_config {                         # Enables a public IP address
-    #  nat_ip = google_compute_address.my_public_ip.address       # Specified static public IP
-    #}
+    subnetwork = var.subnet_name
+    network_ip = cidrhost(
+      data.google_compute_subnetwork.my_subnet.ip_cidr_range,
+      var.ip_start_offset + index (local.vm_names, each.value)) 
   }
 
   metadata = {
@@ -72,6 +81,8 @@ resource "google_compute_instance" "vm_instance" {
 
   #tags = ["kv-linux", "kv-infra"]
 }
+### END VM Resource
+
 
 output "vm_private_ips" {
   value = [for vm in google_compute_instance.vm_instance : vm.network_interface[0].network_ip]
