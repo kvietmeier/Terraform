@@ -23,9 +23,9 @@ The static IPs are calculated using `cidrhost()` and the VM index.
 
 ---
 
-## Examples
+### Examples
 
-### Static IP Assignment with `cidrhost()`
+#### Static IP Assignment with `cidrhost()`
 
 This configuration dynamically assigns static private IP addresses to VMs based on their position in a generated list of names. The key line is:
 
@@ -36,7 +36,7 @@ network_ip = cidrhost(
 )
 ```
 
-### Explanation of Static IP Assignment with `cidrhost()`
+#### Explanation of Static IP Assignment with `cidrhost()`
 
 | Expression                                               | Purpose                                                                                   |
 |----------------------------------------------------------|-------------------------------------------------------------------------------------------|
@@ -47,9 +47,9 @@ network_ip = cidrhost(
 | `var.ip_start_offset + index(...)`                       | Adds the index to the starting offset to get the host number for the IP                   |
 | `cidrhost(...)`                                          | Combines the subnet and calculated host number to return the final static IP address      |
 
-#### Eample Results - 
+#### Eample Results -
 
-Assuming:
+**Assuming:**
 
 | Variable          | Value                               |
 |-------------------|-------------------------------------|
@@ -57,7 +57,7 @@ Assuming:
 | `ip_start_offset` | `90`                                |
 | `subnet CIDR`     | `"10.1.4.0/24"`                     |
 
-The assigned IP addresses will be:
+**The assigned IP addresses will be:**
 
 | VM Name   | Index  | Host Offset | Assigned IP  |
 |-----------|--------|-------------|--------------|
