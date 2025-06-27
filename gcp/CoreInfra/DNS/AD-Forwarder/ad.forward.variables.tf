@@ -3,12 +3,13 @@
 #  File:  forwarder.variables.tf
 #  Created By: Karl Vietmeier
 #
-#  Variable definitions with defaults
+#   This file defines all required input variables for deploying a DNS forwarding zone
+#   in Google Cloud, typically used to forward queries to an external DNS server such
+#   as an Active Directory DNS on a VAST cluster.
 #
 ###===================================================================================###
 
-# variables.tf
-###--- Provider Info
+###--- GCP Provider Configuration
 variable "region" {
   description = "Region to deploy resources"
 }
@@ -22,6 +23,7 @@ variable "project_id" {
   type        = string
 }
 
+###--- DNS Zone Configuration
 variable "dns_name" {
   description = "The DNS name for the managed zone."
   type        = string

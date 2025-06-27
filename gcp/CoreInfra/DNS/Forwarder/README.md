@@ -1,34 +1,26 @@
-### Create a Private DNS Forwarding Domain
+### GCP DNS Forwarding Zone for a VAST Data Cluster
 
-Creates a private DNS domain with at least one NS record pointing to a target DNS server.
-
-I'm using this to maintain DNS records for VAST VMS VIP Pools.
+Provisions a **Cloud DNS private forwarding zone** in **Google Cloud Platform (GCP)**. It's used to forward DNS queries for a **VAST Data Cluster** domain (e.g., `vastdata.com.`).
 
 ---
 
 #### Notes
 
-Put Notes Here
+- [GCP: Private DNS Zones](https://cloud.google.com/dns/docs/zones#private)
+
+#### Requirements
+
+- Google Cloud Project with DNS API enabled
+- Appropriate IAM permissions to create Cloud DNS zones
+- Terraform v1.3+ and Google provider configured
+- DNS confiogured on a VAST Cluster
 
 ---
 
-#### My code is Built With
-
-* [Visual Studio Code](https://code.visualstudio.com/) - Editor
-* [Terraform](https://www.terraform.io/) - Terraform
-
-#### All run under PowerShell on Windows 11
-
-* [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
-
 #### Author/s
 
-* **Karl Vietmeier**
+- **Karl Vietmeier**
 
 #### License
 
 This project is licensed under the Apache License - see the [LICENSE.md](LICENSE.md) file for details
-
-#### Acknowledgments
-
-* None so far other than the many good examples out there.

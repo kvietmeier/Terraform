@@ -1,9 +1,14 @@
 ###===================================================================================###
 #
 #  Created By: Karl Vietmeier
+#  Purpose:      Create DNS forwarding zone for Active Directory domain
+#  Description:  This configuration sets up a Cloud DNS forwarding zone in GCP to
+#                route DNS queries for an Active Directory domain to a specified
+#                on-prem or cloud DNS resolver.
 #
-#  Terraform Module Code
-#  Purpose: Create and modify a Private DNS Zone in GCP for Active Directory
+#  Notes:
+#    - The `fw_target` is the IP of the DNS server to which queries should be forwarded.
+#    - The zone must be private and attached to one or more VPC networks.
 #
 ###===================================================================================###
 

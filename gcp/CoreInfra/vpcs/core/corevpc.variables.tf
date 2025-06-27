@@ -1,5 +1,13 @@
+###========================================================================================###
+##  Variable Definitions for VPC Infrastructure Deployment
+##
+##  - Defines input variables for region, zone, project ID, and VPC settings
+##  - Includes subnet configuration with optional IPv6 and secondary ranges
+##  - Specifies regions where Cloud NAT should be enabled
+##
+##  These variables are used across modules to provision a custom network topology.
+###========================================================================================###
 
-# Define Variables
 ###--- Provider Info
 variable "region" {
   description = "Region to deploy resources"
@@ -13,6 +21,7 @@ variable "project_id" {
   description = "GCP Project ID"
 }
 
+# --- VPC Settings ---
 variable "default_region" {
   description = "Default region"
   type        = string
@@ -25,6 +34,15 @@ variable "vpc_name" {
   default     = "custom-vpc"
 }
 
+# --- Subnet Definitions ---
+/* 
+List of subnet definitions. Each entry includes:
+- name: Subnet name
+- region: GCP region
+- ip_cidr_range: Primary IPv4 CIDR block
+- ipv6_cidr_range (optional): IPv6 block (for dual-stack subnets)
+- secondary_ip_ranges (optional): Additional named secondary CIDR blocks (e.g., for services)
+*/
 variable "subnets" {
   description = "List of subnets with name, region, CIDR, and secondary cidr ranges"
   type = list(object({
@@ -39,6 +57,7 @@ variable "subnets" {
   }))
 }
 
+# --- Cloud NAT Configuration ---
 variable "nat_enabled_regions" {
   description = "List of regions to deploy Cloud NAT"
   type        = list(string)

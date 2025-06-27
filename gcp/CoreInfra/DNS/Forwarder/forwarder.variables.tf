@@ -22,6 +22,7 @@ variable "project_id" {
   type        = string
 }
 
+###--- Forwarder Config 
 variable "dns_name" {
   description = "The DNS name for the managed zone."
   type        = string

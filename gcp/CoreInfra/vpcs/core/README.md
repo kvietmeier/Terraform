@@ -1,12 +1,14 @@
-# Custom VPC Infrastructure with NAT Gateways and Cloud Routers
+## Custom VPC Infrastructure with NAT Gateways and Cloud Routers
 
 This Terraform module provisions a custom Virtual Private Cloud (VPC) in Google Cloud Platform (GCP) with the following components:
 
-- Custom VPC with manual subnet creation
-- Subnets (with support for secondary IP ranges and IPv6)
-- Private Service Access for services like Cloud SQL and Memorystore
-- Cloud Routers and Cloud NAT for internet access from private subnets
-- Service Networking API enablement and peering
+- A named custom VPC with manual subnet creation
+- Subnets across multiple GCP regions
+- Optional secondary IP ranges (e.g., for services like GKE or VAST)
+- IPv6 dual-stack support (where enabled)
+- Private Google access on all subnets
+- Cloud Routers and Cloud NAT (in user-specified regions)
+- VPC Peering for Private Service Access (used by Cloud SQL, Memorystore, etc.)
 
 ---
 
@@ -15,22 +17,31 @@ This Terraform module provisions a custom Virtual Private Cloud (VPC) in Google 
 Dynamically creates subnets from var.subnets.
 Supports:
 
-- private_ip_google_access = true
-- Optional secondary IP ranges
-- Optional dual-stack (IPv4/IPv6) based on name matching
+- region: GCP region
+- name: Subnet name
+- private_ip_google_access: true/false
+- ip_cidr_range: Primary IPv4 CIDR block
+- ipv6_cidr_range (optional): IPv6 block (for dual-stack subnets)
+- secondary_ip_ranges (optional): Additional named secondary CIDR blocks (e.g., for services)
+
+### Requirements
+
+- Terraform ≥ 1.4
+- Google Cloud Provider ≥ 5.9
+- Enabled APIs: compute.googleapis.com, servicenetworking.googleapis.com
 
 ---
 
 **Author:** Karl Vietmeier  
-**Purpose:** Configure custom VPC infrastructure with support for NAT Gateways, Cloud Routers, and Service Networking.
 
 ---
 
-## 🚀 Usage
+### Usage
 
 Run the following Terraform commands with your custom variable file:
 
 ```bash
-terraform plan -var-file=".\fw.terraform.tfvars"
-terraform apply --auto-approve -var-file=".\fw.terraform.tfvars"
-terraform destroy --auto-approve -var-file=".\fw.terraform.tfvars"
+terraform plan -var-file=".\corevpc.terraform.tfvars"
+terraform apply --auto-approve -var-file=".\corevpc.terraform.tfvars"
+terraform destroy --auto-approve -var-file=".\corevpc.terraform.tfvars"
+```

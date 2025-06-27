@@ -2,11 +2,21 @@
 #
 #  Created By: Karl Vietmeier
 #
-#  Terraform Module Code
-#  Purpose: Create and modify a Private DNS Zone in GCP 
+#  GCP Private DNS Forwarding Zone for VAST Data Cluster
+#
+#  Description:
+#    Provisions a private DNS managed zone in Google Cloud and
+#    configures it to forward DNS queries to a VAST Data cluster or other
+#    external DNS resolver.
+#
+#    - Enables private DNS resolution across specified VPC networks
+#    - Uses Cloud DNS forwarding to route queries to a specified target server
+#
+#  Use Case:
+#    Integrating GCP-based workloads with DNS services provided by a VAST Data
+#    cluster, enabling name resolution for applications that rely on external DNS.
 #
 ###===================================================================================###
-
 
 ###===================================================================================###
 #                                 Provider Configuration
