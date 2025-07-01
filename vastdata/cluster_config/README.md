@@ -148,7 +148,8 @@ The sequemce of PowerShell commands below will extract this in a usable form fro
       CN=Administrator,CN=Users,DC=ginaz,DC=org
   ```
 
-If you have access to the Domain Controllers or the customer is interested, you can add a new OU for VAST clusters.  
+**For Extra Credit**  
+If you have access to the Domain Controllers (Lab) or the customer is interested, you can add a new OU for VAST clusters.  
 
 - Create a new OU with a different name (VAST):
 
