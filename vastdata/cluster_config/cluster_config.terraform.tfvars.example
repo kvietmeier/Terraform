@@ -1,14 +1,29 @@
 ###===================================================================================###
-# VAST Data VIP Pools and NFS View Configuration
-# --role: PROTOCOLS | REPLICATION | VAST_CATALOG
+# VAST Data – Configuration Settings for VIP Pools, NFS/S3 Views, DNS, and Identity
 #
-# This file defines:
-# - VAST provider connection settings
+# Description:
+# This `.tfvars` file provides input values for deploying a VAST Data cluster 
+# in a demo or proof-of-concept environment. It configures critical settings for:
+#
 # - Two VIP Pools:
 #     - sharesPool (role: PROTOCOLS)
 #     - targetPool (role: REPLICATION)
-# - Shared network settings
-# - NFS view policy configuration
+# - NFS and S3 view policy and export configuration
+# - POSIX-style tenant, user, and group definitions
+# - DNS configuration (including VIP and domain settings)
+# - Active Directory integration (disabled by default in this file)
+#
+# Highlights:
+# - Creates 3 NFS views with full read-write/no-squash access
+# - Defines one S3 view with default policy and ownership
+# - Users are assigned with leading and supplementary GIDs
+# - All IPs are open by default for simplified testing
+# - AD join is configured but disabled; LDAP URL is statically defined
+#
+# Warning:
+# - Credentials (e.g., bindpw, vast_password) are included in clear text for testing
+#   and should **not** be used in production environments.
+# - This file should be secured or excluded from version control if used beyond PoC.
 ###===================================================================================###
 
 # Provider Configuration
