@@ -1,4 +1,7 @@
-### Using the VAST Data Provider
+### VAST Data – Terraform Automation for Demo/POC Deployments
+
+> ⚠️ **Note:** This setup is not intended for production use. It includes default credentials, wide-open access ranges, and optional TLS/AD security disabled for simplified testing. Always review and harden configurations before applying to live environments.
+
 
 ---
 #### Docs
@@ -9,22 +12,28 @@
 
 ---
 
-#### Configurations
+#### Configuring a Cluster
 
-setup1:  Using the VAST Data provider to setup a View with an existing VIP Pool.
+**The configurations include (cluster_config):**
 
-```text
-.
-├── README.md
-└── setup1
-    ├── main.tf
-    ├── provider.tf
-    ├── terraform.tfvars
-    └── variables.tf
-```
+- VAST provider setup
+- VIP Pool definitions for protocol and replication roles
+- NFS and S3 view policies and exports
+- DNS service configuration
+- Active Directory integration options
+- POSIX-style tenants, users, and group definitions
+
+**Features**
+
+- Modular and reusable design for rapid iteration
+- Clear separation of configuration (`.tfvars`), logic (`main.tf`), and variables
+- Supports multi-protocol (NFS/S3) configurations
+- Uses dynamic constructs (e.g., maps, `count`, `for_each`) for scalability
+- Compatible with VAST provider v1.6.8+
+
 
 ---
-#### Notes
+#### Misc Notes
 
 Example: Use existing VIP Pool for resources like Views.
 
