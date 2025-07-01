@@ -31,6 +31,8 @@
 - Uses dynamic constructs (e.g., maps, `count`, `for_each`) for scalability
 - Compatible with VAST provider v1.6.8+
 
+---
+
 - **NOTE: For a quick test of authentication use the config in `testapply`, it validates credentials and grabs some basic metadata.**
 
 ---
