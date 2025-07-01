@@ -1,37 +1,33 @@
 ###===================================================================================###
 #
-#  File:  dns1.terraform.tfvars
-#  Created By: Karl Vietmeier
+#  File:         ad_forwarding.terraform.tfvars
+#  Purpose:      Create DNS forwarding zone for Active Directory domain
+#  Description:  This configuration sets up a Cloud DNS forwarding zone in GCP to
+#                route DNS queries for an Active Directory domain to a specified
+#                on-prem or cloud DNS resolver.
 #
-#  This creates A records for a reserved CIDR in GCP for VAST VIP addresses
+#  Notes:
+#    - The `fw_target` is the IP of the DNS server to which queries should be forwarded.
+#    - The zone must be private and attached to one or more VPC networks.
+#
+#  Author:  Karl Vietmeier
 #
 ###===================================================================================###
 
-# terraform.tfvars
-project_id      = "your-project-id"
-region          = "us-west3"
-zone            = "us-west3-a"
+# GCP project and region info
+project_id     = "your-gcp-project-id"
+region         = "your-region"
+zone           = "your-zone"
 
-dns_name   = "your-domain.com."
-description = "VIP Pool IPs"
+# DNS forwarding zone configuration
+name           = "ad-forwarding-domain"
+dns_name       = "example.ad."             # Replace with your AD DNS domain
+description    = "Forward AD DNS Queries to on-prem DNS"
 
+# Target DNS server for forwarding
+fw_target      = "10.0.0.53"               # Replace with actual on-prem/cloud DNS IP
+
+# VPC networks associated with the forwarding zone
 networks = [
-  "default",
-  "your-vpc-name"
+  "core-vpc"                              # Replace with actual network name(s)
 ]
-
-a_records = {
-  "protocolvip1"   = ["your-ip-address"],
-  "protocolvip2"   = ["your-ip-address"],
-  "protocolvip3"   = ["your-ip-address"],
-  "repvip1"        = ["your-ip-address"],
-  "repvip2"        = ["your-ip-address"],
-  "repvip3"        = ["your-ip-address"],
-  "repvip4"        = ["your-ip-address"],
-  "vastdata1" = [
-    "Use IPs from the list above",
-    "Use IPs from the list above",
-    "Use IPs from the list above",
-    "Use IPs from the list above"
-  ]
-}

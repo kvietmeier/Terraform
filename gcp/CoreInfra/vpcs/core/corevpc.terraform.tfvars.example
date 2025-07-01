@@ -1,7 +1,13 @@
-# ========================
-# This configuration has been sanitized to remove sensitive information.
-# Replace placeholders (e.g., <your-project-id>, <your-region>) with actual values.
-# ========================
+##========================================================================================###
+##  Subnet and NAT Configuration Variables
+##
+##  - Defines subnet CIDR blocks across multiple global regions
+##  - Specifies regions where Cloud NAT Gateways will be deployed
+##  - Sets project-level information and ingress IP filtering rules
+##
+##  NOTE: This sanitized version uses placeholder values. Replace them with actual data
+##        before applying. This is the only file intended for customization.
+##========================================================================================###
 
 # Project Info
 project_id      = "<your-project-id>"
@@ -55,7 +61,6 @@ nat_enabled_regions = [
 ]
 
 ingress_filter = [
-  "47.144.111.57",     # My ISP Address
   "35.191.0.0/16",     # GCP health checks
   "130.211.0.0/22",    # GCP health checks
   "192.168.0.0/16",    # Docker

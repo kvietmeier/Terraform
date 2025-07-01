@@ -1,37 +1,29 @@
 ###===================================================================================###
 #
-#  File:  dns1.terraform.tfvars
-#  Created By: Karl Vietmeier
+#  File:         forwarding_zone.tfvars
+#  Purpose:      Configure a GCP Private DNS Forwarding Zone
+#  Description:  Forwards DNS queries to a VAST Data cluster DNS endpoint using 
+#                a reserved VIP address in GCP.
 #
-#  This creates A records for a reserved CIDR in GCP for VAST VIP addresses
+#  Author:       Karl Vietmeier
 #
 ###===================================================================================###
 
-# terraform.tfvars
-project_id      = "your-project-id"
-region          = "us-west3"
-zone            = "us-west3-a"
+# GCP project and deployment location
+project_id     = "your-gcp-project-id"
+region         = "us-west3"
+zone           = "us-west3-a"
 
-dns_name   = "your-domain.com."
-description = "VIP Pool IPs"
+# DNS forwarding zone configuration
+name           = "forwarding-domain"
+dns_name       = "example.org."            # Must be a fully-qualified domain (ends with a dot)
+description    = "Forward to VAST DNS VIP"
 
+# DNS forwarding configuration
+vastcluser_dns  = "172.1.4.110"            # IP of the DNS server on the VAST cluster
+forwarding_path = "private"                # "default" or "private" per GCP DNS spec
+
+# VPC networks with access to this DNS zone
 networks = [
-  "default",
-  "your-vpc-name"
+  "core-vpc"
 ]
-
-a_records = {
-  "protocolvip1"   = ["your-ip-address"],
-  "protocolvip2"   = ["your-ip-address"],
-  "protocolvip3"   = ["your-ip-address"],
-  "repvip1"        = ["your-ip-address"],
-  "repvip2"        = ["your-ip-address"],
-  "repvip3"        = ["your-ip-address"],
-  "repvip4"        = ["your-ip-address"],
-  "vastdata1" = [
-    "Use IPs from the list above",
-    "Use IPs from the list above",
-    "Use IPs from the list above",
-    "Use IPs from the list above"
-  ]
-}

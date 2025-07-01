@@ -1,20 +1,15 @@
 ###===================================================================================###
+#  VPC Infrastructure Configuration
 #
-#  File:  vpc.main.tf
-#  Created By: Karl Vietmeier
+#  - Creates a custom VPC with subnets and secondary IP ranges
+#  - Enables IPv6 support where applicable
+#  - Sets up Private Service Access for Google-managed services
+#  - Deploys Cloud Routers and NAT Gateways in specified regions
+#  - Establishes VPC peering with the Service Networking API
 #
-#  Purpose:   Configure custom VPC with subnets, NAT GW, and Cloud Routers
-# 
+#  NOTE: Only the associated *.tfvars file should be modified to customize this setup.
 ###===================================================================================###
 
-/* 
-  
-Usage:
-terraform plan -var-file=".\fw.terraform.tfvars"
-terraform apply --auto-approve -var-file=".\fw.terraform.tfvars"
-terraform destroy --auto-approve -var-file=".\fw.terraform.tfvars"
-
-*/
 
 ###===================================================================================###
 #                                  Provider Configuration

@@ -7,6 +7,11 @@
 #
 ###===================================================================================###
 
+data "google_compute_subnetwork" "my_subnet" {
+  name    = var.subnet_name
+  region  = var.region
+}
+
 # Project ID
 variable "project_id" {
   description = "The GCP project ID"
@@ -36,16 +41,24 @@ variable "service_account" {
   })
 }
 
+# VM instance count
+variable "vm_count" {
+  description = "Number of VMs to create"
+  type    = string
+}
+
+# Base name for VMs
+variable "vm_base_name" {
+  type        = string
+  description = "Base name for VM instances"
+  default     = "linux"
+}
+
 # Machine type for the VM
 variable "machine_type" {
   description = "The machine type for the VM"
   type        = string
   default     = "e2-medium"
-}
-
-# VM instance names
-variable "vm_names" {
-  type    = list(string)
 }
 
 variable "os_image" {
@@ -93,6 +106,11 @@ variable "subnet_name" {
   default     = "default"
 }
 
+variable "ip_start_offset" {
+  type        = number
+  description = "Offset to start IP assignments within the subnet"
+  default     = 20
+}
 
 ###=================          Locals                ==================###
 locals {
@@ -101,4 +119,8 @@ locals {
   
   # cloud-init file
   cloudinit_config  = file(var.cloudinit_configfile)
+
+  # Create the list of vm names
+  vm_names = [for i in range(var.vm_count) : format("%s%02d", var.vm_base_name, i + 1)]
+
 }
