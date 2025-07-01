@@ -97,7 +97,18 @@ Setting up DNS is a good example. It isn't immediately clear from the documentat
 
 Sometimes it can be difficult to get the exact information you need through GUIs or asking questions. Fortunately there are a few PowerShell commands you can use.  
 
-NOTE: You will need the AD PowerShell Modules but most AD domain controllers should have them installed, and run in an Admin console.  
+You need:
+
+```hcl
+ou_name         = "voc-cluster01"
+ad_ou           = "OU=VAST,DC=ginaz,DC=org "
+bind_dn         = "CN=Administrator,CN=Users,DC=ginaz,DC=org"
+bindpw          = "Chalc0pyr1te!123"
+ad_domain       = "ginaz.org"
+```
+
+The sequemce of PowerShell commands below will extract this in a usable form from a Domain Controller.   
+**NOTE:** You will need the AD PowerShell Modules but most AD domain controllers should have them installed, and run in an Admin console.  
 
 - Domain Information
 
