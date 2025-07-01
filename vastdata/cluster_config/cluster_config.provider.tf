@@ -1,16 +1,10 @@
 ###===================================================================================###
-# VAST Data VIP Pools and NFS View Configuration
-# --role: PROTOCOLS | REPLICATION | VAST_CATALOG
+# VAST Data – Terraform Provider Configuration
 #
-# This file defines:
-# - VAST provider connection settings
-# - Two VIP Pools:
-#     - sharesPool (role: PROTOCOLS)
-#     - targetPool (role: REPLICATION)
-# - Shared network settings
-# - NFS view policy configuration
+# Sets up the VAST provider (v1.6.8) with GCP cluster connection settings.
+# Uses input variables for credentials, host info, and SSL options.
+# Alias: GCPCluster
 ###===================================================================================###
-
 
 terraform {
   required_providers {

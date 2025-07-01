@@ -1,17 +1,32 @@
 ###===================================================================================###
-# VAST Data Cluser basic setup for demo/POC
+# VAST Data – Cluster Resource Deployment for Demo/POC
+#
+# Description:
+# This Terraform `main.tf` file provisions core VAST Data resources on a GCP cluster,
+# enabling functional evaluation or proof-of-concept deployments. It defines:
+#
+# - VIP Pool creation:
+#     - `sharesPool` for protocol services (role: PROTOCOLS)
+#     - `targetPool` for replication (role: REPLICATION)
+# - NFS view policy and export path configuration
+# - S3-compatible view and bucket configuration
+# - Policy-based access controls (NFS and S3)
+# - DNS service setup for protocol-based VIP resolution
+#
+# Features:
+# - Uses modular variable input from `.tfvars` or external sources
+# - Generates multiple NFS views dynamically via `count`
+# - Supports named S3 views with user-level bucket ownership
+# - Builds view policies with permission assignment per VIP Pool
 #
 # Notes:
-# --role: PROTOCOLS | REPLICATION | VAST_CATALOG
+# - Active Directory and tenant/user provisioning are defined in separate files
+# - View policies require NFS/SMB ACLs even for S3-only deployments
+# - `depends_on` ensures proper resource ordering for VIP and DNS services
 #
-# This file defines:
-# - VAST provider connection settings
-# - Two VIP Pools:
-#     - sharesPool (role: PROTOCOLS)
-#     - targetPool (role: REPLICATION)
-# - Shared network settings
-# - NFS view policy configuration
-# - DNS
+# Required:
+# - Valid `vastdata.GCPCluster` provider configuration must be declared separately
+# - Input variable definitions must match those referenced here
 ###===================================================================================###
 
 ###===================================================================================###
