@@ -57,7 +57,8 @@ Configure Active Directory integration to join the `ginaz.org` domain.
 
 The online documentation doesn't have very good examples of things like DNS and setting up S3 and the LLMs do not have correct information on the Provider. As I figure out how to configure them I will try to put some examples here with explantions.
 
-Setting up DNS is a good example. It isn'tclear from hte documenbtration that you need to configure it in 2 places to get a complete implementation.  
+#### DNS
+Setting up DNS is a good example. It isn't immediately clear from the documentation that you need to configure it in 2 places to get a complete implementation.  
 
 - In the DNS resource "*domain_suffix*" is the root domain of the FQDN or properly the "*domain name*":
 
@@ -71,7 +72,7 @@ Setting up DNS is a good example. It isn'tclear from hte documenbtration that yo
     enabled       = var.dns_enabled
   }
   ```
-- In the VIP Pool resource it is confusing because the attribute you need to set is named incorrectly - it is called the "*domain_name*" when it is more correctly refered to as the "*short or host name*". *Not sure it is required but just in case I added a dependency on DNS being setup first*:
+- In the VIP Pool resource it can be confusing because the attribute you need to set is named incorrectly - it is called the "*domain_name*" when it is more correctly refered to as the "*short, or host name*". *Not sure it is required but just in case I added a dependency on DNS being setup first*:
 
   ```hcl
   resource "vastdata_vip_pool" "protocols" {
@@ -96,7 +97,18 @@ Setting up DNS is a good example. It isn'tclear from hte documenbtration that yo
 
 Sometimes it can be difficult to get the exact information you need through GUIs or asking questions. Fortunately there are a few PowerShell commands you can use.  
 
-NOTE: You will need the AD PowerShell Modules but most AD domain controllers should have them installed.  
+You need:
+
+```hcl
+ou_name         = "voc-cluster01"
+ad_ou           = "OU=VAST,DC=ginaz,DC=org "
+bind_dn         = "CN=Administrator,CN=Users,DC=ginaz,DC=org"
+bindpw          = "Chalc0pyr1te!123"
+ad_domain       = "ginaz.org"
+```
+
+The sequemce of PowerShell commands below will extract this in a usable form from a Domain Controller.   
+**NOTE:** You will need the AD PowerShell Modules but most AD domain controllers should have them installed, and run in an Admin console.  
 
 - Domain Information
 
@@ -136,7 +148,8 @@ NOTE: You will need the AD PowerShell Modules but most AD domain controllers sho
       CN=Administrator,CN=Users,DC=ginaz,DC=org
   ```
 
-If you have access to the Domain Controllers or the customer is intersted, you can add a new OU for VAST clusters.  
+**For Extra Credit**  
+If you have access to the Domain Controllers (Lab) or the customer is interested, you can add a new OU for VAST clusters.  
 
 - Create a new OU with a different name (VAST):
 
@@ -186,4 +199,4 @@ This project is licensed under the Apache License - see the [LICENSE.md](../../L
 
 #### Acknowledgments
 
-* None so far
+* Josh Wentzel for getting me started down this path.

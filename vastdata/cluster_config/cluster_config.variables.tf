@@ -1,16 +1,31 @@
 ###===================================================================================###
-# VAST Data VIP Pools and NFS View Configuration
-# --role: PROTOCOLS | REPLICATION | VAST_CATALOG
+# VAST Data – VIP Pool, NFS/S3 View, DNS, and Identity Configuration (Demo/POC)
 #
-# This file defines:
-# - VAST provider connection settings
-# - Two VIP Pools:
-#     - sharesPool (role: PROTOCOLS)
-#     - targetPool (role: REPLICATION)
-# - Shared network settings
-# - NFS view policy configuration
+# Description:
+# This Terraform file contains variable declarations used for provisioning a 
+# VAST Data Cluster in a demo or proof-of-concept (POC) environment. It defines
+# configurable settings for network identity, VIP pools, view policies, 
+# authentication, and access controls.
+#
+# This file supports:
+# - Two VIP Pools (e.g., sharesPool, targetPool) with defined roles:
+#     - PROTOCOLS, REPLICATION, VAST_CATALOG
+# - NFS and S3 View Policy and View Configuration
+# - DNS service configuration for cluster IP resolution
+# - Tenant, user, and group creation (POSIX-style)
+# - Active Directory integration (including LDAPS and optional manual LDAP URLs)
+#
+# Key Features:
+# - Modular and flexible inputs via variables
+# - Defaults included for simplified POC testing
+# - NFS and S3 configuration support with protocol-specific options
+# - Role-based network and identity assignments
+#
+# Notes:
+# - This file only declares variables. Logic is implemented in corresponding resource files.
+# - Ensure all required variables are populated via `terraform.tfvars` or CLI/environment inputs.
+# - AD config supports StartTLS, bind DN, and OU-based machine account targeting.
 ###===================================================================================###
-
 
 #------------------------------------------------------------------------------
 # Provider Configuration Variables
@@ -332,7 +347,7 @@ variable "dns_domain_suffix" {
 }
 
 variable "port_type" {
-  description = "DNS domain suffix"
+  description = "What port to assign the service to (EXTERNAL_PORT, NORTH_PORT)"
   type        = string
   default     = "NORTH_PORT"
 }

@@ -1,16 +1,24 @@
 ###===================================================================================###
 #
-#  File:  testapply.main.tf
-#  Created By: Karl Vietmeier
+#  File:        testapply.main.tf
+#  Author:      Karl Vietmeier
 #
-#  Purpose:  
-#    Verify that you can authenticate to the VAST cluster 
-#     * Good way to test authentication
-#     * Grabs a default value
+#  Description:
+#  Lightweight Terraform configuration used to verify authentication with a 
+#  VAST Data cluster. This script performs a basic read operation by retrieving 
+#  metadata for the default tenant, allowing you to:
 #
-#   Usage:
+#    - Confirm provider credentials and connectivity
+#    - Validate SSL and host configuration
+#    - Troubleshoot access issues before applying full deployments
+#
+#  Usage:
 #    terraform apply -auto-approve -var-file=testapply.terraform.tfvars
-# 
+#
+#  Notes:
+#    - Uses the VAST provider with alias `GCPCluster`
+#    - Defaults are provided for rapid testing
+#
 ###===================================================================================###
 
 ###===================================================================================###

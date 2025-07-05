@@ -1,17 +1,23 @@
 ###===================================================================================###
-# VAST Data Cluser basic setup for demo/POC
+# VAST Data Cluster – Demo/POC Basic Setup
+#
+# Description:
+# This Terraform file provisions user/tenant resources for a VAST Data cluster, intended
+# for demo or proof-of-concept use cases. It defines the following:
+#
+# - Tenant creation from variable map (supports multiple tenants)
+# - POSIX group and user creation with GID/UID mapping
+# - Active Directory integration settings (without domain join)
 #
 # Notes:
-# --role: PROTOCOLS | REPLICATION | VAST_CATALOG
+# - AD configuration uses bind credentials and supports LDAPS/TLS
+# - Group/user relationships are mapped via supplementary and leading GIDs
+# - VIP Pools and view policies referenced externally (not defined in this file)
+# - `provider = vastdata.GCPCluster` must be declared elsewhere
 #
-# This file defines:
-# - VAST provider connection settings
-# - Two VIP Pools:
-#     - sharesPool (role: PROTOCOLS)
-#     - targetPool (role: REPLICATION)
-# - Shared network settings
-# - NFS view policy configuration
-# - DNS
+# Optional:
+# - The commented-out resource block shows how to create a single static tenant
+# - Client IP ranges and VIP pool IDs are optionally supported via variable maps
 ###===================================================================================###
 
 
@@ -23,6 +29,7 @@ resource "vastdata_tenant" "tenant1" {
 }
 */
 
+# Create num_tenants tenant from a map()
 resource "vastdata_tenant" "tenants" {
   provider         = vastdata.GCPCluster
   for_each         = { for tenant in var.tenants : tenant.name => tenant }
@@ -31,8 +38,7 @@ resource "vastdata_tenant" "tenants" {
   #vippool_ids      = each.value.vippool_ids
 }
 
-#Create a user named user1 with leading group & supplementary groups
-# Create groups from the list
+# Create groups from a map()
 resource "vastdata_group" "groups" {
   provider         = vastdata.GCPCluster
   for_each = { for g in var.groups : g.name => g }
@@ -41,7 +47,7 @@ resource "vastdata_group" "groups" {
   gid  = each.value.gid
 }
 
-# Create users from the list
+# Create users from a map()
 resource "vastdata_user" "users" {
   provider         = vastdata.GCPCluster
   for_each = { for u in var.users : u.name => u }
@@ -54,19 +60,19 @@ resource "vastdata_user" "users" {
   depends_on = [vastdata_group.groups]
 }
 
+# Add Actve Directory DC Information - doesn't join the domain
 resource "vastdata_active_directory2" "gcp_ad1" {
   provider             = vastdata.GCPCluster
   machine_account_name = var.ou_name
   organizational_unit  = var.ad_ou
   use_auto_discovery   = var.use_ad
   binddn               = var.bind_dn
-  #searchbase           = "dc=qa,dc=vastdata,dc=com"
   bindpw               = var.bindpw
   use_ldaps            = var.ldap
   domain_name          = var.ad_domain
   method               = var.method
   query_groups_mode    = var.query_mode
   use_tls              = var.use_tls
+  #searchbase           = "dc=qa,dc=vastdata,dc=com"
   #urls                 = ["ldap://198.51.100.3"]
-
-}
+} 
