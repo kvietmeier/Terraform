@@ -24,23 +24,6 @@
 #
 ###===================================================================================###
 
-###--- Provider
-terraform {
-  required_providers {
-  google = {
-      source  = "hashicorp/google"
-      version = "4.51.0"
-    }
-  }
-}
-
-provider "google" {
-  project = var.project_id
-  region  = var.region
-  zone    = var.zone
-}
-
-
 ###===================================================================================###
 #     Start creating infrastructure resources
 ###===================================================================================###
@@ -88,6 +71,11 @@ resource "google_compute_firewall" "custom_app_rules" {
   allow {
     protocol = "tcp"
     ports    = var.vast_tcp
+  }
+
+  allow {
+    protocol = "udp"
+    ports    = var.vast_udp
   }
 
   allow {
