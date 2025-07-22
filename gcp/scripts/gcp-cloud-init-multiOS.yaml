@@ -20,19 +20,19 @@ package_update: true
 package_upgrade: true
 
 # Packages to install on first boot on both distros
-#packages:
-#  - libtool
-#  - tmux
-#  - git
-#  - tree
-#  - numactl
-#  - wget
-#  - traceroute
-#  - nmap
-#  - sysstat
-#  - bc
-#  - jq
-#  - pkg-config
+packages:
+  - libtool
+  - tmux
+  - git
+  - tree
+  - numactl
+  - wget
+  - traceroute
+  - nmap
+  - sysstat
+  - bc
+  - jq
+  - pkg-config
 
 write_files:
   ###--- Setup script to install tools and compile software
@@ -234,17 +234,17 @@ write_files:
     append: true
 
   ###--- Setup time keeping
-  #- path: /etc/chrony/chrony.conf
-  #  content: |
-  #    server metadata.google.internal iburst
-  #    driftfile /var/lib/chrony/drift
-  #    makestep 1.0 3
-  #    rtcsync
-  #    logdir /var/log/chrony
-  #    allow 0.0.0.0/0
-  #    bindcmdaddress 127.0.0.1
-  #    bindcmdaddress ::1
-#
+  - path: /etc/chrony/chrony.conf
+    content: |
+      server metadata.google.internal iburst
+      driftfile /var/lib/chrony/drift
+      makestep 1.0 3
+      rtcsync
+      logdir /var/log/chrony
+      allow 0.0.0.0/0
+      bindcmdaddress 127.0.0.1
+      bindcmdaddress ::1
+
   ###--- Flag file
   - path: /root/CONFIGURED_BY_CLOUD_INIT
 
