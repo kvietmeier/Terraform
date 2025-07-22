@@ -124,55 +124,53 @@ vast_tcp = [
   "443",   # HTTPS
   "445",   # SMB
   "636",   # Secure LDAP
-  "1611",  # For vperfsanity/elbencho
-  "1612",  # For vperfsanity/elbencho
-  "2611",  # For --netbench 
   "2049",  # NFS
+  "3128",  # VAST - Call Home Proxy
   "3268",  # LDAP catalouge
   "3269",  # LDAP catalouge ssl
+  "4000",  # VAST - Dnode internal
+  "4001",  # VAST - Dnode internal
+  "4100",  # VAST - Dnode internal
+  "4101",  # VAST - Dnode internal
+  "4200",  # VAST - Cnode internal
+  "4201",  # VAST - Cnode internal
   "4420",  # spdk target
   "4520",  # spdk target
   "5000",  # docker registry
+  "5200",  # VAST - Cnode internal data-env
+  "5201",  # VAST - Cnode internal data-env
+  "5551",  # VAST - vms_monitor
+  "6000",  # VAST - leader
+  "6001",  # VAST - leader
   "6126",  # mlx sharpd
+  "7000",  # VAST - Dnode internal
+  "7001",  # VAST - Dnode internal
+  "7100",  # VAST - Dnode internal
+  "7101",  # VAST - Dnode internal
+  "8000",  # VAST - mcvms
   "9090",  # Tabular
   "9092",  # Kafka
   "20048", # mount
   "20106", # NSM
   "20107", # NLM
   "20108", # NFS_RQUOTA
-  ### VAST Specific
-  "6000",  # leader
-  "6001",  # leader
-  "3128",  # Call Home Proxy
-  "4000",  # Dnode internal
-  "4001",  # Dnode internal
-  "4100",  # Dnode internal
-  "4101",  # Dnode internal
-  "4200",  # Cnode internal
-  "4201",  # Cnode internal
-  "5200",  # Cnode internal data-env
-  "5201",  # Cnode internal data-env
-  "5551",  # vms_monitor
-  "7000",  # Dnode internal
-  "7001",  # Dnode internal
-  "7100",  # Dnode internal
-  "7101",  # Dnode internal
-  "8000",  # mcvms
-  "49001", # replication
-  "49002"  # replication
+  "49001", # VAST - replication
+  "49002", # VAST - replication
+  ### VAST Optional
+  "1611",  # VAST Optional - For vperfsanity/elbencho
+  "1612",  # VAST Optional - For vperfsanity/elbencho
+  "2611"   # VAST Optional - For --netbench 
 ]
 
 ###--- For 5.3.1 and newer - Added UDP ports.
 vast_udp = [
-  "4001",      # Dnode internal
-  "4005",      # Dnode1 platform CAS
-  "4101",      # Dnode internal
-  "4105",      # Dnode1 data CAS
-  "4205",      # CAS Operations
-  "5205-5239", # Cnode silos CAS
-  "6005",      # Leader CAS
-  "7005",      # Dnode2 Platform CAS
-  "7105"       # Dnode2 data CAS
+  "4005",      # VAST - Dnode1 platform CAS
+  "4105",      # VAST - Dnode1 data CAS
+  "4205",      # VAST - CAS Operations
+  "5205-5241", # VAST - Cnode silos CAS
+  "6005",      # VAST - Leader CAS
+  "7005",      # VAST - Dnode2 Platform CAS
+  "7105"       # VAST - Dnode2 data CAS
 ]
 
 

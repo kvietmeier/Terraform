@@ -2,7 +2,8 @@
 # vim: syntax=yaml
 #
 # ------------------------------------------------------------------------------
-# Created by: Karl Vietmeier / KCV Consulting
+# Copyright 2025 Karl Vietmeier / KCV Consulting
+# SPDX-License-Identifier: Apache-2.0
 #
 # This cloud-init config bootstraps a RHEL/CentOS or Debian/Ubuntu instance.
 # It updates packages, installs common dev tools, compiles and installs FIO,
@@ -19,19 +20,19 @@ package_update: true
 package_upgrade: true
 
 # Packages to install on first boot on both distros
-packages:
-  - libtool
-  - tmux
-  - git
-  - tree
-  - numactl
-  - wget
-  - traceroute
-  - nmap
-  - sysstat
-  - bc
-  - jq
-  - pkg-config
+#packages:
+#  - libtool
+#  - tmux
+#  - git
+#  - tree
+#  - numactl
+#  - wget
+#  - traceroute
+#  - nmap
+#  - sysstat
+#  - bc
+#  - jq
+#  - pkg-config
 
 write_files:
   ###--- Setup script to install tools and compile software
@@ -233,23 +234,23 @@ write_files:
     append: true
 
   ###--- Setup time keeping
-  - path: /etc/chrony/chrony.conf
-    content: |
-      server metadata.google.internal iburst
-      driftfile /var/lib/chrony/drift
-      makestep 1.0 3
-      rtcsync
-      logdir /var/log/chrony
-      allow 0.0.0.0/0
-      bindcmdaddress 127.0.0.1
-      bindcmdaddress ::1
-
+  #- path: /etc/chrony/chrony.conf
+  #  content: |
+  #    server metadata.google.internal iburst
+  #    driftfile /var/lib/chrony/drift
+  #    makestep 1.0 3
+  #    rtcsync
+  #    logdir /var/log/chrony
+  #    allow 0.0.0.0/0
+  #    bindcmdaddress 127.0.0.1
+  #    bindcmdaddress ::1
+#
   ###--- Flag file
   - path: /root/CONFIGURED_BY_CLOUD_INIT
 
 runcmd:
-  - curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
-  - bash add-google-cloud-ops-agent-repo.sh --also-install
+  #- curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+  #- bash add-google-cloud-ops-agent-repo.sh --also-install
   - systemctl restart google-cloud-ops-agent
   - bash /tmp/compiletools.sh
   - echo "cloud-init completed successfully at $(date)" > /tmp/cloud-init-completed.txt
@@ -265,7 +266,8 @@ users:
     ssh_authorized_keys:
       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDj/oqU+Kjs/sLN67JZ798S42efzK/jBKE3RWj4n9SJR6FYaijoy46qXWoC26ibOKhsO01g4OPeZAoUJq39hwsWNw/bTFKsjBuO6jRaNroybK2/lzQuX2oku0pclreXjPy/x0Mrf9ZD6Jzm0sbr9bk52KUdy6cPjFBIvVUNGXRLFm6AKggqWDzY3+9ONLyAihginw9N+yF28bQYjUwUbuy4k9gkD+cTWKNl1Al58rOAuifAJDMAA7CrlsNXK3nf4VtaURh4n3CbOoJI+auRiPfO4EoJGYVYVFy6V2NeSDV52q+7SUXXclb6c6DEVxLu2YAe9sMmUkL/N62uKAxrOqX+qJHXdOm/TOcHB+tw/jTDafRSJcPZ+EuGw4FjROEtEAMHus2poHN0qF0vdTm0DuNWHtH+ABpCHP8rvQeybkR3yFjStTyJlTLPTnY0/8gt8ykLWFyYtZott+hszXe6NM8lQlK9BiRi6e3F+LRBr1fMpQtOV0gemhaqYwCRdZKckqM= karlv@linuxtools
       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOVhK8T5vJgKqXzSgDryh1EQEReE1lU9CvlBK8v4bG+eTjhPqacXqPkUWPlnM+kA1l3xe/GBxbIeoJ/WruUZV58SBjUUEMYN0qyKVwl+G5GqhijGAsWNC1KsfpTHNRRplZWAkKajAzb57kCzdNvFmOi86ENhn4gYFTWqAPEYALMnq6T1D52SELJGs/A3fwDEE99nTjcZ4/Huv1z+WWJmZEkSRWNtYLD/mx+cP41UHKCEIgsffvKH3o/IHgpsDGi5sQ8AKHChNkHb3vWQVPHx1BZDwxEUG7SPjY4gc/wRtrdauzMvdKvm9AUi1paY2PCGViLcysv619hQj02k/OQBJBy7MqplB1waoisxDuxKMSKjeKTyMGbMfv+MCrQd1iT+qdQtQImvyxRtQnYnbNMjnLPYUey7/kTkb4Xggm/hhuJOxnFqH/9WILDb81I4jElis+raXh0Vnt7gQ7OAO74osiLqD7uGuhytRCLqnU5VQmEAGdpxahxtirRu0eVQr/Ncs= karl.vietmeier@Tandaloor
+      - ssh-rsa ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC7gFq64WSW39+C5QH5PBCne9N/4NHCd4Cv5kZL5gvfm1Oaz+dLf/jtIOofy3qgELI2zQA+OcdWdb7yRzjKCcktMxFbWNCm2QUvpvv8rvx47KOXXQrnsjgltVmBb7P9UUakPMtEU/l20XwnbzB3cgupawLCwrSNW4uwaHCqQQwhmr4L4Kb0giNVbqYPsNPPwwQe+vHHc+2b8czS1llnC7+xPNWZw57r0Vx3RZeJo4j3HXkSDwjPC2g1IX6Ihd8aaA11cvIFe2BA9w8v9Q18Ipw7J9ho4PAiykd25bjhHqqieJeVsMQb0QfEsjOTVWyN3VqN+JQBXhOpvKl8srlpM/Z1i0jMd2mePWPk6hxH5z9zBlnRbjt8syu8s9YgEBPDFXA4rg7ztI21+8LtgZF48FwD2/PSm2Z1cgXhvWjlccQrj1X6dfxle287veeruwPCk1NZTmGtTYdsokfLpNXw9PdoUMhMNu81CJ3yM7AmW2oHvjGBXNcpgTSudmIJObwd8Ds= karlv@DESKTOP-RALP2EV
 
-timezone: "America/Los_Angeles"
+#timezone: "America/Los_Angeles"
 
 final_message: =========  Post Install cloud-init Completed  =========
