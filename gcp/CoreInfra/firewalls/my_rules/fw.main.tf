@@ -1,42 +1,28 @@
 ###===================================================================================###
+#  File:        fw.main.tf
+#  Author:      Karl Vietmeier
 #
-#  File:  fw.main.tf
-#  Created By: Karl Vietmeier
+#  Purpose:     Define and apply custom firewall rules for the 'karlv-corevpc' VPC 
+#               on Google Cloud Platform (GCP). Rules are scoped using target tags 
+#               to enforce role-based access for standard services, Active Directory,
+#               VAST infrastructure, and security controls (e.g., ICMP restrictions).
 #
-#  Purpose:   Configure custom firewall rules in the default VPC
-# 
-#  Files in Module:
-#    fw.main.tf
-#    fw.variables.tf
-#    fw.terraform.tfvars
+#  Usage:
+#    terraform plan -var-file="fw.terraform.tfvars"
+#    terraform apply --auto-approve -var-file="fw.terraform.tfvars"
+#    terraform destroy --auto-approve -var-file="fw.terraform.tfvars"
+#
+#  Structure:
+#    - Standard service rules (TCP, UDP, ICMP for SSH, DNS, HTTP, etc.)
+#    - Application-specific rules (e.g., VAST on Cloud)
+#    - Active Directory support (LDAP, Kerberos, DNS, etc.)
+#    - ICMP control: allow trusted sources, deny public pings
+#
+#  Related Files:
+#    - fw.variables.tf       → Variable declarations
+#    - fw.terraform.tfvars   → Environment-specific values (excluded from repo)
 #
 ###===================================================================================###
-
-/* 
-  
-Usage:
-terraform plan -var-file=".\fw.terraform.tfvars"
-terraform apply --auto-approve -var-file=".\fw.terraform.tfvars"
-terraform destroy --auto-approve -var-file=".\fw.terraform.tfvars"
-
-*/
-
-###--- Provider
-terraform {
-  required_providers {
-  google = {
-      source  = "hashicorp/google"
-      version = "4.51.0"
-    }
-  }
-}
-
-provider "google" {
-  project = var.project_id
-  region  = var.region
-  zone    = var.zone
-}
-
 
 ###===================================================================================###
 #     Start creating infrastructure resources
@@ -67,6 +53,7 @@ resource "google_compute_firewall" "default_services_rules" {
 
   source_ranges = var.ingress_filter     # CIDR - Ingress filter
   
+  # Optional: restrict to specific target tags
   #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
 
 }
@@ -87,12 +74,18 @@ resource "google_compute_firewall" "custom_app_rules" {
   }
 
   allow {
+    protocol = "udp"
+    ports    = var.vast_udp
+  }
+
+  allow {
     protocol = "icmp"                    # ICMP for ping/diagnostic
   }
 
   source_ranges = var.ingress_filter     # CIDR - Ingress filter
   
-  #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
+  # Optional: restrict to specific target tags
+  #target_tags = ["standard-services"]   
 
 }
 
@@ -122,7 +115,7 @@ resource "google_compute_firewall" "addc_rules" {
 
   source_ranges = var.ingress_filter     # CIDR - Ingress filter
   
-  # Limit scope
+  # Optional: restrict to specific target tags
   #source_tags   = ["ad-domaincontroller"]
   #target_tags   = ["ad-domaincontroller"]
 }

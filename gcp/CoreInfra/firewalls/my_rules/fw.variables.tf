@@ -128,6 +128,11 @@ variable addc_udp_ports {
 }
 
 variable vast_tcp {
-  description = "A list of ports needed for VAST Data"
+  description = "A list of TCP ports needed for VAST Data"
+  type        = list(string)
+}
+
+variable vast_udp {
+  description = "A list of UDP ports needed for VAST Data"
   type        = list(string)
 }
