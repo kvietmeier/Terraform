@@ -316,7 +316,7 @@ variable "s3_policy1_file" {
 variable "s3_user_policy_name" {
   description = "Name of the S3 view"
   type        = string
-  default     = "s3bucket01"
+  default     = "s3user_policy01"
 }
 
 
