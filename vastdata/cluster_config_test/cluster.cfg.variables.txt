@@ -362,54 +362,36 @@ variable "dns_enabled" {
 # User\Tenant Configuration Variables
 #------------------------------------------------------------------------------
 
-variable "tenant1_name" {
-  description = "VIP address for the DNS service"
-  type        = string
-  default     = "labusers01"
-}
-
-variable "tenants" {
-  description = "List of tenants to create"
-  type = list(object({
-    name             = string
-    client_ip_ranges = list(string)
-    #vippool_ids      = list(string)
-  }))
-}
-
-variable "user1_name" {
-  description = "VIP address for the DNS service"
-  type        = string
-  default     = "labuser01"
-}
-
+# Groups
 variable "groups" {
-  type = list(object({
-    name = string
-    gid  = number
+  description = "Map of groups to create"
+  type = map(object({
+    gid = number
   }))
-  default = [
-    { name = "group1", gid = 1000 },
-    { name = "group2", gid = 2000 },
-    { name = "group3", gid = 3000 }
-  ]
 }
 
+# Users
 variable "users" {
-  type = list(object({
-    name               = string
-    uid                = number
-    leading_group_name = string
+  description = "Map of users to create"
+  type = map(object({
+    uid                  = number
+    leading_group_name   = string
     supplementary_groups = list(string)
+    allow_create_bucket  = optional(bool, false)
+    allow_delete_bucket  = optional(bool, false)
   }))
-  default = [
-    {
-      name               = "user1"
-      uid                = 1111
-      leading_group_name = "group1"
-      supplementary_groups = ["group2", "group3"]
-    }
-  ]
+}
+
+# Tenants
+variable "tenants" {
+  description = "Map of tenants to create"
+  type = map(object({
+    client_ip_ranges = list(object({
+      start_ip = string
+      end_ip   = string
+    }))
+    vippool_ids = optional(list(string))
+  }))
 }
 
 #------------------------------------------------------------------------------

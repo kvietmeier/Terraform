@@ -1,0 +1,173 @@
+###===================================================================================###
+# VAST Data – Configuration Settings for VIP Pools, NFS/S3 Views, DNS, and Identity
+#
+# Description:
+# This `.tfvars` file provides input values for deploying a VAST Data cluster 
+# in a demo or proof-of-concept environment. It configures critical settings for:
+#
+# - Two VIP Pools:
+#     - sharesPool (role: PROTOCOLS)
+#     - targetPool (role: REPLICATION)
+# - NFS and S3 view policy and export configuration
+# - POSIX-style tenant, user, and group definitions
+# - DNS configuration (including VIP and domain settings)
+# - Active Directory integration (disabled by default in this file)
+#
+# Highlights:
+# - Creates 3 NFS views with full read-write/no-squash access
+# - Defines one S3 view with default policy and ownership
+# - Users are assigned with leading and supplementary GIDs
+# - All IPs are open by default for simplified testing
+# - AD join is configured but disabled; LDAP URL is statically defined
+#
+# Warning:
+# - Credentials (e.g., bindpw, vast_password) are included in clear text for testing
+#   and should **not** be used in production environments.
+# - This file should be secured or excluded from version control if used beyond PoC.
+###===================================================================================###
+
+
+###===================================================================================
+# Provider Configuration
+###===================================================================================
+vast_username           = "admin"
+vast_password           = "SuperSecretPassword"
+vast_host               = "vast.example.com"
+vast_port               = "443"
+vast_skip_ssl_verify    = true
+vast_version_validation_mode = "warn"
+
+###===================================================================================
+# VIP Pool Configuration
+###===================================================================================
+cidr        = "10.1.0.0/24"
+
+# VIP Pool 1
+vip1_name   = "sharesPool"
+gw1         = "10.1.0.1"
+vip1_startip = "10.1.0.10"
+vip1_endip   = "10.1.0.20"
+role1       = "PROTOCOLS"
+
+# VIP Pool 2
+vip2_name   = "targetPool"
+gw2         = "10.1.1.1"
+vip2_startip = "10.1.1.10"
+vip2_endip   = "10.1.1.20"
+role2       = "REPLICATION"
+
+###===================================================================================
+# DNS Configuration
+###===================================================================================
+dns_name          = "vast-dns"
+dns_vip           = "10.1.0.5"
+dns_domain_suffix = "cluster.local"
+port_type         = "NORTH_PORT"
+dns_enabled       = true
+
+###===================================================================================
+# Views and Policies Configuration
+###===================================================================================
+flavor              = "MIXED_LAST_WINS"
+use_auth_provider   = true
+auth_source         = "RPC_AND_PROVIDERS"
+access_flavor       = "ALL"
+vippool_permissions = "RW"
+
+# NFS View Policy
+nfs_default_policy_name = "nfs-policy-demo"
+nfs_no_squash           = ["10.1.0.0/24"]
+nfs_read_write          = ["10.1.0.0/24"]
+nfs_read_only           = []
+
+smb_read_write          = []
+smb_read_only           = []
+
+num_views         = 1
+path_name         = "/mnt/vast/demo"
+protocols         = ["NFS", "SMB"]
+create_dir        = true
+
+# S3 View Policy
+s3_default_policy_name      = "s3-policy-demo"
+s3_flavor                  = "S3_NATIVE"
+s3_special_chars_support    = true
+s3_view_path               = "/s3bucket01"
+s3_view_protocol           = ["S3"]
+s3_view_name               = "s3view01"
+s3_bucket_name             = "bucket01"
+s3_default_owner           = "s3user1"
+s3_use_ldap_auth           = false
+s3_view_create_dir         = true
+s3_view_allow_s3_anonymous = false
+
+s3_policy1_file     = "s3Policy1.json"
+s3_user_policy_name = "s3user_policy01"
+
+###===================================================================================
+# Groups Configuration
+###===================================================================================
+groups = {
+  s3users  = { gid = 1000 }
+  nfsusers = { gid = 1100 }
+  allusers = { gid = 1200 }
+}
+
+###===================================================================================
+# Users Configuration
+###===================================================================================
+users = {
+  nfsuser1 = {
+    uid                  = 2111
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    allow_create_bucket  = false
+    allow_delete_bucket  = false
+  }
+
+  s3user1 = {
+    uid                  = 2112
+    leading_group_name   = "s3users"
+    supplementary_groups = ["allusers", "nfsusers"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = false
+  }
+}
+
+###===================================================================================
+# Tenants Configuration
+###===================================================================================
+tenants = {
+  tenant1 = {
+    client_ip_ranges = [
+      { start_ip = "10.0.0.0", end_ip = "10.0.0.255" },
+      { start_ip = "10.0.1.0", end_ip = "10.0.1.255" }
+    ]
+    vippool_ids = ["sharesPool"]
+  }
+
+  tenant2 = {
+    client_ip_ranges = [
+      { start_ip = "192.168.1.0", end_ip = "192.168.1.255" }
+    ]
+    # vippool_ids omitted, defaults to null
+  }
+}
+
+###===================================================================================
+# Active Directory Configuration
+###===================================================================================
+ou_name     = "CN=Computers,DC=example,DC=com"
+ad_ou      = "OU=VAST,DC=example,DC=com"
+use_ad     = true
+bind_dn    = "CN=binduser,OU=Service Accounts,DC=example,DC=com"
+bindpw     = "BindPasswordHere"
+ldap       = true
+ad_domain  = "example.com"
+method     = "simple"
+query_mode = "tokenGroups"
+use_tls    = true
+ldap_urls  = [
+  "ldaps://ad1.example.com:636",
+  "ldaps://ad2.example.com:636"
+]
