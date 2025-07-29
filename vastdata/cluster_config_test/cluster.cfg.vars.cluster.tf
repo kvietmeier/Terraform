@@ -1,36 +1,77 @@
 ###===================================================================================
-# User, Group, Tenant Configuration Variables
+# Provider Configuration Variables
 ###===================================================================================
 
-variable "groups" {
-  description = "Map of groups to create"
-  type = map(object({
-    gid = number
-  }))
+variable "vast_username" {
+  description = "Username for VAST Data API access"
+  type        = string
 }
 
-variable "users" {
-  description = "Map of users to create"
-  type = map(object({
-    uid                  = number
-    leading_group_name   = string
-    supplementary_groups = list(string)
-    allow_create_bucket  = optional(bool, false)
-    allow_delete_bucket  = optional(bool, false)
-    s3_superuser         = optional(bool, false)
-  }))
+variable "vast_password" {
+  description = "Password for VAST Data API access"
+  type        = string
+  sensitive   = true
 }
 
-variable "tenants" {
-  description = "Map of tenants to create"
-  type = map(object({
-    client_ip_ranges = list(object({
-      start_ip = string
-      end_ip   = string
-    }))
-    vippool_ids = optional(list(string))
-  }))
+variable "vast_host" {
+  description = "VAST cluster hostname or IP address"
+  type        = string
 }
+
+variable "vast_port" {
+  description = "VAST cluster API port"
+  type        = string
+  default     = "443"
+}
+
+variable "vast_skip_ssl_verify" {
+  description = "Skip SSL verification for the VAST provider"
+  type        = bool
+  default     = true
+}
+
+variable "vast_version_validation_mode" {
+  description = "API version validation mode (strict, warn, or none)"
+  type        = string
+  default     = "warn"
+}
+
+###===================================================================================
+# DNS Configuration Variables
+###===================================================================================
+
+variable "dns_name" {
+  description = "Name of the DNS configuration"
+  type        = string
+}
+
+variable "dns_vip" {
+  description = "VIP address for the DNS service"
+  type        = string
+}
+
+variable "dns_domain_suffix" {
+  description = "DNS domain suffix"
+  type        = string
+}
+
+variable "port_type" {
+  description = "What port to assign the service to (EXTERNAL_PORT, NORTH_PORT)"
+  type        = string
+  default     = "NORTH_PORT"
+}
+
+variable "dns_enabled" {
+  description = "Enable DNS"
+  type        = bool
+  default     = true
+}
+
+variable "dns_shortname" {
+  description = "Prefix for DNS domain"
+  type        = string
+}
+
 
 ###===================================================================================
 # Active Directory Configuration Variables
@@ -97,4 +138,3 @@ variable "ldap_urls" {
   type        = list(string)
   default     = []
 }
-

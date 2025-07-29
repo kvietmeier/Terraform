@@ -22,7 +22,7 @@ This repository contains Terraform configurations to automate the setup of a bas
 
 ### Elements Created
 
-####  Provider Configuration
+#### Provider Configuration
 
 Establishes a connection to a VAST Data cluster using credentials and API endpoint info.
 
