@@ -1,0 +1,20 @@
+{
+  "defaults": {
+    "os_image": "ubuntu-2204-jammy-v20250415",
+    "machine_type": "n2-standard-8",
+    "bootdisk_size": "100"
+  },
+  "vms": {
+    "client01": { "ip_octet": 91 },
+    "client02": { "ip_octet": 92, "machine_type": "e2-standard-8" },
+    "client03": { "ip_octet": 93 },
+    "client04": { "ip_octet": 94 },
+    "client05": { "ip_octet": 95 },
+    "client06": { "ip_octet": 96 },
+    "client07": { "ip_octet": 97 },
+    "client08": { "ip_octet": 98 },
+    "client09": { "ip_octet": 99 },
+    "client10": { "ip_octet": 100 },
+    "client11": { "ip_octet": 101 }
+  }
+}

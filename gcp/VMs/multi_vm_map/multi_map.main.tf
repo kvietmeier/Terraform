@@ -1,12 +1,20 @@
 ###===================================================================================###
+#  File:         multi.main.tf
+#  Created By:   Karl Vietmeier / KCV Consulting
+#  License:      Licensed under the Apache License, Version 2.0
+#                http://www.apache.org/licenses/LICENSE-2.0
 #
-#  File:  multi.main.tf
-#  Created By: Karl Vietmeier
+#  Description:  Terraform module to deploy multiple identical VMs using a simple map
+#                of VM names and parameters (e.g., machine type, boot disk, IP octet).
 #
-#  Terraform Module Code
-#  Purpose:  Create multiple identical VMs from a simple list
-#  vm_names             = ["linux01", "linux02", "linux03"]
-# 
+#  Purpose:      Automates provisioning of multiple Google Cloud VMs with:
+#                   - Cloud-init configuration
+#                   - Static IP assignments
+#                   - Custom SSH keys
+#                   - Service account integration
+#
+#  Example Input:
+#       vm_names = ["linux01", "linux02", "linux03"]
 ###===================================================================================###
 
 
@@ -14,8 +22,8 @@
 ###                  Start creating infrastructure resources                          ###
 
 # Cloud-Init Configuration
-# This block loads the cloud-init configuration that is passed to the VM at boot time.
-# It enables automatic configuration like user setup, package installation, etc.
+# Purpose: Supplies initial OS bootstrap configuration (users, packages, etc.)
+# to each VM at first boot using cloud-init.
 data "cloudinit_config" "system_setup" {
   gzip = false
   base64_encode = false
@@ -27,8 +35,15 @@ data "cloudinit_config" "system_setup" {
   }
 }
 
-
-# Google Cloud VM instance with public IP
+/* 
+ Google Compute VM Instance
+ Creates one VM per entry in var.vms map.
+ Each VM gets:
+   - Defined machine type and boot disk
+   - Cloud-init configuration
+   - Static private IP based on ip_octet
+   - SSH key injection via metadata 
+*/
 resource "google_compute_instance" "vm_instance" {
   for_each     = var.vms
 

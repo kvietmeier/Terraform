@@ -16,31 +16,32 @@
 
 **The configurations include (cluster_config):**
 
-- VAST provider setup
-- VIP Pool definitions for protocol and replication roles
-- NFS and S3 view policies and exports
-- DNS service configuration
-- Active Directory integration options
-- POSIX-style tenants, users, and group definitions
+* VAST provider setup
+* VIP Pool definitions for protocol and replication roles
+* NFS and S3 view policies and exports
+* DNS service configuration
+* Active Directory integration options
+* POSIX-style tenants, users, and group definitions
 
 **Features**
 
-- Modular and reusable design for rapid iteration
-- Clear separation of configuration (`.tfvars`), logic (`main.tf`), and variables
-- Supports multi-protocol (NFS/S3) configurations
-- Uses dynamic constructs (e.g., maps, `count`, `for_each`) for scalability
-- Compatible with VAST provider v1.6.8+
+* Modular and reusable design for rapid iteration
+* Clear separation of configuration (`.tfvars`), logic (`main.tf`), and variables
+* Supports multi-protocol (NFS/S3) configurations
+* Uses dynamic constructs (e.g., maps, `count`, `for_each`) for scalability
+* Compatible with VAST provider v1.6.8+
 
 ---
 
-- **NOTE: For a quick test of authentication use the config in `testapply`, it validates credentials and grabs some basic metadata.**
+* **NOTE: For a quick test of authentication use the config in `testapply`, it validates credentials and grabs some basic metadata.**
 
 ---
+
 #### Misc Notes
 
 Example: Use existing VIP Pool for resources like Views.
 
-``` terraform
+``` hcl
 data "vastdata_vip_pool" "protocolsVIP" {
     name = "protocolsPool"
 }
@@ -48,7 +49,7 @@ data "vastdata_vip_pool" "protocolsVIP" {
 
 Use the VIP Pool - you need the tenantID that owns the Pool and the PoolID.
 
-``` terraform
+```hcl
 # Need a View Policy
 resource "vastdata_view_policy" "ViewPolicy01" {
   name          = "ViewPolicy01"
@@ -73,7 +74,8 @@ resource "vastdata_view" "elbencho_view" {
 These are the object metada available:
 
 *VIP Poool ID:*
-``` terraform
+
+```hcl
 output "protocols_vip_pool_id" {
   value = data.vastdata_vip_pool.protocolsVIP.id
   description = "The ID of the protocols VIP pool."
@@ -81,7 +83,8 @@ output "protocols_vip_pool_id" {
 ```
 
 *VIP Pool Name:*
-``` terraform
+
+```hcl
 output "protocols_vip_pool_name" {
   value = data.vastdata_vip_pool.protocolsVIP.name
   description = "The name of the protocols VIP pool."
@@ -89,7 +92,8 @@ output "protocols_vip_pool_name" {
 ```
 
 *Tenant ID that owns the VIP Pool*
-``` terraform
+
+```hcl
 output "protocols_vip_pool_tenant_id" {
   value = data.vastdata_vip_pool.protocolsVIP.tenant_id
   description = "The tenant ID associated with the protocols VIP pool."
@@ -97,15 +101,17 @@ output "protocols_vip_pool_tenant_id" {
 ```
 
 *Cluster Name where the VIP Pool lives:*
-``` terraform
+
+```hcl
 output "protocols_vip_pool_cluster" {
   value = data.vastdata_vip_pool.protocolsVIP.cluster
   description = "The cluster associated with the protocols VIP pool."
 }
 ```
 
-Output - 
-``` terraform
+Output -
+
+```hcl
 Outputs:
 
 protocols_vip_pool_cluster = "vastoncloud-gcp02"
