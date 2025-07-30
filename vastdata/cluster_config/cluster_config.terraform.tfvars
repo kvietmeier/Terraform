@@ -109,9 +109,9 @@ s3_special_chars_support = true
 
 
 ###--- Default S3 View Settings
-s3_view_name               = "s3bucket01"
-s3_view_path               = "/s3bucket01"
-s3_bucket_name             = "bucket01"
+s3_view_name               = "vast-databricks"
+s3_view_path               = "/vast-databricks"
+s3_bucket_name             = "vast-databricks"
 s3_view_protocol           = ["S3"]
 s3_enable                  = true
 s3_default_owner           = "s3user1"
