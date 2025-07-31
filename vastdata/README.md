@@ -76,7 +76,7 @@ tenant_id = 1
 #### Example: Use existing VIP Pool for resources like Views
 
 
-**Get the VIP Pool metadata - you need the tenantID that owns the Pool and the PoolID.**
+- Get the VIP Pool metadata - you need the tenantID that owns the Pool and the PoolID.
 
   ``` hcl
   data "vastdata_vip_pool" "protocolsVIP" {
@@ -84,7 +84,7 @@ tenant_id = 1
   }
   ```
 
-**Use the VIP Pool - you need the tenantID that owns the Pool and the PoolID.**
+- Use the VIP Pool - you need the tenantID that owns the Pool and the PoolID.
 
   ```hcl
   # Need a View Policy
