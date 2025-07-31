@@ -13,9 +13,9 @@ bind_dn         = "CN=Administrator,CN=Users,DC=ginaz,DC=org"
 bindpw          = "Chalc0pyr1te!123"
 ad_domain       = "ginaz.org"
 ```
-
+  
 The sequence of PowerShell commands below will extract this in a usable form from a Domain Controller.   
-**NOTE:** You will need the AD PowerShell Modules but most AD domain controllers should have them installed, and must run them in an Admin console.  
+**NOTE:** You will need the AD PowerShell Modules but most AD domain controllers should have them installed, and must run them in an Admin console.    
 
 - Domain Information
 
