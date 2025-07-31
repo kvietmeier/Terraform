@@ -14,7 +14,7 @@
 
 #### Configuring a Cluster
 
-**The configurations include (cluster_config):**
+**For a complete example of configurarting a cluyster see (cluster_config):**
 
 * VAST provider setup
 * VIP Pool definitions for protocol and replication roles
@@ -33,13 +33,45 @@
 
 ---
 
-* **NOTE: For a quick test of authentication use the config in `testapply`, it validates credentials and grabs some basic metadata.**
+* **NOTE: For a quick test of authentication use the config in `simple_query`, it validates credentials and grabs some basic metadata.**
+
+You can use this set HCL/tf files as a starting point to build more complex configurations with. 
+
+Use like this - 
+```shell
+terraform apply -var-file="sq.var.tfvars" -auto-approve
+```
+
+You will get output like this if everything is working:
+```shell
+karlv@devops01:~/Terraform/vastdata/simple_query$ terraform apply 
+data.vastdata_tenant.default: Reading...
+data.vastdata_tenant.default: Read complete after 0s [name=default]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+cluster_description = "Demo cluster for PoC and testing"
+cluster_name = "vast-demo-cluster"
+cluster_region = "us-central1"
+cluster_tags = tomap({
+  "environment" = "dev"
+  "project" = "vast-poc"
+})
+tenant_id = 1
+```
+
 
 ---
 
 #### Misc Notes
 
-Example: Use existing VIP Pool for resources like Views.
+**Example: Use existing VIP Pool for resources like Views.**
 
 ``` hcl
 data "vastdata_vip_pool" "protocolsVIP" {

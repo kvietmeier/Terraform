@@ -21,29 +21,6 @@
 #
 ###===================================================================================###
 
-###===================================================================================###
-###                       Confgure VAST Cluster Provider                              ### 
-
-
-terraform {
-  required_providers {
-    vastdata = {
-      source  = "vast-data/vastdata"
-      version = "1.6.8"
-    }
-  }
-}
-
-provider "vastdata" {
-  username                = var.vast_username
-  password                = var.vast_password
-  host                    = var.vast_host
-  port                    = var.vast_port
-  skip_ssl_verify         = var.vast_skip_ssl_verify
-  version_validation_mode = var.vast_version_validation_mode
-  alias                   = "GCPCluster"
-}
-
 ###===================================================================================
 # Provider Configuration Variables
 ###===================================================================================
@@ -82,23 +59,30 @@ variable "vast_version_validation_mode" {
   default     = "warn"
 }
 
-
-###===================================================================================###
-###                        Query infrastructure resources                             ###
-
-data "vastdata_tenant" "default" {
-  provider = vastdata.GCPCluster
-  name = "default"
+###  Metadata Variables     
+variable "cluster_name" {
+  description = "Human-readable name for the VAST cluster"
+  type        = string
+  default     = "vast-demo-cluster"
 }
 
-
-###===================================================================================###
-###                                  Output Data                                      ###
-
-output "tenant_id" {
-  value = data.vastdata_tenant.default.id
+variable "cluster_description" {
+  description = "Description of the cluster environment or purpose"
+  type        = string
+  default     = "Demo cluster for PoC and testing"
 }
 
-output "tenant_name" {
-  value = data.vastdata_tenant.default.name
+variable "cluster_region" {
+  description = "Physical or cloud region of the cluster"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "cluster_tags" {
+  description = "Tags to assign to cluster for organization"
+  type        = map(string)
+  default     = {
+    environment = "dev"
+    project     = "vast-poc"
+  }
 }
