@@ -37,13 +37,13 @@ The sequence of PowerShell commands below will extract this in a usable form fro
 
 - Find the Admin users
 
-```powershell
-	PS C:\> Get-ADGroupMember -Identity "Domain Admins" -Recursive | Select-Object Name, SamAccountName, ObjectClass
-	
-	Name          SamAccountName ObjectClass
-	----          -------------- -----------
-    Administrator Administrator  user       
-```
+  ```powershell
+  	PS C:\> Get-ADGroupMember -Identity "Domain Admins" -Recursive | Select-Object Name, SamAccountName, ObjectClass
+  	
+  	Name          SamAccountName ObjectClass
+  	----          -------------- -----------
+      Administrator Administrator  user       
+  ```
 
 - Get the Bind DN for an Admin user that can add servers (clusters) to a domain
 
