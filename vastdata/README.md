@@ -105,9 +105,7 @@ tenant_id = 1
   }
   ```
 
----
-
- - These are the object metada available:
+#### These are the object metada available:
 
  - *VIP Poool ID:*
 
@@ -145,7 +143,7 @@ tenant_id = 1
   }
   ```
 
-- **Output -**
+- *Output:*
 
   ```hcl
   Outputs:
