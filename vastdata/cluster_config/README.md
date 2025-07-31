@@ -1,16 +1,17 @@
-# WIP - Testing DB Setup
+# Full End-to-End Configuration of a VAST Data Cluster from Scratch
 
-Could be broken at any point in time
+This should always be a working version.
 
 
 ### VAST Data Cluster Demo/POC Setup
 
-This repository contains Terraform configurations to automate the setup of a basic VAST Data cluster environment for **demo or proof-of-concept (POC)** scenarios. The configuration includes:
+This repository contains Terraform configurations to automate the setup of a complete VAST Data cluster suitable for **demo or proof-of-concept (POC)** scenarios. The configuration includes:
 
 - VAST Provider and authentication
-- VIP Pools for `PROTOCOLS` and `REPLICATION`
+- VIP Pools for `PROTOCOLS`, `REPLICATION`, and `VAST_CATALOG`
 - NFS view policy and NFS views
 - S3 view policy and NFS views
+- S3 User policies
 - DNS configuration
 - Basic multi-tenant setup with users and groups
 - Active Directory integration
@@ -22,7 +23,7 @@ This repository contains Terraform configurations to automate the setup of a bas
 - VAST provider plugin initialized
 - Access to a VAST Data cluster (on GCP or other supported platforms)
 - Accessible Active Directory DC
-- DNS Forwarder configured to point to the VAST DNS domain/s
+- DNS Forwarder or Delegation configured to point to the VAST DNS domain/s
 
 ### Elements Created
 
@@ -44,6 +45,9 @@ Creates a VAST NFS view policy with:
 - Read/write permissions
 - VIP pool assignment
 
+####  S3 User Policies
+- Sample configurations loaded from json files
+
 ####  NFS Views
 Provisioned using a loop, each with:
 - Path prefix (e.g., `/nfs_share_1`, `/nfs_share_2`)
@@ -63,7 +67,7 @@ Configure Active Directory integration to join the `ginaz.org` domain.
 The online documentation doesn't have very good examples of things like DNS and setting up S3 and the LLMs do not have correct information on the Provider. As I figure out how to configure them I will try to put some examples here with explantions.
 
 #### DNS
-Setting up DNS is a good example. It isn't immediately clear from the documentation that you need to configure it in 2 places to get a complete implementation.  
+It isn't immediately clear from the documentation that you need to configure it in 2 places to get a complete implementation.  
 
 - In the DNS resource "*domain_suffix*" is the root domain of the FQDN or properly the "*domain name*":
 
@@ -98,87 +102,6 @@ Setting up DNS is a good example. It isn't immediately clear from the documentat
 
 ---
 
-### Getting Active Directory Information for Configuring a Cluster
-
-Sometimes it can be difficult to get the exact information you need through GUIs or asking questions. Fortunately there are a few PowerShell commands you can use.  
-
-You need:
-
-```hcl
-ou_name         = "voc-cluster01"
-ad_ou           = "OU=VAST,DC=ginaz,DC=org "
-bind_dn         = "CN=Administrator,CN=Users,DC=ginaz,DC=org"
-bindpw          = "Chalc0pyr1te!123"
-ad_domain       = "ginaz.org"
-```
-
-The sequemce of PowerShell commands below will extract this in a usable form from a Domain Controller.   
-**NOTE:** You will need the AD PowerShell Modules but most AD domain controllers should have them installed, and run in an Admin console.  
-
-- Domain Information
-
-  ```powershell
-     PS C:\> (Get-ADDomain).DistinguishedName
-     DC=ginaz,DC=org
-  ```
-
-- OUs for adding Servers (VAST was added)
-
-  ```powershell
-     PS C:\> Get-ADOrganizationalUnit -Filter * | Select-Object Name, DistinguishedName
-    
-     Name               DistinguishedName                    
-     ----               -----------------                    
-     Domain Controllers OU=Domain Controllers,DC=ginaz,DC=org
-     VAST               OU=VAST,DC=ginaz,DC=org              
-  ```
-
-- Find the Admin users
-
-```powershell
-	PS C:\> Get-ADGroupMember -Identity "Domain Admins" -Recursive | Select-Object Name, SamAccountName, ObjectClass
-	
-	Name          SamAccountName ObjectClass
-	----          -------------- -----------
-    Administrator Administrator  user       
-```
-
-- Get the Bind DN for an Admin user that can add servers (clusters) to a domain
-
-  ```powershell
-      PS C:\> Get-ADUser -Identity "Administrator" | Select-Object DistinguishedName
-    
-      DistinguishedName                        
-      -----------------                        
-      CN=Administrator,CN=Users,DC=ginaz,DC=org
-  ```
-
-**For Extra Credit**  
-If you have access to the Domain Controllers (Lab) or the customer is interested, you can add a new OU for VAST clusters.  
-
-- Create a new OU with a different name (VAST):
-
-  ```powershell
-     New-ADOrganizationalUnit -Name "VAST" -Path "DC=ginaz,DC=org"
-  ```
-
-- Redirect new VAST Clusters you add to the OU:
-
-  ```powershell
-     redircmp "OU=VAST,DC=ginaz,DC=org"
-  ```
-
-- Move existing ones to the new OU (careful with this one - it needs to be more selective - use at your own risk):
-
-  ```powershell
-      Get-ADComputer -SearchBase "CN=Computers,DC=ginaz,DC=org" -Filter * |
-      ForEach-Object {
-        Move-ADObject -Identity $_.DistinguishedName -TargetPath "OU=Workstations,DC=ginaz,DC=org"
-      }
-  ```
-
----
-
 ###  Key Resources
 
 | Resource                              | Purpose                                           |
@@ -191,6 +114,8 @@ If you have access to the Domain Controllers (Lab) or the customer is interested
 | `vastdata_view`                       | Provision of NFS views                            |
 | `vastdata_dns`                        | DNS setup for VAST domain resolution              |
 | `vastdata_active_directory2`          | Configure Active Directory Domain integration     |
+| `vastdata_s3_policy`                  | Define an S3 User Policy     |
+|---------------------------------------|---------------------------------------------------|
 
 ---
 

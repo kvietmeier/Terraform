@@ -18,7 +18,7 @@ variable "vip_pools" {
     name        = string
     start_ip    = string
     end_ip      = string
-    role        = string           # e.g., PROTOCOLS, REPLICATION, VAST_CATALOG
+    role        = string           # Must be: PROTOCOLS, REPLICATION, or VAST_CATALOG
     subnet_cidr = optional(number) # CIDR for the subnet (default: 24)
     dns_name    = optional(string) # Optional DNS shortname
     gateway     = optional(string) # Optional gateway IP, used as gw_ip in resource
@@ -183,19 +183,31 @@ variable "s3_view_create_dir" {
 variable "s3_view_allow_s3_anonymous" {
   description = "Allow anonymous S3 access"
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "s3_policy1_file" {
-  description = "Path to the S3 policy JSON file"
-  type        = string
-  default     = "s3Policy1.json"
-}
 
-variable "s3_user_policy_name" {
+#------------------------------------------------------------------------------ 
+# S3 User Policy Setup
+#------------------------------------------------------------------------------
+variable "s3_detailed_policy_name" {
   description = "Name of the S3 user policy"
   type        = string
-  default     = "s3user_policy01"
+}
+
+variable "s3_detailed_policy_file" {
+  description = "Path to the S3 policy JSON file"
+  type        = string
+}
+
+variable "s3_allowall_policy_name" {
+  description = "Name of the S3 user policy"
+  type        = string
+}
+
+variable "s3_allowall_policy_file" {
+  description = "Path to the S3 policy JSON file"
+  type        = string
 }
 
 #------------------------------------------------------------------------------ 

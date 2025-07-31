@@ -96,15 +96,17 @@ resource "vastdata_view" "nfs_views" {
 ###--- Policies
 
 resource "vastdata_view_policy" "s3_default_policy" {
-  provider                 = vastdata.GCPCluster
-  name                     = var.s3_default_policy_name
-  flavor                   = var.s3_flavor
+  provider           = vastdata.GCPCluster
+  name               = var.s3_default_policy_name
+  flavor             = var.s3_flavor
+
+  # S3 specific settings
   s3_special_chars_support = var.s3_special_chars_support
   
   # Common values
-  use_auth_provider  = var.use_auth_provider
-  auth_source        = var.auth_source
-  access_flavor      = var.access_flavor
+  use_auth_provider = var.use_auth_provider
+  auth_source       = var.auth_source
+  access_flavor     = var.access_flavor
   
   # Required NFS squash/no-squash settings - will fail apply without these
   nfs_no_squash     = var.nfs_no_squash
@@ -115,17 +117,24 @@ resource "vastdata_view_policy" "s3_default_policy" {
   
 
   vippool_permissions {
-    vippool_id = local.protocols_pool.id   # Associate with PROTOCOLS pool
+    vippool_id          = local.protocols_pool.id   # Associate with PROTOCOLS pool
     vippool_permissions = var.vippool_permissions
   }
 }
 
 
 # This is a "user" policy!  It gets associated to a user.
-resource "vastdata_s3_policy" "s3policy_user_policy1" {
+resource "vastdata_s3_policy" "s3policy_user_allowall" {
   provider = vastdata.GCPCluster
-  name     = var.s3_user_policy_name
-  policy   = file("${path.module}/${var.s3_policy1_file}")
+  name     = var.s3_allowall_policy_name
+  policy   = file("${path.module}/${var.s3_allowall_policy_file}")
+  enabled  = true
+}
+
+resource "vastdata_s3_policy" "s3policy_user_detailed" {
+  provider = vastdata.GCPCluster
+  name     = var.s3_detailed_policy_name
+  policy   = file("${path.module}/${var.s3_detailed_policy_file}")
   enabled  = true
 }
 
