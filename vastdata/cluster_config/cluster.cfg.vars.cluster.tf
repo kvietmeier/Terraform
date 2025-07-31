@@ -67,12 +67,12 @@ variable "dns_enabled" {
   default     = true
 }
 
-variable "dns_shortname" {
+/* variable "dns_shortname" {
   description = "Prefix for DNS domain"
   type        = string
 }
 
-
+ */
 ###===================================================================================
 # Active Directory Configuration Variables
 ###===================================================================================

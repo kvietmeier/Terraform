@@ -1,29 +1,19 @@
 ###===================================================================================###
-# VAST Data – Configuration Settings for VIP Pools, NFS/S3 Views, DNS, and Identity
+# VAST Data – Demo/POC Configuration Input Variables (.tfvars)
 #
-# Description:
-# This `.tfvars` file provides input values for deploying a VAST Data cluster 
-# in a demo or proof-of-concept environment. It configures critical settings for:
+# This file provides input values for provisioning a VAST Data cluster with:
+# - Multiple VIP Pools (PROTOCOLS, REPLICATION, VAST_CATALOG roles)
+# - NFS and S3 view policies and view configurations
+# - Tenant, user, and group mappings for access control
+# - DNS service setup for cluster networking
+# - Active Directory integration settings (disabled by default)
 #
-# - Two VIP Pools:
-#     - sharesPool (role: PROTOCOLS)
-#     - targetPool (role: REPLICATION)
-# - NFS and S3 view policy and export configuration
-# - POSIX-style tenant, user, and group definitions
-# - DNS configuration (including VIP and domain settings)
-# - Active Directory integration (disabled by default in this file)
-#
-# Highlights:
-# - Creates 3 NFS views with full read-write/no-squash access
-# - Defines one S3 view with default policy and ownership
-# - Users are assigned with leading and supplementary GIDs
-# - All IPs are open by default for simplified testing
-# - AD join is configured but disabled; LDAP URL is statically defined
-#
-# Warning:
-# - Credentials (e.g., bindpw, vast_password) are included in clear text for testing
-#   and should **not** be used in production environments.
-# - This file should be secured or excluded from version control if used beyond PoC.
+# Notes:
+# - Designed for demo or proof-of-concept deployments; IPs and credentials
+#   are simplified and should be secured for production use.
+# - VIP Pools include optional gateways and DNS names.
+# - Supports multiple NFS views and a single S3 view with custom policies.
+# - Users can have POSIX groups and bucket creation/deletion permissions.
 ###===================================================================================###
 
 ###===================================================================================###
@@ -37,32 +27,43 @@ vast_port                    = "443"
 vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
 
-###===================================================================================###
-# VIP Pool 1 Configuration
-###===================================================================================###
-vip1_name      = "sharesPool"
-vip1_startip   = "33.20.1.11"
-vip1_endip     = "33.20.1.13"
-#vip1_endip     = "33.20.1.21"
-gw1            = "33.20.1.1"
-role1          = "PROTOCOLS"
-dns_shortname  = "sharespool"
 
 ###===================================================================================###
-# VIP Pool 2 Configuration
+#   VIP Pool Configuration
 ###===================================================================================###
-vip2_name      = "targetPool"
-vip2_startip   = "33.21.1.11"
-vip2_endip     = "33.21.1.13"
-#vip2_endip     = "33.21.1.21"
-gw2            = "33.21.1.1"
-role2          = "REPLICATION"
+# Extend end_ip if the cluster has more than 3 nodes
+# Ensure start_ip and end_ip are within the same subnet defined by subnet_cidr 
+vip_pools = {
+  vip1 = {
+    name        = "sharesPool"
+    start_ip    = "33.20.1.11"
+    end_ip      = "33.20.1.13"
+    role        = "PROTOCOLS"
+    subnet_cidr = 24
+    dns_name    = "sharespool"
+    gateway     = "33.20.1.1"
+  }
 
-###===================================================================================###
-#   Shared Network Settings
-###===================================================================================###
+  vip2 = {
+    name        = "targetPool"
+    start_ip    = "33.21.1.11"
+    end_ip      = "33.21.1.13"
+    role        = "REPLICATION"
+    subnet_cidr = 24
+    # no gateway here, optional
+  }
 
-cidr           = "24"
+  #vip3 = {
+  #  name        = "catalogPool"
+  #  start_ip    = "33.22.1.11"
+  #  end_ip      = "33.22.1.13"
+  #  role        = "VAST_CATALOG"
+  #  subnet_cidr = 24
+  #  dns_name    = "catalogpool"
+  #  # no gateway here, optional
+  #}
+}
+
 
 ###===================================================================================###
 #   Common View Policy Settings
@@ -169,6 +170,10 @@ tenants = {
     ]
   }
 }
+
+###--- Keys
+
+s3pgpkey = "../secrets/s3_pgp_key.asc"
 
 
 ###===================================================================================###

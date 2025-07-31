@@ -8,6 +8,7 @@
 # - Tenant creation from variable map (supports multiple tenants)
 # - POSIX group and user creation with GID/UID mapping
 # - Active Directory integration settings (without domain join)
+# - Adds a key for S3 access
 #
 # Notes:
 # - AD configuration uses bind credentials and supports LDAPS/TLS
@@ -15,11 +16,12 @@
 # - VIP Pools and view policies referenced externally (not defined in this file)
 # - `provider = vastdata.GCPCluster` must be declared elsewhere
 #
-# Optional:
-# - The commented-out resource block shows how to create a single static tenant
-# - Client IP ranges and VIP pool IDs are optionally supported via variable maps
+###===================================================================================###
+
+
 ###===================================================================================###
 # Groups
+###===================================================================================###
 resource "vastdata_group" "groups" {
   provider = vastdata.GCPCluster
   for_each = var.groups
@@ -28,7 +30,10 @@ resource "vastdata_group" "groups" {
   gid  = each.value.gid
 }
 
+
+###===================================================================================###
 # Users
+###===================================================================================###
 resource "vastdata_user" "users" {
   provider = vastdata.GCPCluster
   for_each = var.users
@@ -45,7 +50,10 @@ resource "vastdata_user" "users" {
   depends_on = [vastdata_group.groups]
 }
 
+
+###===================================================================================###
 # Tenants
+###===================================================================================###
 resource "vastdata_tenant" "tenants" {
   provider = vastdata.GCPCluster
   for_each = var.tenants
@@ -64,7 +72,9 @@ resource "vastdata_tenant" "tenants" {
 }
 
 
+###===================================================================================###
 # Add Actve Directory DC Information - doesn't join the domain
+###===================================================================================###
 resource "vastdata_active_directory2" "gcp_ad1" {
   provider             = vastdata.GCPCluster
   machine_account_name = var.ou_name
@@ -80,3 +90,27 @@ resource "vastdata_active_directory2" "gcp_ad1" {
   #searchbase           = "dc=qa,dc=vastdata,dc=com"
   #urls                 = ["ldap://198.51.100.3"]
 } 
+
+
+/*
+###===================================================================================###
+#   User Keys
+###===================================================================================###
+
+ You can create the key and provide a PGP public key so that the secret will be encrypted 
+ using this public key. The PGP public key must be provided in the ASCII armor format. The
+ encrypted secret key returned by the cluster will be set to the `encrypted_secret_key` field.
+
+ If you do not set the PGP public key during key creation, the returned secret key will 
+ be set to the `secret_key` field. It is highly recommended to avoid using this option. 
+ Otherwise, ensure that your Terraform backend is well secured.
+
+*/
+ 
+resource "vastdata_user_key" "s3key1" {
+  provider       = vastdata.GCPCluster
+  user_id        = vastdata_user.users["s3user1"].id
+  enabled        = false
+  pgp_public_key = file(var.s3pgpkey)
+}
+

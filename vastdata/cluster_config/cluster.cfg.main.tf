@@ -31,32 +31,25 @@
 ###===================================================================================###
 #   VIP Pools
 ###===================================================================================###
-resource "vastdata_vip_pool" "protocols" {
-  provider     = vastdata.GCPCluster
-  name         = var.vip1_name
-  domain_name  = var.dns_shortname
-  role         = var.role1
-  subnet_cidr  = var.cidr
-  gw_ip        = var.gw1
+
+resource "vastdata_vip_pool" "vip_pools" {
+  provider    = vastdata.GCPCluster
+
+  for_each    = var.vip_pools
+
+  name        = each.value.name
+  subnet_cidr = each.value.subnet_cidr
+  role        = each.value.role
+
   ip_ranges {
-    start_ip = var.vip1_startip
-    end_ip   = var.vip1_endip
+    start_ip = each.value.start_ip
+    end_ip   = each.value.end_ip
   }
 
-  depends_on = [vastdata_dns.protocol_dns]
+  gw_ip       = try(each.value.gateway, null)
+  domain_name = try(each.value.dns_name, null)
 }
 
-resource "vastdata_vip_pool" "replication" {
-  provider     = vastdata.GCPCluster
-  name         = var.vip2_name
-  role         = var.role2
-  subnet_cidr  = var.cidr
-  gw_ip        = var.gw2
-  ip_ranges {
-    start_ip = var.vip2_startip
-    end_ip   = var.vip2_endip
-  }
-}
 
 ###===================================================================================###
 #   NFS Configuration
@@ -64,7 +57,7 @@ resource "vastdata_vip_pool" "replication" {
 
 ###--- Policies
 resource "vastdata_view_policy" "nfs_default_policy" {
-  provider          = vastdata.GCPCluster
+  provider          = vastdata.GCPCluster   # Need to specify the provider alias
   name              = var.nfs_default_policy_name
   #vip_pools         = [vastdata_vip_pool.protocols.id]
   flavor            = var.flavor
@@ -80,15 +73,15 @@ resource "vastdata_view_policy" "nfs_default_policy" {
   smb_read_only     = var.smb_read_only
   
   vippool_permissions {
-    vippool_id          = vastdata_vip_pool.protocols.id
+    vippool_id = local.protocols_pool.id   # Associate with PROTOCOLS pool
     vippool_permissions = var.vippool_permissions
   }
 }
 
 ###--- Views
 resource "vastdata_view" "nfs_views" {
+  provider   = vastdata.GCPCluster   # Need to specify the provider alias
   count      = var.num_views
-  provider   = vastdata.GCPCluster
   policy_id  = vastdata_view_policy.nfs_default_policy.id
   path       = "/${var.path_name}${count.index + 1}"
   protocols  = var.protocols
@@ -122,7 +115,7 @@ resource "vastdata_view_policy" "s3_default_policy" {
   
 
   vippool_permissions {
-    vippool_id          = vastdata_vip_pool.protocols.id
+    vippool_id = local.protocols_pool.id   # Associate with PROTOCOLS pool
     vippool_permissions = var.vippool_permissions
   }
 }

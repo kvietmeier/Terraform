@@ -1,8 +1,3 @@
-# WIP - Testing DB Setup
-
-Could be broken at any point in time
-
-
 ### VAST Data Cluster Demo/POC Setup
 
 This repository contains Terraform configurations to automate the setup of a basic VAST Data cluster environment for **demo or proof-of-concept (POC)** scenarios. The configuration includes:
@@ -18,6 +13,7 @@ This repository contains Terraform configurations to automate the setup of a bas
 ---
 
 ### Prerequisites
+
 - Terraform installed
 - VAST provider plugin initialized
 - Access to a VAST Data cluster (on GCP or other supported platforms)
@@ -26,43 +22,54 @@ This repository contains Terraform configurations to automate the setup of a bas
 
 ### Elements Created
 
-####  Provider Configuration
+#### Provider Configuration
+
 Establishes a connection to a VAST Data cluster using credentials and API endpoint info.
 
 ####  VIP Pools
+
 Defines two VIP Pools:
+
 - `sharesPool`: Assigned the `PROTOCOLS` role
 - `targetPool`: Assigned the `REPLICATION` role
 
 ####  Tenants, Groups, and Users
+
 - Dynamically creates tenants from a list.
 - Groups and users are provisioned with specified GIDs/UIDs and group relationships.
 
 ####  View Policy
+
 Creates a VAST NFS view policy with:
+
 - Authentication sources
 - Read/write permissions
 - VIP pool assignment
 
 ####  NFS Views
+
 Provisioned using a loop, each with:
+
 - Path prefix (e.g., `/nfs_share_1`, `/nfs_share_2`)
 - Backed by the defined view policy
 - Optionally creates a backing directory
 
 ####  DNS
+
 Defines a VAST DNS server for the VAST cluster, using the `busab.org` domain suffix and specified VIP address.
 
 ####  Active Directory
+
 Configure Active Directory integration to join the `ginaz.org` domain.
 
 ---
 
-### Examples:
+### Examples
 
 The online documentation doesn't have very good examples of things like DNS and setting up S3 and the LLMs do not have correct information on the Provider. As I figure out how to configure them I will try to put some examples here with explantions.
 
 #### DNS
+
 Setting up DNS is a good example. It isn't immediately clear from the documentation that you need to configure it in 2 places to get a complete implementation.  
 
 - In the DNS resource "*domain_suffix*" is the root domain of the FQDN or properly the "*domain name*":
@@ -77,6 +84,7 @@ Setting up DNS is a good example. It isn't immediately clear from the documentat
     enabled       = var.dns_enabled
   }
   ```
+
 - In the VIP Pool resource it can be confusing because the attribute you need to set is named incorrectly - it is called the "*domain_name*" when it is more correctly refered to as the "*short, or host name*". *Not sure it is required but just in case I added a dependency on DNS being setup first*:
 
   ```hcl
@@ -136,10 +144,10 @@ The sequemce of PowerShell commands below will extract this in a usable form fro
 - Find the Admin users
 
 ```powershell
-	PS C:\> Get-ADGroupMember -Identity "Domain Admins" -Recursive | Select-Object Name, SamAccountName, ObjectClass
-	
-	Name          SamAccountName ObjectClass
-	----          -------------- -----------
+    PS C:\> Get-ADGroupMember -Identity "Domain Admins" -Recursive | Select-Object Name, SamAccountName, ObjectClass
+
+    Name          SamAccountName ObjectClass
+    ----          -------------- -----------
     Administrator Administrator  user       
 ```
 
@@ -179,7 +187,7 @@ If you have access to the Domain Controllers (Lab) or the customer is interested
 
 ---
 
-###  Key Resources
+### Key Resources
 
 | Resource                              | Purpose                                           |
 |---------------------------------------|---------------------------------------------------|
@@ -196,7 +204,7 @@ If you have access to the Domain Controllers (Lab) or the customer is interested
 
 #### Author
 
-* **Karl Vietmeier**
+- **Karl Vietmeier**
 
 #### License
 
@@ -204,4 +212,4 @@ This project is licensed under the Apache License - see the [LICENSE.md](../../L
 
 #### Acknowledgments
 
-* Josh Wentzel for getting me started down this path.
+- Josh Wentzel for getting me started down this path.
