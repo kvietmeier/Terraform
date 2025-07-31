@@ -62,14 +62,14 @@ Configure Active Directory integration to join the `ginaz.org` domain.
 
 ---
 
-### Examples:
+## Examples:
 
 The online documentation doesn't have very good examples of things like DNS and setting up S3 and the LLMs do not have correct information on the Provider. As I figure out how to configure them I will try to put some examples here with explantions.
 
-#### DNS
+### DNS
 It isn't immediately clear from the documentation that you need to configure it in 2 places to get a complete implementation.  
   
-**Important Note**  
+#### Important Note  
 *The `domain_suffix` can only be used with VIP Pools assigned the `PROTOCOLS` role.*  
   
 - In the DNS resource "*domain_suffix*" is the root domain of the FQDN or properly the "*domain name*":
