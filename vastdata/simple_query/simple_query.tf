@@ -24,67 +24,62 @@
 ###===================================================================================###
 ###                       Confgure VAST Cluster Provider                              ### 
 
-# Terraform version and required providers
-terraform {
-    required_version = ">=1.4"
 
-    required_providers {
-      vastdata = {
-        source  = "vast-data/vastdata"
-        version = "1.6.0"
+terraform {
+  required_providers {
+    vastdata = {
+      source  = "vast-data/vastdata"
+      version = "1.6.8"
     }
   }
 }
 
-# VAST Data Provider Configuration
-provider vastdata {
-  # Set values in .tfvars
-  username                = var.vast_user
-  port                    = var.vast_port
-  password                = var.vast_passwd
+provider "vastdata" {
+  username                = var.vast_username
+  password                = var.vast_password
   host                    = var.vast_host
-  skip_ssl_verify         = var.skip_ssl
-  version_validation_mode = var.validation_mode
+  port                    = var.vast_port
+  skip_ssl_verify         = var.vast_skip_ssl_verify
+  version_validation_mode = var.vast_version_validation_mode
   alias                   = "GCPCluster"
 }
 
-###===================================================================================###
-###                            VAST Cluster Provider Variables                        ###
+###===================================================================================
+# Provider Configuration Variables
+###===================================================================================
 
-variable "vast_user" {
-  description = "Username for the VAST Cluster"
+variable "vast_username" {
+  description = "Username for VAST Data API access"
   type        = string
-  default     = "admin"
 }
 
-variable "vast_port" {
-  description = "Port used to connect to the VAST Cluster"
-  type        = number
-  default     = 443
-}
-
-variable "vast_passwd" {
-  description = "Password for the VAST Cluster"
+variable "vast_password" {
+  description = "Password for VAST Data API access"
   type        = string
-  default     = "123456"
+  sensitive   = true
 }
 
 variable "vast_host" {
-  description = "Hostname or IP address of the VAST Cluster"
+  description = "VAST cluster hostname or IP address"
   type        = string
-  default     = "vms"
 }
 
-variable "skip_ssl" {
-  description = "Boolean to skip SSL certificate verification"
+variable "vast_port" {
+  description = "VAST cluster API port"
+  type        = string
+  default     = "443"
+}
+
+variable "vast_skip_ssl_verify" {
+  description = "Skip SSL verification for the VAST provider"
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "validation_mode" {
-  description = "Mode to use for provider version validation"
+variable "vast_version_validation_mode" {
+  description = "API version validation mode (strict, warn, or none)"
   type        = string
-  default     = "strict"
+  default     = "warn"
 }
 
 
