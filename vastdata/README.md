@@ -105,9 +105,9 @@ tenant_id = 1
   }
   ```
 
-#### These are the object metada available:
+#### This is the VIP Pool object metadata available:
 
- -*VIP Poool ID:*
+ - *VIP Poool ID:*
 
   ```hcl
   output "protocols_vip_pool_id" {
