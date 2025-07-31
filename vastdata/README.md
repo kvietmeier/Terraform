@@ -80,7 +80,8 @@ tenant_id = 1
 
   ``` hcl
   data "vastdata_vip_pool" "protocolsVIP" {
-      name = "protocolsPool"
+      provider = vastdata.GCPCluster
+      name     = "protocolsPool"
   }
   ```
 
