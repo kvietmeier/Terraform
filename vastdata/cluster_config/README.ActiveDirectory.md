@@ -1,12 +1,10 @@
 #  Active Directory integration Notes
 
----
-
 ### Getting Active Directory Information for Configuring a Cluster
 
 Sometimes it can be difficult to get the exact information you need through GUIs or asking questions. Fortunately there are a few PowerShell commands you can use.  
 
-You need:
+You need (example values):
 
 ```hcl
 ou_name         = "voc-cluster01"
@@ -16,8 +14,8 @@ bindpw          = "Chalc0pyr1te!123"
 ad_domain       = "ginaz.org"
 ```
 
-The sequemce of PowerShell commands below will extract this in a usable form from a Domain Controller.   
-**NOTE:** You will need the AD PowerShell Modules but most AD domain controllers should have them installed, and run in an Admin console.  
+The sequence of PowerShell commands below will extract this in a usable form from a Domain Controller.   
+**NOTE:** You will need the AD PowerShell Modules but most AD domain controllers should have them installed, and must run them in an Admin console.  
 
 - Domain Information
 
@@ -57,7 +55,7 @@ The sequemce of PowerShell commands below will extract this in a usable form fro
       CN=Administrator,CN=Users,DC=ginaz,DC=org
   ```
 
-**For Extra Credit**  
+#### For Extra Credit  
 If you have access to the Domain Controllers (Lab) or the customer is interested, you can add a new OU for VAST clusters.  
 
 - Create a new OU with a different name (VAST):
