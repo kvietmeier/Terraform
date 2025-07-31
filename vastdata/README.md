@@ -12,30 +12,11 @@
 
 ---
 
-#### Configuring a Cluster
+### Testing basic authentication
 
-**For a complete example of configurarting a cluyster see (cluster_config):**
+For a quick test of authentication use the config in `simple_query`, it validates credentials and returns some basic metadata.
 
-* VAST provider setup
-* VIP Pool definitions for protocol and replication roles
-* NFS and S3 view policies and exports
-* DNS service configuration
-* Active Directory integration options
-* POSIX-style tenants, users, and group definitions
-
-**Features**
-
-* Modular and reusable design for rapid iteration
-* Clear separation of configuration (`.tfvars`), logic (`main.tf`), and variables
-* Supports multi-protocol (NFS/S3) configurations
-* Uses dynamic constructs (e.g., maps, `count`, `for_each`) for scalability
-* Compatible with VAST provider v1.6.8+
-
----
-
-* **NOTE: For a quick test of authentication use the config in `simple_query`, it validates credentials and grabs some basic metadata.**
-
-You can use this set HCL/tf files as a starting point to build more complex configurations with. 
+*You can also use this set of HCL/tf files as a starting point templatee to build more complex configurations*
 
 Use like this - 
 ```shell
@@ -66,44 +47,67 @@ cluster_tags = tomap({
 tenant_id = 1
 ```
 
+---
+
+### Setting up a fully functioning cluster from scratch
+
+**For a complete example of setting up a cluster see (cluster_config):**
+
+* VAST provider setup
+* VIP Pool definitions for protocol and replication roles
+* NFS and S3 view policies and exports
+* DNS service configuration
+* Active Directory integration options
+* POSIX-style tenants, users, and group definitions
+
+**Features**
+
+* Modular and reusable design for rapid iteration
+* Clear separation of configuration (`.tfvars`), logic (`main.tf`), and variables
+* Supports multi-protocol (NFS/S3) configurations
+* Uses dynamic constructs (e.g., `maps`, `count`, `for_each`) for scalability
+* Compatible with VAST provider v1.6.8+
+
 
 ---
 
-#### Misc Notes
+### Misc Notes
 
-**Example: Use existing VIP Pool for resources like Views.**
+#### Example: Use existing VIP Pool for resources like Views
 
-``` hcl
-data "vastdata_vip_pool" "protocolsVIP" {
-    name = "protocolsPool"
-}
-```
 
-Use the VIP Pool - you need the tenantID that owns the Pool and the PoolID.
+**Get the VIP Pool metadata - you need the tenantID that owns the Pool and the PoolID.**
 
-```hcl
-# Need a View Policy
-resource "vastdata_view_policy" "ViewPolicy01" {
-  name          = "ViewPolicy01"
-  vip_pools     = [data.vastdata_vip_pool.protocolsVIP.id]
-  tenant_id     = data.vastdata_vip_pool.protocolsVIP.tenant_id
-  flavor        = "NFS"
-  nfs_no_squash = [ "10.111.1.28", "10.111.1.26", "10.111.1.27" ] # Should be a list() var!
-}
+  ``` hcl
+  data "vastdata_vip_pool" "protocolsVIP" {
+      name = "protocolsPool"
+  }
+  ```
 
-# Create the View
-resource "vastdata_view" "elbencho_view" {
-  path       = "/vast/share01"
-  policy_id  = vastdata_view_policy.ViewPolicy01.id
-  create_dir = "true"
-  protocols  = ["NFS", "NFS4"]  # Should be a list() var!
-}
+**Use the VIP Pool - you need the tenantID that owns the Pool and the PoolID.**
 
-```
+  ```hcl
+  # Need a View Policy
+  resource "vastdata_view_policy" "ViewPolicy01" {
+    name          = "ViewPolicy01"
+    vip_pools     = [data.vastdata_vip_pool.protocolsVIP.id]
+    tenant_id     = data.vastdata_vip_pool.protocolsVIP.tenant_id
+    flavor        = "NFS"
+    nfs_no_squash = [ "10.111.1.28", "10.111.1.26", "10.111.1.27" ] # Should be a list() var!
+  }
+
+  # Create the View
+  resource "vastdata_view" "elbencho_view" {
+    path       = "/vast/share01"
+    policy_id  = vastdata_view_policy.ViewPolicy01.id
+    create_dir = "true"
+    protocols  = ["NFS", "NFS4"]  # Should be a list() var!
+  }
+  ```
 
 ---
 
-These are the object metada available:
+#### These are the object metada available:
 
 *VIP Poool ID:*
 
