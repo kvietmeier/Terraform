@@ -89,6 +89,7 @@ tenant_id = 1
   ```hcl
   # Need a View Policy
   resource "vastdata_view_policy" "ViewPolicy01" {
+    provider      = vastdata.GCPCluster
     name          = "ViewPolicy01"
     vip_pools     = [data.vastdata_vip_pool.protocolsVIP.id]
     tenant_id     = data.vastdata_vip_pool.protocolsVIP.tenant_id
@@ -98,6 +99,7 @@ tenant_id = 1
 
   # Create the View
   resource "vastdata_view" "elbencho_view" {
+    provider   = vastdata.GCPCluster
     path       = "/vast/share01"
     policy_id  = vastdata_view_policy.ViewPolicy01.id
     create_dir = "true"
