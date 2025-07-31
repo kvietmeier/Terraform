@@ -107,54 +107,54 @@ tenant_id = 1
 
 ---
 
-#### These are the object metada available:
+ - These are the object metada available:
 
-*VIP Poool ID:*
+ - *VIP Poool ID:*
 
-```hcl
-output "protocols_vip_pool_id" {
-  value = data.vastdata_vip_pool.protocolsVIP.id
-  description = "The ID of the protocols VIP pool."
-}
-```
+  ```hcl
+  output "protocols_vip_pool_id" {
+    value = data.vastdata_vip_pool.protocolsVIP.id
+    description = "The ID of the protocols VIP pool."
+  }
+  ```
 
-*VIP Pool Name:*
+- *VIP Pool Name:*
 
-```hcl
-output "protocols_vip_pool_name" {
-  value = data.vastdata_vip_pool.protocolsVIP.name
-  description = "The name of the protocols VIP pool."
-}
-```
+  ```hcl
+  output "protocols_vip_pool_name" {
+    value = data.vastdata_vip_pool.protocolsVIP.name
+    description = "The name of the protocols VIP pool."
+  }
+  ```
 
-*Tenant ID that owns the VIP Pool*
+- *Tenant ID that owns the VIP Pool*
 
-```hcl
-output "protocols_vip_pool_tenant_id" {
-  value = data.vastdata_vip_pool.protocolsVIP.tenant_id
-  description = "The tenant ID associated with the protocols VIP pool."
-}
-```
+  ```hcl
+  output "protocols_vip_pool_tenant_id" {
+    value = data.vastdata_vip_pool.protocolsVIP.tenant_id
+    description = "The tenant ID associated with the protocols VIP pool."
+  }
+  ```
 
-*Cluster Name where the VIP Pool lives:*
+- *Cluster Name where the VIP Pool lives:*
 
-```hcl
-output "protocols_vip_pool_cluster" {
-  value = data.vastdata_vip_pool.protocolsVIP.cluster
-  description = "The cluster associated with the protocols VIP pool."
-}
-```
+  ```hcl
+  output "protocols_vip_pool_cluster" {
+    value = data.vastdata_vip_pool.protocolsVIP.cluster
+    description = "The cluster associated with the protocols VIP pool."
+  }
+  ```
 
-Output -
+- **Output -**
 
-```hcl
-Outputs:
+  ```hcl
+  Outputs:
 
-protocols_vip_pool_cluster = "vastoncloud-gcp02"
-protocols_vip_pool_id = 3
-protocols_vip_pool_name = "protocolsPool"
-protocols_vip_pool_tenant_id = 1
-```
+  protocols_vip_pool_cluster = "vastoncloud-gcp02"
+  protocols_vip_pool_id = 3
+  protocols_vip_pool_name = "protocolsPool"
+  protocols_vip_pool_tenant_id = 1
+  ```
 
 ---
 
