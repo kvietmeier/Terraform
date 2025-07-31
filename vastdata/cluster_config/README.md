@@ -68,7 +68,10 @@ The online documentation doesn't have very good examples of things like DNS and 
 
 #### DNS
 It isn't immediately clear from the documentation that you need to configure it in 2 places to get a complete implementation.  
-
+  
+**Important Note**  
+The `domain_suffix` can only be used with VIP Pools assigned the `PROTOCOLS` role.  
+  
 - In the DNS resource "*domain_suffix*" is the root domain of the FQDN or properly the "*domain name*":
 
   ```hcl
