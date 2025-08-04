@@ -53,14 +53,15 @@ vip_pools = {
     role        = "REPLICATION"
   }
 
-   vip3 = {
+  /*   vip3 = {
     name        = "catalogPool"
     start_ip    = "33.22.1.11"
     end_ip      = "33.22.1.13"
     gateway     = "33.23.1.1"
     role        = "VAST_CATALOG"
     subnet_cidr = 24
-  }
+  } 
+  */
 }
 
 
@@ -138,6 +139,9 @@ s3_detailed_policy_file = "s3Policy-Detailed.json"
 s3_allowall_policy_name = "s3policy_user_allowall"
 s3_detailed_policy_name = "s3policy_user_detailed"
 
+###--- Keys
+s3pgpkey = "../secrets/s3_pgp_key.asc"
+
 
 groups = {
   s3users  = { gid = 1000 }
@@ -178,10 +182,6 @@ tenants = {
     ]
   }
 }
-
-###--- Keys
-
-s3_pgpkey = "../secrets/s3_pgp_key.asc"
 
 
 ###===================================================================================###

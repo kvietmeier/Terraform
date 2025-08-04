@@ -1,28 +1,15 @@
 ###===================================================================================###
-# VAST Data VIP Pools and NFS View Configuration
-# --role: PROTOCOLS | REPLICATION | VAST_CATALOG
-#
-# This file defines:
-# - VAST provider connection settings
-# - Two VIP Pools:
-#     - sharesPool (role: PROTOCOLS)
-#     - targetPool (role: REPLICATION)
-# - Shared network settings
-# - NFS view policy configuration
+#   Vast Data Cluster Configuration Outputs
 ###===================================================================================###
 
 
-/*
-data "vastdata_vip_pool" "pool1_gcp" {
-  provider = vastdata.GCPCluster
-  name     = var.vip1_name
+# S3 Keys for s3user1
+output "s3_access_key" {
+  value     = vastdata_user_key.s3key1.access_key
+  sensitive = true
 }
 
-output "vip_pool_id_gcp" {
-  value = data.vastdata_vip_pool.pool1_gcp.id
+output "s3_secret_key_encrypted" {
+  value     = vastdata_user_key.s3key1.encrypted_secret_key
+  sensitive = true
 }
-
-output "vip_pool_name_gcp" {
-  value = data.vastdata_vip_pool.pool1_gcp.name
-}
-*/
