@@ -12,18 +12,24 @@
 #------------------------------------------------------------------------------ 
 # VIP Pool Configuration
 #------------------------------------------------------------------------------
+
+
+variable "number_of_nodes" {
+  type    = number
+  default = 3
+}
+
 variable "vip_pools" {
-  description = "Map of VIP pool configurations"
   type = map(object({
     name        = string
     start_ip    = string
-    end_ip      = string
-    role        = string           # Must be: PROTOCOLS, REPLICATION, or VAST_CATALOG
-    subnet_cidr = optional(number) # CIDR for the subnet (default: 24)
-    dns_name    = optional(string) # Optional DNS shortname
-    gateway     = optional(string) # Optional gateway IP, used as gw_ip in resource
+    gateway     = string
+    subnet_cidr = number
+    role        = string
+    dns_name    = optional(string)
   }))
 }
+
 
 #------------------------------------------------------------------------------ 
 # View/Policy Common Settings

@@ -29,15 +29,12 @@ vast_version_validation_mode = "warn"
 
 
 ###===================================================================================###
-#   VIP Pool Configuration
+#   VIP Pool Configuration (see locals for explanation)
 ###===================================================================================###
-# Extend end_ip if the cluster has more than 3 nodes - 1 VIP/cnode in GCP
-# Ensure start_ip and end_ip are within the same subnet defined by subnet_cidr 
 vip_pools = {
   vip1 = {
     name        = "sharesPool"
     start_ip    = "33.20.1.11"
-    end_ip      = "33.20.1.13"
     gateway     = "33.20.1.1"
     subnet_cidr = 24
     role        = "PROTOCOLS"
@@ -47,21 +44,19 @@ vip_pools = {
   vip2 = {
     name        = "targetPool"
     start_ip    = "33.21.1.11"
-    end_ip      = "33.21.1.13"
     gateway     = "33.21.1.1"
     subnet_cidr = 24
     role        = "REPLICATION"
   }
 
-  /*   vip3 = {
-    name        = "catalogPool"
+  vip3 = {
+    name        = "s3Pool"
     start_ip    = "33.22.1.11"
-    end_ip      = "33.22.1.13"
-    gateway     = "33.23.1.1"
-    role        = "VAST_CATALOG"
+    gateway     = "33.22.1.1"
     subnet_cidr = 24
+    role        = "PROTOCOLS"
+    dns_name    = "s3pool"
   } 
-  */
 }
 
 

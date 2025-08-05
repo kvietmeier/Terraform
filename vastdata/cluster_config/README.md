@@ -8,10 +8,11 @@ This should always be a working version.
 This repository contains Terraform configurations to automate the setup of a complete VAST Data cluster suitable for **demo or proof-of-concept (POC)** scenarios. The configuration includes:
 
 - VAST Provider and authentication
-- VIP Pools for `PROTOCOLS`, `REPLICATION`, and `VAST_CATALOG`
+- VIP Pools for `PROTOCOLS`, `REPLICATION`
 - NFS view policy and NFS views
 - S3 view policy and NFS views
 - S3 User policies
+- S3 User keys
 - DNS configuration
 - Basic multi-tenant setup with users and groups
 - Active Directory integration
@@ -24,6 +25,7 @@ This repository contains Terraform configurations to automate the setup of a com
 - Access to a VAST Data cluster (on GCP or other supported platforms)
 - Accessible Active Directory DC
 - DNS Forwarder or Delegation configured to point to the VAST DNS domain/s
+- Valid PGP key
 
 ### Elements Created
 
@@ -31,9 +33,12 @@ This repository contains Terraform configurations to automate the setup of a com
 Establishes a connection to a VAST Data cluster using credentials and API endpoint info.
 
 ####  VIP Pools
-Defines two VIP Pools:
+Defines 3 VIP Pools:
 - `sharesPool`: Assigned the `PROTOCOLS` role
+- `spool`: Assigned the `PROTOCOLS` role
 - `targetPool`: Assigned the `REPLICATION` role
+
+**NOTE**: VIP pools are extended dynamically based on number of nodes.
 
 ####  Tenants, Groups, and Users
 - Dynamically creates tenants from a list.
@@ -47,6 +52,9 @@ Creates a VAST NFS view policy with:
 
 ####  S3 User Policies
 - Sample configurations loaded from json files
+
+####  S3 User Keys
+- Add PGP key for S3
 
 ####  NFS Views
 Provisioned using a loop, each with:
