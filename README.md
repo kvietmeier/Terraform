@@ -1,10 +1,10 @@
-### Terraform Projects
+# Terraform Projects
 
 Terraform projects - recently added VAST Data.
 
-#### Installing Terraform
+### Installing Terraform
 
-[Hashicorp Learn Install Tutorial](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/certification-associate-tutorials)
+[Hashicorp Instructions](https://developer.hashicorp.com/terraform/install)
 
 * InstallUpgradeTerraform.ps1 is a small PS script I wrote to upgrade/install the Terraform binary
 
@@ -43,7 +43,7 @@ Terraform projects - recently added VAST Data.
 
 ---
 
-#### Directories
+### Directories (subject to change)
 
 ```text
 ├── scripts
@@ -76,8 +76,6 @@ Terraform projects - recently added VAST Data.
 #### Terraform Notes
 
 **Terraform commands:**  
-A good cheat sheet I ran across  
-<https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet>
 
 Apply/destroy without prompting  
 
