@@ -17,8 +17,8 @@ The ingress rules and VAST Data IP/UDP ports are excluded from GitHub by placing
 
 ```hcl
    ingress_filter = [
-  "123.45.67.89/32",  # Example: My Local IP
-  "192.0.2.0/24",     # Example: My Office CIDR
+   "123.45.67.89/32",  # Example: My Local IP
+   "192.0.2.0/24",     # Example: My Office CIDR
    # ... add other private IPs here ...
    ]
 ```
