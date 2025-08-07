@@ -31,6 +31,8 @@ vast_version_validation_mode = "warn"
 ###===================================================================================###
 #   VIP Pool Configuration (see locals for explanation)
 ###===================================================================================###
+number_of_nodes = 1
+
 vip_pools = {
   vip1 = {
     name        = "sharesPool"
