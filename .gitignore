@@ -13,7 +13,11 @@
 **/samples/*
 **/secrets/*
 
+# VAST directories
+# These directories are used for VAST specific configurations and should not be included in the repo.
+**/vast_configurations/**
 **/vast/**
+**/vast_on_cloud/**
 
 # .tfstate files
 *.tfstate
