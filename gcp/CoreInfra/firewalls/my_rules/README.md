@@ -11,9 +11,10 @@ The ingress rules and VAST Data IP/UDP ports are excluded from GitHub by placing
 #### How to Use
 
 1. Create Your Private Variables File:
-   Create a new file named private.auto.tfvars in the same directory as fw.main.tf.
-2. Add Your Sensitive Data:
-   In the private.auto.tfvars file, add your list of private IP addresses and ranges:
+   Create a new file named `private.auto.tfvars` in the same directory as `fw.main.tf`.
+2. Add `private.auto.tfvars` to `.gitignore`.
+3. Add Your Sensitive Data:
+   In the `private.auto.tfvars` file, add your list of private IP addresses and ranges:
 
 ```hcl
    ingress_filter = [
@@ -22,8 +23,6 @@ The ingress rules and VAST Data IP/UDP ports are excluded from GitHub by placing
    # ... add other private IPs here ...
    ]
 ```
-
-
 
 #### Author/s
 
