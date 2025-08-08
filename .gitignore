@@ -58,7 +58,7 @@ terraform.rc
 
 # Private tfvars info
 # This file is used to store sensitive information such as passwords, private keys, etc.
-private.auto.tfvars
+*.auto.tfvars
 
 
 ###========================== Default entries
