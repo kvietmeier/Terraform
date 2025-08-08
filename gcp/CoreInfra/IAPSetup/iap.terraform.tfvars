@@ -9,11 +9,9 @@
 #
 ###===================================================================================###
 
-
-###---  Standard Values
-
-# VPC Config
-
+# Instances variable is currently not used in IAM assignments.
+# It is included here for future use cases that may require
+# instance-level role assignments or configurations.
 instances = [
   {name = "client01",    zone = "us-east1-c"},
   {name = "client02",    zone = "us-east1-c"},
@@ -26,6 +24,6 @@ instances = [
   {name = "client09",    zone = "us-east1-c"},
   {name = "client10",    zone = "us-east1-c"},
   {name = "client11",    zone = "us-east1-c"},
-  {name = "w22server01", zone = "us-east1-b"},
-  {name = "devops01",    zone = "us-east1-a"}
+  {name = "w22server01", zone = "us-west2-b"},
+  {name = "devops01",    zone = "us-west2-a"}
 ]

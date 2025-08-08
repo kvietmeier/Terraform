@@ -23,6 +23,9 @@ variable "project_id" {
 
 
 ### IAP Configuration
+
+# "Instances" Currently not used in IAM role assignments, but reserved for future
+# expansion where instance-level permissions or configurations may be needed.
 variable "instances" {
   description = "List of VM names with zones"
   type = list(object({

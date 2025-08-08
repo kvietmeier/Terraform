@@ -1,17 +1,24 @@
 ###===================================================================================###
-#  Terraform Configuration File
+# Terraform Configuration File
 #
-#  Description : Setup IAP User Roles
-#  Author      : Karl Vietmeier
+# Description: Assigns IAP user access roles for Google Cloud VMs
+#              - Grants IAP tunnel access at the project level for a list of users
+#              - Grants Compute Viewer role at the project level for a list of users
+#              - Grants OS Login External User role at the instance level for each user-instance pair
 #
-#  License     : Apache 2.0
+# Author:      Karl Vietmeier
+# License:     Apache 2.0
+#
+# Usage:
+#  - Configure project_id, user_emails, and instances variables
+#  - Run `terraform init` and `terraform apply`
+#
+# Notes:
+#  - `roles/iap.tunnelResourceAccessor` must be assigned at the project level
+#  - `roles/compute.osLoginExternalUser` must be assigned per instance
+#  - Ensure instance names and zones are accurate to avoid 404 errors
 #
 ###===================================================================================###
-
-
-###===================================================================================###
-#     Start creating infrastructure resources
-###===================================================================================###o
 
 
 # Flatten user–instance pairs into a map
@@ -30,15 +37,7 @@ locals {
   }
 }
 
-resource "google_compute_instance_iam_member" "vm_tunnel" {
-  for_each      = local.user_instance_pairs
-  project       = var.project_id
-  zone          = each.value.zone
-  instance_name = each.value.instance
-  role          = "roles/iap.tunnelResourceAccessor"
-  member        = "user:${each.value.user}"
-}
-
+# Assign iap.tunnelResourceAccessor at project level for all users
 resource "google_project_iam_member" "iap_tunnel" {
   for_each = toset(var.user_emails)
   project  = var.project_id
@@ -46,6 +45,7 @@ resource "google_project_iam_member" "iap_tunnel" {
   member   = "user:${each.value}"
 }
 
+# Assign compute.viewer at project level
 resource "google_project_iam_member" "compute_viewer" {
   for_each = toset(var.user_emails)
   project  = var.project_id
@@ -53,9 +53,12 @@ resource "google_project_iam_member" "compute_viewer" {
   member   = "user:${each.value}"
 }
 
+/*
+# Has to be set at the Organization level
 resource "google_project_iam_member" "oslogin" {
   for_each = toset(var.user_emails)
   project  = var.project_id
   role     = "roles/compute.osLoginExternalUser"
   member   = "user:${each.value}"
 }
+ */
