@@ -8,6 +8,7 @@
 ###===================================================================================###
 
 
+
 ###---  Standard Values
 # Provider Information
 project_id      = "clouddev-itdesk124"
@@ -17,6 +18,7 @@ zone            = "us-west2-a"
 
 user_emails    = [
   "mordechai.blaunstein@vastdata.com",
+  "karl.vietmeier@vastdata.com",
   "jesse.thaloor@vastdata.com",
   "leonid.vaimon@vastdata.com",
   "ronnie.lazar@vastdata.com",
