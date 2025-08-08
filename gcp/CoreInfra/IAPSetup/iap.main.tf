@@ -19,9 +19,10 @@ locals {
   user_instance_pairs = {
     for pair in flatten([
       for user in var.user_emails : [
-        for instance in var.instance_names : {
+        for inst in var.instances : {
           user     = user
-          instance = instance
+          instance = inst.name
+          zone     = inst.zone
         }
       ]
     ]) :
@@ -29,17 +30,15 @@ locals {
   }
 }
 
-resource "google_compute_instance_iam_member" "jump_host_tunnel" {
+resource "google_compute_instance_iam_member" "vm_tunnel" {
   for_each      = local.user_instance_pairs
   project       = var.project_id
-  zone          = var.zone
+  zone          = each.value.zone
   instance_name = each.value.instance
   role          = "roles/iap.tunnelResourceAccessor"
   member        = "user:${each.value.user}"
 }
 
-
-# Project-level IAP tunnel access
 resource "google_project_iam_member" "iap_tunnel" {
   for_each = toset(var.user_emails)
   project  = var.project_id
@@ -47,7 +46,6 @@ resource "google_project_iam_member" "iap_tunnel" {
   member   = "user:${each.value}"
 }
 
-# Optional: Let gcloud look up instance metadata
 resource "google_project_iam_member" "compute_viewer" {
   for_each = toset(var.user_emails)
   project  = var.project_id
@@ -55,7 +53,6 @@ resource "google_project_iam_member" "compute_viewer" {
   member   = "user:${each.value}"
 }
 
-# OS Login for guest OS (only if enabled)
 resource "google_project_iam_member" "oslogin" {
   for_each = toset(var.user_emails)
   project  = var.project_id

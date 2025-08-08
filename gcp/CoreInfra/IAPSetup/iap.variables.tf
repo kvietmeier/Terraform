@@ -23,10 +23,14 @@ variable "project_id" {
 
 
 ### IAP Configuration
-variable "instance_names" {
-  description = "Name of the target VM instance"
-  type        = list(string)
+variable "instances" {
+  description = "List of VM names with zones"
+  type = list(object({
+    name = string
+    zone = string
+  }))
 }
+
 
 variable "user_emails" {
   description = "List of user email addresses to grant access"

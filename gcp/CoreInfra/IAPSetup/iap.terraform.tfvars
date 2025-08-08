@@ -14,22 +14,18 @@
 
 # VPC Config
 
-instance_names = [
-  "client01",
-  "client02",
-  "client03",
-  "client04",
-  "client05",
-  "client06",
-  "client07",
-  "client08",
-  "client09",
-  "client10",
-  "client11",
-  "w22server01",
-  "devops01"
+instances = [
+  {name = "client01",    zone = "us-east1-c"},
+  {name = "client02",    zone = "us-east1-c"},
+  {name = "client03",    zone = "us-east1-c"},
+  {name = "client04",    zone = "us-east1-c"},
+  {name = "client05",    zone = "us-east1-c"},
+  {name = "client06",    zone = "us-east1-c"},
+  {name = "client07",    zone = "us-east1-c"},
+  {name = "client08",    zone = "us-east1-c"},
+  {name = "client09",    zone = "us-east1-c"},
+  {name = "client10",    zone = "us-east1-c"},
+  {name = "client11",    zone = "us-east1-c"},
+  {name = "w22server01", zone = "us-east1-b"},
+  {name = "devops01",    zone = "us-east1-a"}
 ]
-
-
-
-###======  Examples:
