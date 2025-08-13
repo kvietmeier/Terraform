@@ -35,7 +35,7 @@ variable "vip_pools" {
 # View/Policy Common Settings
 #------------------------------------------------------------------------------
 variable "flavor" {
-  description = "Specifies the NFS view policy flavor"
+  description = "Specifies the view policy flavor [NFS|SMB|MIXED_LAST_WINS|S3_NATIVE]"
   type        = string
   default     = "MIXED_LAST_WINS"
 }
@@ -47,13 +47,13 @@ variable "use_auth_provider" {
 }
 
 variable "auth_source" {
-  description = "Authentication source (e.g., RPC_AND_PROVIDERS)"
+  description = "Authentication source [RPC|PROVIDERS|RPC_AND_PROVIDERS]"
   type        = string
   default     = "RPC_AND_PROVIDERS"
 }
 
 variable "access_flavor" {
-  description = "Access flavor setting"
+  description = "Access flavor setting [NFS4|SMB|ALL]"
   type        = string
   default     = "ALL"
 }
@@ -67,7 +67,7 @@ variable "vippool_permissions" {
 #------------------------------------------------------------------------------ 
 # NFS View Policy & View Configuration
 #------------------------------------------------------------------------------
-variable "nfs_default_policy_name" {
+variable "nfs_basic_policy_name" {
   description = "Name of the default NFS view policy"
   type        = string
 }
@@ -125,10 +125,12 @@ variable "create_dir" {
   default     = true
 }
 
-#------------------------------------------------------------------------------ 
-# S3 View Configuration
-#------------------------------------------------------------------------------
-variable "s3_default_policy_name" {
+###------------------------------------------------------------------------------###
+#    S3 Views Configuration
+###------------------------------------------------------------------------------###
+
+###--- Policy Settings
+variable "s3_basic_policy_name" {
   description = "Name of the default S3 view policy"
   type        = string
 }
@@ -145,66 +147,22 @@ variable "s3_special_chars_support" {
   default     = true
 }
 
-variable "s3_view_path" {
-  description = "Filesystem path for the S3 view"
-  type        = string
-  default     = "/s3bucket01"
+
+###--- Views Map
+variable "s3_views_config" {
+  description = "Map of static view configs without resource references"
+  type = map(object({
+    name                      = string
+    bucket                    = string
+    path                      = string
+    protocols                 = list(string)
+    create_dir                = bool
+    bucket_owner              = string
+    allow_s3_anonymous_access = optional(bool)
+  }))
 }
 
-variable "s3_view_protocol" {
-  description = "Protocol list for S3 view"
-  type        = list(string)
-  default     = ["S3"]
-}
-
-variable "s3_view_name" {
-  description = "Name of the S3 view"
-  type        = string
-  default     = "s3view01"
-}
-
-variable "s3_bucket_name" {
-  description = "Bucket name for the S3 view"
-  type        = string
-  default     = "bucket01"
-}
-
-variable "s3_default_owner" {
-  description = "Owner of the S3 view"
-  type        = string
-}
-
-variable "s3_use_ldap_auth" {
-  description = "Enable LDAP auth for S3"
-  type        = bool
-  default     = false
-}
-
-variable "s3_view_create_dir" {
-  description = "Create directory if missing"
-  type        = bool
-  default     = true
-}
-
-variable "s3_view_allow_s3_anonymous" {
-  description = "Allow anonymous S3 access"
-  type        = bool
-  default     = true
-}
-
-
-#------------------------------------------------------------------------------ 
-# S3 User Policy Setup
-#------------------------------------------------------------------------------
-variable "s3_detailed_policy_name" {
-  description = "Name of the S3 user policy"
-  type        = string
-}
-
-variable "s3_detailed_policy_file" {
-  description = "Path to the S3 policy JSON file"
-  type        = string
-}
+### S3 User Policies
 
 variable "s3_allowall_policy_name" {
   description = "Name of the S3 user policy"
@@ -254,3 +212,9 @@ variable "s3pgpkey" {
   description = "Path to the PGP public key file for S3 user keys"
   type        = string
 }
+
+variable "pgp_key_users" {
+  description = "List of users to assign PGP keys"
+  type        = list(string)
+  default     = ["s3user1", "dbuser1"]
+} 

@@ -101,16 +101,12 @@ resource "vastdata_active_directory2" "gcp_ad1" {
  using this public key. The PGP public key must be provided in the ASCII armor format. The
  encrypted secret key returned by the cluster will be set to the `encrypted_secret_key` field.
 
- If you do not set the PGP public key during key creation, the returned secret key will 
- be set to the `secret_key` field. It is highly recommended to avoid using this option. 
- Otherwise, ensure that your Terraform backend is well secured.
-
 */
  
-resource "vastdata_user_key" "s3key1" {
-  provider       = vastdata.GCPCluster
-  user_id        = vastdata_user.users["s3user1"].id
-  enabled        = false
+resource "vastdata_user_key" "s3keys" {
+  for_each      = toset(var.pgp_key_users)
+  provider      = vastdata.GCPCluster
+  user_id       = vastdata_user.users[each.key].id
+  enabled       = true
   pgp_public_key = file(var.s3pgpkey)
 }
-

@@ -28,6 +28,7 @@ simplify and standardize references across the Terraform modules.
 */
 
 locals {
+
   vip_pools = {
     for key, pool in var.vip_pools : key => merge(
       pool,
@@ -55,5 +56,14 @@ locals {
   replication_pools = {
     for k, v in local.vip_pools : k => v
     if v.role == "REPLICATION"
+  }
+
+  s3_views = {
+    for key, view in var.s3_views_config : key => merge(
+      view,
+      {
+        policy_id = vastdata_view_policy.s3_basic_policy.id
+      }
+    )
   }
 }

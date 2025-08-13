@@ -75,13 +75,13 @@ access_flavor           = "ALL"
 ###===================================================================================###
 #   NFS View Policy Settings
 ###===================================================================================###
-nfs_default_policy_name = "nfs-view-policy"
-nfs_no_squash       = ["0.0.0.0/0"]
-nfs_read_write      = ["0.0.0.0/0"]
-nfs_read_only       = []
-smb_read_write      = []
-smb_read_only       = []
-vippool_permissions = "RW"
+nfs_basic_policy_name = "nfs-view-policy"
+nfs_no_squash         = ["0.0.0.0/0"]
+nfs_read_write        = ["0.0.0.0/0"]
+nfs_read_only         = []
+smb_read_write        = []
+smb_read_only         = []
+vippool_permissions   = "RW"
 
 
 ###===================================================================================###
@@ -95,22 +95,54 @@ create_dir        = true
 ###===================================================================================###
 #   S3 Settings
 ###===================================================================================###
-#tenant             = "default-tenant"
 
 
-###--- Default S3 View Policy Settings
-s3_default_policy_name   = "DefaultS3Policy"
+###--- Basic S3 View Policy Settings
+s3_basic_policy_name     = "StandardS3Policy"
 s3_flavor                = "S3_NATIVE"
 s3_special_chars_support = true
 
 
-###--- Default S3 View Settings
-s3_view_name               = "s3bucket01"
-s3_view_path               = "/s3bucket01"
+s3_views_config = {
+  s3 = {
+    name                      = "s3view01"
+    bucket                    = "bucket01"
+    path                      = "/s3buckets"
+    protocols                 = ["S3"]
+    create_dir                = true
+    bucket_owner              = "s3user1"
+    allow_s3_anonymous_access = false
+  }
+  db = {
+    name                      = "vastdb_view"
+    bucket                    = "vastdb01"
+    path                      = "/vastdb"
+    protocols                 = ["S3", "DATABASE"]
+    create_dir                = true
+    bucket_owner              = "dbuser1"
+    allow_s3_anonymous_access = true
+  }
+}
+
+
+/* 
+###--- Basic S3 View Settings
+s3_view_name               = "s3view01"
+s3_view_path               = "/s3buckets"
 s3_bucket_name             = "bucket01"
 s3_view_protocol           = ["S3"]
-#s3_enable                  = true
 s3_default_owner           = "s3user1"
+
+###--- Database View Settings
+db_view_name               = "vastdb_view"
+db_view_path               = "/vastdb"
+db_bucket_name             = "vastdb01"
+db_view_protocol           = ["S3","DATABASE"]
+db_default_owner           = "dbuser1"
+db_view_create_dir         = true
+db_view_allow_s3_anonymous = true
+*/
+
 
 ###===================================================================================###
 #   DNS Settings
@@ -129,15 +161,16 @@ dns_enabled       = true
 
 
 #- User View Polices json files
-s3_allowall_policy_file = "s3Policy-AllowAll.json"
-s3_detailed_policy_file = "s3Policy-Detailed.json"
+s3_allowall_policy_file = "../policies/s3Policy-VastAllowAll.json"
+#s3_detailed_policy_file = "s3Policy-Detailed.example.json"
 
 # Policy names
-s3_allowall_policy_name = "s3policy_user_allowall"
-s3_detailed_policy_name = "s3policy_user_detailed"
+s3_allowall_policy_name = "s3_user_AllowAll"
+#s3_detailed_policy_name = "s3policy_user_detailed"
 
 ###--- Keys
 s3pgpkey = "../secrets/s3_pgp_key.asc"
+pgp_key_users = ["dbuser1", "s3user1"]
 
 
 groups = {
@@ -156,6 +189,14 @@ users = {
 
   s3user1 = {
     uid                  = 2112
+    leading_group_name   = "allusers"
+    supplementary_groups = ["nfsusers", "s3users"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+  dbuser1 = {
+    uid                  = 2113
     leading_group_name   = "allusers"
     supplementary_groups = ["nfsusers", "s3users"]
     allow_create_bucket  = true
