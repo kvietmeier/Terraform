@@ -18,6 +18,12 @@
 #  - `roles/compute.osLoginExternalUser` must be assigned per instance
 #  - Ensure instance names and zones are accurate to avoid 404 errors
 #
+#
+# Connect to VM with:
+# gcloud compute ssh USERNAME@INSTANCE_NAME --zone=ZONE --ssh-key-file=/path/to/private_key.pem --tunnel-through-iap
+#
+# gcloud compute ssh labuser1@devops01 --zone=us-west2-a --ssh-key-file= --tunnel-through-iap
+#
 ###===================================================================================###
 
 
@@ -62,3 +68,29 @@ resource "google_project_iam_member" "oslogin" {
   member   = "user:${each.value}"
 }
  */
+
+/* 
+Refactor - to use a list - 
+This revised code block creates a unique key for each combination of user and role 
+(e.g., user1@example.com:roles/iap.tunnelResourceAccessor), which allows for_each to 
+correctly create a separate google_project_iam_member resource for every single assignment.
+
+ # Define a list of roles to assign
+locals {
+  roles_to_assign = [
+    "roles/iap.tunnelResourceAccessor",
+    "roles/compute.viewer"
+  ]
+}
+
+# Assign roles to all users using a single resource block
+resource "google_project_iam_member" "user_roles" {
+  for_each = toset([
+    for user in var.user_emails :
+    for role in local.roles_to_assign : "${user}:${role}"
+  ])
+
+  project = var.project_id
+  role    = split(":", each.key)[1]
+  member  = "user:${split(":", each.key)[0]}"
+} */
