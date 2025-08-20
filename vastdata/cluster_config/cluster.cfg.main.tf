@@ -53,6 +53,9 @@ resource "vastdata_vip_pool" "protocols" {
 
   gw_ip       = try(each.value.gateway, null)
   domain_name = try(each.value.dns_name, null)
+  
+  # DNS needs to be configured before VIP Pools
+  depends_on  = [vastdata_dns.protocol_dns]
 }
 
 
@@ -72,6 +75,9 @@ resource "vastdata_vip_pool" "replication" {
 
   gw_ip       = try(each.value.gateway, null)
   domain_name = try(each.value.dns_name, null)
+  
+  # DNS needs to be configured before VIP Pools
+  depends_on  = [vastdata_dns.protocol_dns]
 }
 
 
@@ -80,9 +86,9 @@ resource "vastdata_vip_pool" "replication" {
 ###===================================================================================###
 
 ###--- NFS Default View Policy
-resource "vastdata_view_policy" "nfs_default_policy" {
+resource "vastdata_view_policy" "nfs_basic_policy" {
   provider          = vastdata.GCPCluster
-  name              = var.nfs_default_policy_name
+  name              = var.nfs_basic_policy_name
 
   flavor            = var.flavor
   use_auth_provider = var.use_auth_provider
@@ -113,7 +119,7 @@ resource "vastdata_view" "nfs_views" {
   # Automatically create one view per node
   count      = var.number_of_nodes
 
-  policy_id  = vastdata_view_policy.nfs_default_policy.id
+  policy_id  = vastdata_view_policy.nfs_basic_policy.id
   path       = "/${var.path_name}${count.index + 1}"
   protocols  = var.protocols
   create_dir = var.create_dir
@@ -123,10 +129,10 @@ resource "vastdata_view" "nfs_views" {
 #   S3 Configuration
 ###===================================================================================###
 
-###--- S3 Default View Policy
-resource "vastdata_view_policy" "s3_default_policy" {
+###--- S3 Standard View Policy
+resource "vastdata_view_policy" "s3_basic_policy" {
   provider = vastdata.GCPCluster
-  name     = var.s3_default_policy_name
+  name     = var.s3_basic_policy_name
   flavor   = var.s3_flavor
 
   s3_special_chars_support = var.s3_special_chars_support
@@ -134,6 +140,7 @@ resource "vastdata_view_policy" "s3_default_policy" {
   auth_source              = var.auth_source
   access_flavor            = var.access_flavor
 
+  # Need these for some reason
   nfs_no_squash  = var.nfs_no_squash
   nfs_read_write = var.nfs_read_write
   nfs_read_only  = var.nfs_read_only
@@ -147,22 +154,27 @@ resource "vastdata_view_policy" "s3_default_policy" {
   }
 }
 
-###--- S3 View
-resource "vastdata_view" "s3_view" {
+
+###--- Create all S3 views from map
+resource "vastdata_view" "s3_views" {
+  for_each = local.s3_views
+
   provider                  = vastdata.GCPCluster
-  policy_id                 = vastdata_view_policy.s3_default_policy.id
-  name                      = var.s3_view_name
-  bucket                    = var.s3_bucket_name
-  path                      = var.s3_view_path
-  protocols                 = var.s3_view_protocol
-  create_dir                = var.s3_view_create_dir
-  allow_s3_anonymous_access = var.s3_view_allow_s3_anonymous
-  bucket_owner              = var.s3_default_owner
+  policy_id                 = each.value.policy_id
+  name                      = each.value.name
+  bucket                    = each.value.bucket
+  path                      = each.value.path
+  protocols                 = each.value.protocols
+  create_dir                = each.value.create_dir
+  bucket_owner              = each.value.bucket_owner
+  allow_s3_anonymous_access = lookup(each.value, "allow_s3_anonymous_access", false)
 
   depends_on = [vastdata_user.users]
 }
 
+
 ###--- User S3 Policies
+
 # Allow-all S3 policy (broad permissions)
 resource "vastdata_s3_policy" "s3policy_user_allowall" {
   provider = vastdata.GCPCluster
@@ -171,6 +183,8 @@ resource "vastdata_s3_policy" "s3policy_user_allowall" {
   enabled  = true
 }
 
+/*
+Disable for now, as detailed policy is not provided
 # Detailed S3 policy (fine-grained permissions)
 resource "vastdata_s3_policy" "s3policy_user_detailed" {
   provider = vastdata.GCPCluster
@@ -178,7 +192,7 @@ resource "vastdata_s3_policy" "s3policy_user_detailed" {
   policy   = file("${path.module}/${var.s3_detailed_policy_file}")
   enabled  = true
 }
-
+*/
 
 ###===================================================================================###
 #   Misc Custer Configuration
@@ -195,3 +209,4 @@ resource "vastdata_dns" "protocol_dns" {
   domain_suffix = var.dns_domain_suffix
   enabled       = var.dns_enabled
 }
+

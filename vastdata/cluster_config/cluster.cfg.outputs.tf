@@ -7,7 +7,17 @@
 # - Aggregated VIP pool details
 ###===================================================================================###
 
+output "users_keys" {
+  value = {
+    for k, u in vastdata_user.users : k => {
+      id         = u.id
+      key_exists = contains(keys(vastdata_user_key.s3keys), k)
+    }
+  }
+}
 
+/*
+Disabled for now
 #------------------------------------------------------------------------------
 # S3 User Keys (Sensitive)
 #------------------------------------------------------------------------------
@@ -63,4 +73,5 @@ output "vip_pools_all" {
 output "vip_pools_protocols" {
   description = "Map of VIP pools with role = PROTOCOLS"
   value       = local.protocols_pools
-}
+} 
+*/

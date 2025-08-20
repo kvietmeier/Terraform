@@ -5,12 +5,14 @@ This should always be a working version.
 
 ### VAST Data Cluster Demo/POC Setup
 
-This repository contains Terraform configurations to automate the setup of a complete VAST Data cluster suitable for **demo or proof-of-concept (POC)** scenarios. The configuration includes:
+This project contains Terraform a configuration to automate the setup of a complete VAST Data cluster suitable for **demo or proof-of-concept (POC)** scenarios. The configuration includes:
 
 - VAST Provider and authentication
 - VIP Pools for `PROTOCOLS`, `REPLICATION`
 - NFS view policy and NFS views
 - S3 view policy and NFS views
+- S3 View for Database
+- Creates empty database instance
 - S3 User policies
 - S3 User keys
 - DNS configuration
@@ -25,7 +27,7 @@ This repository contains Terraform configurations to automate the setup of a com
 - Access to a VAST Data cluster (on GCP or other supported platforms)
 - Accessible Active Directory DC
 - DNS Forwarder or Delegation configured to point to the VAST DNS domain/s
-- Valid PGP key
+- Valid PGP public key in "armored" format
 
 ### Elements Created
 
@@ -38,23 +40,18 @@ Defines 3 VIP Pools:
 - `spool`: Assigned the `PROTOCOLS` role
 - `targetPool`: Assigned the `REPLICATION` role
 
-**NOTE**: VIP pools are extended dynamically based on number of nodes.
+**NOTE**: VIP pools are sized dynamically based on number of nodes.
 
 ####  Tenants, Groups, and Users
 - Dynamically creates tenants from a list.
 - Groups and users are provisioned with specified GIDs/UIDs and group relationships.
+- S3 users have keys uploaded
 
-####  View Policy
+####  NFS View Policy
 Creates a VAST NFS view policy with:
 - Authentication sources
 - Read/write permissions
 - VIP pool assignment
-
-####  S3 User Policies
-- Sample configurations loaded from json files
-
-####  S3 User Keys
-- Add PGP key for S3
 
 ####  NFS Views
 Provisioned using a loop, each with:
@@ -62,8 +59,25 @@ Provisioned using a loop, each with:
 - Backed by the defined view policy
 - Optionally creates a backing directory
 
+####  S3 View Policy
+
+####  S3 Views
+- 2 views - one for standard S3, one for Database
+
+####  S3 User Policies
+- Sample configurations loaded from json files in ../policies
+
+####  S3 User Keys
+- Add PGP key for S3
+
+####  Database
+- Crerated when you add "DATABASE" to an S3 View - named after the bucket
+
 ####  DNS
 Defines a VAST DNS server for the VAST cluster, using the `busab.org` domain suffix and specified VIP address.
+- `sharespool.busab.org`
+- `s3pool.busab.org`
+- Forwarding domain setup in GCP.
 
 ####  Active Directory
 Configure Active Directory integration to join the `ginaz.org` domain.

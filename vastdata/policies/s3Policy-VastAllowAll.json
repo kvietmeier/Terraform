@@ -1,9 +1,10 @@
 {
+  "Id": "Policy1754902261682",
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "Allow Everything",
-      "Action": "*",
+      "Sid": "AllowAllAccess",
+      "Action": "s3:*",
       "Effect": "Allow",
       "Resource": "*"
     }
