@@ -1,103 +1,102 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ==============================================================================
-# get_vast_secret.sh
+# decrypt_vast_keys.sh
 #
-# Usage:
-#   ./get_vast_secret.sh <resource_name> [tf_state_dir] [private_key_file] [output_dir]
-#
-# Parameters:
-#   <resource_name>    = The suffix of the Terraform resource name. For example:
-#                        If the full Terraform resource is `vastdata_user_key.s3key1`,
-#                        pass only `s3key1` as the argument.
-#
-#   [tf_state_dir]     = Path to Terraform state directory
-#                         Default: ~/Terraform/vastdata/cluster_config
-#
-#   [private_key_file] = Path to private PGP key file
-#                         Default: ~/Terraform/vastdata/secrets/s3_pgp_private.asc
-#
-#   [output_dir]       = Directory where the extracted encrypted file will be saved
-#                         Default: ~/Terraform/vastdata/secrets
-#
-# Example:
-#   ./get_vast_secret.sh s3key1
-#   ./get_vast_secret.sh s3key1 /custom/tf_dir /custom/key.asc /custom/output
-#
-# What this script does:
-#   1. Imports the private PGP key (if not already imported)
-#   2. Extracts the access key and encrypted secret key block from Terraform state
-#   3. Cleans leading whitespace from the PGP block
-#   4. Saves the cleaned block to an .asc file in the output directory
-#   5. Decrypts it and prints both the access key and secret key
+# Automatically extracts and decrypts all VAST user keys from Terraform state.
+# Saves access key and decrypted secret to ../secrets/<username>.txt
 # ==============================================================================
 
-set -e
+set -euo pipefail  # Exit on errors, unset variables, and pipe failures
 
-# Parameters and defaults
-RESOURCE_NAME="$1"
-TF_DIR="${2:-$HOME/Terraform/vastdata/cluster_config}"
-PRIVATE_KEY_FILE="${3:-$HOME/Terraform/vastdata/secrets/s3_pgp_private.asc}"
-OUTPUT_DIR="${4:-$HOME/Terraform/vastdata/secrets}"
+# -----------------------------
+# Paths
+# -----------------------------
+TF_ROOT="/home/karlv/Terraform/vastdata/cluster_config"            # Terraform state directory
+PRIVATE_KEY_FILE="/home/karlv/Terraform/vastdata/secrets/s3_pgp_private.asc"  # PGP private key
+OUTPUT_DIR="/home/karlv/Terraform/vastdata/secrets"                # Directory to save decrypted secrets
 
-# Ensure resource name provided
-if [ -z "$RESOURCE_NAME" ]; then
-    echo "Usage: $0 <resource_name> [tf_state_dir] [private_key_file] [output_dir]"
+# -----------------------------
+# Pre-flight checks
+# -----------------------------
+if [ ! -d "$TF_ROOT" ]; then
+    echo "Error: Terraform state directory not found: $TF_ROOT"
     exit 1
 fi
-
-# Validate directories and files
-if [ ! -d "$TF_DIR" ]; then
-    echo "Error: Terraform directory not found: $TF_DIR"
-    exit 1
-fi
-
 if [ ! -f "$PRIVATE_KEY_FILE" ]; then
     echo "Error: Private key file not found: $PRIVATE_KEY_FILE"
     exit 1
 fi
 
+# Create output directory if it does not exist
 mkdir -p "$OUTPUT_DIR"
 
-ENCRYPTED_FILE="$OUTPUT_DIR/${RESOURCE_NAME}_encrypted.asc"
-
-# Step 1: Import private key (if not already imported)
+# -----------------------------
+# Import private key if needed
+# -----------------------------
+# Only import if the key "vast-s3@example.com" is not already in GPG
 if ! gpg --list-secret-keys | grep -q "vast-s3@example.com"; then
-    echo "Importing private key from ${PRIVATE_KEY_FILE}..."
-    gpg --import "$PRIVATE_KEY_FILE" || { echo "Failed to import private key"; exit 1; }
+    echo "Importing private key..."
+    gpg --import "$PRIVATE_KEY_FILE"
 fi
 
-# Step 2: Extract access key and encrypted PGP block from Terraform state
-ACCESS_KEY=$(
-  cd "$TF_DIR"
-  terraform state show "vastdata_user_key.${RESOURCE_NAME}" \
-    | awk '/access_key/ {gsub(/"/,"",$3); print $3}'
-)
+# -----------------------------
+# Change to Terraform state directory
+# -----------------------------
+cd "$TF_ROOT"
 
-(
-  cd "$TF_DIR"
-  terraform state show "vastdata_user_key.${RESOURCE_NAME}" \
-    | awk '/-----BEGIN PGP MESSAGE-----/{flag=1} flag; /-----END PGP MESSAGE-----/{flag=0}' \
-    | sed 's/^[ \t]*//' > "$ENCRYPTED_FILE"
-)
+# -----------------------------
+# Process each user key
+# -----------------------------
+# Find all Terraform resources that match 'vastdata_user_key.s3keys[...]'
+terraform state list \
+  | grep '^vastdata_user_key\.s3keys\[' \
+  | while read -r key; do
 
-if [ -z "$ACCESS_KEY" ]; then
-    echo "Error: Failed to extract access key."
-    exit 1
-fi
+      # Extract username from the resource name, e.g., s3user1 or dbuser1
+      username=$(echo "$key" | sed -E 's/.*\["([^"]+)"\]$/\1/')
 
-if [ ! -s "$ENCRYPTED_FILE" ]; then
-    echo "Error: Failed to extract encrypted secret key."
-    exit 1
-fi
+      echo "Processing user: $username"
 
-# Step 3: Decrypt and clean output (strip headers and prompt)
-SECRET=$(gpg --decrypt "$ENCRYPTED_FILE" 2>/dev/null | tr -d '\n' | awk '{print $NF}')
+      # -----------------------------
+      # Extract access key
+      # -----------------------------
+      # Pull the access_key field from Terraform state
+      ACCESS_KEY=$(terraform state show "$key" | awk '/access_key/ {gsub(/"/,"",$3); print $3}')
 
-if [ -z "$SECRET" ]; then
-    echo "Error: Failed to decrypt secret key."
-    exit 1
-fi
+      # -----------------------------
+      # Decrypt secret key
+      # -----------------------------
+      # Extract the PGP block and decrypt it directly
+      SECRET=$(terraform state show "$key" \
+        | awk '/-----BEGIN PGP MESSAGE-----/{flag=1} flag; /-----END PGP MESSAGE-----/{flag=0}' \
+        | sed 's/^[ \t]*//' \
+        | gpg --decrypt 2>/dev/null \
+        | tr -d '\n' \
+        | awk '{print $NF}')
 
-# Print results
-echo "Access Key : $ACCESS_KEY"
-echo "Secret Key : $SECRET"
+      # -----------------------------
+      # Validate extraction
+      # -----------------------------
+      if [ -z "$ACCESS_KEY" ] || [ -z "$SECRET" ]; then
+          echo "  Error: Failed to extract or decrypt key for $username"
+          continue
+      fi
+
+      # -----------------------------
+      # Save combined access key and secret
+      # -----------------------------
+      # Write both access key and decrypted secret to a single file
+      {
+        echo "Access Key: $ACCESS_KEY"
+        echo "Secret Key: $SECRET"
+      } > "$OUTPUT_DIR/${username}.txt"
+
+      # -----------------------------
+      # Output status
+      # -----------------------------
+      echo "  Access Key and Secret saved to $OUTPUT_DIR/${username}.txt"
+      echo "----------------------------------------"
+
+  done
+
+echo "All VAST user keys processed successfully."
