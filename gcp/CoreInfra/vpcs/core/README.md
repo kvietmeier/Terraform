@@ -28,7 +28,27 @@ Supports:
 
 - Terraform ≥ 1.4
 - Google Cloud Provider ≥ 5.9
+- **Google Beta Provider for ipv6 EULA**
 - Enabled APIs: compute.googleapis.com, servicenetworking.googleapis.com
+
+---
+- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network)
+- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork)
+- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router)
+- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router_nat)
+- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network_)
+- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network)
+
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router_nat
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network_ipv6_ula_allocation
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_global_address
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_networking_connection
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_service
+#
+
 
 ---
 

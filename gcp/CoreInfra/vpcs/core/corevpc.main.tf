@@ -8,6 +8,20 @@
 #  - Establishes VPC peering with the Service Networking API
 #
 #  NOTE: Only the associated *.tfvars file should be modified to customize this setup.
+#
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router_nat
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network_ipv6_ula_allocation
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_global_address
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_networking_connection
+#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_service
+#
+#  Requires the Google and Google-Beta providers for setting up EULA IPv6.
+#  Ensure the Google Cloud project has the "Service Networking API" enabled.
+#  Ensure the user has sufficient permissions to create VPCs, subnets, routers, and NAT gateways.
+#
 ###===================================================================================###
 
 
