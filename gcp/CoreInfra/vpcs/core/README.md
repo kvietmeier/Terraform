@@ -32,23 +32,17 @@ Supports:
 - Enabled APIs: compute.googleapis.com, servicenetworking.googleapis.com
 
 ---
-- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network)
-- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork)
-- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router)
-- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router_nat)
-- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network_)
-- [Reference](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network)
 
-#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network
-#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork
-#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router
-#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router_nat
-#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network_ipv6_ula_allocation
-#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_global_address
-#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_networking_connection
-#  Reference: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_service
-#
+### Terraform Resource References
 
+- [compute_network](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network)
+- [compute_subnetwork](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_subnetwork)
+- [compute_router](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router)
+- [compute_router_nat](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_router_nat)
+- [compute_network_ipv6_ula_allocation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_network_ipv6_ula_allocation)
+- [compute_global_adress](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_global_adress)
+- [service_networking_connection](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_networking_connection)
+- [project_service](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_service)
 
 ---
 

@@ -66,6 +66,7 @@ locals {
 # Need the beta provider to enable IPv6 ULA
 resource "google_compute_network" "custom_vpc" {
   provider                 = google-beta
+  project                  = var.project_id
   name                     = var.vpc_name
   auto_create_subnetworks  = false
   enable_ula_internal_ipv6 = true  # REQUIRED to use INTERNAL IPv6 in subnets

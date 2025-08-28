@@ -31,7 +31,8 @@ vast_version_validation_mode = "warn"
 ###===================================================================================###
 #   VIP Pool Configuration (see locals for explanation)
 ###===================================================================================###
-number_of_nodes = 1
+number_of_nodes = 3
+# VIP_per_node  
 
 vip_pools = {
   vip1 = {
