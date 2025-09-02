@@ -126,25 +126,6 @@ s3_views_config = {
 }
 
 
-/* 
-###--- Basic S3 View Settings
-s3_view_name               = "s3view01"
-s3_view_path               = "/s3buckets"
-s3_bucket_name             = "bucket01"
-s3_view_protocol           = ["S3"]
-s3_default_owner           = "s3user1"
-
-###--- Database View Settings
-db_view_name               = "vastdb_view"
-db_view_path               = "/vastdb"
-db_bucket_name             = "vastdb01"
-db_view_protocol           = ["S3","DATABASE"]
-db_default_owner           = "dbuser1"
-db_view_create_dir         = true
-db_view_allow_s3_anonymous = true
-*/
-
-
 ###===================================================================================###
 #   DNS Settings
 ###===================================================================================###
