@@ -7,7 +7,8 @@ for the VAST Data cluster Terraform deployment.
 
 Key Functions:
 - Dynamically calculates the `end_ip` for each VIP pool based on the number
-  of cluster nodes (`var.number_of_nodes`), extending the IP range accordingly.
+  of cluster nodes (`var.number_of_nodes`), and VIPs/node extending the IP 
+  range accordingly.
 - Filters VIP pools by their roles:
     • "PROTOCOLS" pools are grouped in `protocols_pools`.
     • "REPLICATION" pools are grouped in `replication_pools`.
@@ -20,6 +21,7 @@ Important Notes:
 - If these pools are missing or duplicated, references such as
   `local.s3pool_key` and `local.sharespool_key` will break, causing errors.
 - Ensure that `var.vip_pools` is properly defined with unique names for these pools.
+- Does not prevent over-running a /24 subnet; ensure IP ranges are valid.
 
 This locals block centralizes pool-related computations and filtering to
 simplify and standardize references across the Terraform modules.
@@ -28,7 +30,6 @@ simplify and standardize references across the Terraform modules.
 */
 
 locals {
-
   vip_pools = {
     for key, pool in var.vip_pools : key => merge(
       pool,
@@ -36,7 +37,7 @@ locals {
         end_ip = format(
           "%s%d",
           regex("^([0-9]+\\.[0-9]+\\.[0-9]+\\.)[0-9]+$", pool.start_ip)[0],
-          tonumber(regex("[0-9]+$", pool.start_ip)) + var.number_of_nodes - 1
+          tonumber(regex("[0-9]+$", pool.start_ip)) + (var.number_of_nodes * var.vips_per_node) - 1
         )
       }
     )
@@ -66,4 +67,8 @@ locals {
       }
     )
   }
+
+  # Set the effective number of views to create - default to number of nodes = number of views if not set
+  effective_num_views = var.num_views != null ? var.num_views : var.number_of_nodes
+
 }

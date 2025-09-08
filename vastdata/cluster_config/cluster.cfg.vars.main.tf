@@ -30,6 +30,12 @@ variable "vip_pools" {
   }))
 }
 
+variable "vips_per_node" {
+  type    = number
+  default = 1
+  description = "Number of VIPs to allocate per node"
+}
+
 
 #------------------------------------------------------------------------------ 
 # View/Policy Common Settings
@@ -67,6 +73,13 @@ variable "vippool_permissions" {
 #------------------------------------------------------------------------------ 
 # NFS View Policy & View Configuration
 #------------------------------------------------------------------------------
+
+variable "num_views" {
+  type        = number
+  default     = null
+  description = "Number of NFS views to create. Defaults to the number of nodes if not set."
+}
+
 variable "nfs_basic_policy_name" {
   description = "Name of the default NFS view policy"
   type        = string

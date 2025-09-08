@@ -32,7 +32,7 @@ vast_version_validation_mode = "warn"
 #   VIP Pool Configuration (see locals for explanation)
 ###===================================================================================###
 number_of_nodes = 3
-# VIP_per_node  
+vips_per_node   = 1
 
 vip_pools = {
   vip1 = {
@@ -88,8 +88,8 @@ vippool_permissions   = "RW"
 ###===================================================================================###
 #   NFS View Settings
 ###===================================================================================###
-num_views         = 3
-path_name         = "nfs_share_"
+#num_views         = 5      # Override: create 5 views (uncomment if you don't want num_views = num_nodes)
+path_name         = "nfs_"
 protocols         = ["NFS"]
 create_dir        = true
 

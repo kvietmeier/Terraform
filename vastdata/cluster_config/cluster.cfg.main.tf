@@ -80,7 +80,6 @@ resource "vastdata_vip_pool" "replication" {
   depends_on  = [vastdata_dns.protocol_dns]
 }
 
-
 ###===================================================================================###
 #   NFS Configuration
 ###===================================================================================###
@@ -109,21 +108,19 @@ resource "vastdata_view_policy" "nfs_basic_policy" {
 }
 
 ###--- NFS Views
-# NFS views are automatically tied to cluster size:
-# - One view per node (count = var.number_of_nodes)
-# - Adjust logic in locals if different ratio is required
-
+# NFS views are automatically tied to cluster size or overridden by var.num_views
 resource "vastdata_view" "nfs_views" {
   provider   = vastdata.GCPCluster
 
-  # Automatically create one view per node
-  count      = var.number_of_nodes
+  # Number of views = number of nodes by default, or overridden by var.num_views
+  count      = local.effective_num_views
 
   policy_id  = vastdata_view_policy.nfs_basic_policy.id
   path       = "/${var.path_name}${count.index + 1}"
   protocols  = var.protocols
   create_dir = var.create_dir
 }
+
 
 ###===================================================================================###
 #   S3 Configuration
@@ -197,6 +194,7 @@ resource "vastdata_s3_policy" "s3policy_user_detailed" {
 ###===================================================================================###
 #   Misc Custer Configuration
 ###===================================================================================###
+
 
 #======================
 #  Create DNS Service

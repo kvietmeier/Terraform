@@ -37,10 +37,24 @@ Establishes a connection to a VAST Data cluster using credentials and API endpoi
 ####  VIP Pools
 Defines 3 VIP Pools:
 - `sharesPool`: Assigned the `PROTOCOLS` role
-- `spool`: Assigned the `PROTOCOLS` role
+- `s3pool`: Assigned the `PROTOCOLS` role
 - `targetPool`: Assigned the `REPLICATION` role
 
 **NOTE**: VIP pools are sized dynamically based on number of nodes.
+
+This Terraform configuration dynamically calculates VIP pool ranges and sets up S3 views for a VAST Data deployment. It automatically computes the end_ip for each VIP pool based on the number of nodes and VIPs per node, ensuring each node has the correct number of IPs. Pools are categorized by role (protocols or replication), and S3 views are automatically assigned the appropriate policy. This setup makes it easy to scale nodes and VIPs without manually updating IP ranges or view configurations.
+
+Example:  (This calculation assumes all VIPs are in the same /24 subnet.)
+
+  ```hcl
+  # Example VIP pool calculation:
+  start_ip = "10.0.0.5"
+  number_of_nodes = 11
+  vips_per_node = 3
+
+  # Computed end_ip:
+  end_ip = "10.0.0.37"
+  ```
 
 ####  Tenants, Groups, and Users
 - Dynamically creates tenants from a list.
