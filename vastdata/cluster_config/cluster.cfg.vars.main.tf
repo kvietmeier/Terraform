@@ -116,10 +116,6 @@ variable "smb_read_only" {
 }
 
 # View creation
-variable "num_views" {
-  description = "Number of views to create"
-  type        = number
-}
 
 variable "path_name" {
   description = "Base path name for views"
