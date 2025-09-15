@@ -12,8 +12,6 @@
 #------------------------------------------------------------------------------ 
 # VIP Pool Configuration
 #------------------------------------------------------------------------------
-
-
 variable "number_of_nodes" {
   type    = number
   default = 3
@@ -73,7 +71,6 @@ variable "vippool_permissions" {
 #------------------------------------------------------------------------------ 
 # NFS View Policy & View Configuration
 #------------------------------------------------------------------------------
-
 variable "num_views" {
   type        = number
   default     = null
@@ -116,7 +113,6 @@ variable "smb_read_only" {
 }
 
 # View creation
-
 variable "path_name" {
   description = "Base path name for views"
   type        = string
@@ -140,7 +136,7 @@ variable "create_dir" {
 
 ###--- Policy Settings
 variable "s3_basic_policy_name" {
-  description = "Name of the default S3 view policy"
+  description = "Name of the S3 view policy"
   type        = string
 }
 
@@ -172,7 +168,6 @@ variable "s3_views_config" {
 }
 
 ### S3 User Policies
-
 variable "s3_allowall_policy_name" {
   description = "Name of the S3 user policy"
   type        = string

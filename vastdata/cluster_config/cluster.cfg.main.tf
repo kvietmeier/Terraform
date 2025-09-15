@@ -137,7 +137,7 @@ resource "vastdata_view_policy" "s3_basic_policy" {
   auth_source              = var.auth_source
   access_flavor            = var.access_flavor
 
-  # Need these for some reason
+  # Need these because the same resource creates S3 and NFS policies
   nfs_no_squash  = var.nfs_no_squash
   nfs_read_write = var.nfs_read_write
   nfs_read_only  = var.nfs_read_only

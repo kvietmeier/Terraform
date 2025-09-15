@@ -85,7 +85,7 @@ Provisioned using a loop, each with:
 - Add PGP key for S3
 
 ####  Database
-- Crerated when you add "DATABASE" to an S3 View - named after the bucket
+- Created when you add "DATABASE" to an S3 View - named after the bucket
 
 ####  DNS
 Defines a VAST DNS server for the VAST cluster, using the `busab.org` domain suffix and specified VIP address.
