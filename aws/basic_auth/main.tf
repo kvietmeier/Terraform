@@ -8,11 +8,11 @@ terraform {
 }
 
 provider "aws" {
-  profile = "AWS-POC-VOC-Cluster-600627351840"
+  profile = "AWS-POC-VOC-Admin"
   region  = "us-west-2"
 }
 
-# Just fetch caller identity (no resources created)
+# Just fetch caller ide"ntity (no resources created)
 data "aws_caller_identity" "current" {}
 output "account_id" {
   value = data.aws_caller_identity.current.account_id

@@ -117,6 +117,16 @@ variable udp_ports {
   type        = list(string)
 }
 
+variable spark_tcp {
+  description = "Ports for Spark"
+  type        = list(string)
+}
+
+variable spark_vast_tcp{
+  description = "Ports for VAST Spark"
+  type        = list(string)
+}
+
 variable addc_tcp_ports {
   description = "TCP Ports for Active Directory"
   type        = list(string)

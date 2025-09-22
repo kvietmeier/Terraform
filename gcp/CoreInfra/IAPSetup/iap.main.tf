@@ -59,6 +59,17 @@ resource "google_project_iam_member" "compute_viewer" {
   member   = "user:${each.value}"
 }
 
+/* # Assign Compute Instance Admin at project level (allows setting metadata)
+#compute.instances.setMetadata
+resource "google_project_iam_member" "compute_instance_admin" {
+  for_each = toset(var.user_emails)
+  project  = var.project_id
+  role     = "roles/compute.instanceAdmin.v1"
+  member   = "user:${each.value}"
+}
+
+ */
+
 /*
 # Has to be set at the Organization level
 resource "google_project_iam_member" "oslogin" {
