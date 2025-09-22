@@ -1,0 +1,368 @@
+###===================================================================================###
+# VAST Data Cluster – Terraform Input Variables
+#
+# Description:
+# This file defines all input variables used to deploy a VAST Data cluster in a
+# demo/POC environment. Variables are grouped by function for clarity.
+#
+# Sections:
+# - Provider Configuration
+# - VIP Pool Configuration
+# - NFS and S3 View Policy Configuration
+# - NFS and S3 Views
+# - DNS Settings
+# - User/Tenant/Group Management
+# - Active Directory Settings
+# - S3 Key Management
+#
+# Notes:
+# - Keep maps/lists broken out per line for readability
+# - Some defaults are set for demo purposes; override in tfvars
+###===================================================================================###
+
+
+###===================================================================================###
+# Provider Configuration
+###===================================================================================###
+variable "vast_username" {
+  description = "VAST Data admin username"
+  type        = string
+}
+
+variable "vast_password" {
+  description = "VAST Data admin password"
+  type        = string
+  sensitive   = true
+}
+
+variable "vast_host" {
+  description = "VAST Data cluster management endpoint"
+  type        = string
+}
+
+variable "vast_port" {
+  description = "VAST Data API port"
+  type        = string
+  default     = "443"
+}
+
+variable "vast_skip_ssl_verify" {
+  description = "Skip SSL verification for self-signed certs"
+  type        = bool
+  default     = true
+}
+
+variable "vast_version_validation_mode" {
+  description = "Version validation mode for provider"
+  type        = string
+  default     = "warn"
+}
+
+
+###===================================================================================###
+# VIP Pool Configuration
+###===================================================================================###
+variable "number_of_nodes" {
+  description = "Number of nodes in the cluster"
+  type        = number
+  default     = 3
+}
+
+variable "vips_per_node" {
+  description = "Number of VIPs per node"
+  type        = number
+  default     = 1
+}
+
+variable "vip_pools" {
+  description = "Map of VIP pools for PROTOCOLS and REPLICATION roles"
+  type = map(object({
+    name        = string
+    start_ip    = string
+    gateway     = optional(string)
+    subnet_cidr = number
+    role        = string
+    dns_name    = optional(string)
+  }))
+}
+
+
+###===================================================================================###
+# NFS and S3 View Policy Configuration
+###===================================================================================###
+variable "flavor" {
+  description = "Cluster view policy flavor"
+  type        = string
+  default     = "MIXED_LAST_WINS"
+}
+
+variable "use_auth_provider" {
+  description = "Enable auth provider usage for views"
+  type        = bool
+  default     = true
+}
+
+variable "auth_source" {
+  description = "Authentication source type"
+  type        = string
+  default     = "RPC_AND_PROVIDERS"
+}
+
+variable "access_flavor" {
+  description = "Access flavor (e.g., ALL)"
+  type        = string
+  default     = "ALL"
+}
+
+variable "nfs_no_squash" {
+  description = "NFS no-squash access list"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "nfs_read_write" {
+  description = "NFS read/write access list"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "nfs_read_only" {
+  description = "NFS read-only access list"
+  type        = list(string)
+  default     = []
+}
+
+variable "smb_read_write" {
+  description = "SMB read/write access list"
+  type        = list(string)
+  default     = []
+}
+
+variable "smb_read_only" {
+  description = "SMB read-only access list"
+  type        = list(string)
+  default     = []
+}
+
+variable "vippool_permissions" {
+  description = "Permissions for VIP pool access in policies"
+  type        = string
+  default     = "RW"
+}
+
+variable "nfs_basic_policy_name" {
+  description = "Name of the default NFS view policy"
+  type        = string
+  default     = "nfs-view-policy"
+}
+
+variable "s3_basic_policy_name" {
+  description = "Name of the default S3 view policy"
+  type        = string
+  default     = "StandardS3Policy"
+}
+
+variable "s3_flavor" {
+  description = "Flavor for S3 view policies"
+  type        = string
+  default     = "S3_NATIVE"
+}
+
+variable "s3_special_chars_support" {
+  description = "Enable special character support in S3"
+  type        = bool
+  default     = true
+}
+
+
+###===================================================================================###
+# NFS and S3 Views
+###===================================================================================###
+variable "num_views" {
+  description = "Optional override for number of NFS views; defaults to number_of_nodes"
+  type        = number
+  default     = null
+}
+
+variable "path_name" {
+  description = "Base path name for NFS views"
+  type        = string
+  default     = "nfs_"
+}
+
+variable "protocols" {
+  description = "Protocols enabled for NFS views"
+  type        = list(string)
+  default     = ["NFS"]
+}
+
+variable "create_dir" {
+  description = "Automatically create directory for view"
+  type        = bool
+  default     = true
+}
+
+variable "s3_views_config" {
+  description = "Map of S3 view configurations"
+  type = map(object({
+    name                      = string
+    bucket                    = string
+    path                      = string
+    protocols                 = list(string)
+    create_dir                = bool
+    bucket_owner              = string
+    allow_s3_anonymous_access = optional(bool)
+  }))
+}
+
+
+###===================================================================================###
+# DNS Settings
+###===================================================================================###
+variable "dns_name" {
+  description = "DNS service name for cluster"
+  type        = string
+}
+
+variable "dns_vip" {
+  description = "VIP for DNS service"
+  type        = string
+}
+
+variable "port_type" {
+  description = "Port type for DNS service"
+  type        = string
+}
+
+variable "dns_domain_suffix" {
+  description = "Domain suffix for DNS resolution"
+  type        = string
+}
+
+variable "dns_enabled" {
+  description = "Enable/disable DNS service"
+  type        = bool
+  default     = true
+}
+
+
+###===================================================================================###
+# User/Tenant/Group Management
+###===================================================================================###
+variable "groups" {
+  description = "Map of POSIX groups with GID"
+  type = map(object({
+    gid = number
+  }))
+}
+
+variable "users" {
+  description = "Map of users with UID, leading group, supplementary groups, and S3 permissions"
+  type = map(object({
+    uid                  = number
+    leading_group_name   = string
+    supplementary_groups = list(string)
+    allow_create_bucket  = optional(bool)
+    allow_delete_bucket  = optional(bool)
+    s3_superuser         = optional(bool)
+  }))
+}
+
+variable "tenants" {
+  description = "Map of tenants with client IP ranges and optional VIP pools"
+  type = map(object({
+    client_ip_ranges = list(object({
+      start_ip = string
+      end_ip   = string
+    }))
+    vippool_ids = optional(list(string))
+  }))
+}
+
+
+###===================================================================================###
+# Active Directory
+###===================================================================================###
+variable "use_ad" {
+  description = "Enable/disable AD integration"
+  type        = bool
+  default     = false
+}
+
+variable "ou_name" {
+  description = "Organizational unit name for AD"
+  type        = string
+}
+
+variable "ad_ou" {
+  description = "AD organizational unit distinguished name"
+  type        = string
+}
+
+variable "bind_dn" {
+  description = "Bind DN for AD queries"
+  type        = string
+}
+
+variable "bindpw" {
+  description = "Bind password for AD queries"
+  type        = string
+  sensitive   = true
+}
+
+variable "ad_domain" {
+  description = "Active Directory domain name"
+  type        = string
+}
+
+variable "method" {
+  description = "AD query method"
+  type        = string
+}
+
+variable "query_mode" {
+  description = "AD query mode"
+  type        = string
+}
+
+variable "ldap" {
+  description = "Use LDAP (non-TLS)"
+  type        = bool
+  default     = false
+}
+
+variable "use_tls" {
+  description = "Enable TLS/LDAPS"
+  type        = bool
+  default     = false
+}
+
+variable "ldap_urls" {
+  description = "Optional LDAP URLs if not using DNS discovery"
+  type        = list(string)
+  default     = []
+}
+
+
+###===================================================================================###
+# S3 Key Management
+###===================================================================================###
+variable "s3pgpkey" {
+  description = "PGP public key file for encrypting secrets"
+  type        = string
+}
+
+variable "pgp_key_users" {
+  description = "List of users for which to create PGP-encrypted keys"
+  type        = list(string)
+}
+
+variable "s3_allowall_policy_name" {
+  description = "Name of the S3 allow-all policy"
+  type        = string
+}
+
+variable "s3_allowall_policy_file" {
+  description = "Path to the JSON file for S3 allow-all policy"
+  type        = string
+}

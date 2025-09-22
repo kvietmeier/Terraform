@@ -1,21 +1,5 @@
 ###===================================================================================###
-# VAST Data Cluster – Demo/POC Basic Setup
-#
-# Description:
-# This Terraform file provisions user/tenant resources for a VAST Data cluster, intended
-# for demo or proof-of-concept use cases. It defines the following:
-#
-# - Tenant creation from variable map (supports multiple tenants)
-# - POSIX group and user creation with GID/UID mapping
-# - Active Directory integration settings (without domain join)
-# - Adds a key for S3 access
-#
-# Notes:
-# - AD configuration uses bind credentials and supports LDAPS/TLS
-# - Group/user relationships are mapped via supplementary and leading GIDs
-# - VIP Pools and view policies referenced externally (not defined in this file)
-# - `provider = vastdata.GCPCluster` must be declared elsewhere
-#
+# VAST Data – Users, Groups, Tenants, and S3 Keys
 ###===================================================================================###
 
 ###===================================================================================###
@@ -33,8 +17,8 @@ resource "vastdata_group" "groups" {
 # Users
 ###===================================================================================###
 resource "vastdata_user" "users" {
-  provider    = vastdata.GCPCluster
-  for_each    = var.users
+  provider = vastdata.GCPCluster
+  for_each = var.users
 
   name        = each.key
   uid         = each.value.uid
@@ -54,27 +38,21 @@ resource "vastdata_user" "users" {
 resource "vastdata_tenant" "tenants" {
   provider = vastdata.GCPCluster
   for_each = var.tenants
+  name     = each.key
 
-  name = each.key
-
-  dynamic "client_ip_ranges" {
-    for_each = each.value.client_ip_ranges
-    content {
-      start_ip = client_ip_ranges.value.start_ip
-      end_ip   = client_ip_ranges.value.end_ip
-    }
-  }
-
-  vippool_ids = try(each.value.vippool_ids, null)
+  client_ip_ranges = [
+    for r in each.value.client_ip_ranges : [r.start_ip, r.end_ip]
+  ]
 }
 
 ###===================================================================================###
-# User S3 Keys
+# S3 User Keys
 ###===================================================================================###
 resource "vastdata_user_key" "s3keys" {
-  provider       = vastdata.GCPCluster
-  for_each       = toset(var.pgp_key_users)
-  user_id        = vastdata_user.users[each.key].id
-  enabled        = true
+  provider      = vastdata.GCPCluster
+  for_each      = toset(var.pgp_key_users)
+  
+  user_id       = vastdata_user.users[each.key].id
+  enabled       = true
   pgp_public_key = file(var.s3pgpkey)
 }

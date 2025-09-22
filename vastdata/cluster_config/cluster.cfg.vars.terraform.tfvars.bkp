@@ -1,0 +1,81 @@
+###===================================================================================###
+# VAST Cluster Input Variables
+#
+# Purpose:
+# - Provide all input values for VIP pools, users, groups, tenants, views, and DNS.
+# - Drive the deployment dynamically via locals.tf and main.tf.
+#
+# Key Sections:
+# 1. Provider credentials
+# 2. VIP pool definitions (PROTOCOLS + REPLICATION)
+# 3. NFS and S3 view policies and settings
+# 4. Tenants, users, and groups
+# 5. DNS configuration
+# 6. Active Directory settings (disabled by default)
+###===================================================================================###
+
+vast_username = "admin"
+vast_password = "123456"
+vast_host     = "vms"
+vast_port     = "443"
+vast_skip_ssl_verify = true
+vast_version_validation_mode = "warn"
+
+number_of_nodes = 3
+vips_per_node   = 1
+
+vip_pools = {
+  vip1 = { name="sharesPool", start_ip="33.20.1.11", gateway="33.20.1.1", subnet_cidr=24, role="PROTOCOLS", dns_name="sharespool" }
+  vip2 = { name="targetPool", start_ip="33.21.1.11", gateway="33.21.1.1", subnet_cidr=24, role="REPLICATION" }
+  vip3 = { name="s3Pool", start_ip="33.22.1.11", gateway="33.22.1.1", subnet_cidr=24, role="PROTOCOLS", dns_name="s3pool" }
+}
+
+flavor = "MIXED_LAST_WINS"
+use_auth_provider = true
+auth_source       = "RPC_AND_PROVIDERS"
+access_flavor     = "ALL"
+
+nfs_basic_policy_name = "nfs-view-policy"
+nfs_no_squash         = ["0.0.0.0/0"]
+nfs_read_write        = ["0.0.0.0/0"]
+nfs_read_only         = []
+smb_read_write        = []
+smb_read_only         = []
+vippool_permissions   = "RW"
+
+path_name  = "nfs_"
+protocols  = ["NFS"]
+create_dir = true
+
+s3_basic_policy_name     = "StandardS3Policy"
+s3_flavor                = "S3_NATIVE"
+s3_special_chars_support = true
+s3_views_config = {
+  s3 = { name="s3view01", bucket="bucket01", path="/s3buckets", protocols=["S3"], create_dir=true, bucket_owner="s3user1", allow_s3_anonymous_access=false }
+  db = { name="vastdb_view", bucket="vastdb01", path="/vastdb", protocols=["S3","DATABASE"], create_dir=true, bucket_owner="dbuser1", allow_s3_anonymous_access=true }
+}
+
+dns_name          = "vastdns"
+dns_vip           = "172.1.4.110"
+port_type         = "NORTH_PORT"
+dns_domain_suffix = "busab.org"
+dns_enabled       = true
+
+groups = { s3users={gid=1000} nfsusers={gid=1100} allusers={gid=1200} }
+
+users = {
+  nfsuser1 = { uid=2111, leading_group_name="allusers", supplementary_groups=["s3users","nfsusers"] }
+  s3user1  = { uid=2112, leading_group_name="allusers", supplementary_groups=["nfsusers","s3users"], allow_create_bucket=true, allow_delete_bucket=true, s3_superuser=true }
+  dbuser1  = { uid=2113, leading_group_name="allusers", supplementary_groups=["nfsusers","s3users"], allow_create_bucket=true, allow_delete_bucket=true, s3_superuser=true }
+}
+
+tenants = {
+  tenant1 = { client_ip_ranges=[ {start_ip="10.0.0.0", end_ip="10.0.0.255"}, {start_ip="10.0.1.0", end_ip="10.0.1.255"} ] }
+  tenant2 = { client_ip_ranges=[ {start_ip="192.168.1.0", end_ip="192.168.1.255"} ] }
+}
+
+# Active Directory (disabled)
+use_ad  = false
+use_tls = false
+ldap    = false
+ldap_urls = ["ldap://172.20.16.3"]
