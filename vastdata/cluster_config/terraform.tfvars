@@ -78,20 +78,41 @@ access_flavor           = "ALL"
 ###===================================================================================###
 
 ###---  NFS View Policy Settings
-nfs_basic_policy_name = "nfs-view-policy"
+nfs_basic_policy_name      = "nfs-view-policy"
+vippool_permissions        = "RW"
+nfs_basic_policy_flavor    = "MIXED_LAST_WINS" 
+nfs_basic_policy_protocols = ["NFS"]
 nfs_no_squash         = ["0.0.0.0/0"]
 nfs_read_write        = ["0.0.0.0/0"]
 nfs_read_only         = []
 smb_read_write        = []
 smb_read_only         = []
-vippool_permissions   = "RW"
 
-###---  NFS View Settings
-#num_views         = 5      # Override: create 5 views (uncomment if you don't want num_views = num_nodes)
-path_name         = "nfs_"
-protocols         = ["NFS"]
-create_dir        = true
 
+###---  File View Settings
+
+file_views_config = {
+  fileview01 = {
+    name       = "nfs01"
+    path       = "/nfs01"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
+  fileview02 = {
+    name       = "nfs02"
+    path       = "/nfs02"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
+  fileview03 = {
+    name       = "nfs03"
+    path       = "/nfs03"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+}
 
 
 ###===================================================================================###
@@ -99,16 +120,18 @@ create_dir        = true
 ###===================================================================================###
 
 ###--- Basic S3 View Policy Settings
-s3_basic_policy_name     = "StandardS3Policy"
-s3_flavor                = "S3_NATIVE"
-s3_special_chars_support = true
+s3_basic_policy_name       = "StandardS3Policy"
+s3_basic_policy_flavor     = "S3_NATIVE" 
+s3_basic_policy_protocols  = ["S3"]
+s3_special_chars_support   = true
 
 
+###--- S3 View Settings
 s3_views_config = {
   s3 = {
     name                      = "s3view01"
     bucket                    = "bucket01"
-    path                      = "/s3buckets"
+    path                      = "/s3"
     protocols                 = ["S3"]
     create_dir                = true
     bucket_owner              = "s3user1"
@@ -200,6 +223,7 @@ tenants = {
   }
 }
 
+
 ###==================================================================================###
 # Active Directory
 ###===================================================================================###
@@ -210,9 +234,9 @@ bindpw          = "Chalc0pyr1te!123"
 ad_domain       = "ginaz.org"
 method          = "simple"
 query_mode      = "COMPATIBLE"
-# Can't use TLS for some reason - 
-use_ad          = false
+use_ad          = true
 use_tls         = false
 ldap            = false
 # Optional: if you're not using DNS discovery
+# Can't use TLS for some reason - 
 ldap_urls       = ["ldap://172.20.16.3"]

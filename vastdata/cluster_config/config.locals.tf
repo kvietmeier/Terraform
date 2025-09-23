@@ -1,7 +1,27 @@
 ###===================================================================================###
-# VAST Data – VIP Pools Locals Configuration (v2 provider)
-# Computes VIP end IPs, separates protocol and replication pools,
-# and extracts s3Pool and sharesPool keys.
+# Locals – Dynamic VAST Cluster Configuration
+#
+# Purpose:
+# - Compute derived values for VIP pools, protocols, replication pools, and views.
+# - Centralize dynamic configuration logic to avoid hardcoding in resources.
+#
+# Key Functionality:
+# - Calculates `end_ip` for VIP pools based on `number_of_nodes` and `vips_per_node`.
+# - Separates VIP pools by role (PROTOCOLS vs REPLICATION).
+# - Dynamically identifies `sharesPool` and `s3Pool` keys for use in policies.
+# - Determines effective number of NFS views (`effective_num_views`).
+# - Filters tenants that have valid `client_ip_ranges`.
+#
+# Usage Notes:
+# - All VIP pool names and roles come from `terraform.tfvars`.
+# - Adjust `number_of_nodes` or `vips_per_node` in `.tfvars` to scale VIP ranges automatically.
+###===================================================================================###
+# Dynamic VAST Cluster Configuration (VAST 2.0)
+#
+# Key Changes for 2.0:
+# - VIP pools ip_ranges are flat list(string)
+# - Removed vippool_permissions references from locals
+# - Maintains dynamic calculation of sharesPool and s3Pool keys
 ###===================================================================================###
 
 locals {

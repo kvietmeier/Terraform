@@ -1,5 +1,21 @@
 ###===================================================================================###
-# VAST Data – Users, Groups, Tenants, and S3 Keys
+# VAST Data Cluster – Demo/POC Basic Setup
+#
+# Description:
+# This Terraform file provisions user/tenant resources for a VAST Data cluster, intended
+# for demo or proof-of-concept use cases. It defines the following:
+#
+# - Tenant creation from variable map (supports multiple tenants)
+# - POSIX group and user creation with GID/UID mapping
+# - Active Directory integration settings (without domain join)
+# - Adds a key for S3 access
+#
+# Notes:
+# - AD configuration uses bind credentials and supports LDAPS/TLS
+# - Group/user relationships are mapped via supplementary and leading GIDs
+# - VIP Pools and view policies referenced externally (not defined in this file)
+# - `provider = vastdata.GCPCluster` must be declared elsewhere
+#
 ###===================================================================================###
 
 ###===================================================================================###

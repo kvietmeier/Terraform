@@ -1,10 +1,13 @@
 ###===================================================================================###
-# Input Variables for VAST Data Cluster – Demo/POC
+# VAST Data Cluster Input Variables
+# All variables for main.tf and users.tf
+# Logical headers for readability, maps split on multiple lines
 ###===================================================================================###
 
-#--------------------------------------
-# Provider Configuration
-#--------------------------------------
+
+###===================================================================================###
+###--- Provider Configuration
+###===================================================================================###
 variable "vast_username" {
   type = string
 }
@@ -33,9 +36,9 @@ variable "vast_version_validation_mode" {
   default = "strict"
 }
 
-#--------------------------------------
-# Cluster Node & VIP Configuration
-#--------------------------------------
+###===================================================================================###
+###--- Cluster Node & VIP Configuration
+###===================================================================================###
 variable "number_of_nodes" {
   type = number
 }
@@ -66,9 +69,9 @@ variable "flavor" {
   default     = "MIXED_LAST_WINS"
 }
 
-#--------------------------------------
-# DNS Configuration
-#--------------------------------------
+###===================================================================================###
+###--- DNS Configuration 
+###===================================================================================###
 variable "dns_name" {
   type = string
 }
@@ -91,11 +94,21 @@ variable "dns_enabled" {
   default = true
 }
 
-#--------------------------------------
-# NFS/SMB View Policy Settings
-#--------------------------------------
+###===================================================================================###
+###--- NFS/SMB View Policy Settings
+###===================================================================================###
 variable "nfs_basic_policy_name" {
   type = string
+}
+
+variable "nfs_basic_policy_flavor" {
+  type    = string
+  default = "MIXED_LAST_WINS"
+}
+
+variable "nfs_basic_policy_protocols" {
+  type    = list(string)
+  default = ["NFS"]
 }
 
 variable "nfs_no_squash" {
@@ -128,9 +141,9 @@ variable "vippool_permissions" {
   default = "RW"
 }
 
-#--------------------------------------
-# NFS View Settings
-#--------------------------------------
+###===================================================================================###
+###--- NFS/SMB View Settings
+###===================================================================================###
 variable "num_views" {
   type    = number
   default = 0
@@ -146,8 +159,8 @@ variable "create_dir" {
   default = true
 }
 
-variable "nfs_views_config" {
-  description = "Map of NFS views to create with their configuration"
+variable "file_views_config" {
+  description = "Map of NFS/SMB views to create with their configuration"
   type = map(object({
     name       : string
     path       : string
@@ -165,12 +178,20 @@ variable "nfs_views_config" {
 }
 
 
-
-
-
 #--------------------------------------
 # S3 View & Policy Settings
 #--------------------------------------
+
+variable "s3_basic_policy_flavor" {
+  type    = string
+  default = "S3_NATIVE"
+}
+
+variable "s3_basic_policy_protocols" {
+  type    = list(string)
+  default = ["S3"]
+}
+
 variable "s3_basic_policy_name" {
   type = string
 }
