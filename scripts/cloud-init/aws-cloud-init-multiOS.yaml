@@ -56,6 +56,7 @@ write_files:
           man-db \
           chrony \
           dnsutils \
+          docker \
           nfs-common \
           cmake \
           dkms \
@@ -75,6 +76,7 @@ write_files:
           boost-thread \
           ncurses-devel \
           openssl-devel \
+          docker \
           bcc-tools \
           man-db \
           chrony \
