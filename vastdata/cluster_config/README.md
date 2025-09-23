@@ -68,12 +68,10 @@ Creates a VAST NFS view policy with:
 - VIP pool assignment
 
 ####  NFS Views
-Provisioned using a loop, each with:
-- Path prefix (e.g., `/nfs_share_1`, `/nfs_share_2`)
-- Backed by the defined view policy
-- Optionally creates a backing directory
+Provisioned from a list where each view can be configured uniquely
 
 ####  S3 View Policy
+Basic policy with no extra settings (Isn't working right now)
 
 ####  S3 Views
 - 2 views - one for standard S3, one for Database
@@ -83,13 +81,14 @@ Provisioned using a loop, each with:
 
 ####  S3 User Keys
 - Add PGP key for S3
+- Use local script to recover the keys
 
 ####  Database
 - Created when you add "DATABASE" to an S3 View - named after the bucket
 
 ####  DNS
 Defines a VAST DNS server for the VAST cluster, using the `busab.org` domain suffix and specified VIP address.
-- `sharespool.busab.org`
+- `viewpool.busab.org`
 - `s3pool.busab.org`
 - Forwarding domain setup in GCP.
 

@@ -1,0 +1,21 @@
+digraph G {
+  rankdir = "RL";
+  node [shape = rect, fontname = "sans-serif"];
+  "vastdata_active_directory.gcp_ad1" [label="vastdata_active_directory.gcp_ad1"];
+  "vastdata_dns.protocol_dns" [label="vastdata_dns.protocol_dns"];
+  "vastdata_group.groups" [label="vastdata_group.groups"];
+  "vastdata_tenant.tenants" [label="vastdata_tenant.tenants"];
+  "vastdata_user.users" [label="vastdata_user.users"];
+  "vastdata_user_key.s3keys" [label="vastdata_user_key.s3keys"];
+  "vastdata_view.file_views" [label="vastdata_view.file_views"];
+  "vastdata_view.s3_views" [label="vastdata_view.s3_views"];
+  "vastdata_view_policy.nfs_basic_policy" [label="vastdata_view_policy.nfs_basic_policy"];
+  "vastdata_view_policy.s3_basic_policy" [label="vastdata_view_policy.s3_basic_policy"];
+  "vastdata_vip_pool.protocols" [label="vastdata_vip_pool.protocols"];
+  "vastdata_vip_pool.replication" [label="vastdata_vip_pool.replication"];
+  "vastdata_user.users" -> "vastdata_group.groups";
+  "vastdata_user_key.s3keys" -> "vastdata_user.users";
+  "vastdata_view.file_views" -> "vastdata_view_policy.nfs_basic_policy";
+  "vastdata_view.s3_views" -> "vastdata_user.users";
+  "vastdata_view.s3_views" -> "vastdata_view_policy.s3_basic_policy";
+}
