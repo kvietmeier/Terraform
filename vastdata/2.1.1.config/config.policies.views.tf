@@ -26,7 +26,7 @@ resource "vastdata_view_policy" "nfs_basic_policy" {
   provider  = vastdata.GCPCluster
   name      = var.nfs_basic_policy_name
   flavor    = var.nfs_basic_policy_flavor
-  protocols = var.nfs_basic_policy_protocols
+  #protocols = var.nfs_basic_policy_protocols # This is optional and breaks automation
 }
 
 # S3 Basic Policy
@@ -37,7 +37,7 @@ resource "vastdata_view_policy" "s3_basic_policy" {
   provider  = vastdata.GCPCluster
   name      = var.s3_basic_policy_name
   flavor    = var.s3_basic_policy_flavor
-  protocols = var.s3_basic_policy_protocols
+  #protocols = var.s3_basic_policy_protocols This is optional and breaks automation
 }
 
 #=============================================================================

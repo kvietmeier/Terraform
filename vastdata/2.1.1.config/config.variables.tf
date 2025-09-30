@@ -106,7 +106,8 @@ variable "nfs_basic_policy_flavor" {
   default = "MIXED_LAST_WINS"
 }
 
-variable "nfs_basic_policy_protocols" {
+# Not needed - breaks automation
+variable "nfs_audit_protocols" {
   type    = list(string)
   default = ["NFS"]
 }
@@ -187,7 +188,7 @@ variable "s3_basic_policy_flavor" {
   default = "S3_NATIVE"
 }
 
-variable "s3_basic_policy_protocols" {
+variable "s3_audit_protocols" {
   type    = list(string)
   default = ["S3"]
 }

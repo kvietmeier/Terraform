@@ -94,8 +94,12 @@ terraform state list \
       # -----------------------------
       # Output status
       # -----------------------------
-      echo "  Access Key and Secret saved to $OUTPUT_DIR/${username}.txt"
+      echo ""
       echo "----------------------------------------"
+      echo "Access Key and Secret saved to $OUTPUT_DIR/${username}.txt"
+      cat $OUTPUT_DIR/${username}.txt
+      echo "----------------------------------------"
+      echo ""
 
   done
 

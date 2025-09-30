@@ -1,0 +1,78 @@
+#cloud-config
+# vim: syntax=yaml
+#
+# -------------------------------------------------------------------------------
+# Copyright 2025 Karl Vietmeier / KCV Consulting
+# SPDX-License-Identifier: Apache-2.0
+#
+# AWS-adapted cloud-init config for Ubuntu/Debian & RHEL/CentOS/Rocky EC2
+# Bootstraps instance, installs dev tools, compiles FIO, iPerf, DOOL, SockPerf, Elbencho,
+# sets up labuser, enables NTP via AWS default server, configures shell environment.
+# -------------------------------------------------------------------------------
+
+package_update:  false
+package_upgrade: false
+
+# Some common packages - a bad package here will abort cloud-init
+packages:
+  - libtool
+  - tmux
+  - git
+  - tree
+  - numactl
+  - wget
+  - traceroute
+  - nmap
+  - sysstat
+  - bc
+  - jq
+  - pkg-config
+
+# Users
+users:
+  - name: labuser
+    gecos: Lab User
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCxeiwknIx8Vo1osaw/V+rp7kcC4lxtuDJlgOwQidKcoz7JfaKReic2C75DvxL8+WB95dQE+GFH+28InkVaIgeFxj5cDpACa/YoVuX8zb6OVhxDutxWTZWpI+HUQ1BXSYRY8eXQesaOsYpXO9/k9zkGOKii7Lr/+HlWBszfy5UJPl3quftVT7wYIlTuqygGo7OgIKWnA1ST7QkUU6ffKjMzJEnR8KK1Z+Sno6vuRyU63dC7mKt7lO0J0tvm5M0mrVYt3cOQjR7fU0omlQm9c3MkSRDM6lDDWm49QQ1e8Zv8nFn6GudJZU+r1anl9pdixZ0nFMJGTI5H4TUPoQQXS8ml0NxkcAjAc+KAKMx3oS1bmgHXJ5rRwKQ6mUf/As+WHSbwAQ/t+RtQf0qPzN4nd925/tqNGdlhCS7ZmDeWC6cAXMr3wH17SQKscxLTsYAwaEfBHOI4YCF1rg91D+9bnpd7jpjFUVwwBrKO67/J0576MfcbFpUMdlc4bbWaog4V9os= karlv@Tandaloor
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOVhK8T5vJgKqXzSgDryh1EQEReE1lU9CvlBK8v4bG+eTjhPqacXqPkUWPlnM+kA1l3xe/GBxbIeoJ/WruUZV58SBjUUEMYN0qyKVwl+G5GqhijGAsWNC1KsfpTHNRRplZWAkKajAzb57kCzdNvFmOi86ENhn4gYFTWqAPEYALMnq6T1D52SELJGs/A3fwDEE99nTjcZ4/Huv1z+WWJmZEkSRWNtYLD/mx+cP41UHKCEIgsffvKH3o/IHgpsDGi5sQ8AKHChNkHb3vWQVPHx1BZDwxEUG7SPjY4gc/wRtrdauzMvdKvm9AUi1paY2PCGViLcysv619hQj02k/OQBJBy7MqplB1waoisxDuxKMSKjeKTyMGbMfv+MCrQd1iT+qdQtQImvyxRtQnYnbNMjnLPYUey7/kTkb4Xggm/hhuJOxnFqH/9WILDb81I4jElis+raXh0Vnt7gQ7OAO74osiLqD7uGuhytRCLqnU5VQmEAGdpxahxtirRu0eVQr/Ncs= karl.vietmeier@Tandaloor      
+
+write_files:
+  # Fetch compiletools_full.sh from GitHub
+  - path: /tmp/compiletools_full.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      # Download the full compile tools script from GitHub
+      GITHUB_RAW_URL="https://raw.githubusercontent.com/kvietmeier/scripts/main/initial_system_configuration.sh"
+
+      echo "Fetching compiletools_full.sh from GitHub..."
+      curl -sSL $GITHUB_RAW_URL -o /tmp/initial_system_configuration.sh.download
+      if [ $? -ne 0 ]; then
+        echo "Error: Failed to download initial_system_configuration.sh"
+        exit 1
+      fi
+
+      mv /tmp/initial_system_configuration.sh.download /tmp/initial_system_configuration.sh
+      chmod +x /tmp/initial_system_configuration.sh
+      echo "Downloaded and made /tmp/initial_system_configuration.sh executable"
+
+  # Small launcher script
+  - path: /tmp/initial_os_setup.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      echo "Running initial_system_configuration.sh..."
+      /bin/bash /tmp/initial_system_configuration.sh
+  
+
+  # Flag file
+  - path: /root/CONFIGURED_BY_CLOUD_INIT
+
+runcmd:
+  - bash /tmp/initial_os_setup.sh
+  - echo "cloud-init completed successfully at $(date)" > /tmp/cloud-init-completed.txt
+
+final_message: "========= Post Install cloud-init Completed ========="

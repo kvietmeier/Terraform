@@ -10,8 +10,8 @@
 # sets up labuser, enables NTP via AWS default server, configures shell environment.
 # -------------------------------------------------------------------------------
 
-package_update: true
-package_upgrade: true
+package_update:  false
+package_upgrade: false
 
 packages:
   - libtool
@@ -26,6 +26,17 @@ packages:
   - bc
   - jq
   - pkg-config
+
+# Users
+users:
+  - name: labuser
+    gecos: Lab User
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    #ssh_authorized_keys:
+    #  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... karlv@linuxtools
+    #  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD... karl.vietmeier@Tandaloor
 
 write_files:
   # Compile/install tools
@@ -64,6 +75,16 @@ write_files:
           libcurl4-openssl-dev \
           uuid-dev \
           zlib1g-dev
+        
+        #--- Disable unattended-upgrades / auto updates ---
+        echo 'APT::Periodic::Update-Package-Lists "0";' > /etc/apt/apt.conf.d/20auto-upgrades
+        echo 'APT::Periodic::Unattended-Upgrade "0";' >> /etc/apt/apt.conf.d/20auto-upgrades
+        systemctl stop unattended-upgrades || true
+        systemctl disable unattended-upgrades || true
+        systemctl stop apt-daily.timer apt-daily-upgrade.timer || true
+        systemctl disable apt-daily.timer apt-daily-upgrade.timer || true
+        systemctl mask apt-daily.service apt-daily-upgrade.service || true
+        
       elif [ -f /etc/redhat-release ]; then
         dnf groupinstall -y "Development Tools"
         dnf install -y \
@@ -225,16 +246,5 @@ write_files:
 runcmd:
   - bash /tmp/compiletools.sh
   - echo "cloud-init completed successfully at $(date)" > /tmp/cloud-init-completed.txt
-
-# Users
-users:
-  - name: labuser
-    gecos: Lab User
-    groups: sudo
-    shell: /bin/bash
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    #ssh_authorized_keys:
-    #  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... karlv@linuxtools
-    #  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD... karl.vietmeier@Tandaloor
 
 final_message: "========= Post Install cloud-init Completed ========="

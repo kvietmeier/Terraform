@@ -81,7 +81,7 @@ access_flavor           = "ALL"
 nfs_basic_policy_name      = "nfs-view-policy"
 vippool_permissions        = "RW"
 nfs_basic_policy_flavor    = "MIXED_LAST_WINS" 
-nfs_basic_policy_protocols = ["NFS"]
+#nfs_audit_protocols = ["NFS"]
 nfs_no_squash         = ["0.0.0.0/0"]
 nfs_read_write        = ["0.0.0.0/0"]
 nfs_read_only         = []
@@ -122,7 +122,7 @@ file_views_config = {
 ###--- Basic S3 View Policy Settings
 s3_basic_policy_name       = "StandardS3Policy"
 s3_basic_policy_flavor     = "S3_NATIVE" 
-s3_basic_policy_protocols  = ["S3"]
+#s3_audit_protocols  = ["S3"]
 s3_special_chars_support   = true
 
 

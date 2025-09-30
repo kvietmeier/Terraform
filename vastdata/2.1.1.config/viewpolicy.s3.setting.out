@@ -1,0 +1,84 @@
+# vastdata_view_policy.s3_basic_policy:
+resource "vastdata_view_policy" "s3_basic_policy" {
+    access_flavor                            = "ALL"
+    allowed_characters                       = "LCD"
+    apple_sid                                = true
+    auth_source                              = "RPC"
+    change                                   = []
+    cluster                                  = "voc1-cluster01d"
+    cluster_id                               = 1
+    count_views                              = 2
+    created                                  = "2025-09-29T22:59:08.847050Z"
+    disable_handle_lease                     = false
+    disable_read_lease                       = false
+    disable_write_lease                      = false
+    enable_access_to_snapshot_dir_in_subdirs = true
+    enable_listing_of_snapshot_dir           = false
+    enable_snapshot_lookup                   = true
+    enable_visibility_of_snapshot_dir        = false
+    expose_id_in_fsid                        = false
+    flavor                                   = "S3_NATIVE"
+    full                                     = []
+    gid_inheritance                          = "LINUX"
+    guid                                     = "52f9bc17-1b4f-4421-8d64-6b0b6af99f20"
+    id                                       = 12
+    inherit_parent_mode_bits                 = false
+    internal                                 = false
+    is_s3_default_policy                     = false
+    name                                     = "StandardS3Policy"
+    nfs_all_squash                           = []
+    nfs_case_insensitive                     = false
+    nfs_enforce_tls                          = false
+    nfs_minimal_protection_level             = "NONE"
+    nfs_no_squash                            = []
+    nfs_posix_acl                            = false
+    nfs_read_write                           = [
+        "*",
+    ]
+    nfs_return_open_permissions              = false
+    nfs_root_squash                          = [
+        "*",
+    ]
+    path_length                              = "LCD"
+    pretty_auth_source                       = "Client"
+    protocols                                = []
+    protocols_audit                          = {
+        create_delete_files_dirs_objects = false
+        log_full_path                    = false
+        log_username                     = false
+        modify_data_md                   = false
+        read_data                        = false
+    }
+    read                                     = []
+    read_only                                = []
+    read_write                               = [
+        "*",
+    ]
+    s3_flavor_allow_free_listing             = false
+    s3_flavor_detect_full_pathname           = false
+    s3_read_only                             = []
+    s3_read_write                            = [
+        "*",
+    ]
+    s3_special_chars_support                 = true
+    s3_visibility                            = []
+    s3_visibility_groups                     = []
+    smb_directory_mode                       = 755
+    smb_directory_mode_padded                = "755"
+    smb_file_mode                            = 644
+    smb_file_mode_padded                     = "644"
+    smb_is_ca                                = false
+    smb_read_only                            = []
+    smb_read_write                           = [
+        "*",
+    ]
+    sync                                     = "SYNCED"
+    sync_time                                = "2025-09-29T23:00:05.836581Z"
+    tenant_id                                = 1
+    tenant_name                              = "default"
+    title                                    = "StandardS3Policy"
+    trash_access                             = []
+    url                                      = "https://vms:443/api/v5/viewpolicies/12"
+    use_32bit_fileid                         = false
+    use_auth_provider                        = false
+}
