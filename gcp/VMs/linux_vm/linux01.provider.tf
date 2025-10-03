@@ -1,9 +1,9 @@
 ###===================================================================================###
 #
-#  File:  provider.tf
+#  File:  devops01.provider.tf
 #  Created By: Karl Vietmeier
 #
-#  Purpose: Configure the GCP Provider TerraForm
+#  Purpose: Configure the GCP TerraForm Provider 
 # 
 #  Google defaults set as Env: vars
 #
