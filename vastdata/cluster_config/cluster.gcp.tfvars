@@ -28,24 +28,36 @@ vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
 
 
+/* ###--- Google Provider and Network Settings
+gcp_region  = "us-central1"
+gcp_project = "clouddev-itdesk124"
+
+# Network - where IPs will be reserved 
+gcp_subnet  = "subnet-hub-us-east1-voc1"
+dns_ip      = "10.20.0.251"   # the exact IP you want to reserve
+*/
+
+
+
+
 ###===================================================================================###
 #   VIP Pool Configuration (see locals for explanation)
 ###===================================================================================###
-number_of_nodes = 3
+number_of_nodes = 11
 vips_per_node   = 1
 
 vip_pools = {
   vip1 = {
-    name        = "sharesPool"
+    name        = "nfsPool"
     start_ip    = "33.20.1.11"
     gateway     = "33.20.1.1"
     subnet_cidr = 24
     role        = "PROTOCOLS"
-    dns_name    = "sharespool"
+    dns_name    = "nfspool"
   }
 
   vip2 = {
-    name        = "targetPool"
+    name        = "replicationPool"
     start_ip    = "33.21.1.11"
     gateway     = "33.21.1.1"
     subnet_cidr = 24

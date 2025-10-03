@@ -8,6 +8,11 @@
 
 terraform {
   required_providers {
+    
+    #google = {
+    #  source  = "hashicorp/google"
+    #  version = "~> 5.0"
+    #}
     vastdata = {
       source  = "vast-data/vastdata"
       version = "1.7.0"
@@ -24,3 +29,10 @@ provider "vastdata" {
   version_validation_mode = var.vast_version_validation_mode
   alias                   = "GCPCluster"
 }
+/* 
+# Google Provider for GCP resources
+provider "google" {
+  project = var.gcp_project
+  region  = var.gcp_region
+}
+ */

@@ -36,6 +36,24 @@ variable "vast_version_validation_mode" {
   default     = "warn"
 }
 
+/* ###--- Google Provider
+variable "gcp_project" {
+  description = "GCP project ID"
+  type        = string
+}
+
+variable "gcp_region" {
+  description = "GCP region for resources"
+  type        = string
+}
+
+variable "gcp_subnet" {
+  description = "Subnet name or self_link where IPs will be reserved"
+  type        = string
+}
+ */
+
+
 ###===================================================================================
 # DNS Configuration Variables
 ###===================================================================================
