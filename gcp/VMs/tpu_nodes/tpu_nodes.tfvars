@@ -1,10 +1,13 @@
 ###===================================================================================###
-#   File:         multi.tfvars
-#   Created By:   Karl Vietmeier / KCV Consulting
-#   License:      Licensed under the Apache License, Version 2.0
-#                 http://www.apache.org/licenses/LICENSE-2.0
+#  File:         tpu_nodes.tfvars
+#  Created By:   Karl Vietmeier / VAST Data
+#  License:      Licensed under the Apache License, Version 2.0
+#                http://www.apache.org/licenses/LICENSE-2.0
 #
-#   Description:   Variables for 11 clients using machine images
+#  Description:  Configuration variables for TPU node deployment.
+#                Includes project/region settings, network configuration,
+#                TPU disk/runtime parameters, and client definitions.
+#
 ###===================================================================================###
 
 ###===================================================================================###

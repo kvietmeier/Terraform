@@ -1,14 +1,19 @@
 ###===================================================================================###
-#  File:         multi.main.tf
-#  Created By:   Karl Vietmeier / KCV Consulting
+#  File:         tpu_nodes.main.tf
+#  Created By:   Karl Vietmeier / VAST Data
 #  License:      Licensed under the Apache License, Version 2.0
 #                http://www.apache.org/licenses/LICENSE-2.0
 #
-
+#  Description:  Main Terraform configuration for TPU node provisioning.
+#                Defines providers, data sources (VPC, subnet, service account),
+#                and resources for TPU VM and associated data disk creation.
+###===================================================================================###
 
 ###===================================================================================###
 #                        Provider Configuration
 ###===================================================================================###
+# Uses both `google` and `google-beta` providers. 
+# The beta provider is required for TPU v2 VM resources.
 
 terraform {
   required_providers {
@@ -30,50 +35,55 @@ provider "google" {
 }
 
 
-
 ###===================================================================================###
-#                       Create VMs from Machine Images
+#                         Data Sources
 ###===================================================================================###
+# Retrieve existing infrastructure objects to reference in new resource definitions.
+# Ensures the TPU node is deployed within an existing, managed environment.
 
-/* 
-data "google_tpu_v2_runtime_versions" "available" {
-  provider = google-beta
-}
-
-data "google_tpu_v2_accelerator_types" "available" {
-  provider = google-beta
-}
-*/
+# --- TPU Accelerator and Runtimes (lookup available types in the target zone)
+# To view all the options in that region - 
+# terraform console
+# > data.google_tpu_v2_accelerator_types.available.accelerator_types[*].type
+# > data.google_tpu_v2_runtime_versions.available.runtime_versions[*].version
 
 data "google_tpu_v2_accelerator_types" "available" {
   provider = google-beta
   zone     = var.tpu_zone
 }
 
+data "google_tpu_v2_runtime_versions" "available" {
+  provider = google-beta
+  zone     = var.tpu_zone
+}
+
+
 # --- Data Sources (Referencing Existing Infrastructure) ---
-# 1. Fetch existing VPC Network
+# --- Existing VPC Network
 data "google_compute_network" "network" {
   name    = var.vpc_name
   project = var.project_id
 }
 
-# 2. Fetch existing Subnet
+# --- Existing Subnet
 data "google_compute_subnetwork" "subnet" {
   name    = var.subnet_name
   region  = var.tpu_region
   project = var.project_id
 }
 
-# 3. Fetch existing Service Account
+# --- Existing Service Account
+# Use account_id by splitting the email to get the short form before '@'
 data "google_service_account" "sa" {
-  # FIX: Use 'account_id' (the expected argument) and extract the short ID
-  #      by splitting the full email string at the '@' symbol and taking the first element (index 0).
   account_id = split("@", var.service_account)[0]
-  #id = var.service_account
-  # The project is also necessary for a complete lookup
   project    = var.project_id
-# --- New Infrastructure: Data Disk (Optional, but kept for completeness) ---
 }
+
+###===================================================================================###
+#                         TPU Data Disk (Optional)
+###===================================================================================###
+# Creates a persistent data disk to attach to the TPU VM.
+# Useful for workloads requiring large dataset storage or scratch space.
 
 resource "google_compute_disk" "disk" {
   name = "tpu-data-disk-${var.tpu_zone}"
@@ -83,7 +93,12 @@ resource "google_compute_disk" "disk" {
 }
 
 
-# --- The TPU VM Resource ---
+###===================================================================================###
+#                         TPU v2 VM Resource
+###===================================================================================###
+# Defines the TPU node (VM) resource using the google-beta provider.
+# This configuration deploys a TPU with specified runtime, accelerator type,
+# and networking tied to existing infrastructure.
 
 resource "google_tpu_v2_vm" "tpu" {
   provider         = google-beta
@@ -126,6 +141,7 @@ resource "google_tpu_v2_vm" "tpu" {
     mode        = "READ_ONLY"
   }
 
+  /*   
   labels = {
     foo = "bar"
   }
@@ -135,7 +151,12 @@ resource "google_tpu_v2_vm" "tpu" {
   }
 
   tags = ["foo"]
-  
+  */
+
   # Removed the 'time_sleep' dependency as it's generally not needed 
   # when referencing existing network infrastructure via data sources.
 }
+
+###===================================================================================###
+# End of File
+###===================================================================================###

@@ -1,42 +1,56 @@
 ###===================================================================================###
-# File:         variables.tf
-# Description:  Variable definitions for multi.main.tf using machine images
+#  File:         tpu_nodes.variables.tf
+#  Created By:   Karl Vietmeier / KCV Consulting
+#  License:      Licensed under the Apache License, Version 2.0
+#                http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Description:  Variable definitions for TPU node deployment.
+#                Includes project settings, network configuration, TPU VM parameters,
+#                and optional data disk settings.
 ###===================================================================================###
 
-# Project ID
+
+###===================================================================================###
+#                         Project & Region Settings
+###===================================================================================###
+
+# The GCP project ID where resources will be deployed
 variable "project_id" {
   description = "The GCP project ID"
   type        = string
 }
 
-# Region
+# The primary region for the Project
 variable "region" {
   description = "The GCP region to deploy resources"
   type        = string
 }
 
+# The TPU-specific region (can be different from the primary region)
 variable "tpu_region" {
   description = "The GCP region to deploy resources"
   type        = string
 }
 
 
+###===================================================================================###
+#                         TPU VM / Service Account Info
+###===================================================================================###
 
-###--- VM Info
-
+# The GCP service account used by the TPU VM
 variable "service_account" {
-  description = "The GCP region to deploy resources"
+  description = "The GCP service account used by the TPU VM"
   type        = string
 }
 
-# Replace these variables with your desired values
+# The zone where the TPU will be created
 variable "tpu_zone" {
   type        = string
   description = "The zone where the TPU will be created"
   default     = "us-central1-c" 
 }
 
-# Names of your existing resources
+# --- Names of existing network resources ---
 variable "vpc_name" {
   type        = string
   default = "your-existing-vpc-name" # <-- CHANGE THIS
@@ -47,12 +61,16 @@ variable "subnet_name" {
   default = "your-existing-subnet-name" # <-- CHANGE THIS
 }
 
+# Optional alternative: service account email variable
 variable "service_account_email" {
   type        = string
-  default = "sa-tpu-runner@your-gcp-project-id.iam.gserviceaccount.com" # <-- CHANGE THIS
 }
 
-# --- VARIABLES for Disk and TPU VM ---
+
+###===================================================================================###
+#                         TPU Data Disk Settings
+###===================================================================================###
+
 variable "tpu_disk_size_gb" {
   description = "Size of the data disk in GB."
   type        = number
@@ -64,6 +82,11 @@ variable "tpu_disk_type" {
   type        = string
   default     = "pd-ssd"
 }
+
+
+###===================================================================================###
+#                         TPU VM Configuration
+###===================================================================================###
 
 variable "tpu_accelerator_type" {
   description = "The desired TPU accelerator size (e.g., v3-8, v5litepod-8)."
