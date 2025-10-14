@@ -70,8 +70,8 @@ resource "google_compute_instance_from_machine_image" "vm_instance" {
   source_machine_image = each.value.machine_image
 
   service_account {
-    email  = var.service_account.email
-    scopes = var.service_account.scopes
+    email   = var.service_account.email
+    scopes  = var.service_account.scope
   }
 
   network_interface {

@@ -27,7 +27,7 @@ variable "service_account" {
   description = "Service account configuration"
   type = object({
     email  = string
-    scopes = list(string)
+    scope = list(string)
   })
 }
 
