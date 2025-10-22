@@ -47,13 +47,13 @@ resource "vastdata_dns" "protocol_dns" {
 
 ### Protocols VIP Pools
 resource "vastdata_vip_pool" "protocols" {
-  provider = vastdata.GCPCluster
-  for_each = local.protocols_pools
+  provider    = vastdata.GCPCluster
+  for_each    = local.protocols_pools
 
-  name      = each.value.name
-  role      = each.value.role
+  name        = each.value.name
+  role        = each.value.role
   subnet_cidr = each.value.subnet_cidr
-  ip_ranges = [[each.value.start_ip, each.value.end_ip]]
+  ip_ranges   = [[each.value.start_ip, each.value.end_ip]]
 }
 
 ### Replication VIP Pools

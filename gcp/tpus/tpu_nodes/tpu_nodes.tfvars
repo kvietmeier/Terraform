@@ -14,9 +14,9 @@
 #   Basic project and region settings
 ###===================================================================================###
 project_id  = "clouddev-itdesk124"
-region      = "us-east1"
-tpu_region  = "us-central1"
-tpu_zone    = "us-central1-a"  # target zone
+region      = "us-east5"
+tpu_region  = "us-east5"
+tpu_zone    = "us-east5-a"  # target zone
 
 ###===================================================================================###
 #-  Adjust zone to target zone
@@ -26,17 +26,19 @@ tpu_zone    = "us-central1-a"  # target zone
 #zone        = "us-central1-f"  # target zone
 #zone        = "us-central1-b"  # target zone
 
-tpu_name        = "my-tpu-node"
+tpu_name        = "tpu-testing-node"
 tpu_description = "TPU Node created via Terraform"
 service_account = "terraform-sa@clouddev-itdesk124.iam.gserviceaccount.com"
+
+
 
 
 ###===================================================================================###
 #   Network Configuration - subnet you are moving to
 ###===================================================================================###
 vpc_name        = "karlv-corevpc"
-subnet_name     = "subnet-hub-us-central1-voc2"
-tpu_cidr_block  = "172.11.1.0/29"    # Using the specified CIDR block
+subnet_name     = "subnet-hub-us-east5-tpu"
+tpu_cidr_block  = "172.10.8.0/29"    # Using the specified CIDR block
 
 
 ###===================================================================================###
@@ -44,5 +46,5 @@ tpu_cidr_block  = "172.11.1.0/29"    # Using the specified CIDR block
 ###===================================================================================###
 tpu_disk_size_gb     = 200                # Overriding the default of 100
 tpu_disk_type        = "pd-ssd"           # Keeping the default
-tpu_accelerator_type = "v3-8"             # Using the available type
-tpu_runtime          = "tpu-vm-tf-2.13.0"
+tpu_accelerator_type = "v6e-8"             # Using the available type
+tpu_runtime          =  "v6e-ubuntu-2404" 

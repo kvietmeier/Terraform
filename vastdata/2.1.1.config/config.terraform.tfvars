@@ -31,8 +31,8 @@ vast_version_validation_mode = "warn"
 ###===================================================================================###
 #   VIP Pool Configuration (see locals for explanation)
 ###===================================================================================###
-number_of_nodes = 5
-vips_per_node   = 1
+number_of_nodes = 4
+vips_per_node   = 2
 
 vip_pools = {
   vip1 = {
@@ -41,7 +41,7 @@ vip_pools = {
     gateway     = "33.20.1.1"
     subnet_cidr = 24
     role        = "PROTOCOLS"
-    dns_name    = "nfspool"
+    dns_name    = "vastdata"
   }
 
   vip2 = {
@@ -58,7 +58,7 @@ vip_pools = {
     gateway     = "33.22.1.1"
     subnet_cidr = 24
     role        = "PROTOCOLS"
-    dns_name    = "s3pool"
+    dns_name    = "vasts3"
   } 
 }
 

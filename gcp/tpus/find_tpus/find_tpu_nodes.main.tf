@@ -52,11 +52,13 @@ provider "google" {
 
 data "google_tpu_v2_accelerator_types" "available" {
   provider = google-beta
+  project = var.project_id
   zone     = var.tpu_zone
 }
 
 data "google_tpu_v2_runtime_versions" "available" {
   provider = google-beta
+  project = var.project_id
   zone     = var.tpu_zone
 }
 
@@ -81,85 +83,3 @@ data "google_service_account" "sa" {
   account_id = split("@", var.service_account)[0]
   project    = var.project_id
 }
-
-###===================================================================================###
-#                         TPU Data Disk (Optional)
-###===================================================================================###
-# Creates a persistent data disk to attach to the TPU VM.
-# Useful for workloads requiring large dataset storage or scratch space.
-
-resource "google_compute_disk" "disk" {
-  name = "tpu-data-disk-${var.tpu_zone}"
-  type = var.tpu_disk_type    # <-- Using variable
-  size = var.tpu_disk_size_gb # <-- Using variable
-  zone = var.tpu_zone
-}
-
-
-###===================================================================================###
-#                         TPU v2 VM Resource
-###===================================================================================###
-# Defines the TPU node (VM) resource using the google-beta provider.
-# This configuration deploys a TPU with specified runtime, accelerator type,
-# and networking tied to existing infrastructure.
-
-resource "google_tpu_v2_vm" "tpu" {
-  provider         = google-beta
-
-  name             = var.tpu_name
-  zone             = var.tpu_zone
-  #description      = "Text description of the TPU."
-  description      = var.tpu_description
-
-  runtime_version  = var.tpu_runtime 
-  #runtime_version  = "tpu-vm-tf-2.13.0" 
-
-  accelerator_type = var.tpu_accelerator_type # <-- Using variable
-
-  cidr_block       = "172.11.1.0/29" # Ensure this range does NOT conflict with your existing VPC/Subnet ranges
-
-  network_config {
-    can_ip_forward      = true
-    enable_external_ips = false
-    # Reference the existing network and subnet using data sources
-    network             = data.google_compute_network.network.self_link
-    subnetwork          = data.google_compute_subnetwork.subnet.self_link
-  }
-
-  scheduling_config {
-    spot = false
-  }
-
-  shielded_instance_config {
-    enable_secure_boot = false
-  }
-
-  service_account {
-    # Reference the existing service account using the data source
-    email  = var.service_account
-  }
-
-  data_disks {
-    source_disk = google_compute_disk.disk.id
-    mode        = "READ_ONLY"
-  }
-
-  /*   
-  labels = {
-    foo = "bar"
-  }
-
-  metadata = {
-    foo = "bar"
-  }
-
-  tags = ["foo"]
-  */
-
-  # Removed the 'time_sleep' dependency as it's generally not needed 
-  # when referencing existing network infrastructure via data sources.
-}
-
-###===================================================================================###
-# End of File
-###===================================================================================###
