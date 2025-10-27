@@ -65,11 +65,17 @@ variable "subnet_name" {
 variable "service_account_email" {
   type        = string
 }
- */
 
+ */
 ###===================================================================================###
 #                         TPU Data Disk Settings
 ###===================================================================================###
+
+variable "tpu_data_disk_name" {
+  description = "Name of the data disk"
+  type        = number
+  default     = 100 
+}
 
 variable "tpu_disk_size_gb" {
   description = "Size of the data disk in GB."

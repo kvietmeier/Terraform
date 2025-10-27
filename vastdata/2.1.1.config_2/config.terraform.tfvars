@@ -22,8 +22,8 @@
 
 vast_username                = "admin"
 vast_password                = "123456"
-vast_host                    = "vms"
-vast_port                    = "443"
+vast_host                    = "vms_japan"
+vast_port                    = 443
 vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
 
@@ -31,14 +31,14 @@ vast_version_validation_mode = "warn"
 ###===================================================================================###
 #   VIP Pool Configuration (see locals for explanation)
 ###===================================================================================###
-number_of_nodes = 4
+number_of_nodes = 3
 vips_per_node   = 2
 
 vip_pools = {
   vip1 = {
     name        = "sharesPool"
-    start_ip    = "33.20.1.11"
-    gateway     = "33.20.1.1"
+    start_ip    = "34.20.1.11"
+    gateway     = "34.20.1.1"
     subnet_cidr = 24
     role        = "PROTOCOLS"
     dns_name    = "vastdata"
@@ -46,16 +46,16 @@ vip_pools = {
 
   vip2 = {
     name        = "targetPool"
-    start_ip    = "33.21.1.11"
-    gateway     = "33.21.1.1"
+    start_ip    = "34.21.1.11"
+    gateway     = "34.21.1.1"
     subnet_cidr = 24
     role        = "REPLICATION"
   }
 
   vip3 = {
     name        = "s3Pool"
-    start_ip    = "33.22.1.11"
-    gateway     = "33.22.1.1"
+    start_ip    = "34.22.1.11"
+    gateway     = "34.22.1.1"
     subnet_cidr = 24
     role        = "PROTOCOLS"
     dns_name    = "vasts3"
@@ -82,8 +82,8 @@ nfs_basic_policy_name      = "nfs-view-policy"
 vippool_permissions        = "RW"
 nfs_basic_policy_flavor    = "MIXED_LAST_WINS" 
 #nfs_audit_protocols = ["NFS"]
-nfs_no_squash         = ["0.0.0.0/0"]
-nfs_read_write        = ["0.0.0.0/0"]
+nfs_no_squash         = ["*"]
+nfs_read_write        = []
 nfs_read_only         = []
 smb_read_write        = []
 smb_read_only         = []
@@ -167,9 +167,9 @@ s3_views_config = {
 #   DNS Settings
 ###===================================================================================###
 dns_name          = "vastdns"
-dns_vip           = "172.1.4.110"
+dns_vip           = "172.10.15.250"
 port_type         = "NORTH_PORT"
-dns_domain_suffix = "busab.org"
+dns_domain_suffix = "arrakis.org"
 dns_enabled       = true
 #vip_gateway       = "172.1.4.1"
 
@@ -227,7 +227,7 @@ users = {
 tenants = {
   tenant1 = {
     client_ip_ranges = [
-      { start_ip = "10.10.0.0", end_ip = "10.10.0.254" }
+      { start_ip = "10.11.0.0", end_ip = "10.11.0.254" }
     ]
   }
   tenant2 = {

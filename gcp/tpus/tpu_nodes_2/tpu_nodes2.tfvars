@@ -15,8 +15,8 @@
 ###===================================================================================###
 project_id  = "clouddev-itdesk124"
 region      = "us-east1"
-tpu_region  = "us-central1"
-tpu_zone    = "us-central1-b"  # target zone
+tpu_region  = "us-east5"
+tpu_zone    = "us-east5-b"  # target zone
 
 ###===================================================================================###
 #-  Adjust zone to target zone
@@ -35,14 +35,16 @@ service_account = "terraform-sa@clouddev-itdesk124.iam.gserviceaccount.com"
 #   Network Configuration - subnet you are moving to
 ###===================================================================================###
 vpc_name        = "karlv-corevpc"
-subnet_name     = "subnet-hub-us-central1-voc2"
-tpu_cidr_block  = "172.11.1.0/29"    # Using the specified CIDR block
+subnet_name     = "subnet-hub-us-east5"
+#subnet_name     = "subnet-hub-us-central1-voc2"
+tpu_cidr_block  = "172.20.128.0/29"    # Using the specified CIDR block
 
 
 ###===================================================================================###
 #   VARIABLES for Disk and TPU VM
 ###===================================================================================###
+tpu_data_disk_name   = "01"
 tpu_disk_size_gb     = 200                # Overriding the default of 100
 tpu_disk_type        = "pd-ssd"           # Keeping the default
-tpu_accelerator_type = "v3-8"             # Using the available type
-tpu_runtime          = "tpu-vm-tf-2.13.0"
+tpu_accelerator_type = "v6e-8"             # Using the available type
+tpu_runtime          = "v6e-ubuntu-2404"

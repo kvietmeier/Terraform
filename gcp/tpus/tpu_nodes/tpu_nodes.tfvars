@@ -28,25 +28,34 @@
 #   https://cloud.google.com/tpu/docs/regions-zones
 #
 ###===================================================================================###
-project_id  = "clouddev-itdesk124"
-region      = "us-east1"
-vpc_name    = "karlv-corevpc"
+project_id    = "clouddev-itdesk124"
+#region        = "us-east5"
+region        = "asia-northeast1"
+tpu_region    = "asia-northeast1"
+tpu_zone      = "asia-northeast1-b"
+
+###===================================================================================###
+#-  Adjust zone to target zone
+###===================================================================================###
+#zone        = "us-central1-a"  # target zone
+#zone        = "us-central1-c"  # target zone
+#zone        = "us-central1-f"  # target zone
+#zone        = "us-central1-b"  # target zone
+
+tpu_name        = "tpu-testing-node"
+tpu_description = "TPU Node created via Terraform"
+service_account = "terraform-sa@clouddev-itdesk124.iam.gserviceaccount.com"
+
+
 
 
 ###===================================================================================###
 #   TPU-specific region and zone (can be different from primary region)
 #   Subnet needs to be in the region
 ###===================================================================================###
-tpu_region      = "us-central1"
-subnet_name     = "subnet-hub-us-central1-voc2"
-tpu_cidr_block  = "172.11.1.0/29"    # Using the specified CIDR block has to be /29
-
-#-  Adjust zone to target zone
-#tpu_zone = "us-central1-a"  # target zone
-tpu_zone = "us-central1-b"  # target zone
-#tpu_zone = "us-central1-c"  # target zone
-#tpu_zone = "us-central1-d"  # target zone
-#tpu_zone = "us-central1-f"  # target zone
+vpc_name        = "karlv-corevpc"
+subnet_name     = "subnet-hub-asia-northeast1-tpu"  # Subnet must already exist
+tpu_cidr_block  = "172.10.14.0/29"    # Using the specified CIDR block
 
 
 ###===================================================================================###
@@ -57,5 +66,5 @@ tpu_name             = "tpu-test-node"
 tpu_description      = "TPU Node/s created via Terraform"
 tpu_disk_size_gb     = 200                # Overriding the default of 100
 tpu_disk_type        = "pd-ssd"           # Keeping the default
-tpu_accelerator_type = "v6e-1"             # Using the available type
-tpu_runtime          = "tpu-ubuntu2204-base"
+tpu_accelerator_type = "v6e-8"             # Using the available type
+tpu_runtime          =  "v6e-ubuntu-2404" 
