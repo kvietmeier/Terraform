@@ -61,11 +61,11 @@ variable "subnet_name" {
   default = "your-existing-subnet-name" # <-- CHANGE THIS
 }
 
-# Optional alternative: service account email variable
+/* # Optional alternative: service account email variable
 variable "service_account_email" {
   type        = string
 }
-
+ */
 
 ###===================================================================================###
 #                         TPU Data Disk Settings

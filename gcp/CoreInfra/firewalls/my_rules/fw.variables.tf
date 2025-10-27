@@ -146,3 +146,15 @@ variable vast_udp {
   description = "A list of UDP ports needed for VAST Data"
   type        = list(string)
 }
+
+
+# --- HA VPN Control Plane Variables ---
+variable "azure_public_ip_01" {
+  description = "The public IP of the first Azure VPN Gateway interface."
+  type        = string
+}
+
+variable "azure_public_ip_02" {
+  description = "The public IP of the second Azure VPN Gateway interface."
+  type        = string
+}

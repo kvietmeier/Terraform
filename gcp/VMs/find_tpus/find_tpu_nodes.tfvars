@@ -16,7 +16,7 @@
 project_id  = "clouddev-itdesk124"
 region      = "us-east1"
 tpu_region  = "us-central1"
-tpu_zone    = "us-central1-a"  # target zone
+tpu_zone    = "us-central1-b"  # target zone
 
 ###===================================================================================###
 #-  Adjust zone to target zone
