@@ -13,10 +13,11 @@
 ###===================================================================================###
 #   Basic project and region settings
 ###===================================================================================###
-project_id  = "clouddev-itdesk124"
-region      = "us-east5"
-tpu_region  = "us-east5"
-tpu_zone    = "us-east5-a"  # target zone
+project_id    = "clouddev-itdesk124"
+#region        = "us-east5"
+region        = "asia-northeast1"
+tpu_region    = "asia-northeast1"
+tpu_zone      = "asia-northeast1-b"
 
 ###===================================================================================###
 #-  Adjust zone to target zone
@@ -37,8 +38,8 @@ service_account = "terraform-sa@clouddev-itdesk124.iam.gserviceaccount.com"
 #   Network Configuration - subnet you are moving to
 ###===================================================================================###
 vpc_name        = "karlv-corevpc"
-subnet_name     = "subnet-hub-us-east5-tpu"
-tpu_cidr_block  = "172.10.8.0/29"    # Using the specified CIDR block
+subnet_name     = "subnet-hub-asia-northeast1-tpu"  # Subnet must already exist
+tpu_cidr_block  = "172.10.14.0/29"    # Using the specified CIDR block
 
 
 ###===================================================================================###
