@@ -1,6 +1,6 @@
 # Full End-to-End Configuration of a VAST Data Cluster from Scratch
 
-This should always be a working version.
+Using the GCP Provider together with the VAST Provider
 
 
 ### VAST Data Cluster Demo/POC Setup

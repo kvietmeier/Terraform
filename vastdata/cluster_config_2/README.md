@@ -1,6 +1,6 @@
 # Full End-to-End Configuration of a VAST Data Cluster from Scratch
 
-This should always be a working version.
+This is a mirror of cluster_config for configuring 2 cluxsters.
 
 
 ### VAST Data Cluster Demo/POC Setup

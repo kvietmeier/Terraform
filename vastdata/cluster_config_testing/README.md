@@ -1,6 +1,6 @@
 # Full End-to-End Configuration of a VAST Data Cluster from Scratch
 
-This should always be a working version.
+This folder is a testing version and may not work as expected.
 
 
 ### VAST Data Cluster Demo/POC Setup
