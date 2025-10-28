@@ -119,3 +119,35 @@ resource "google_compute_firewall" "addc_rules" {
   #source_tags   = ["ad-domaincontroller"]
   #target_tags   = ["ad-domaincontroller"]
 }
+
+resource "google_compute_firewall" "allow_ha_vpn_bgp" {
+  name          = "allow-ha-vpn-control" # Renamed for clarity
+  network       = var.vpc_name
+  direction     = "INGRESS"
+  description   = "Allow IKE/IPsec/BGP from Azure Public IPs for HA VPN establishment"
+  
+  # CRITICAL: Priority must be low (e.g., 100) for security, 
+  # NOT 1000, which is the default internet route priority.
+  priority      = 100 
+
+  # --- IPsec/IKE Protocols from the Azure Public Gateway ---
+  allow {
+    protocol = "tcp"
+    ports    = ["179"] 	# BGP (Though often unneeded if tunnel is established)
+  }
+
+  allow {
+    protocol = "udp"
+    ports    = ["500", "4500"] 	# IKE (500) + NAT-T (4500)
+  }
+
+  allow {
+    protocol = "esp" 			# IPsec ESP traffic (Required for data integrity)
+  }
+
+  # CRITICAL: Use the Azure Public Gateway IPs as the source.
+  source_ranges = [
+    var.azure_public_ip_01,
+    var.azure_public_ip_02
+  ]
+}
