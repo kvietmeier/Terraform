@@ -10,12 +10,15 @@
 #
 # created by: Karl Vietmeier
 
-
-# Configure the Google Provider (ensure you are authenticated)
-provider "google" {
-  project = var.project_id
-  region  = var.region
-}
+/* The following GCP resources will be created/configured to establish the HA VPN with BGP:
+  Resource Type,Terraform Resource Name,Function
+  google_compute_ha_vpn_gateway,ha_vpn_gw,The GCP HA VPN Gateway (vpngw-to-azure) which has two interfaces with public IPs.
+  google_compute_external_vpn_gateway,external_gw,Represents the Azure VPN Gateway (vpngw-azure) with its two public IPs.
+  google_compute_router,cloud_router,The Cloud Router (router-us-centra1-azvpn) that handles dynamic BGP routing.
+  google_compute_vpn_tunnel,"tunnel_0, tunnel_1","The two VPN Tunnels (azure-central1-tunnel-if0, if1) connecting the GCP and Azure gateways."
+  google_compute_router_interface,"router_if_0, router_if_1",Defines the BGP interfaces on the Cloud Router with the GCP BGP link-local IPs.
+  google_compute_router_peer,"bgp_peer_0, bgp_peer_1",Defines the BGP peers with the Azure ASN and Azure BGP link-local IPs.
+*/
 
 # Data source for the existing VPC network
 data "google_compute_network" "vpc_network" {
@@ -59,7 +62,7 @@ resource "google_compute_router" "cloud_router" {
 }
 
 # --- 4. VPN Tunnels ---
-# VPN Tunnel 1
+# VPN Tunnel 0
 resource "google_compute_vpn_tunnel" "tunnel_0" {
   name                          = "azure-central1-tunnel-if0"
   region                        = var.region
@@ -75,7 +78,7 @@ resource "google_compute_vpn_tunnel" "tunnel_0" {
   remote_traffic_selector = ["0.0.0.0/0"]
 }
 
-# VPN Tunnel 2
+# VPN Tunnel 1
 resource "google_compute_vpn_tunnel" "tunnel_1" {
   name                          = "azure-central1-tunnel-if1"
   region                        = var.region
@@ -93,7 +96,7 @@ resource "google_compute_vpn_tunnel" "tunnel_1" {
 
 # --- 5. Cloud Router BGP Interfaces and Peers ---
 
-# Cloud Router Interface for Tunnel 1
+# Cloud Router Interface for Tunnel 0
 resource "google_compute_router_interface" "router_if_0" {
   name       = "azure-tunnel-if0"
   router     = google_compute_router.cloud_router.name
@@ -102,7 +105,7 @@ resource "google_compute_router_interface" "router_if_0" {
   ip_range   = var.gcp_bgp_ip_0 
 }
 
-# Cloud Router BGP Peer for Tunnel 1
+# Cloud Router BGP Peer for Tunnel 0
 resource "google_compute_router_peer" "bgp_peer_0" {
   name                      = "azure-bgp-peer-if0"
   router                    = google_compute_router.cloud_router.name
@@ -120,7 +123,7 @@ resource "google_compute_router_peer" "bgp_peer_0" {
   }
 }
 
-# Cloud Router Interface for Tunnel 2
+# Cloud Router Interface for Tunnel 1
 resource "google_compute_router_interface" "router_if_1" {
   name       = "azure-tunnel-if1"
   router     = google_compute_router.cloud_router.name
@@ -129,7 +132,7 @@ resource "google_compute_router_interface" "router_if_1" {
   ip_range   = var.gcp_bgp_ip_1
 }
 
-# Cloud Router BGP Peer for Tunnel 2
+# Cloud Router BGP Peer for Tunnel 1
 resource "google_compute_router_peer" "bgp_peer_1" {
   name                      = "azure-bgp-peer-if1"
   router                    = google_compute_router.cloud_router.name

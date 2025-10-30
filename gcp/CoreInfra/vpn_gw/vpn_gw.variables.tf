@@ -10,24 +10,31 @@
 #
 # created by: Karl Vietmeier
 
-
+###--- Project Info ---###
 variable "project_id" {
-  description = "The GCP project ID where resources will be created"
+  description = "The GCP project ID"
   type        = string
 }
 
+# Region
 variable "region" {
-  description = "The GCP region for all resources"
+  description = "The GCP region to deploy resources"
   type        = string
-  default     = "us-central1"
 }
 
+# Zone
+variable "zone" {
+  description = "The GCP zone to deploy the VPN Gateway"
+  type        = string
+}
+
+#--- Network Info ---###
 variable "network_name" {
   description = "The VPC network to attach the VPN to (e.g., karlv-corevpc)"
   type        = string
 }
 
-
+#--- VPN Gateway Info ---###
 variable "vpn_gateway_name" {
   description = "Name for the GCP HA VPN Gateway"
   type        = string
@@ -45,7 +52,6 @@ variable "external_gateway_name" {
   type        = string
   default     = "vpngw-azure"
 }
-
 
 ### GCP VPN Gateway Settings
 variable "gcp_asn" {
