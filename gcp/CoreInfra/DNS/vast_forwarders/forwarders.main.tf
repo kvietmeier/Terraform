@@ -37,14 +37,19 @@ provider "google" {
   zone    = var.zone
 }
 
+
 ###===================================================================================###
-#                      Private DNS Managed Zone Configuration
+#                      Private DNS Managed Zone Configuration (Updated)
 ###===================================================================================###
 resource "google_dns_managed_zone" "dns_forwarder" {
+  # Use for_each to create a zone for every entry in the forwarding_zones map
+  for_each = var.forwarding_zones
+
   # Define the DNS Managed Zone
-  name        = var.name
-  dns_name    = var.dns_name
-  description = var.description
+  # The name must be unique; using the map key ensures this
+  name        = each.key
+  dns_name    = each.value.dns_name
+  description = each.value.description
   visibility  = "private"
 
   # Configure private visibility for the DNS zone
@@ -57,17 +62,25 @@ resource "google_dns_managed_zone" "dns_forwarder" {
       }
     }
   }
- 
-  # Setup this domain up with a forwarder for VAST DNS
+
+  # Setup this domain up with a forwarder
   forwarding_config {
     target_name_servers {
-      ipv4_address    = var.vastcluser_dns
-      forwarding_path = var.forwarding_path
+      # Reference the target DNS IP from the map value
+      ipv4_address    = each.value.vastcluser_dns
+      # Retain the forwarding_path from the original code/variable if still used
+      forwarding_path = try(each.value.forwarding_path, var.forwarding_path)
     }
   }
 }
 
-
 ###===================================================================================###
-#                                   Outputs
+#                                   Outputs (Updated)
 ###===================================================================================###
+output "forwarding_zone_names" {
+  description = "The list of names of the created DNS forwarding zones."
+  # Use the splat expression to output the names of all created zones
+  value = {
+    for k, v in google_dns_managed_zone.dns_forwarder : k => v.dns_name
+  }
+}
