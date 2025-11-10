@@ -51,6 +51,7 @@ resource "vastdata_vip_pool" "protocols" {
   for_each    = local.protocols_pools
 
   name        = each.value.name
+  domain_name = each.value.dns_name
   role        = each.value.role
   subnet_cidr = each.value.subnet_cidr
   ip_ranges   = [[each.value.start_ip, each.value.end_ip]]
@@ -62,6 +63,7 @@ resource "vastdata_vip_pool" "replication" {
   for_each    = local.replication_pools
 
   name        = each.value.name
+  role        = each.value.role
   subnet_cidr = each.value.subnet_cidr
   ip_ranges   = [[each.value.start_ip, each.value.end_ip]]
 }
