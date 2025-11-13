@@ -111,7 +111,7 @@ It isn't immediately clear from the documentation that you need to configure it 
 
   ```hcl
   resource "vastdata_dns" "protocol_dns" {
-    provider      = vastdata.gCPCluster_jpn
+    provider      = vastdata.gCPCluster_2
     name          = var.dns_name
     vip           = var.dns_vip
     net_type      = var.port_type
@@ -123,7 +123,7 @@ It isn't immediately clear from the documentation that you need to configure it 
 
   ```hcl
   resource "vastdata_vip_pool" "protocols" {
-  provider     = vastdata.gCPCluster_jpn
+  provider     = vastdata.gCPCluster_2
   name         = var.vip1_name
   domain_name  = var.dns_shortname
   role         = var.role1

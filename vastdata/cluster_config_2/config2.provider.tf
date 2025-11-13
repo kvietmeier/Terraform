@@ -17,7 +17,7 @@ terraform {
 }
 
 provider "vastdata" {
-  alias                   = "GCPCluster_jpn"
+  alias                   = "GCPCluster_2"
   username                = var.vast_username
   password                = var.vast_password
   host                    = var.vast_host

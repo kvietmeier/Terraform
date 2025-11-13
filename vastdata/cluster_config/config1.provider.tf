@@ -3,7 +3,7 @@
 #
 # Sets up the VAST provider (v1.6.8) with GCP cluster connection settings.
 # Uses input variables for credentials, host info, and SSL options.
-# Alias: GCPCluster
+# Alias: GCPCluster_1
 ###===================================================================================###
 
 terraform {
@@ -23,5 +23,5 @@ provider "vastdata" {
   port                    = var.vast_port
   skip_ssl_verify         = var.vast_skip_ssl_verify
   version_validation_mode = var.vast_version_validation_mode
-  alias                   = "GCPCluster"
+  alias                   = "GCPCluster_1"
 }

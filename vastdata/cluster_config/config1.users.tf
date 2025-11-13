@@ -14,7 +14,7 @@
 # - AD configuration uses bind credentials and supports LDAPS/TLS
 # - Group/user relationships are mapped via supplementary and leading GIDs
 # - VIP Pools and view policies referenced externally (not defined in this file)
-# - `provider = vastdata.GCPCluster` must be declared elsewhere
+# - `provider = vastdata.GCPCluster_1` must be declared elsewhere
 #
 ###===================================================================================###
 
@@ -22,7 +22,7 @@
 # Groups
 ###===================================================================================###
 resource "vastdata_group" "groups" {
-  provider = vastdata.GCPCluster
+  provider = vastdata.GCPCluster_1
   for_each = var.groups
 
   name = each.key
@@ -33,7 +33,7 @@ resource "vastdata_group" "groups" {
 # Users
 ###===================================================================================###
 resource "vastdata_user" "users" {
-  provider = vastdata.GCPCluster
+  provider = vastdata.GCPCluster_1
   for_each = var.users
 
   name        = each.key
@@ -52,7 +52,7 @@ resource "vastdata_user" "users" {
 # Tenants
 ###===================================================================================###
 resource "vastdata_tenant" "tenants" {
-  provider = vastdata.GCPCluster
+  provider = vastdata.GCPCluster_1
   for_each = var.tenants
   name     = each.key
 
@@ -65,7 +65,7 @@ resource "vastdata_tenant" "tenants" {
 # S3 User Keys
 ###===================================================================================###
 resource "vastdata_user_key" "s3keys" {
-  provider      = vastdata.GCPCluster
+  provider      = vastdata.GCPCluster_1
   for_each      = toset(var.pgp_key_users)
   
   user_id       = vastdata_user.users[each.key].id
