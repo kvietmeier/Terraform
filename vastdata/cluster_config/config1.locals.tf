@@ -55,16 +55,7 @@ locals {
   s3pool_key     = [for k, v in local.protocols_pools : k if v.name == "s3Pool"][0]
   sharespool_key = [for k, v in local.protocols_pools : k if v.name == "sharesPool"][0]
 
-  # Effective number of views
+  # Effective number of NFS views
   effective_num_views = var.num_views != null ? var.num_views : var.number_of_nodes
 
-  # Map s3 views to policy ID
-  s3_views = {
-    for key, view in var.s3_views_config : key => merge(
-      view,
-      {
-        policy_id = vastdata_view_policy.s3_basic_policy.id
-      }
-    )
-  }
 }

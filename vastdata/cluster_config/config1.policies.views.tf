@@ -19,85 +19,104 @@
 ###=============================================================================
 
 # NFS Basic Policy
-# - Flavor and protocols are configurable via variables:
-#     var.nfs_basic_policy_flavor
-#     var.nfs_basic_policy_protocols
-resource "vastdata_view_policy" "nfs_basic_policy" {
-  provider  = vastdata.GCPCluster_1
-  name      = var.nfs_basic_policy_name
-  flavor    = var.nfs_basic_policy_flavor
-  #protocols = var.nfs_basic_policy_protocols # This is optional and breaks automation
+resource "vastdata_view_policy" "voc_standard_nfs" {
+  provider = vastdata.GCPCluster_1
+  for_each = var.nfs_policies
+
+  # Attributes that are likely defined and NOT causing the error:
+  name             = each.value.name           #  <-- ERROR: Missing
+  flavor           = each.value.flavor
+  nfs_read_write   = each.value.nfs_read_write
+  nfs_read_only    = each.value.nfs_read_only
+  nfs_no_squash    = each.value.nfs_no_squash
+  smb_read_write   = each.value.smb_read_write
+  smb_read_only    = each.value.smb_read_only
+
+  # --- Attributes you should remove or add to var.nfs_policies ---
+  access_flavor                    = each.value.access_flavor    
+  allowed_characters               = each.value.allowed_characters
+  nfs_root_squash                  = each.value.nfs_root_squash  
+  nfs_posix_acl                    = each.value.nfs_posix_acl   
+  gid_inheritance                  = each.value.gid_inheritance 
+  enable_access_to_snapshot_dir_in_subdirs = each.value.enable_access_to_snapshot_dir_in_subdirs 
 }
 
-# S3 Basic Policy
-# - Flavor and protocols are configurable via variables:
-#     var.s3_basic_policy_flavor
-#     var.s3_basic_policy_protocols
-resource "vastdata_view_policy" "s3_basic_policy" {
-  provider  = vastdata.GCPCluster_1
-  name      = var.s3_basic_policy_name
-  flavor    = var.s3_basic_policy_flavor
-  #protocols = var.s3_basic_policy_protocols This is optional and breaks automation
+### S3 Basic Policy
+resource "vastdata_view_policy" "voc_standard_s3" {
+  provider = vastdata.GCPCluster_1
+  for_each = var.s3_policies
+
+  # Attributes that are likely defined and NOT causing the error:
+  name            = each.value.name    #                         <-- ERROR: Missing
+  flavor          = each.value.flavor
+  s3_read_write   = each.value.s3_read_write
+  s3_read_only    = each.value.s3_read_only
+  #special_chars   = each.value.special_chars # Note: The .tfvars uses 'special_chars', but the error lists 's3_special_chars_support'
+
+  # --- Attributes you should remove or add to var.s3_policies ---
+  access_flavor                  = each.value.access_flavor                    
+  allowed_characters             = each.value.allowed_characters               
+  s3_flavor_allow_free_listing   = each.value.s3_flavor_allow_free_listing    
+  s3_flavor_detect_full_pathname = each.value.s3_flavor_detect_full_pathname 
+  s3_special_chars_support       = each.value.s3_special_chars_support      
+  gid_inheritance                = each.value.gid_inheritance              
+  enable_access_to_snapshot_dir_in_subdirs = each.value.enable_access_to_snapshot_dir_in_subdirs
 }
 
 #=============================================================================
 # NFS VIEWS
 #=============================================================================
-# Creates NFS views from var.file_views_config
-# - Each view is assigned the NFS basic policy
-# - The 'create_dir' flag creates the path if parent exists
 resource "vastdata_view" "file_views" {
-  provider = vastdata.GCPCluster_1
-  for_each = var.file_views_config
+  # Change: Reference the variable directly
+  for_each = var.file_views_config 
 
+  provider   = vastdata.GCPCluster_1
   name       = each.value.name
   path       = each.value.path
   protocols  = each.value.protocols
-  policy_id  = vastdata_view_policy.nfs_basic_policy.id
   create_dir = each.value.create_dir
+  
+  # The policy_id must reference the policy resource using the key from the view config
+  policy_id  = vastdata_view_policy.voc_standard_nfs[each.value.policy].id
 }
 
 #=============================================================================
 # S3 VIEWS
 #=============================================================================
-# Creates S3 views from local.s3_views
-# - Each view references a specific policy via each.value.policy_id
-# - Supports bucket owner and optional anonymous access
-# - Depends on vastdata_user.users for proper permissions
 resource "vastdata_view" "s3_views" {
-  provider   = vastdata.GCPCluster_1
-  for_each   = local.s3_views
+  # Change: Reference the variable directly
+  for_each = var.s3_views_config
 
-  name       = each.value.name
-  path       = each.value.path
-  bucket     = each.value.bucket
-  protocols  = each.value.protocols
-  create_dir = each.value.create_dir
-  policy_id  = each.value.policy_id
-
-  bucket_owner              = each.value.bucket_owner
-  allow_s3_anonymous_access = lookup(each.value, "allow_s3_anonymous_access", false)
-
+  provider                      = vastdata.GCPCluster_1
+  name                          = each.value.name
+  bucket                        = each.value.bucket
+  path                          = each.value.path
+  protocols                     = each.value.protocols
+  create_dir                    = each.value.create_dir
+  bucket_owner                  = each.value.bucket_owner
+  allow_s3_anonymous_access     = lookup(each.value, "allow_s3_anonymous_access", false)
+  
+  # The policy_id must reference the policy resource using the key from the view config
+  policy_id                     = vastdata_view_policy.voc_standard_s3[each.value.policy].id
+  
   depends_on = [vastdata_user.users]
 }
 
 
-# The below is an alternative S3 view resource definition that uses var.s3_views_config directly.
-# It is functionally equivalent to the active s3_views resource above.
+###===================================================================================###
+### Get existing resources
+###===================================================================================###
 
-/* resource "vastdata_view" "s3_views" {
-  for_each = local.s3_views
-
-  provider   = vastdata.GCPCluster_1
-  policy_id  = each.value.policy_id
-  name       = each.value.name
-  bucket     = each.value.bucket
-  path       = each.value.path
-  protocols  = each.value.protocols
-  create_dir = each.value.create_dir
-  bucket_owner = each.value.bucket_owner
-  allow_s3_anonymous_access = lookup(each.value, "allow_s3_anonymous_access", false)
-
-  depends_on = [vastdata_user.users]
+/*
+# Default view ppolicy
+data "vastdata_view_policy" "vastdb_view_policy_default" {
+  name = "default"
 }
+*/
+/* 
+resource "vastdata_view_policy" "default" {
+  provider   = vastdata.GCPCluster_1
+  name = "default"
+}
+
  */
