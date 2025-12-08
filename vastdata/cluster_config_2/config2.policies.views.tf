@@ -11,7 +11,7 @@
 #   - NFS views automatically use the NFS basic policy.
 #   - S3 views reference a policy defined per view.
 #   - SMB or AD-integrated views can be added as needed.
-#   - Resources use the 'vastdata.GCPCluster' provider.
+#   - Resources use the 'vastdata.GCPCluster_2' provider.
 ######################################################################
 
 ###=============================================================================
@@ -23,7 +23,7 @@
 #     var.nfs_basic_policy_flavor
 #     var.nfs_basic_policy_protocols
 resource "vastdata_view_policy" "nfs_basic_policy" {
-  provider  = vastdata.GCPCluster
+  provider  = vastdata.GCPCluster_2
   name      = var.nfs_basic_policy_name
   flavor    = var.nfs_basic_policy_flavor
   #protocols = var.nfs_basic_policy_protocols # This is optional and breaks automation
@@ -34,7 +34,7 @@ resource "vastdata_view_policy" "nfs_basic_policy" {
 #     var.s3_basic_policy_flavor
 #     var.s3_basic_policy_protocols
 resource "vastdata_view_policy" "s3_basic_policy" {
-  provider  = vastdata.GCPCluster
+  provider  = vastdata.GCPCluster_2
   name      = var.s3_basic_policy_name
   flavor    = var.s3_basic_policy_flavor
   #protocols = var.s3_basic_policy_protocols This is optional and breaks automation
@@ -47,7 +47,7 @@ resource "vastdata_view_policy" "s3_basic_policy" {
 # - Each view is assigned the NFS basic policy
 # - The 'create_dir' flag creates the path if parent exists
 resource "vastdata_view" "file_views" {
-  provider = vastdata.GCPCluster
+  provider = vastdata.GCPCluster_2
   for_each = var.file_views_config
 
   name       = each.value.name
@@ -65,7 +65,7 @@ resource "vastdata_view" "file_views" {
 # - Supports bucket owner and optional anonymous access
 # - Depends on vastdata_user.users for proper permissions
 resource "vastdata_view" "s3_views" {
-  provider   = vastdata.GCPCluster
+  provider   = vastdata.GCPCluster_2
   for_each   = local.s3_views
 
   name       = each.value.name
@@ -88,7 +88,7 @@ resource "vastdata_view" "s3_views" {
 /* resource "vastdata_view" "s3_views" {
   for_each = local.s3_views
 
-  provider   = vastdata.GCPCluster
+  provider   = vastdata.GCPCluster_2
   policy_id  = each.value.policy_id
   name       = each.value.name
   bucket     = each.value.bucket

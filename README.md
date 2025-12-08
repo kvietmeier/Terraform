@@ -46,27 +46,12 @@ Terraform projects - recently added VAST Data.
 ### Directories (subject to change)
 
 ```text
-├── scripts
-│   │── InstallUpgradeTerraform.ps1
-|
+├.
+├── aws
 ├── azure
-│   │── AKS          (AKS cluster projects)
-│   │── AVD          (AVD projects - placeholder)
-│   │── CoreInfra    (Production modules to manage my infrastructure)
-│   │── samples      (Non-functional code samples)
-│   │── secrets      (certs, cloud-init files, etc in .gitignore)
-│   │── templates    (templates for new projects)
-│   │── testing      (Primary working Directory)
-│   │── VMs          (What it says)
-│   |── README.md
-|
 ├── gcp
-│   │── CoreInfra    (Production modules to manage my infrastructure)
-│   │── scripts      (Misc scripts and config files)
-│   │── templates    (templates for new projects)
-│   │── testing      (Primary working Directory for new projects)
-│   |── README.md
-|
+├── scripts
+├── vastdata
 ├── LICENSE.md
 └── README.md
 ```

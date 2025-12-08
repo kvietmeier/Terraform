@@ -97,10 +97,10 @@ variable "dns_enabled" {
 ###===================================================================================###
 ###--- NFS/SMB View Policy Settings
 ###===================================================================================###
-variable "nfs_basic_policy_name" {
+/* variable "nfs_basic_policy_name" {
   type = string
 }
-
+ */
 variable "nfs_basic_policy_flavor" {
   type    = string
   default = "MIXED_LAST_WINS"
@@ -141,6 +141,21 @@ variable "vippool_permissions" {
   type    = string
   default = "RW"
 }
+
+
+###===================================================================================###
+###--- NFS/SMB View Polices
+###===================================================================================###
+variable "nfs_policies" {
+  type = map(any)
+  description = "Map of NFS policies to create"
+}
+
+variable "s3_policies" {
+  type = map(any)
+  description = "Map of S3 policies to create"
+}
+
 
 ###===================================================================================###
 ###--- NFS/SMB View Settings
