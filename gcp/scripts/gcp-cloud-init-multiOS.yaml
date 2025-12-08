@@ -33,6 +33,7 @@ packages:
   - bc
   - jq
   - pkg-config
+  - clustershell
 
 write_files:
   ###--- Setup script to install tools and compile software
@@ -73,6 +74,7 @@ write_files:
           # Need for elbencho S3 support
           libcurl4-openssl-dev \
           uuid-dev \
+          docker.io \
           zlib1g-dev
 
       # RedHat, Centos, Rocky etc.
