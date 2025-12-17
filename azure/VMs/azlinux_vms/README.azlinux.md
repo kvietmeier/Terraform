@@ -13,7 +13,7 @@ This project deploys High-Performance Computing (HPC) Virtual Machines on Azure 
 
 ---
 
-## Important Notes on Azure Linux
+### Important Notes on Azure Linux
 
 * **Package Manager:** Uses `tdnf` (Tiny DNF), aliased to `dnf`. It is RPM-based (similar to RHEL/CentOS).
 * **Kernel Locking:** This deployment automatically adds `exclude=kernel*` to `/etc/dnf/dnf.conf` to prevent accidental kernel upgrades during patch cycles.
