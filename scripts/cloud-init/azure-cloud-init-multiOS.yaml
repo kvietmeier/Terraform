@@ -5,12 +5,13 @@
 # Copyright 2025 Karl Vietmeier / KCV Consulting
 # SPDX-License-Identifier: Apache-2.0
 #
-# AWS-adapted cloud-init config for Ubuntu/Debian & RHEL/CentOS/Rocky EC2
+# AZURE-adapted cloud-init config for Ubuntu/Debian & RHEL/CentOS/Rocky/AzureLinux
 # Bootstraps instance, installs dev tools, compiles FIO, iPerf, DOOL, SockPerf, Elbencho,
-# sets up labuser, enables NTP via AWS default server, configures shell environment.
+# sets up labuser, enables NTP via Azure Host, configures shell environment.
 # -------------------------------------------------------------------------------
 
-package_update:  false
+# --- CHANGE 1: Must be true on Azure to populate empty repos ---
+package_update:  true
 package_upgrade: false
 
 packages:
@@ -27,16 +28,6 @@ packages:
   - jq
   - pkg-config
 
-# Users
-users:
-  - name: labuser
-    gecos: Lab User
-    groups: sudo
-    shell: /bin/bash
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    ssh_authorized_keys:
-      - ssh-rsa ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCxeiwknIx8Vo1osaw/V+rp7kcC4lxtuDJlgOwQidKcoz7JfaKReic2C75DvxL8+WB95dQE+GFH+28InkVaIgeFxj5cDpACa/YoVuX8zb6OVhxDutxWTZWpI+HUQ1BXSYRY8eXQesaOsYpXO9/k9zkGOKii7Lr/+HlWBszfy5UJPl3quftVT7wYIlTuqygGo7OgIKWnA1ST7QkUU6ffKjMzJEnR8KK1Z+Sno6vuRyU63dC7mKt7lO0J0tvm5M0mrVYt3cOQjR7fU0omlQm9c3MkSRDM6lDDWm49QQ1e8Zv8nFn6GudJZU+r1anl9pdixZ0nFMJGTI5H4TUPoQQXS8ml0NxkcAjAc+KAKMx3oS1bmgHXJ5rRwKQ6mUf/As+WHSbwAQ/t+RtQf0qPzN4nd925/tqNGdlhCS7ZmDeWC6cAXMr3wH17SQKscxLTsYAwaEfBHOI4YCF1rg91D+9bnpd7jpjFUVwwBrKO67/J0576MfcbFpUMdlc4bbWaog4V9os= karlv@Tandaloor
-    #  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD... karl.vietmeier@Tandaloor
 
 write_files:
   # Compile/install tools
@@ -85,7 +76,9 @@ write_files:
         systemctl disable apt-daily.timer apt-daily-upgrade.timer || true
         systemctl mask apt-daily.service apt-daily-upgrade.service || true
         
-      elif [ -f /etc/redhat-release ]; then
+      # --- CHANGE 2: Added support for Azure Linux / Mariner detection ---
+      elif [ -f /etc/redhat-release ] || [ -f /etc/azurelinux-release ] || [ -f /etc/mariner-release ]; then
+        # On Azure Linux, dnf is aliased to tdnf usually, but this works
         dnf groupinstall -y "Development Tools"
         dnf install -y \
           epel-release \
@@ -162,7 +155,7 @@ write_files:
       git clone https://github.com/breuner/elbencho.git
       cd elbencho
       make S3_SUPPORT=1 -j "$(nproc)"
-      if [ -f /etc/redhat-release ]; then
+      if [ -f /etc/redhat-release ] || [ -f /etc/azurelinux-release ] || [ -f /etc/mariner-release ]; then
         make rpm && dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm
       elif [ -f /etc/debian_version ]; then
         make install
@@ -180,7 +173,7 @@ write_files:
       if [ -f /etc/debian_version ]; then
         systemctl enable chrony
         systemctl restart chrony
-      elif [ -f /etc/redhat-release ]; then
+      elif [ -f /etc/redhat-release ] || [ -f /etc/azurelinux-release ] || [ -f /etc/mariner-release ]; then
         systemctl enable chronyd
         systemctl restart chronyd
       fi
@@ -228,10 +221,11 @@ write_files:
       set -o vi
       bind 'set bell-style none'
 
-  # Timekeeping with AWS NTP
+  # --- CHANGE 3: Timekeeping with Azure Host Sync ---
   - path: /etc/chrony/chrony.conf
     content: |
-      server 169.254.169.123 prefer iburst
+      # Sync with Azure Hyper-V Host (Stratum 2 generally)
+      server 169.254.169.254 prefer iburst
       driftfile /var/lib/chrony/drift
       makestep 1.0 3
       rtcsync
