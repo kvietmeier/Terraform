@@ -21,9 +21,17 @@ This project deploys High-Performance Computing (HPC) Virtual Machines on Azure 
 
 ---
 
-## Prerequisites to use Azure Linux HPC Images
+### Prerequisites to use Azure Linux HPC Images
 
-#### 1. Find the Images
+#### Accept Legal Terms (One-Time)
+
+Before deploying this specific Marketplace image programmatically, you must accept the license agreement for your subscription.
+
+```powershell
+az vm image terms accept --urn "azure-hpc:azurelinux-hpc:3:latest"
+```
+
+#### Locate the Images
 
 ```shell
 # Replace variables with your target (e.g., location westus3)
@@ -45,14 +53,6 @@ x64           azurelinux-hpc  azure-hpc   3              azure-hpc:azurelinux-hp
 x64           azurelinux-hpc  azure-hpc   3-fips         azure-hpc:azurelinux-hpc:3-fips:3.0.2025092901      3.0.2025092901
 x64           azurelinux-hpc  azure-hpc   3-mi300x       azure-hpc:azurelinux-hpc:3-mi300x:3.0.2025120801    3.0.2025120801
 x64           azurelinux-hpc  azure-hpc   3-v100         azure-hpc:azurelinux-hpc:3-v100:3.0.2025092901      3.0.2025092901
-```
-
-#### 2. Accept Legal Terms (One-Time)
-
-Before deploying this specific Marketplace image programmatically, you must accept the license agreement for your subscription.
-
-```powershell
-az vm image terms accept --urn "azure-hpc:azurelinux-hpc:3:latest"
 ```
 
 ---
