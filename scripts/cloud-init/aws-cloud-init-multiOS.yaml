@@ -34,8 +34,8 @@ users:
     groups: sudo
     shell: /bin/bash
     sudo: ALL=(ALL) NOPASSWD:ALL
-    #ssh_authorized_keys:
-    #  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... karlv@linuxtools
+    ssh_authorized_keys:
+      - ssh-rsa ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCxeiwknIx8Vo1osaw/V+rp7kcC4lxtuDJlgOwQidKcoz7JfaKReic2C75DvxL8+WB95dQE+GFH+28InkVaIgeFxj5cDpACa/YoVuX8zb6OVhxDutxWTZWpI+HUQ1BXSYRY8eXQesaOsYpXO9/k9zkGOKii7Lr/+HlWBszfy5UJPl3quftVT7wYIlTuqygGo7OgIKWnA1ST7QkUU6ffKjMzJEnR8KK1Z+Sno6vuRyU63dC7mKt7lO0J0tvm5M0mrVYt3cOQjR7fU0omlQm9c3MkSRDM6lDDWm49QQ1e8Zv8nFn6GudJZU+r1anl9pdixZ0nFMJGTI5H4TUPoQQXS8ml0NxkcAjAc+KAKMx3oS1bmgHXJ5rRwKQ6mUf/As+WHSbwAQ/t+RtQf0qPzN4nd925/tqNGdlhCS7ZmDeWC6cAXMr3wH17SQKscxLTsYAwaEfBHOI4YCF1rg91D+9bnpd7jpjFUVwwBrKO67/J0576MfcbFpUMdlc4bbWaog4V9os= karlv@Tandaloor
     #  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD... karl.vietmeier@Tandaloor
 
 write_files:

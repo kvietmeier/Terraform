@@ -181,3 +181,27 @@ output "service_networking_connection" {
   description = "Peering connection to servicenetworking.googleapis.com"
   value       = google_service_networking_connection.private_vpc_connection.network
 }
+
+
+
+/*
+
+resource "google_compute_global_address" "private_service_range" {
+  name          = "private-service-access"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.custom_vpc.self_link
+  
+  # We use 192.168.0.0/16 for Cloud SQL.
+  # It is distinct from 10.x (Voc) and 172.20.x (Hubs).
+  address       = "192.168.0.0" 
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = google_compute_network.custom_vpc.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_service_range.name]
+  depends_on              = [google_project_service.servicenetworking]
+}
+*/
