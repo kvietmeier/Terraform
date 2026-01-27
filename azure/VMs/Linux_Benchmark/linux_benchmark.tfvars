@@ -27,7 +27,7 @@ node_count = 2
 #sku        = "20_04-daily-lts-gen2"
 #ver        = "latest"
 
-# OS Disk
+# OS Disk 
 caching = "ReadWrite"
 sa_type = "Standard_LRS"
 
