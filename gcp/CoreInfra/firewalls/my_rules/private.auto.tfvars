@@ -31,8 +31,9 @@ ingress_filter = [
   ###--- Individual External IPs
   "47.144.96.167",    # MyISPAddress
   "47.44.178.111",    # MobileIP
-  "47.37.190.104",   # MobileIP
+  "47.37.190.104",    # MobileIP
   "10.241.165.219",   # Josh W.(Cato IP)
+  "192.116.36.234",   # Dotan 
   "172.56.180.122",   # Arrakis HotSpot
   "69.181.233.114",   # Casey - VAST Support
   "38.97.31.114",     # Bryan Gilcrease

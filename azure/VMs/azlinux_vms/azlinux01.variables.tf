@@ -100,6 +100,25 @@ variable "admin_user" {
   default     = "azureuser"
 }
 
+### Secure Boot settings
+variable "security_type" {
+  description = "Trusted Launch setting"
+  type        = string
+  default     = "TrustedLaunch"
+}
+
+variable "secure_boot_enabled" {
+  description = "Enable or disable secure boot (set to false for unsigned drivers)"
+  type        = bool
+  default     = false
+}
+
+variable "vtpm_enabled" {
+  description = "Enable or disable VTPM - (set to true is secure_boot_enabled = false)"
+  type        = bool
+  default     = true
+}
+
 
 ### System Config
 variable "cloud_init_path" {

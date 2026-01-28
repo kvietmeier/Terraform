@@ -37,6 +37,12 @@ image_offer     = "azurelinux-hpc"
 image_sku       = "3"
 image_version   = "latest"
 
+  # For AZ Linux - Disable Secure Boot to allow unsigned drives to load
+security_type = "TrustedLaunch"
+secure_boot_enabled = false
+vtpm_enabled = true
+
+
 # --- File Paths (Use Forward Slashes '/' even on Windows) ---
 ssh_key_path    = "C:/Users/karl.vietmeier/.ssh/id_rsa.pub"
 
