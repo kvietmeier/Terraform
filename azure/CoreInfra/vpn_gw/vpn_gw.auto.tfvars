@@ -15,11 +15,11 @@
 
 
 # --- Azure Infrastructure Config ---
-subscription_id      = "YOUR_AZURE_SUBSCRIPTION_ID" # <--- REPLACE THIS
-resource_group_name  = "rg-azure-vpn-central1"
-location             = "Central US"
-vnet_name            = "vnet-azure-core"
-gateway_name         = "vpngw-azure-central1"
+subscription_id      = "ea2ae48a-1f66-401b-9406-338e0e0d7c4c" # <--- REPLACE THIS
+resource_group_name  = "rg-vpn-to-gcp"
+location             = "West US 3 "
+vnet_name            = "vnet-voctesting-karlv-01"
+gateway_name         = "vpngw-to-gcp"
 
 # --- BGP Configuration ---
 azure_asn            = "65010"
@@ -33,9 +33,8 @@ gcp_apipa_bgp_b      = "169.254.22.9"
 
 # [CRITICAL] These must match the PUBLIC IPs of your existing GCP HA Gateway.
 # Run: gcloud compute vpn-gateways describe vpn-gateway-azure-central1 --region=us-central1
-gcp_pubip0           = "REPLACE_WITH_GCP_INTERFACE0_IP"
-gcp_pubip1           = "REPLACE_WITH_GCP_INTERFACE1_IP"
-
+gcp_pubip0           = "35.242.108.176"
+gcp_pubip1           = "34.157.232.109"
 
 # --- Security ---
 # This must match the key used on the GCP side exactly.
