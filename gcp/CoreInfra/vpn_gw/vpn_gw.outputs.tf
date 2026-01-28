@@ -10,20 +10,37 @@
 #
 # created by: Karl Vietmeier
 
-# Output the public IP of the GCP HA VPN Gateway Interface 0
-output "gcp_vpn_ip_0" {
-  description = "Public IP address of the HA VPN Gateway Interface 0 (for Tunnel 1 to Azure)"
-  value       = google_compute_ha_vpn_gateway.ha_vpn_gw.vpn_interfaces[0].ip_address
+output "ha_vpn_gateway_self_link" {
+  description = "The URI of the created HA VPN Gateway"
+  value       = google_compute_ha_vpn_gateway.ha_gateway.self_link
 }
 
-# Output the public IP of the GCP HA VPN Gateway Interface 1
-output "gcp_vpn_ip_1" {
-  description = "Public IP address of the HA VPN Gateway Interface 1 (for Tunnel 2 to Azure)"
-  value       = google_compute_ha_vpn_gateway.ha_vpn_gw.vpn_interfaces[1].ip_address
+output "cloud_router_self_link" {
+  description = "The URI of the created Cloud Router"
+  value       = google_compute_router.router.self_link
 }
 
-# Output the GCP Cloud Router's ASN
-output "gcp_router_asn" {
-  description = "The BGP Autonomous System Number (ASN) of the Cloud Router"
-  value       = google_compute_router.cloud_router.bgp[0].asn
+output "external_gateway_self_link" {
+  description = "The URI of the created External Peer Gateway"
+  value       = google_compute_external_vpn_gateway.external_gateway.self_link
+}
+
+output "vpn_tunnel0_id" {
+  description = "The ID of VPN Tunnel 0"
+  value       = google_compute_vpn_tunnel.tunnel0.id
+}
+
+output "vpn_tunnel1_id" {
+  description = "The ID of VPN Tunnel 1"
+  value       = google_compute_vpn_tunnel.tunnel1.id
+}
+
+output "router_interface0_ip" {
+  description = "The GCP side BGP IP for Interface 0"
+  value       = google_compute_router_interface.router_interface0.ip_range
+}
+
+output "router_interface1_ip" {
+  description = "The GCP side BGP IP for Interface 1"
+  value       = google_compute_router_interface.router_interface1.ip_range
 }

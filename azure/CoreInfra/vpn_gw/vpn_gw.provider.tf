@@ -7,6 +7,7 @@
 # 
 ###===================================================================================###
 # Configure the Microsoft Azure Provider TerraForm
+
 terraform {
   required_version = ">= 1.9"
 
@@ -23,6 +24,7 @@ terraform {
 }
 
 
+
 provider "azurerm" {
   features {
    resource_group {
@@ -30,8 +32,4 @@ provider "azurerm" {
        prevent_deletion_if_contains_resources = false
    }
   }
-}
-
-provider "azurerm" {
-  features {}
 }
