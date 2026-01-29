@@ -36,8 +36,8 @@ priority            = 100
 
 
 ### Azure Side
-azure_pubip0        = "4.249.107.59"
-azure_pubip1        = "4.249.107.48"
+azure_pubip0        = "20.38.169.47"
+azure_pubip1        = "20.38.169.253"
 azure_apipa_bgp_a   = "169.254.21.10"
 azure_apipa_bgp_b   = "169.254.22.10"
 azure_asn_b         = "65010"

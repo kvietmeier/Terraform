@@ -29,6 +29,10 @@
 #                                  Provider Configuration
 ###===================================================================================###
 terraform {
+  backend "gcs" {
+    bucket  = "clouddev-itdesk124-tfstate"
+    prefix  = "terraform/state/core-vpc"
+  }
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -70,6 +74,7 @@ resource "google_compute_network" "custom_vpc" {
   name                     = var.vpc_name
   auto_create_subnetworks  = false
   enable_ula_internal_ipv6 = true  # REQUIRED to use INTERNAL IPv6 in subnets
+  routing_mode             = "GLOBAL"   
 }
 
 # Reserve IP range for Private Service Access (used by Cloud SQL, Memorystore, etc.)
