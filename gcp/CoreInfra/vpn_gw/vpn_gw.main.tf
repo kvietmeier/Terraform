@@ -41,14 +41,8 @@ resource "google_compute_ha_vpn_gateway" "ha_gateway" {
   network = var.network
   region  = var.region
   
-  vpn_interfaces {
-    id      = 0
-    address = google_compute_address.vpn_static_ip_0.address
-  }
-  vpn_interfaces {
-    id      = 1
-    address = google_compute_address.vpn_static_ip_1.address
-  }
+  # Note: No vpn_interfaces block needed here for input. 
+  # Google creates them automatically.
 }
 
 # =========================================================================

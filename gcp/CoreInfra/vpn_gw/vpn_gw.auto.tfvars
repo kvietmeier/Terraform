@@ -11,14 +11,14 @@
 # created by: Karl Vietmeier
 
 project_id          = "clouddev-itdesk124"
-region              = "us-central1"
-zone                = "us-central1a"
+region              = "europe-north2"
+zone                = "europe-north2a"
 network             = "karlv-corevpc"
 
 # VPN Gateway Setup
 ha_vpn_gw_name      = "vpn-gateway-azure-central1"
 external_gw_name    = "vpn-gateway-azure-central1"
-router_name         = "router-azure-central1"
+router_name         = "router-to-azure-sweden"
 gcp_asn             = "65333"
 shared_key          = "xVTsD61QPvDUPgD3bJvyaxo6s+peCTD6"
 
@@ -36,8 +36,8 @@ priority            = 100
 
 
 ### Azure Side
-azure_pubip0        = "20.38.169.47"
-azure_pubip1        = "20.38.169.253"
+azure_pubip0        = "20.91.221.126"
+azure_pubip1        = "20.91.231.34"
 azure_apipa_bgp_a   = "169.254.21.10"
 azure_apipa_bgp_b   = "169.254.22.10"
 azure_asn_b         = "65010"

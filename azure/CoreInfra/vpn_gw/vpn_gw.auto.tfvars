@@ -34,8 +34,8 @@ gcp_apipa_bgp_b      = "169.254.22.9"
 
 # [CRITICAL] These must match the PUBLIC IPs of your existing GCP HA Gateway.
 # Run: gcloud compute vpn-gateways describe vpn-gateway-azure-central1 --region=us-central1
-gcp_pubip0           = "35.242.108.176"
-gcp_pubip1           = "34.157.232.109"
+gcp_pubip0           = "35.153.46.113"
+gcp_pubip1           = "34.153.239.240"
 
 # --- Security ---
 # This must match the key used on the GCP side exactly.
