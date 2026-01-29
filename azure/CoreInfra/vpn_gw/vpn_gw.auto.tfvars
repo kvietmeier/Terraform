@@ -16,11 +16,11 @@
 
 
 # --- Azure Infrastructure Config ---
-subscription_id      = "eb42feec-fb2a-4e25-a415-b75aef25f296" # <--- REPLACE THIS
-resource_group_name  = "karlv-voctesting"
-location             = "West US 3 "
-vnet_name            = "vnet-voctesting-karlv-01"
-gateway_name         = "vpngw-to-gcp"
+subscription_id      = "ea2ae48a-1f66-401b-9406-338e0e0d7c4c" # <--- REPLACE THIS
+resource_group_name  = "rg-karlv-swedencentral"
+location             = "Sweden Central"
+vnet_name            = "vnet-karlv-swedencentral-00"
+gateway_name         = "vpngw-sweden-to-gcp"
 
 # --- BGP Configuration ---
 azure_asn            = "65010"
