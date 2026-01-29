@@ -20,7 +20,18 @@
   google_compute_router_peer,"bgp_peer_0, bgp_peer_1",Defines the BGP peers with the Azure ASN and Azure BGP link-local IPs.
 */
 
+# =========================================================================
+# Reserve a static IP in Stockholm so it doesn't change on you again
+# =========================================================================
+resource "google_compute_address" "vpn_static_ip_0" {
+  name   = "vpn-static-ip-0"
+  region = var.region
+}
 
+resource "google_compute_address" "vpn_static_ip_1" {
+  name   = "vpn-static-ip-1"
+  region = var.region
+}
 
 # =========================================================================
 # 1. HA VPN GATEWAY
@@ -29,6 +40,15 @@ resource "google_compute_ha_vpn_gateway" "ha_gateway" {
   name    = var.ha_vpn_gw_name
   network = var.network
   region  = var.region
+  
+  vpn_interfaces {
+    id      = 0
+    address = google_compute_address.vpn_static_ip_0.address
+  }
+  vpn_interfaces {
+    id      = 1
+    address = google_compute_address.vpn_static_ip_1.address
+  }
 }
 
 # =========================================================================

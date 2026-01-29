@@ -44,3 +44,20 @@ output "router_interface1_ip" {
   description = "The GCP side BGP IP for Interface 1"
   value       = google_compute_router_interface.router_interface1.ip_range
 }
+
+# --- NEW PUBLIC IP OUTPUTS ---
+
+output "gcp_public_ip_0" {
+  description = "The first Public IP of the Stockholm HA VPN Gateway. Use this for Azure Tunnel 1."
+  value       = google_compute_ha_vpn_gateway.ha_gateway.vpn_interfaces[0].ip_address
+}
+
+output "gcp_public_ip_1" {
+  description = "The second Public IP of the Stockholm HA VPN Gateway. Use this for Azure Tunnel 2."
+  value       = google_compute_ha_vpn_gateway.ha_gateway.vpn_interfaces[1].ip_address
+}
+
+output "gcp_asn" {
+  description = "The ASN of the GCP Cloud Router. Ensure this matches your Azure Peer ASN."
+  value       = google_compute_router.router.bgp[0].asn
+}

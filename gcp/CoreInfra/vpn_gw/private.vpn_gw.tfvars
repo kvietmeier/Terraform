@@ -11,14 +11,14 @@
 # created by: Karl Vietmeier
 
 project_id          = "clouddev-itdesk124"
-region              = "us-central1"
-zone                = "us-central1a"
+region              = "europe-north2"
+zone                = "europe-north2a"
 network             = "karlv-corevpc"
 
 # VPN Gateway Setup
 ha_vpn_gw_name      = "vpn-gateway-azure-central1"
 external_gw_name    = "vpn-gateway-azure-central1"
-router_name         = "router-azure-central1"
+router_name         = "router-to-azure-sweden"
 gcp_asn             = "65333"
 shared_key          = "xVTsD61QPvDUPgD3bJvyaxo6s+peCTD6"
 
