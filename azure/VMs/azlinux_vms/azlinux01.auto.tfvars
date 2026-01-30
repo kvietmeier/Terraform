@@ -12,7 +12,7 @@
 ###===================================================================================###
 # --- Target Location & Resource Group ---
 resource_group_name = "rg-vastnfs-tf-02"
-location            = "westus3"
+location            = "Sweden Central"
 
 # --- VM Configuration ---
 vm_count                = 2
@@ -23,7 +23,7 @@ admin_user              = "labuser"
 # --- Storage Configuration ---
 # Note: disk_controller_type requires provider v3.98+
 # If you get an error, remove this, but it is needed for NVMe performance
-disk_ctlr = "NVME"
+disk_ctlr = "NVMe"
 
 
 # --- OS Disk ---
@@ -44,13 +44,13 @@ vtpm_enabled = true
 
 
 # --- File Paths (Use Forward Slashes '/' even on Windows) ---
-ssh_key_path    = "C:/Users/karl.vietmeier/.ssh/id_rsa.pub"
+ssh_key_path = "../../../../personal/ssh_keys/ghostw11.id_rsa.pub"
 
 # Using the path found in your PowerShell script 
-cloud_init_path = "C:/Users/karl.vietmeier/repos/Terraform/scripts/cloud-init/azure-cloud-init-multiOS.yaml"
+cloud_init_path = "../../../scripts/cloud-init/azure-cloud-init-multiOS.yaml"
 
 
 # --- Networking Configuration ---
-existing_network_rg  = "rg-westus3-karlv-coreresources"
-existing_vnet_name   = "vnet-uswest3-hub-karlv"
+existing_network_rg  = "rg-karlv-swedencentral"
+existing_vnet_name   = "vnet-karlv-swedencentral-00"
 existing_subnet_name = "subnet00"
