@@ -23,8 +23,8 @@
 ###===================================================================================###
 
 # Azure Public IPs from VPN Gateway Configuration
-azure_public_ip_01 = "20.121.130.26"
-azure_public_ip_02 = "172.172.233.46"
+azure_public_ip_01 = "20.91.221.126"
+azure_public_ip_02 = "20.91.231.34"
 
 
 ingress_filter = [
