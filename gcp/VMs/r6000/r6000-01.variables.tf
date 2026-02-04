@@ -1,5 +1,10 @@
 ###===================================================================================###
-#  File: devops01.variables.tf (Fixed for Blackwell)
+#  Created By:  Karl Vietmeier
+#  Purpose:     De Novo NVIDIA Blackwell Workstation Deployment (Ubuntu 24.04)
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 ###===================================================================================###
 
 # --- Project & Location ---
@@ -40,23 +45,38 @@ variable "h_disk_size" {
 }
 
 # --- Network ---
-variable "vpc_name"    { type = string }
-variable "subnet_name" { type = string }
+variable "vpc_name"    { 
+  type = string
+}
+
+variable "subnet_name" {
+  type = string
+}
 
 # --- Service Account ---
-variable "sa_email"  { type = string }
-variable "sa_scopes" { type = list(string) }
+variable "sa_email"  {
+  type = string
+  }
+
+variable "sa_scopes" {
+  type = list(string)
+  }
 
 # --- SSH & Legacy Config ---
-variable "ssh_user"     { type = string }
-variable "ssh_key_file" { type = string }
+variable "ssh_user"     {
+  type = string
+  }
+
+variable "ssh_key_file" {
+  type = string
+  }
 
 variable "personal_repo" {
   type    = string
   default = ""  # will fallback to env var
 }
 
-
+### Locals to set file locations
 locals {
   # Use the variable or fallback
   personal_repo   = var.personal_repo != "" ? var.personal_repo : "/home/karlv/projects/personal"
