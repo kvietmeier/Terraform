@@ -58,6 +58,19 @@ resource "google_compute_router" "router" {
     advertise_mode    = "CUSTOM"
     # This automatically picks up all global subnets now that VPC is GLOBAL
     advertised_groups  = ["ALL_SUBNETS"]
+    
+    # --- VIP Pool CIDRs ---
+    advertised_ip_ranges {
+      range       = "33.20.1.0/24"
+      description = "Protocols Pool"
+    }
+
+    advertised_ip_ranges {
+      range       = "33.21.1.0/24"
+      description = "Replication Pool"
+    }
+    # ------------------------
+
   }
 }
 
