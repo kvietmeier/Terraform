@@ -1,0 +1,18 @@
+# Never modify line endings for keys
+# Infrastructure SSH keys — never normalize
+
+secrets/* -text
+ssh_keys/* -text
+*.pem -text
+*.key -text
+*.ppk -text
+id_rsa -text
+id_ed25519 -text
+
+# Terraform & Linux
+*.tf text eol=lf
+*.tfvars text eol=lf
+*.sh text eol=lf
+
+# Windows PowerShell
+*.ps1 text eol=crlf

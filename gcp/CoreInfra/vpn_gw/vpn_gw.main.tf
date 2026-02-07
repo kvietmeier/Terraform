@@ -20,132 +20,153 @@
   google_compute_router_peer,"bgp_peer_0, bgp_peer_1",Defines the BGP peers with the Azure ASN and Azure BGP link-local IPs.
 */
 
-# Data source for the existing VPC network
-data "google_compute_network" "vpc_network" {
-  name = var.network_name
+# =========================================================================
+# Reserve a static IP in Stockholm so it doesn't change on you again
+# =========================================================================
+resource "google_compute_address" "vpn_static_ip_0" {
+  name   = "vpn-static-ip-0"
+  region = var.region
 }
 
-# --- 1. HA VPN Gateway ---
-resource "google_compute_ha_vpn_gateway" "ha_vpn_gw" {
-  name    = var.vpn_gateway_name
-  network = data.google_compute_network.vpc_network.id
+resource "google_compute_address" "vpn_static_ip_1" {
+  name   = "vpn-static-ip-1"
+  region = var.region
+}
+
+# =========================================================================
+# 1. HA VPN GATEWAY
+# =========================================================================
+resource "google_compute_ha_vpn_gateway" "ha_gateway" {
+  name    = var.ha_vpn_gw_name
+  network = var.network
   region  = var.region
+  
+  # Note: No vpn_interfaces block needed here for input. 
+  # Google creates them automatically.
 }
 
-# --- 2. External VPN Gateway (Azure side) ---
-resource "google_compute_external_vpn_gateway" "external_gw" {
-  name            = var.external_gateway_name
-  redundancy_type = "TWO_IPS_REDUNDANCY"
-
-  # Interface 0
-  interface {
-    id         = 0
-    ip_address = var.azure_peer_ip_0
-  }
-
-  # Interface 1
-  interface {
-    id         = 1
-    ip_address = var.azure_peer_ip_1
-  }
-}
-
-# --- 3. Cloud Router ---
-resource "google_compute_router" "cloud_router" {
+# =========================================================================
+# 2. CLOUD ROUTER
+# =========================================================================
+resource "google_compute_router" "router" {
   name    = var.router_name
-  network = data.google_compute_network.vpc_network.id
+  network = var.network
   region  = var.region
-
+  
   bgp {
     asn = var.gcp_asn
-  }
-}
-
-# --- 4. VPN Tunnels ---
-# VPN Tunnel 0
-resource "google_compute_vpn_tunnel" "tunnel_0" {
-  name                          = "azure-central1-tunnel-if0"
-  region                        = var.region
-  ike_version                   = 2
-  shared_secret                 = var.shared_secret
-  router                        = google_compute_router.cloud_router.name
-  vpn_gateway                   = google_compute_ha_vpn_gateway.ha_vpn_gw.name
-  vpn_gateway_interface         = 0 
-  peer_external_gateway         = google_compute_external_vpn_gateway.external_gw.name
-  peer_external_gateway_interface = 0 
-  
-  local_traffic_selector = ["0.0.0.0/0"]
-  remote_traffic_selector = ["0.0.0.0/0"]
-}
-
-# VPN Tunnel 1
-resource "google_compute_vpn_tunnel" "tunnel_1" {
-  name                          = "azure-central1-tunnel-if1"
-  region                        = var.region
-  ike_version                   = 2
-  shared_secret                 = var.shared_secret
-  router                        = google_compute_router.cloud_router.name
-  vpn_gateway                   = google_compute_ha_vpn_gateway.ha_vpn_gw.name
-  vpn_gateway_interface         = 1 
-  peer_external_gateway         = google_compute_external_vpn_gateway.external_gw.name
-  peer_external_gateway_interface = 1 
-  
-  local_traffic_selector = ["0.0.0.0/0"]
-  remote_traffic_selector = ["0.0.0.0/0"]
-}
-
-# --- 5. Cloud Router BGP Interfaces and Peers ---
-
-# Cloud Router Interface for Tunnel 0
-resource "google_compute_router_interface" "router_if_0" {
-  name       = "azure-tunnel-if0"
-  router     = google_compute_router.cloud_router.name
-  region     = var.region
-  vpn_tunnel = google_compute_vpn_tunnel.tunnel_0.name
-  ip_range   = var.gcp_bgp_ip_0 
-}
-
-# Cloud Router BGP Peer for Tunnel 0
-resource "google_compute_router_peer" "bgp_peer_0" {
-  name                      = "azure-bgp-peer-if0"
-  router                    = google_compute_router.cloud_router.name
-  region                    = var.region
-  peer_asn                  = var.azure_asn
-  interface                 = google_compute_router_interface.router_if_0.name
-  peer_ip_address           = var.azure_bgp_ip_0
-  advertised_route_priority = var.advertised_route_priority
-  
-  dynamic "advertised_ip_ranges" {
-    for_each = var.advertised_ip_ranges
-    content {
-      range = advertised_ip_ranges.value
+    advertise_mode    = "CUSTOM"
+    # This automatically picks up all global subnets now that VPC is GLOBAL
+    advertised_groups  = ["ALL_SUBNETS"]
+    
+    # --- VIP Pool CIDRs ---
+    advertised_ip_ranges {
+      range       = "33.20.1.0/24"
+      description = "Protocols Pool"
     }
-  }
-}
 
-# Cloud Router Interface for Tunnel 1
-resource "google_compute_router_interface" "router_if_1" {
-  name       = "azure-tunnel-if1"
-  router     = google_compute_router.cloud_router.name
-  region     = var.region
-  vpn_tunnel = google_compute_vpn_tunnel.tunnel_1.name
-  ip_range   = var.gcp_bgp_ip_1
-}
-
-# Cloud Router BGP Peer for Tunnel 1
-resource "google_compute_router_peer" "bgp_peer_1" {
-  name                      = "azure-bgp-peer-if1"
-  router                    = google_compute_router.cloud_router.name
-  region                    = var.region
-  peer_asn                  = var.azure_asn
-  interface                 = google_compute_router_interface.router_if_1.name
-  peer_ip_address           = var.azure_bgp_ip_1
-  advertised_route_priority = var.advertised_route_priority
-  
-  dynamic "advertised_ip_ranges" {
-    for_each = var.advertised_ip_ranges
-    content {
-      range = advertised_ip_ranges.value
+    advertised_ip_ranges {
+      range       = "33.21.1.0/24"
+      description = "Replication Pool"
     }
+    # ------------------------
+
   }
+}
+
+# =========================================================================
+# 3. EXTERNAL VPN GATEWAY (Azure Side)
+# =========================================================================
+resource "google_compute_external_vpn_gateway" "external_gateway" {
+  name            = var.external_gw_name
+  redundancy_type = "TWO_IPS_REDUNDANCY"
+  
+  interface {
+    id         = 0
+    ip_address = var.azure_pubip0
+  }
+  
+  interface {
+    id         = 1
+    ip_address = var.azure_pubip1
+  }
+}
+
+# =========================================================================
+# 4. VPN TUNNEL 0
+# =========================================================================
+resource "google_compute_vpn_tunnel" "tunnel0" {
+  name                            = var.tunnel_if0
+  region                          = var.region
+  vpn_gateway                     = google_compute_ha_vpn_gateway.ha_gateway.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 0
+  vpn_gateway_interface           = 0
+  shared_secret                   = var.shared_key
+  router                          = google_compute_router.router.id
+  ike_version                     = 2
+}
+
+# =========================================================================
+# 5. VPN TUNNEL 1
+# =========================================================================
+resource "google_compute_vpn_tunnel" "tunnel1" {
+  name                            = var.tunnel_if1
+  region                          = var.region
+  vpn_gateway                     = google_compute_ha_vpn_gateway.ha_gateway.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 1
+  vpn_gateway_interface           = 1
+  shared_secret                   = var.shared_key
+  router                          = google_compute_router.router.id
+  ike_version                     = 2
+}
+
+# =========================================================================
+# 6. ROUTER INTERFACE 0
+# =========================================================================
+resource "google_compute_router_interface" "router_interface0" {
+  name       = var.interface0
+  router     = google_compute_router.router.name
+  region     = var.region
+  ip_range   = "${var.gcp_apipa_bgp_a}/30"
+  vpn_tunnel = google_compute_vpn_tunnel.tunnel0.name
+}
+
+# =========================================================================
+# 7. ROUTER INTERFACE 1
+# =========================================================================
+resource "google_compute_router_interface" "router_interface1" {
+  name       = var.interface1
+  router     = google_compute_router.router.name
+  region     = var.region
+  # Note: Used gcp_apipa_bgp_b here (correction from original script)
+  ip_range   = "${var.gcp_apipa_bgp_b}/30" 
+  vpn_tunnel = google_compute_vpn_tunnel.tunnel1.name
+}
+
+# =========================================================================
+# 8. BGP PEER 0
+# =========================================================================
+resource "google_compute_router_peer" "bgp_peer0" {
+  name                      = var.bgp_peer_if0
+  router                    = google_compute_router.router.name
+  region                    = var.region
+  peer_ip_address           = var.azure_apipa_bgp_a
+  peer_asn                  = var.azure_asn_b
+  advertised_route_priority = var.priority
+  interface                 = google_compute_router_interface.router_interface0.name
+}
+
+# =========================================================================
+# 9. BGP PEER 1
+# =========================================================================
+resource "google_compute_router_peer" "bgp_peer1" {
+  name                      = var.bgp_peer_if1
+  router                    = google_compute_router.router.name
+  region                    = var.region
+  peer_ip_address           = var.azure_apipa_bgp_b
+  peer_asn                  = var.azure_asn_b
+  advertised_route_priority = var.priority
+  interface                 = google_compute_router_interface.router_interface1.name
 }

@@ -108,6 +108,10 @@ resource "azurerm_linux_virtual_machine" "vm" {
   proximity_placement_group_id = azurerm_proximity_placement_group.ppg.id
   zone                         = "1"
 
+  # For AZ Linux - Disable Secure Boot to allow unsigned drives to load
+  #security_type = var.security_type
+  secure_boot_enabled = var.secure_boot_enabled
+  vtpm_enabled = var.vtpm_enabled
 
   plan {
     name      = var.image_sku       # Must match the SKU
@@ -121,7 +125,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   
   # IMPORTANT: Enable UltraSSD and NVMe Controller
   additional_capabilities {
-    ultra_ssd_enabled = true
+   ultra_ssd_enabled = true
   }
   
   admin_ssh_key {

@@ -7,16 +7,9 @@
 # 
 ###===================================================================================###
 # Configure the Microsoft Azure Provider TerraForm
+
 terraform {
   required_version = ">= 1.9"
-  
-  # To use backend state
-  backend "azurerm" {
-    resource_group_name  = "rg-tfstate-backend"
-    storage_account_name = "vasttfstatevoc"
-    container_name       = "tfstate"
-    key                  = "vpn-gw.tfstate"
-  }
 
   required_providers {
     azurerm = {
@@ -31,15 +24,16 @@ terraform {
 }
 
 
-provider "azurerm" {
-  features {
-   resource_group {
-       # Go ahead and whack anything in the RG
-       prevent_deletion_if_contains_resources = false
-   }
-  }
-}
 
 provider "azurerm" {
-  features {}
+  use_cli = true
+  subscription_id = "ea2ae48a-1f66-401b-9406-338e0e0d7c4c"
+
+  features {
+   
+   resource_group {
+       # Go ahead and whack anything in the RG
+      prevent_deletion_if_contains_resources = false
+   }
+  }
 }

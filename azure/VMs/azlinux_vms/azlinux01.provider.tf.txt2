@@ -1,12 +1,17 @@
 ###===================================================================================###
+# SUMMARY:
+#   Terraform Provider Configuration for Azure.
+#   Sets up the AzureRM provider and version constraints.
+#   Relies on Azure CLI authentication (az login).
 #
-#  File:  provider.tf
-#  Created By: Karl Vietmeier
+# USAGE:
+#   Initialized automatically by 'terraform init'.
 #
-#  Purpose: Configure Provider
-# 
+# LICENSE:
+#   Copyright 2025 Karl Vietmeier / KCV Consulting
+#   SPDX-License-Identifier: Apache-2.0
 ###===================================================================================###
-# Configure the Microsoft Azure Provider TerraForm
+
 terraform {
   required_version = ">= 1.9"
   
@@ -38,8 +43,4 @@ provider "azurerm" {
        prevent_deletion_if_contains_resources = false
    }
   }
-}
-
-provider "azurerm" {
-  features {}
 }

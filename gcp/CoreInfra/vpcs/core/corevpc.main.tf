@@ -24,30 +24,6 @@
 #
 ###===================================================================================###
 
-
-###===================================================================================###
-#                                  Provider Configuration
-###===================================================================================###
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 5.9.0"
-    }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 5.9.0"
-    }
-  }
-}
-
-provider "google" {
-  project = var.project_id
-  region  = var.region
-  zone    = var.zone
-}
-
-
 ###===================================================================================###
 #                          Start creating infrastructure resources
 ###===================================================================================###
@@ -70,6 +46,7 @@ resource "google_compute_network" "custom_vpc" {
   name                     = var.vpc_name
   auto_create_subnetworks  = false
   enable_ula_internal_ipv6 = true  # REQUIRED to use INTERNAL IPv6 in subnets
+  routing_mode             = "GLOBAL"   
 }
 
 # Reserve IP range for Private Service Access (used by Cloud SQL, Memorystore, etc.)
