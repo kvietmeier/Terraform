@@ -1,0 +1,177 @@
+#cloud-config
+# vim: syntax=yaml
+# -------------------------------------------------------------------------------
+# Copyright 2025 Karl Vietmeier / KCV Consulting
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SUMMARY:
+# This cloud-init script bootstraps a multi-cloud performance lab environment.
+# It disables auto-upgrades/firewalls for benchmark stability, configures 
+# cloud-aware NTP (Azure/OCI/AWS), and compiles a suite of performance tools 
+# (FIO, iPerf, Dool, SockPerf, Elbencho) with specific fixes for Rocky 9/OpenSSL 3.
+# -------------------------------------------------------------------------------
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - tmux
+  - git
+  - tree
+  - numactl
+  - wget
+  - sysstat
+  - jq
+  - pkg-config
+  - libtool
+  - traceroute
+  - nmap
+  - bc
+
+write_files:
+  - path: /tmp/compiletools.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      # Final Performance Lab Bootstrap
+      set -euo pipefail
+
+      exec > >(tee -a /tmp/compiletools-out.log) 2>&1
+      echo "compiletools.sh started at $(date)"
+
+      LOG_FILE="/tmp/cloud-init-out.txt"
+
+      wait_for_locks() {
+          echo "Waiting for system locks..."
+          while fuser /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock /var/cache/dnf/metadata_lock.pid >/dev/null 2>&1; do
+              sleep 5
+          done
+          while [ -f /etc/passwd.lock ] || [ -f /etc/group.lock ] || [ -f /etc/ptmp ] || [ -f /etc/gtmp ]; do
+              sleep 2
+          done
+      }
+
+      # --- Disable Auto-Updates & Firewalls ---
+      if [ -f /etc/debian_version ]; then
+          echo 'APT::Periodic::Update-Package-Lists "0";' > /etc/apt/apt.conf.d/20auto-upgrades
+          echo 'APT::Periodic::Unattended-Upgrade "0";' >> /etc/apt/apt.conf.d/20auto-upgrades
+          systemctl stop unattended-upgrades apt-daily.timer apt-daily-upgrade.timer || true
+          systemctl disable unattended-upgrades apt-daily.timer apt-daily-upgrade.timer || true
+          systemctl mask unattended-upgrades apt-daily.service apt-daily-upgrade.service || true
+          ufw disable || true
+      elif [ -f /etc/redhat-release ] || [ -f /etc/azurelinux-release ] || [ -f /etc/mariner-release ]; then
+          systemctl stop dnf-automatic.timer firewalld nftables || true
+          systemctl disable dnf-automatic.timer firewalld nftables || true
+      fi
+
+      # --- User & Directory Setup ---
+      wait_for_locks
+      if ! id -u labuser >/dev/null 2>&1; then
+          [ -f /etc/debian_version ] && GRP="sudo" || GRP="wheel"
+          useradd -m -s /bin/bash -G "$GRP" labuser
+          echo "labuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/labuser
+      fi
+
+      LABUSER_HOME="/home/labuser"
+      mkdir -p "$LABUSER_HOME/output" "$LABUSER_HOME/git" "/root/git"
+
+      ALIASES=$(cat <<'EOF'
+      alias la="ls -Av"
+      alias ls="ls -hF --color=auto"
+      alias l="ls -CFv"
+      alias ll='ls -lhvF --group-directories-first'
+      alias lla='ls -alhvF --group-directories-first'
+      alias grep='grep --color=auto'
+      alias cdb='cd -'
+      alias cdu='cd ..'
+      alias df='df -kh'
+      alias du='du -h'
+      set -o vi
+      bind 'set bell-style none'
+      EOF
+      )
+      echo "$ALIASES" >> "$LABUSER_HOME/.bashrc"
+      echo "$ALIASES" >> /root/.bashrc
+      chown -R labuser:labuser "$LABUSER_HOME"
+
+      # --- Package Installation ---
+      wait_for_locks
+      if [ -f /etc/debian_version ]; then
+          DEBIAN_FRONTEND=noninteractive apt-get update -y
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+              build-essential debhelper libboost-dev libboost-program-options-dev \
+              libboost-system-dev libboost-thread-dev libssl-dev libncurses-dev \
+              libnuma-dev libaio-dev librdmacm1 cmake autoconf \
+              libcurl4-openssl-dev uuid-dev zlib1g-dev git python3-dev libarchive-dev chrony
+      elif [ -f /etc/redhat-release ] || [ -f /etc/azurelinux-release ] || [ -f /etc/mariner-release ]; then
+          dnf groupinstall -y "Development Tools"
+          dnf install -y epel-release || true
+          dnf install -y numactl-devel libaio-devel boost-devel ncurses-devel \
+              openssl-devel cmake rdma-core libcurl-devel libuuid-devel \
+              zlib zlib-devel git python3-devel libarchive-devel chrony
+      fi
+
+      # --- Cloud-Aware Chrony ---
+      [ -f /etc/debian_version ] && CHRONY_CONF="/etc/chrony/chrony.conf" || CHRONY_CONF="/etc/chrony.conf"
+      if curl -s --connect-timeout 1 http://169.254.169.254/opc/v1/instance/ >/dev/null 2>&1; then
+          echo "server 169.254.169.254 iburst" > $CHRONY_CONF # OCI
+      elif curl -s --connect-timeout 1 -H "Metadata:true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" >/dev/null 2>&1; then
+          echo "server 169.254.169.254 prefer iburst" > $CHRONY_CONF # Azure
+      elif curl -s --connect-timeout 1 http://169.254.169.254/latest/meta-data/ >/dev/null 2>&1; then
+          echo "server 169.254.169.123 prefer iburst" > $CHRONY_CONF # AWS
+      else
+          echo "pool pool.ntp.org iburst" > $CHRONY_CONF
+      fi
+      cat <<EOF >> $CHRONY_CONF
+      driftfile /var/lib/chrony/drift
+      makestep 1.0 3
+      rtcsync
+      EOF
+      systemctl enable --now chronyd || systemctl enable --now chrony
+
+      # --- Tools Compilation ---
+      _smart_build() {
+          local url=$1 dir=$2 cmd=$3
+          cd /root/git
+          [ -d "$dir" ] && return 0
+          git clone "$url" "$dir" && cd "$dir"
+          eval "$cmd" || { cd /root/git && rm -rf "$dir"; return 1; }
+      }
+
+      _smart_build "https://github.com/scottchiefbaker/dool.git" "dool" "./install.py"
+      _smart_build "https://github.com/axboe/fio.git" "fio" "./configure && make -j$(nproc) && make install"
+      _smart_build "https://github.com/esnet/iperf.git" "iperf" "./configure && make -j$(nproc) && make install && echo '/usr/local/lib' > /etc/ld.so.conf.d/iperf.conf && ldconfig"
+      _smart_build "https://github.com/mellanox/sockperf" "sockperf" "./autogen.sh && ./configure && make -j$(nproc) && make install"
+
+      # Elbencho (Rocky/AzureLinux Fix)
+      if [ -f /etc/redhat-release ] || [ -f /etc/azurelinux-release ] || [ -f /etc/mariner-release ]; then
+          EL_CMD="find . -name 'CMakeCache.txt' -delete && \
+                  export OPENSSL_ROOT_DIR=/usr OPENSSL_LIBRARIES=/usr/lib64 OPENSSL_INCLUDE_DIR=/usr/include && \
+                  make S3_SUPPORT=1 -j $(nproc) && make rpm && dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm"
+      else
+          EL_CMD="make S3_SUPPORT=1 -j $(nproc) && make install"
+      fi
+      _smart_build "https://github.com/breuner/elbencho.git" "elbencho" "$EL_CMD"
+
+      # User Scripts
+      cd "$LABUSER_HOME"
+      git clone https://github.com/kvietmeier/scripts.git || true
+      chown -R labuser:labuser "$LABUSER_HOME/scripts"
+      echo "compiletools.sh completed at $(date)" >> "$LOG_FILE"
+
+runcmd:
+  - bash /tmp/compiletools.sh
+  - echo "cloud-init completed successfully at $(date)" > /root/CONFIGURED_BY_CLOUD_INIT
+
+final_message: "========= Multi-Cloud Bootstrap Complete ========="
