@@ -10,24 +10,18 @@
 #                                  Provider Configuration
 ###===================================================================================###
 terraform {
-  backend "gcs" {
-    bucket  = "clouddev-itdesk124-tfstate"
-    prefix  = "terraform/state/CHANGEME"
-  }
   required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 5.9.0"
+    oci = {
+      source  = "oracle/oci"
+      version = ">= 4.0.0"
     }
-    #google-beta = {
-    #  source  = "hashicorp/google-beta"
-    #  version = ">= 5.9.0"
-    #}
   }
 }
 
-provider "google" {
-  project = var.project_id
-  region  = var.region
-  zone    = var.zone
+provider "oci" {
+  tenancy_ocid     = var.tenancy_ocid
+  user_ocid        = var.user_ocid
+  fingerprint      = var.fingerprint
+  private_key_path = var.private_key_path
+  region           = var.region
 }

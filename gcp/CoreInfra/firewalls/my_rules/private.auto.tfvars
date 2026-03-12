@@ -32,6 +32,8 @@ ingress_filter = [
   "47.144.81.19",    # MyISPAddress
   "47.44.178.111",    # MobileIP
   "47.37.190.104",    # MobileIP
+  "216.194.63.10",    # MobileIP
+  "157.157.64.73",    # Iceland Office
   "10.241.165.219",   # Josh W.(Cato IP)
   "192.116.36.234",   # Dotan 
   "84.110.32.226",   # Dotan 

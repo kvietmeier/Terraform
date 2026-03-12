@@ -12,7 +12,7 @@
 terraform {
   backend "gcs" {
     bucket  = "clouddev-itdesk124-tfstate"
-    prefix  = "terraform/state/CHANGEME"
+    prefix  = "terraform/state/core-vpc"
   }
   required_providers {
     google = {

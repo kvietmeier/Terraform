@@ -6,13 +6,11 @@
 #  Purpose: Configure the GCP TerraForm Provider 
 # 
 ###===================================================================================###
-###===================================================================================###
-#                                  Provider Configuration
-###===================================================================================###
+
 terraform {
   backend "gcs" {
     bucket  = "clouddev-itdesk124-tfstate"
-    prefix  = "terraform/state/CHANGEME"
+    prefix  = "terraform/state/proxyvm01"
   }
   required_providers {
     google = {
