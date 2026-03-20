@@ -22,86 +22,79 @@
 #
 ###===================================================================================###
 
-# Azure Public IPs from VPN Gateway Configuration
+# Azure Public IPs
 azure_public_ip_01 = "20.91.221.126"
 azure_public_ip_02 = "20.91.231.34"
 
-
 ingress_filter = [
-  ###--- Individual External IPs
-  "47.144.81.19",    # MyISPAddress
-  "47.44.178.111",    # MobileIP
-  "47.37.190.104",    # MobileIP
-  "216.194.63.10",    # MobileIP
-  "157.157.64.73",    # Iceland Office
-  "10.241.165.219",   # Josh W.(Cato IP)
-  "192.116.36.234",   # Dotan 
-  "84.110.32.226",   # Dotan 
-  "172.56.180.122",   # Arrakis HotSpot
-  "69.181.233.114",   # Casey - VAST Support
-  "38.97.31.114",     # Bryan Gilcrease
-  "71.201.117.34",    # Kartik
-  "10.241.247.82",    # CATO IP
-  "24.113.69.73",     # Dad's House
-  
-  ###--- Azure CIDRs allowed through VPN Gateway Configuration
+  ###--- External IPs (converted to /32)
+  "47.144.81.19/32",
+  "47.44.178.111/32",
+  "47.37.190.104/32",
+  "216.194.63.10/32",
+  "157.157.64.73/32",
+  "10.241.165.219/32",
+  "192.116.36.234/32",
+  "84.110.32.226/32",
+  "172.56.180.122/32",
+  "69.181.233.114/32",
+  "38.97.31.114/32",
+  "71.201.117.34/32",
+  "10.241.247.82/32",
+  "24.113.69.73/32",
+
+  ###--- Azure CIDRs
   "10.202.81.0/25",
   "10.202.85.0/25",
   "10.202.85.160/27",
   "192.168.4.0/22",
   "10.50.0.0/20",
-  #"10.223.0.0/21",
 
-  ###--- Fed Lab CIDRs
-  "172.69.0.0/24",    ###- Fed Lab CDIR
-  "172.60.0.0/23",    ###- Fed Lab CDIR
-  #
-  ###--- Internal GCP service rnges
-  #
-  "35.191.0.0/16",    # GCP services range for health checks and managed services
-  "130.211.0.0/22",   # GCP services range for health checks and managed services
-  "199.36.153.4/30",  # Private Google APIs
-  "199.36.153.8/30",  # Private Google APIs
-  # These are for AD/DNS/IAP Proxy
-  "35.235.240.0/20",  # IAP Source CIDR (for Active Directory and IAP Proxy)
-  "35.199.192.0/19",  # Cloud DNS
-  #
+  ###--- Fed Lab
+  "172.69.0.0/24",
+  "172.60.0.0/23",
+
+  ###--- GCP Service Ranges
+  "35.191.0.0/16",
+  "130.211.0.0/22",
+  "199.36.153.4/30",
+  "199.36.153.8/30",
+  "35.235.240.0/20",
+  "35.199.192.0/19",
+
   ###--- Docker/K8S
-  #
-  "10.1.0.0/16",      # K8S Pod CIDR
-  "10.152.183.0/24",  # K8S Service CIDR
-  "192.168.0.0/16",   # Private CIDR Range
-  "172.16.0.0/16",    # Docker private networks
+  "10.1.0.0/16",
+  "10.152.183.0/24",
+  "192.168.0.0/16",
+  "172.16.0.0/16",
 
-  #"169.254.21.8/30",    # For VPN/bGP
-  #"169.254.21.12/30",   # For VPN/bGP
+  ###--- Custom Subnets (VERIFY THESE)
+  "34.20.1.0/24",
+  "34.21.1.0/24",
+  "34.22.1.0/24",
 
-  #
-  ###--- My subnets: Added by me (I use 10.100-199)
-  #"1001::/64",        # ipv6
-  "34.20.1.0/24",     # CoreVPC subnet
-  "34.21.1.0/24",     # CoreVPC subnet
-  "34.22.1.0/24",     # CoreVPC subnet
-  "33.20.1.0/24",     # CoreVPC subnet
-  "33.21.1.0/24",     # CoreVPC subnet
-  "33.22.1.0/24",     # CoreVPC subnet
-  "172.1.1.0/24",     # CoreVPC subnet
-  "172.1.2.0/23",     # CoreVPC subnet
-  "172.1.4.0/23",     # CoreVPC subnet
-  "172.1.6.0/24",     # CoreVPC subnet
-  "172.3.1.0/26",     # CoreVPC subnet 
-  "172.4.1.0/27",     # CoreVPC subnet
-  "172.5.0.0/16",     # 
-  "172.6.0.0/16",     # 
-  "172.7.0.0/16",     # 
-  "172.8.0.0/16",     # 
-  "172.10.0.0/20",    # 
-  "172.20.0.0/14",    # CoreVPC CIDR - allows 172.20.../20 - 172.21.../20
-  "172.30.0.0/16",    # CoreVPC CIDR
-  "192.21.0.0/16",    # CoreVPC CIDR
-  "172.9.1.0/24"      # 
+  # These look suspicious (public ranges?)
+  "33.20.1.0/24",
+  "33.21.1.0/24",
+  "33.22.1.0/24",
+
+  # Not RFC1918 private
+  "172.1.1.0/24",
+  "172.1.2.0/23",
+  "172.1.4.0/23",
+  "172.1.6.0/24",
+  "172.3.1.0/26",
+  "172.4.1.0/27",
+  "172.5.0.0/16",
+  "172.6.0.0/16",
+  "172.7.0.0/16",
+  "172.8.0.0/16",
+  "172.10.0.0/20",
+  "172.20.0.0/14",
+  "172.30.0.0/16",
+  "192.21.0.0/16",
+  "172.9.1.0/24"
 ]
-
 
 ### List of ports required for VAST on Cloud
 vast_tcp = [
@@ -155,6 +148,7 @@ vast_tcp = [
 ###--- For 5.3.1 and newer - Added UDP ports.
 vast_udp = [
   "4005",      # VAST - Dnode1 platform CAS
+  "4101",      # VAST - Dnode1 data CAS
   "4105",      # VAST - Dnode1 data CAS
   "4205",      # VAST - CAS Operations
   "5205-5241", # VAST - Cnode silos CAS

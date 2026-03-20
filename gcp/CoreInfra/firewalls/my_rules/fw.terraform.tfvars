@@ -23,45 +23,62 @@
 #
 ###===================================================================================###
 
+
 # Project Info
-project_id      = "clouddev-itdesk124"
-region          = "us-west2"
-zone            = "us-west2-a"
+project_id = "clouddev-itdesk124"
+region     = "us-west2"
+zone       = "us-west2-a"
 
 # VPC Config
-vpc_name        = "karlv-corevpc"
-description     = "Setup common ports and service FW rules for the core vpc"
-#app_description = "Ports for Vast on Cloud"
+vpc_name   = "karlv-corevpc"
+description = "Setup common ports and service FW rules for the core VPC"
 
 ###--- Firewall and Rules
-ingress_rule     = "INGRESS"
-egress_rule      = "EGRESS"
-myrules_name     = "core-firewall-rules"
-addc_name        = "ad-rules"
-vast_rules_name  = "vast-rules"
-svcs_priority    = "500"
-vast_priority    = "500"
-addc_priority    = "501"
-egress_priority  = "1000"
 
-# Destination port list - external access on public IP
-#public_tcp_ports      = [ "21", "22", "45", "53", "80", "88", "443", "445", "3306", "3389", "8080" ]
-#public_udp_ports      = [ "21", "22", "53" ]  # DNS and FTP
+ingress_rule    = "INGRESS"
+egress_rule     = "EGRESS"
 
-# Destination port list - standard services you might need between VMs in a VPC
-tcp_ports      = [ "20", "21", "22", "45", "53", "80", "88", "119", "443", "445", "563", "3389", "8080" ]
-udp_ports      = [ "53", "67", "68" ]  # DNS and DHCP
+myrules_name    = "core-firewall-rules"
+addc_name       = "ad-rules"
+vast_rules_name = "vast-rules"
 
-# For Active Directory Replication
-addc_tcp_ports = ["53", "88", "135", "137", "138", "139", "389", "445", "636", "49152-65535"]
-addc_udp_ports = ["53", "88", "123", "135", "137", "138", "389", "445"]
+# FIXED: numbers instead of strings
+svcs_priority   = 500
+vast_priority   = 500
+addc_priority   = 501
+egress_priority = 1000
 
+###--- Ingress Source Filters (REQUIRED)
 
-###--- Allow List for standard services and Public IPs- modify as needed
-###    Ingress filter is excluded from GitHub
+ingress_filter = [
+  "10.0.0.0/8",
+  "192.168.0.0/16"
+]
 
+###--- Standard Service Ports
 
+tcp_ports = [
+  "20", "21", "22", "45", "53", "80",
+  "88", "119", "443", "445", "563",
+  "3389", "8080"
+]
 
+udp_ports = [
+  "53", "67", "68"
+]
+
+###--- Active Directory Ports
+
+addc_tcp_ports = [
+  "53", "88", "135", "137", "138",
+  "139", "389", "445", "636",
+  "49152-65535"
+]
+
+addc_udp_ports = [
+  "53", "88", "123", "135",
+  "137", "138", "389", "445"
+]
 ### Notes - 
 # RPC endpoint mapper: port 135 TCP, UDP
 # NetBIOS name service: port 137 TCP, UDP
