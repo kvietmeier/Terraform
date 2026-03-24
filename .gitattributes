@@ -16,3 +16,10 @@ id_ed25519 -text
 
 # Windows PowerShell
 *.ps1 text eol=crlf
+
+# Markdown & text files — safe cross-platform
+*.md text eol=lf
+*.txt text eol=lf
+
+# JSON files used by Terraform templates
+*.json text eol=lf
