@@ -22,7 +22,11 @@
 # .tfstate files
 *.tfstate
 *.tfstate.*
-.terraform.lock.*
+*.tfplan
+# Ignore backup lock files, but commit the main lock file
+.terraform.lock.*.backup
+**/.terraform.lock.hcl
+!.terraform.lock.hcl
 
 # Crash log files
 crash.log
@@ -30,13 +34,6 @@ crash.*.log
 
 # Cloud init - can have SSH keys in it
 #cloud-init
-
-# Exclude all .tfvars files, which are likely to contain sentitive data, such as
-# password, private keys, and other secrets. These should not be part of version
-# control as they are data points which are potentially sensitive and subject
-# to change depending on the environment.
-#
-#*.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
@@ -49,12 +46,16 @@ override.tf.json
 #
 # !example_override.tf
 
-# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
-# example: *tfplan*
-
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Exclude all .tfvars files, which are likely to contain sentitive data, such as
+# password, private keys, and other secrets. These should not be part of version
+# control as they are data points which are potentially sensitive and subject
+# to change depending on the environment.
+#
+#*.tfvars
 
 # Private tfvars info
 # This file is used to store sensitive information such as passwords, private keys, etc.
@@ -68,9 +69,6 @@ README.txt
 
 # Ignore "Private" files directories
 /Private/
-
-# Ignore the azure_arc repo
-/azure_arc/
 
 # Ignore temporary or scratch files
 **/foo*
