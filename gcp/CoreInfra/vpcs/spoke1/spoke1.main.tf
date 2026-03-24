@@ -16,28 +16,6 @@ terraform destroy --auto-approve -var-file=".\fw.terraform.tfvars"
 
 */
 
-###===================================================================================###
-#                                  Provider Configuration
-###===================================================================================###
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 5.9.0"
-    }
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 5.9.0"
-    }
-  }
-}
-
-provider "google" {
-  project = var.project_id
-  region  = var.region
-  zone    = var.zone
-}
-
 
 ###===================================================================================###
 #                          Start creating infrastructure resources
