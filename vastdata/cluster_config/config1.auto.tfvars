@@ -47,24 +47,23 @@ vip_pools = {
     dns_name    = "protocol"
   }
   
-  # Create Repliction Pool during install
-  /*vip2 = {
+  vip2 = {
     name        = "ReplicationPool"
-    start_ip    = "172.9.1.100"
-    gateway     = "172.10.5.1"
-    subnet_cidr = 24
-    role        = "REPLICATION"
-  }
- */
-
-  vip3 = {
-    name        = "s3Pool"
     start_ip    = "33.21.1.10"
     gateway     = "33.21.1.1"
     subnet_cidr = 24
     role        = "PROTOCOLS"
     dns_name    = "s3"
   } 
+
+  /*vip3 = {
+    name        = "s3Pool"
+    start_ip    = "172.9.1.100"
+    gateway     = "172.10.5.1"
+    subnet_cidr = 24
+    role        = "REPLICATION"
+  }
+ */
 }
 
 
