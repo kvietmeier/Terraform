@@ -28,7 +28,7 @@ azure_public_ip_02 = "20.91.231.34"
 
 ingress_filter = [
   ###--- External IPs (converted to /32)
-  "47.144.81.19/32",
+  "47.144.88.204/32",
   "47.44.178.111/32",
   "47.37.190.104/32",
   "216.194.63.10/32",
@@ -78,7 +78,7 @@ ingress_filter = [
   "33.21.1.0/24",
   "33.22.1.0/24",
 
-  # Not RFC1918 private
+  # Not RFC1918 private - subnet ranges that may be used in the environment
   "172.1.1.0/24",
   "172.1.2.0/23",
   "172.1.4.0/23",
