@@ -13,7 +13,7 @@ Large compute platforms like `n4-standard-16` hyperdisk blocks incur heavy idle 
 * **Network Tags:** Passing `vast-client` network tags separates cloud security structures from ephemeral IP changes. Firewall rules utilize these labels directly to track traffic footprints, maintaining zero-trust network integrity regardless of node scale status.  
 
 **Tolerations Block:**
-'''yaml
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -37,4 +37,4 @@ spec:
       containers:
         - name: workload-container
           image: gcr.io/google-samples/hello-app:1.0
-'''
+```
