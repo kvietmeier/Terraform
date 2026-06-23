@@ -1,7 +1,7 @@
 ## Architectural Reasoning for Scale From 0 Design Pattern
 
-### 1. Structural Decoupling via Node Pool Pruning
-GKE requires an initial node group when instantiating a control plane. However, embedding system utilities on default-configured removes your flexibility in choosing instance type and number . By declaring `remove_default_node_pool = true` and defining a discrete `google_container_node_pool.system_pool`, we isolate orchestration infrastructure. Then critical structural agents like `kube-dns` are safely allocated on right-sized resources (`e2-standard-4`).  
+### 1. Replace Default Pool
+GKE requires an initial node group when creating a control plane, using the default system pool removes your flexibility in choosing the instance type and size . to remove and rerplace the default pool declaring `remove_default_node_pool = true` and defining a discrete `google_container_node_pool.system_pool`, we isolate orchestration infrastructure. Then critical structural agents like `kube-dns` are safely allocated on right-sized resources (`e2-standard-4`).  
 
 ### 2. High Availability Anchoring vs. Scale-To-Zero
 The `system_pool` is statically anchored across a minimum size of two live compute instancee. Conversely, the expensive `de-team-pool1` data engineering sandbox contains configurations allowing elastic contractions down to zero (`min_node_count = 0`). Statically reserving space on the infrastructure anchors guarantees that even when consumer demand completely flatlines and the expensive worker fleet scales down to zero, the core scheduling plane, service discovery endpoints, and operational logging remain running.  

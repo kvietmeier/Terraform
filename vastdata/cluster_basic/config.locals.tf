@@ -25,31 +25,6 @@
 ###===================================================================================###
 
 locals {
-  # Compute VIP pools with calculated end_ip
-  vip_pools = {
-    for key, pool in var.vip_pools : key => merge(
-      pool,
-      {
-        end_ip = format(
-          "%s%d",
-          regex("^([0-9]+\\.[0-9]+\\.[0-9]+\\.)[0-9]+$", pool.start_ip)[0],
-          tonumber(regex("[0-9]+$", pool.start_ip)) + (var.number_of_nodes * var.vips_per_node) - 1
-        )
-      }
-    )
-  }
-
-  # Protocols pools
-  protocols_pools = {
-    for k, v in local.vip_pools : k => v
-    if v.role == "PROTOCOLS"
-  }
-
-  # Replication pools
-  replication_pools = {
-    for k, v in local.vip_pools : k => v
-    if v.role == "REPLICATION"
-  }
 
   # Extract s3Pool and sharesPool keys
   s3pool_key     = [for k, v in local.protocols_pools : k if v.name == "s3Pool"][0]

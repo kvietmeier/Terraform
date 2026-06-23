@@ -28,51 +28,10 @@ vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
 
 
-/* ###--- Google Provider and Network Settings
-gcp_region  = "us-central1"
-gcp_project = "clouddev-itdesk124"
-
-# Network - where IPs will be reserved 
-gcp_subnet  = "subnet-hub-us-east1-voc1"
-dns_ip      = "10.20.0.251"   # the exact IP you want to reserve
-*/
-
-
-
-
 ###===================================================================================###
 #   VIP Pool Configuration (see locals for explanation)
 ###===================================================================================###
-number_of_nodes = 11
-vips_per_node   = 1
-
-vip_pools = {
-  vip1 = {
-    name        = "nfsPool"
-    start_ip    = "33.20.1.11"
-    gateway     = "33.20.1.1"
-    subnet_cidr = 24
-    role        = "PROTOCOLS"
-    dns_name    = "nfspool"
-  }
-
-  vip2 = {
-    name        = "replicationPool"
-    start_ip    = "33.21.1.11"
-    gateway     = "33.21.1.1"
-    subnet_cidr = 24
-    role        = "REPLICATION"
-  }
-
-  vip3 = {
-    name        = "s3Pool"
-    start_ip    = "33.22.1.11"
-    gateway     = "33.22.1.1"
-    subnet_cidr = 24
-    role        = "PROTOCOLS"
-    dns_name    = "s3pool"
-  } 
-}
+number_of_nodes = 4
 
 
 ###===================================================================================###
@@ -84,43 +43,79 @@ auth_source             = "RPC_AND_PROVIDERS"
 access_flavor           = "ALL"
 
 
+###===================================================================================###
+#   NFS Settings
+###===================================================================================###
 
-###===================================================================================###
-#   NFS View Policy Settings
-###===================================================================================###
-nfs_basic_policy_name = "nfs-view-policy"
+###---  NFS View Policy Settings
+nfs_basic_policy_name      = "nfs-view-policy"
+vippool_permissions        = "RW"
+nfs_basic_policy_flavor    = "MIXED_LAST_WINS" 
+#nfs_audit_protocols = ["NFS"]
 nfs_no_squash         = ["0.0.0.0/0"]
 nfs_read_write        = ["0.0.0.0/0"]
 nfs_read_only         = []
 smb_read_write        = []
 smb_read_only         = []
-vippool_permissions   = "RW"
 
 
-###===================================================================================###
-#   NFS View Settings
-###===================================================================================###
-#num_views         = 5      # Override: create 5 views (uncomment if you don't want num_views = num_nodes)
-path_name         = "nfs_"
-protocols         = ["NFS"]
-create_dir        = true
+###---  File View Settings
+
+file_views_config = {
+  fileview01 = {
+    name       = "labuser01"
+    path       = "/labuser01"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
+  fileview02 = {
+    name       = "labuser02"
+    path       = "/labuser02"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
+  fileview03 = {
+    name       = "labuser03"
+    path       = "/labuser03"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
+  fileview04 = {
+    name       = "labuser04"
+    path       = "/labuser04"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+  
+  fileview05 = {
+    name       = "labuser05"
+    path       = "/labuser05"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+}
+
 
 ###===================================================================================###
 #   S3 Settings
 ###===================================================================================###
 
-
 ###--- Basic S3 View Policy Settings
-s3_basic_policy_name     = "StandardS3Policy"
-s3_flavor                = "S3_NATIVE"
-s3_special_chars_support = true
+s3_basic_policy_name       = "StandardS3Policy"
+s3_basic_policy_flavor     = "S3_NATIVE" 
+#s3_audit_protocols  = ["S3"]
+s3_special_chars_support   = true
 
 
+###--- S3 View Settings
 s3_views_config = {
   s3 = {
     name                      = "s3view01"
     bucket                    = "bucket01"
-    path                      = "/s3buckets"
+    path                      = "/s3"
     protocols                 = ["S3"]
     create_dir                = true
     bucket_owner              = "s3user1"
@@ -139,17 +134,6 @@ s3_views_config = {
 
 
 ###===================================================================================###
-#   DNS Settings
-###===================================================================================###
-dns_name          = "vastdns"
-dns_vip           = "172.1.4.110"
-port_type         = "NORTH_PORT"
-dns_domain_suffix = "busab.org"
-dns_enabled       = true
-#vip_gateway       = "172.1.4.1"
-
-
-###===================================================================================###
 #   User/Tenant Settings using maps
 ###===================================================================================###
 
@@ -162,10 +146,17 @@ s3_allowall_policy_file = "../policies/s3Policy-VastAllowAll.json"
 s3_allowall_policy_name = "s3_user_AllowAll"
 #s3_detailed_policy_name = "s3policy_user_detailed"
 
-###--- Keys
+###--- Keys - do this on the Mac? ---###
 s3pgpkey = "../secrets/s3_pgp_key.asc"
-pgp_key_users = ["dbuser1", "s3user1"]
-
+pgp_key_users = [
+  "dbuser1",
+  "s3user1",
+  "labuser01",
+  "labuser02",
+  "labuser03",
+  "labuser04",
+  "labuser05"
+  ]
 
 groups = {
   s3users  = { gid = 1000 }
@@ -174,13 +165,57 @@ groups = {
 }
 
 users = {
-  nfsuser1 = {
+  labuser01 = {
     uid                  = 2111
     leading_group_name   = "allusers"
     supplementary_groups = ["s3users", "nfsusers"]
     # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
   }
 
+  labuser02 = {
+    uid                  = 2112
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+  labuser03 = {
+    uid                  = 2113
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+  labuser04 = {
+    uid                  = 2114
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+  labuser05 = {
+    uid                  = 2115
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+  # Need these?
   s3user1 = {
     uid                  = 2112
     leading_group_name   = "allusers"
@@ -189,6 +224,9 @@ users = {
     allow_delete_bucket  = true
     s3_superuser         = true
   }
+
+
+  # Need these?
   dbuser1 = {
     uid                  = 2113
     leading_group_name   = "allusers"
@@ -202,33 +240,28 @@ users = {
 tenants = {
   tenant1 = {
     client_ip_ranges = [
-      { start_ip = "10.0.0.0", end_ip = "10.0.0.255" },
-      { start_ip = "10.0.1.0", end_ip = "10.0.1.255" }
+      { start_ip = "10.10.1.0", end_ip = "10.10.1.254" }
     ]
-    # vippool_ids = ["vip-pool-1"]
   }
-
   tenant2 = {
     client_ip_ranges = [
-      { start_ip = "192.168.1.0", end_ip = "192.168.1.255" }
+      { start_ip = "10.10.2.0", end_ip = "10.10.2.254" }
+    ]
+  }
+  tenant3 = {
+    client_ip_ranges = [
+      { start_ip = "10.10.3.0", end_ip = "10.10.3.254" }
+    ]
+  }
+  tenant4 = {
+    client_ip_ranges = [
+      { start_ip = "10.10.4.0", end_ip = "10.10.4.254" }
+    ]
+  }
+  tenant5= {
+    client_ip_ranges = [
+      { start_ip = "10.10.5.0", end_ip = "10.10.5.254" }
     ]
   }
 }
 
-
-###===================================================================================###
-# Active Directory
-###===================================================================================###
-ou_name         = "voc-cluster01"
-ad_ou           = "OU=VAST,DC=ginaz,DC=org "
-bind_dn         = "CN=Administrator,CN=Users,DC=ginaz,DC=org"
-bindpw          = "Chalc0pyr1te!123"
-ad_domain       = "ginaz.org"
-method          = "simple"
-query_mode      = "COMPATIBLE"
-# Can't use TLS for some reason - 
-use_ad          = false
-use_tls         = false
-ldap            = false
-# Optional: if you're not using DNS discovery
-ldap_urls       = ["ldap://172.20.16.3"]

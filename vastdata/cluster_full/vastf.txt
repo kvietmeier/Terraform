@@ -1,0 +1,2017 @@
+
+
+###===================================================================================###
+# VAST Data – Demo/POC Configuration Input Variables (.tfvars)
+#
+# This file provides input values for provisioning a VAST Data cluster with:
+# - Multiple VIP Pools (PROTOCOLS, REPLICATION, VAST_CATALOG roles)
+# - NFS and S3 view policies and view configurations
+# - Tenant, user, and group mappings for access control
+# - DNS service setup for cluster networking
+# - Active Directory integration settings (disabled by default)
+#
+# Notes:
+# - Designed for demo or proof-of-concept deployments; IPs and credentials
+#   are simplified and should be secured for production use.
+# - VIP Pools include optional gateways and DNS names.
+# - Supports multiple NFS views and a single S3 view with custom policies.
+# - Users can have POSIX groups and bucket creation/deletion permissions.
+###===================================================================================###
+
+###===================================================================================###
+# Provider Configuration
+###===================================================================================###
+
+vast_username                = "admin"
+vast_password                = "123456"
+vast_host                    = "vms"
+vast_port                    = "443"
+vast_skip_ssl_verify         = true
+vast_version_validation_mode = "warn"
+
+
+###===================================================================================###
+#   VIP Pool Configuration (see locals for explanation)
+#
+#   Cant use Cloud Routing for Replication - need to pull from subnet.
+#
+###===================================================================================###
+number_of_nodes = 3
+vips_per_node   = 2
+
+vip_pools = {
+  vip1 = {
+    name        = "sharesPool"
+    start_ip    = "33.20.1.10"
+    gateway     = "33.20.1.1"
+    subnet_cidr = 24
+    role        = "PROTOCOLS"
+    dns_name    = "protocol"
+  }
+  
+  vip2 = {
+    name        = "ReplicationPool"
+    start_ip    = "33.21.1.10"
+    gateway     = "33.21.1.1"
+    subnet_cidr = 24
+    role        = "PROTOCOLS"
+    dns_name    = "s3"
+  } 
+
+  /*vip3 = {
+    name        = "s3Pool"
+    start_ip    = "172.9.1.100"
+    gateway     = "172.10.5.1"
+    subnet_cidr = 24
+    role        = "REPLICATION"
+  }
+ */
+}
+
+
+###===================================================================================###
+#   Common View Policy Settings
+###===================================================================================###
+flavor                  = "MIXED_LAST_WINS"
+use_auth_provider       = true
+auth_source             = "RPC_AND_PROVIDERS"
+access_flavor           = "ALL"
+
+
+
+###===================================================================================###
+#   NFS Settings
+###===================================================================================###
+
+nfs_policies = {
+  voc_standard_nfs = {
+    name                    = "nfs-voc-policy"
+    flavor                  = "NFS"
+    access_flavor           = "ALL"
+    allowed_characters      = "LCD"
+    nfs_read_write          = ["*"]
+    nfs_read_only           = []  
+    nfs_no_squash           = ["*"]
+    nfs_root_squash         = []
+    nfs_posix_acl           = false
+    smb_read_write          = []
+    smb_read_only           = []
+    gid_inheritance         = "LINUX"
+    enable_access_to_snapshot_dir_in_subdirs = true
+  }
+}
+
+###---  File View Settings
+
+file_views_config = {
+  fileview01 = {
+    name       = "nfs"
+    path       = "/pak_nfs"
+    protocols  = ["NFS"]
+    create_dir = true
+    policy     = "voc_standard_nfs"  
+  }
+
+  fileview02 = {
+    name       = "pak_origin"
+    path       = "/pak_origin"
+    protocols  = ["NFS"]
+    create_dir = true
+    policy     = "voc_standard_nfs"  
+  }
+/*
+  fileview03 = {
+    name       = "nfs_3"
+    path       = "/nfs_3"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
+  fileview04 = {
+    name       = "nfs_4"
+    path       = "/nfs_4"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+  
+  fileview05 = {
+    name       = "nfs_5"
+    path       = "/nfs_5"
+    protocols  = ["NFS"]
+    create_dir = true
+  } */
+}
+
+
+###===================================================================================###
+#   S3 Settings
+###===================================================================================###
+
+s3_policies = {
+  voc_standard_s3 = {
+    name                              = "s3-voc-policy"
+    flavor                            = "S3_NATIVE"
+    access_flavor                     = "ALL"
+    allowed_characters                = "LCD"
+    s3_read_write                     = ["*"]
+    s3_read_only                      = []
+    s3_flavor_allow_free_listing      = false
+    s3_flavor_detect_full_pathname    = false
+    s3_special_chars_support          = true
+    #special_chars                     = true 
+    gid_inheritance                   = "LINUX"
+    enable_access_to_snapshot_dir_in_subdirs = true
+  }
+}
+
+
+###--- S3 View Settings
+s3_views_config = {
+  s3 = {
+    name                      = "s3view01"
+    bucket                    = "bucket01"
+    path                      = "/s3"
+    protocols                 = ["S3"]
+    create_dir                = true
+    bucket_owner              = "s3user1"
+    allow_s3_anonymous_access = false
+    policy                    = "voc_standard_s3"  
+  }
+  db = {
+    name                      = "vastdb_view"
+    bucket                    = "vastdb01"
+    path                      = "/vastdb"
+    protocols                 = ["S3", "DATABASE"]
+    create_dir                = true
+    bucket_owner              = "dbuser1"
+    allow_s3_anonymous_access = true
+    policy                    = "voc_standard_s3"  
+  }
+}
+
+
+###===================================================================================###
+#   DNS Settings
+###===================================================================================###
+# Set DNS VIP to match subnet cidr and updsare forwarder if needed.
+dns_name          = "vastdns"
+dns_vip           = "172.9.1.250"
+port_type         = "NORTH_PORT"
+dns_domain_suffix = "vastohio.com"
+dns_enabled       = true
+#vip_gateway       = "172.1.4.1"
+
+
+###===================================================================================###
+#   User/Tenant Settings using maps
+###===================================================================================###
+
+
+#- User View Polices json files
+s3_allowall_policy_file = "../policies/s3Policy-VastAllowAll.json"
+#s3_detailed_policy_file = "s3Policy-Detailed.example.json"
+
+# Policy names
+s3_allowall_policy_name = "s3_user_AllowAll"
+#s3_detailed_policy_name = "s3policy_user_detailed"
+
+###--- Keys
+s3pgpkey = "../secrets/s3_pgp_key.asc"
+pgp_key_users = ["dbuser1", "s3user1"]
+
+
+groups = {
+  s3users  = { gid = 1000 }
+  nfsusers = { gid = 1100 }
+  allusers = { gid = 1200 }
+}
+
+users = {
+  nfsuser1 = {
+    uid                  = 2111
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+  }
+
+  s3user1 = {
+    uid                  = 2112
+    leading_group_name   = "allusers"
+    supplementary_groups = ["nfsusers", "s3users"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+  dbuser1 = {
+    uid                  = 2113
+    leading_group_name   = "allusers"
+    supplementary_groups = ["nfsusers", "s3users"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+}
+
+tenants = {
+  tenant1 = {
+    client_ip_ranges = [
+      { start_ip = "10.10.0.0", end_ip = "10.10.0.254" }
+    ]
+  }
+  tenant2 = {
+    client_ip_ranges = [
+      { start_ip = "192.168.0.0", end_ip = "192.168.0.254" }
+    ]
+  }
+}
+
+
+###==================================================================================###
+# Active Directory
+###===================================================================================###
+ou_name         = "voc-cluster01"
+ad_ou           = "OU=VAST,DC=ginaz,DC=org "
+bind_dn         = "CN=Administrator,CN=Users,DC=ginaz,DC=org"
+bindpw          = "Chalc0pyr1te!123"
+ad_domain       = "ginaz.org"
+method          = "simple"
+query_mode      = "COMPATIBLE"
+use_ad          = true
+use_tls         = false
+ldap            = false
+# Optional: if you're not using DNS discovery
+# Can't use TLS for some reason - 
+ldap_urls       = ["ldap://172.20.16.3"]
+
+
+
+
+
+
+/*
+# Default NFS view policy 5.4.2
+resource "vastdata_view_policy" "default" {
+  provider = vastdata.GCPCluster_1
+
+  name                = "default"
+  flavor              = "NFS"
+  access_flavor       = "ALL"
+  allowed_characters  = "LCD"
+  apple_sid           = true
+  auth_source         = "RPC"
+
+  disable_handle_lease                     = false
+  disable_read_lease                       = false
+  disable_write_lease                      = false
+  enable_access_to_snapshot_dir_in_subdirs = true
+  enable_listing_of_snapshot_dir           = false
+  enable_snapshot_lookup                   = true
+  enable_visibility_of_snapshot_dir        = false
+  expose_id_in_fsid                        = false
+  gid_inheritance                          = "LINUX"
+  inherit_parent_mode_bits                 = false
+  internal                                 = false
+  is_s3_default_policy                     = false
+
+  nfs_case_insensitive            = false
+  nfs_enforce_tls                 = false
+  nfs_enforce_tls_relaxed         = false
+  nfs_minimal_protection_level    = "SYSTEM"
+  nfs_read_write                  = ["*"]
+  nfs_root_squash                 = ["*"]
+  nfs_posix_acl                   = false
+  nfs_return_open_permissions     = false
+
+  path_length                     = "LCD"
+
+  s3_flavor_allow_free_listing     = false
+  s3_flavor_detect_full_pathname   = false
+  s3_special_chars_support         = true
+  s3_read_write                    = ["*"]
+
+  smb_directory_mode               = 755
+  smb_file_mode                    = 644
+  smb_is_ca                        = false
+  smb_read_write                   = ["*"]
+
+  sync                             = "SYNCED"
+}
+*/###===================================================================================###
+# Locals – Dynamic VAST Cluster Configuration
+#
+# Purpose:
+# - Compute derived values for VIP pools, protocols, replication pools, and views.
+# - Centralize dynamic configuration logic to avoid hardcoding in resources.
+#
+# Key Functionality:
+# - Calculates `end_ip` for VIP pools based on `number_of_nodes` and `vips_per_node`.
+# - Separates VIP pools by role (PROTOCOLS vs REPLICATION).
+# - Dynamically identifies `sharesPool` and `s3Pool` keys for use in policies.
+# - Determines effective number of NFS views (`effective_num_views`).
+# - Filters tenants that have valid `client_ip_ranges`.
+#
+# Usage Notes:
+# - All VIP pool names and roles come from `terraform.tfvars`.
+# - Adjust `number_of_nodes` or `vips_per_node` in `.tfvars` to scale VIP ranges automatically.
+###===================================================================================###
+# Dynamic VAST Cluster Configuration (VAST 2.0)
+#
+# Key Changes for 2.0:
+# - VIP pools ip_ranges are flat list(string)
+# - Removed vippool_permissions references from locals
+# - Maintains dynamic calculation of sharesPool and s3Pool keys
+###===================================================================================###
+
+locals {
+  # Compute VIP pools with calculated end_ip
+  vip_pools = {
+    for key, pool in var.vip_pools : key => merge(
+      pool,
+      {
+        end_ip = format(
+          "%s%d",
+          regex("^([0-9]+\\.[0-9]+\\.[0-9]+\\.)[0-9]+$", pool.start_ip)[0],
+          tonumber(regex("[0-9]+$", pool.start_ip)) + (var.number_of_nodes * var.vips_per_node) - 1
+        )
+      }
+    )
+  }
+
+  # Protocols pools
+  protocols_pools = {
+    for k, v in local.vip_pools : k => v
+    if v.role == "PROTOCOLS"
+  }
+
+  # Replication pools
+  replication_pools = {
+    for k, v in local.vip_pools : k => v
+    if v.role == "REPLICATION"
+  }
+
+  # Extract s3Pool and sharesPool keys
+  s3pool_key     = [for k, v in local.protocols_pools : k if v.name == "s3Pool"][0]
+  sharespool_key = [for k, v in local.protocols_pools : k if v.name == "sharesPool"][0]
+
+  # Effective number of NFS views
+  effective_num_views = var.num_views != null ? var.num_views : var.number_of_nodes
+
+}
+###===================================================================================###
+# VAST Data – Cluster Resource Deployment for Demo/POC
+#
+# Description:
+# This Terraform `main.tf` file provisions core VAST Data resources on a Google Cloud
+# cluster, designed for functional evaluation or proof-of-concept (POC) environments.
+# It orchestrates key components required for NFS, SMB, and S3 data access.
+#
+# Provisioned Resources:
+# - VIP Pools:
+#     - `sharesPool` (role: PROTOCOLS) for NFS/SMB data services
+#     - `s3Pool` (role: PROTOCOLS) for S3-compatible services
+#     - `targetPool` (role: REPLICATION) for inter-cluster replication
+# - View Policies:
+#     - NFS default policy with permissions tied to `sharesPool`
+#     - S3 default policy with permissions tied to `s3Pool`
+# - Views:
+#     - Dynamic NFS views generated via `count`
+#     - Static S3 view with bucket configuration
+# - Policy-based access controls and DNS configuration for protocol resolution
+#
+# Features:
+# - Automatically computes VIP ranges based on cluster node count
+# - Supports multi-protocol deployments (NFS + S3) via distinct pools
+# - Centralized pool references through `locals` for simplified configuration
+# - Ensures ordered resource creation using `depends_on` where necessary
+#
+# Notes:
+# - `sharesPool` and `s3Pool` must both be defined in `var.vip_pools` (names must match)
+# - View policies require NFS/SMB ACLs even for S3-only deployments
+# - Provider configuration (`vastdata.GCPCluster_1`) must be declared outside this file
+# - Input variables must align with module references and `.tfvars` inputs
+###===================================================================================###
+
+
+###===================================================================================###
+# DNS Configuration
+###===================================================================================###
+resource "vastdata_dns" "protocol_dns" {
+  provider      = vastdata.GCPCluster_1
+  name          = var.dns_name
+  vip           = var.dns_vip
+  net_type      = var.port_type
+  domain_suffix = var.dns_domain_suffix
+  enabled       = var.dns_enabled
+}
+
+### Protocols VIP Pools
+resource "vastdata_vip_pool" "protocols" {
+  provider    = vastdata.GCPCluster_1
+  for_each    = local.protocols_pools
+
+  name        = each.value.name
+  domain_name = each.value.dns_name
+  role        = each.value.role
+  subnet_cidr = each.value.subnet_cidr
+  ip_ranges   = [[each.value.start_ip, each.value.end_ip]]
+
+  depends_on  = [vastdata_dns.protocol_dns]
+
+}
+
+### Replication VIP Pools
+resource "vastdata_vip_pool" "replication" {
+  provider    = vastdata.GCPCluster_1
+  for_each    = local.replication_pools
+
+  name        = each.value.name
+  role        = each.value.role
+  subnet_cidr = each.value.subnet_cidr
+  ip_ranges   = [[each.value.start_ip, each.value.end_ip]]
+}
+
+
+###===================================================================================###
+# Active Directory – Original Working Setup
+###===================================================================================###
+/* resource "vastdata_active_directory" "gcp_ad1" {
+  provider             = vastdata.GCPCluster_1
+  machine_account_name = var.ou_name
+  organizational_unit  = var.ad_ou
+  use_auto_discovery   = var.use_ad      # true to discover AD via DNS, false to specify host_name
+  binddn               = var.bind_dn
+  bindpw               = var.bindpw
+  use_ldaps            = var.ldap
+  domain_name          = var.ad_domain
+  method               = var.method
+  query_groups_mode    = var.query_mode
+  use_tls              = var.use_tls
+}
+ */###===================================================================================###
+# VAST Data – Cluster Configuration Outputs
+#
+# Organized outputs for:
+# - S3 and shares protocol VIP pools
+# - Aggregated VIP pool details
+###===================================================================================###
+
+
+# DNS Info
+output "vast_dns_fqdn" {
+  value       = "${var.dns_domain_suffix}"
+  description = "Cluster DNS Fully Qualified Domain Name"
+}
+
+# Usernames
+output "vast_usernames" {
+  value       = keys(var.users)
+  description = "List of configured usernames"
+}
+
+output "vast_dns_vip" {
+  value       = var.dns_vip
+  description = "Cluster DNS VIP Address"
+}
+
+
+output "vip_pool_info" {
+  description = "VIP pools summary (dns, start_ip, end_ip, size)"
+  value = [
+    for k in sort(keys(local.vip_pools)) : {
+      name     = local.vip_pools[k].name
+      dns_name = try(local.vip_pools[k].dns_name, null)
+      start_ip = local.vip_pools[k].start_ip
+      end_ip   = local.vip_pools[k].end_ip
+      size     = var.number_of_nodes * var.vips_per_node
+    }
+  ]
+}
+
+output "nfs_views_paths" {
+  description = "Map of NFS view names to paths"
+  value       = { for k, v in var.file_views_config : v.name => v.path }
+}
+
+output "s3_views_paths" {
+  description = "Map of S3 view names to paths"
+  value       = { for k, v in var.s3_views_config : v.name => v.path }
+}
+######################################################################
+# VAST Data Cluster: View Policies and Views
+#
+# This Terraform file defines:
+#   1. View policies for NFS and S3 protocols
+#   2. NFS file system views
+#   3. S3 bucket views
+#
+# Notes:
+#   - All policy names, flavors, and protocols are now configurable via variables.
+#   - NFS views automatically use the NFS basic policy.
+#   - S3 views reference a policy defined per view.
+#   - SMB or AD-integrated views can be added as needed.
+#   - Resources use the 'vastdata.GCPCluster_1' provider.
+######################################################################
+
+###=============================================================================
+###--- VIEW POLICIES
+###=============================================================================
+
+# NFS Basic Policy
+resource "vastdata_view_policy" "voc_standard_nfs" {
+  provider = vastdata.GCPCluster_1
+  for_each = var.nfs_policies
+
+  # Attributes that are likely defined and NOT causing the error:
+  name             = each.value.name           #  <-- ERROR: Missing
+  flavor           = each.value.flavor
+  nfs_read_write   = each.value.nfs_read_write
+  nfs_read_only    = each.value.nfs_read_only
+  nfs_no_squash    = each.value.nfs_no_squash
+  smb_read_write   = each.value.smb_read_write
+  smb_read_only    = each.value.smb_read_only
+
+  # --- Attributes you should remove or add to var.nfs_policies ---
+  access_flavor                    = each.value.access_flavor    
+  allowed_characters               = each.value.allowed_characters
+  nfs_root_squash                  = each.value.nfs_root_squash  
+  nfs_posix_acl                    = each.value.nfs_posix_acl   
+  gid_inheritance                  = each.value.gid_inheritance 
+  enable_access_to_snapshot_dir_in_subdirs = each.value.enable_access_to_snapshot_dir_in_subdirs 
+}
+
+### S3 Basic Policy
+resource "vastdata_view_policy" "voc_standard_s3" {
+  provider = vastdata.GCPCluster_1
+  for_each = var.s3_policies
+
+  # Attributes that are likely defined and NOT causing the error:
+  name            = each.value.name    #                         <-- ERROR: Missing
+  flavor          = each.value.flavor
+  s3_read_write   = each.value.s3_read_write
+  s3_read_only    = each.value.s3_read_only
+  #special_chars   = each.value.special_chars # Note: The .tfvars uses 'special_chars', but the error lists 's3_special_chars_support'
+
+  # --- Attributes you should remove or add to var.s3_policies ---
+  access_flavor                  = each.value.access_flavor                    
+  allowed_characters             = each.value.allowed_characters               
+  s3_flavor_allow_free_listing   = each.value.s3_flavor_allow_free_listing    
+  s3_flavor_detect_full_pathname = each.value.s3_flavor_detect_full_pathname 
+  s3_special_chars_support       = each.value.s3_special_chars_support      
+  gid_inheritance                = each.value.gid_inheritance              
+  enable_access_to_snapshot_dir_in_subdirs = each.value.enable_access_to_snapshot_dir_in_subdirs
+}
+
+#=============================================================================
+# NFS VIEWS
+#=============================================================================
+resource "vastdata_view" "file_views" {
+  # Change: Reference the variable directly
+  for_each = var.file_views_config 
+
+  provider   = vastdata.GCPCluster_1
+  name       = each.value.name
+  path       = each.value.path
+  protocols  = each.value.protocols
+  create_dir = each.value.create_dir
+  
+  # The policy_id must reference the policy resource using the key from the view config
+  policy_id  = vastdata_view_policy.voc_standard_nfs[each.value.policy].id
+}
+
+#=============================================================================
+# S3 VIEWS
+#=============================================================================
+resource "vastdata_view" "s3_views" {
+  # Change: Reference the variable directly
+  for_each = var.s3_views_config
+
+  provider                      = vastdata.GCPCluster_1
+  name                          = each.value.name
+  bucket                        = each.value.bucket
+  path                          = each.value.path
+  protocols                     = each.value.protocols
+  create_dir                    = each.value.create_dir
+  bucket_owner                  = each.value.bucket_owner
+  allow_s3_anonymous_access     = lookup(each.value, "allow_s3_anonymous_access", false)
+  
+  # The policy_id must reference the policy resource using the key from the view config
+  policy_id                     = vastdata_view_policy.voc_standard_s3[each.value.policy].id
+  
+  depends_on = [vastdata_user.users]
+}
+
+
+###===================================================================================###
+### Get existing resources
+###===================================================================================###
+
+/*
+# Default view ppolicy
+data "vastdata_view_policy" "vastdb_view_policy_default" {
+  name = "default"
+}
+*/
+/* 
+resource "vastdata_view_policy" "default" {
+  provider   = vastdata.GCPCluster_1
+  name = "default"
+}
+
+ */
+###===================================================================================###
+# VAST Data – Terraform Provider Configuration
+#
+# Sets up the VAST provider (v1.6.8) with GCP cluster connection settings.
+# Uses input variables for credentials, host info, and SSL options.
+# Alias: GCPCluster_1
+###===================================================================================###
+
+terraform {
+  required_providers {
+    vastdata = {
+      source  = "vast-data/vastdata"
+      version = "2.1.1"
+      #version = "2.0"
+    }
+  }
+}
+
+provider "vastdata" {
+  username                = var.vast_username
+  password                = var.vast_password
+  host                    = var.vast_host
+  port                    = var.vast_port
+  skip_ssl_verify         = var.vast_skip_ssl_verify
+  version_validation_mode = var.vast_version_validation_mode
+  alias                   = "GCPCluster_1"
+}###===================================================================================###
+# VAST Data Cluster – Demo/POC Basic Setup
+#
+# Description:
+# This Terraform file provisions user/tenant resources for a VAST Data cluster, intended
+# for demo or proof-of-concept use cases. It defines the following:
+#
+# - Tenant creation from variable map (supports multiple tenants)
+# - POSIX group and user creation with GID/UID mapping
+# - Active Directory integration settings (without domain join)
+# - Adds a key for S3 access
+#
+# Notes:
+# - AD configuration uses bind credentials and supports LDAPS/TLS
+# - Group/user relationships are mapped via supplementary and leading GIDs
+# - VIP Pools and view policies referenced externally (not defined in this file)
+# - `provider = vastdata.GCPCluster_1` must be declared elsewhere
+#
+###===================================================================================###
+
+###===================================================================================###
+# Groups
+###===================================================================================###
+resource "vastdata_group" "groups" {
+  provider = vastdata.GCPCluster_1
+  for_each = var.groups
+
+  name = each.key
+  gid  = each.value.gid
+}
+
+###===================================================================================###
+# Users
+###===================================================================================###
+resource "vastdata_user" "users" {
+  provider = vastdata.GCPCluster_1
+  for_each = var.users
+
+  name        = each.key
+  uid         = each.value.uid
+  leading_gid = vastdata_group.groups[each.value.leading_group_name].gid
+  gids        = [for g in each.value.supplementary_groups : vastdata_group.groups[g].gid]
+
+  allow_create_bucket = each.value.allow_create_bucket
+  allow_delete_bucket = each.value.allow_delete_bucket
+  s3_superuser        = each.value.s3_superuser
+
+  depends_on = [vastdata_group.groups]
+}
+
+###===================================================================================###
+# Tenants
+###===================================================================================###
+resource "vastdata_tenant" "tenants" {
+  provider = vastdata.GCPCluster_1
+  for_each = var.tenants
+  name     = each.key
+
+  client_ip_ranges = [
+    for r in each.value.client_ip_ranges : [r.start_ip, r.end_ip]
+  ]
+}
+
+###===================================================================================###
+# S3 User Keys
+###===================================================================================###
+resource "vastdata_user_key" "s3keys" {
+  provider      = vastdata.GCPCluster_1
+  for_each      = toset(var.pgp_key_users)
+  
+  user_id       = vastdata_user.users[each.key].id
+  enabled       = true
+  pgp_public_key = file(var.s3pgpkey)
+}
+###===================================================================================
+### VAST Data Cluster Input Variables
+### All variables for main.tf and users.tf
+###===================================================================================###
+
+###===================================================================================
+###--- Provider Configuration
+###===================================================================================
+variable "vast_username" {
+  type = string
+}
+
+variable "vast_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "vast_host" {
+  type = string
+}
+
+variable "vast_port" {
+  type    = number
+  default = 443
+}
+
+variable "vast_skip_ssl_verify" {
+  type    = bool
+  default = false
+}
+
+variable "vast_version_validation_mode" {
+  type    = string
+  default = "strict"
+}
+
+###===================================================================================
+###--- Cluster Node & VIP Configuration
+###===================================================================================
+variable "number_of_nodes" {
+  type = number
+}
+
+variable "vips_per_node" {
+  type = number
+}
+
+variable "vip_pools" {
+  type = map(object({
+    name        = string
+    start_ip    = string
+    gateway     = string
+    subnet_cidr = number
+    role        = string
+    dns_name    = optional(string)
+  }))
+}
+
+variable "protocols" {
+  type    = list(string)
+  default = ["NFS", "SMB", "S3"]
+}
+
+variable "flavor" {
+  description = "Default flavor for view policies"
+  type        = string
+  default     = "MIXED_LAST_WINS"
+}
+
+###===================================================================================
+###--- DNS Configuration 
+###===================================================================================
+variable "dns_name" {
+  type = string
+}
+
+variable "dns_vip" {
+  type = string
+}
+
+variable "dns_domain_suffix" {
+  type = string
+}
+
+variable "port_type" {
+  type    = string
+  default = "NORTH_PORT"
+}
+
+variable "dns_enabled" {
+  type    = bool
+  default = true
+}
+
+###===================================================================================
+###--- NFS/SMB View Policy Settings
+###===================================================================================
+###===================================================================================
+###--- NFS/SMB View Policy Settings
+###===================================================================================
+variable "nfs_policies" {
+  type = map(object({
+    name                                   : string,             # <-- Added
+    flavor                                 : string,
+    access_flavor                          : string,             # <-- Added
+    allowed_characters                     : string,             # <-- Added
+    nfs_read_write                         : set(string),
+    nfs_read_only                          : set(string),
+    nfs_no_squash                          : set(string),
+    nfs_root_squash                        : set(string),        # <-- Added
+    nfs_posix_acl                          : bool,               # <-- Added
+    smb_read_write                         : set(string),
+    smb_read_only                          : set(string),
+    gid_inheritance                        : string,             # <-- Added
+    enable_access_to_snapshot_dir_in_subdirs : bool              # <-- Added
+  }))
+  default = {}
+}
+
+
+variable "s3_policies" {
+  type = map(object({
+    name                                   : string,             # <-- Added
+    flavor                                 : string,
+    access_flavor                          : string,             # <-- Added
+    allowed_characters                     : string,             # <-- Added
+    s3_read_write                          : set(string),
+    s3_read_only                           : set(string),
+    s3_flavor_allow_free_listing           : bool,               # <-- Added
+    s3_flavor_detect_full_pathname         : bool,               # <-- Added
+    s3_special_chars_support               : bool,               # <-- Added
+    #special_chars                          : bool,               # (Keep this if it's required by the provider schema)
+    gid_inheritance                        : string,             # <-- Added
+    enable_access_to_snapshot_dir_in_subdirs : bool              # <-- Added
+  }))
+  default = {}
+}
+
+### Remove?
+variable "s3_allowall_policy_name" {
+  type = string
+}
+
+variable "s3_allowall_policy_file" {
+  type = string
+}
+
+
+
+###===================================================================================
+###--- NFS/SMB Views
+###===================================================================================
+variable "file_views_config" {
+  description = "Map of NFS/SMB views to create with their configuration"
+  type = map(object({
+    name       : string
+    path       : string
+    protocols  : list(string)
+    create_dir : bool
+    policy     : string
+  }))
+  default = {}
+}
+
+variable "s3_views_config" {
+  description = "Map of S3 views to create with their configuration"
+  type = map(object({
+    name                      : string
+    bucket                    : string
+    path                      : string
+    protocols                 : list(string)
+    create_dir                : bool
+    policy                    : string
+    bucket_owner              : string
+    allow_s3_anonymous_access : optional(bool)
+  }))
+  default = {}
+}
+
+###===================================================================================
+###--- Users, Groups, Tenants
+###===================================================================================
+variable "groups" {
+  type = map(object({
+    gid = number
+  }))
+  default = {}
+}
+
+variable "users" {
+  type = map(object({
+    uid                  : number
+    leading_group_name   : string
+    supplementary_groups : list(string)
+    allow_create_bucket  : optional(bool, false)
+    allow_delete_bucket  : optional(bool, false)
+    s3_superuser         : optional(bool, false)
+  }))
+  default = {}
+}
+
+variable "tenants" {
+  description = "Map of tenants with their allowed client IP ranges"
+  type = map(object({
+    client_ip_ranges = list(object({
+      start_ip : string
+      end_ip   : string
+    }))
+  }))
+  default = {}
+}
+
+###===================================================================================
+###--- PGP Keys
+###===================================================================================
+variable "s3pgpkey" {
+  type = string
+}
+
+variable "pgp_key_users" {
+  type    = list(string)
+  default = ["s3user1", "dbuser1"]
+}
+
+###===================================================================================
+###--- Active Directory / LDAP
+###===================================================================================
+variable "ou_name" {
+  type = string
+}
+
+variable "ad_ou" {
+  type = string
+}
+
+variable "use_ad" {
+  type    = bool
+  default = true
+}
+
+variable "bind_dn" {
+  type = string
+}
+
+variable "bindpw" {
+  type      = string
+  sensitive = true
+}
+
+variable "ldap" {
+  type    = bool
+  default = true
+}
+
+variable "ad_domain" {
+  type = string
+}
+
+variable "method" {
+  type    = string
+  default = "simple"
+}
+
+variable "query_mode" {
+  type    = string
+  default = "tokenGroups"
+}
+
+variable "use_tls" {
+  type    = bool
+  default = true
+}
+
+variable "ldap_urls" {
+  type    = list(string)
+  default = []
+}
+
+###===================================================================================
+###--- Authentication / Access Settings
+###===================================================================================
+variable "use_auth_provider" {
+  type    = bool
+  default = true
+}
+
+variable "auth_source" {
+  type    = string
+  default = "RPC_AND_PROVIDERS"
+}
+
+variable "access_flavor" {
+  type    = string
+  default = "ALL"
+}
+
+###===================================================================================
+###--- Other Settings
+###===================================================================================
+variable "num_views" {
+  type    = number
+  default = 0
+}
+
+variable "create_dir" {
+  type    = bool
+  default = true
+}
+
+variable "path_name" {
+  type    = string
+  default = "nfsview"
+}
+###===================================================================================###
+# VAST Data Cluster Input Variables
+# All variables for main.tf and users.tf
+# Logical headers for readability, maps split on multiple lines
+###===================================================================================###
+
+
+###===================================================================================###
+###--- Provider Configuration
+###===================================================================================###
+variable "vast_username" {
+  type = string
+}
+
+variable "vast_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "vast_host" {
+  type = string
+}
+
+variable "vast_port" {
+  type    = number
+  default = 443
+}
+
+variable "vast_skip_ssl_verify" {
+  type    = bool
+  default = false
+}
+
+variable "vast_version_validation_mode" {
+  type    = string
+  default = "strict"
+}
+
+###===================================================================================###
+###--- Cluster Node & VIP Configuration
+###===================================================================================###
+variable "number_of_nodes" {
+  type = number
+}
+
+variable "vips_per_node" {
+  type = number
+}
+
+variable "vip_pools" {
+  type = map(object({
+    name        = string
+    start_ip    = string
+    gateway     = string
+    subnet_cidr = number
+    role        = string
+    dns_name    = optional(string)
+  }))
+}
+
+variable "protocols" {
+  type    = list(string)
+  default = ["NFS", "SMB", "S3"]
+}
+
+variable "flavor" {
+  description = "Default flavor for view policies"
+  type        = string
+  default     = "MIXED_LAST_WINS"
+}
+
+###===================================================================================###
+###--- DNS Configuration 
+###===================================================================================###
+variable "dns_name" {
+  type = string
+}
+
+variable "dns_vip" {
+  type = string
+}
+
+variable "dns_domain_suffix" {
+  type = string
+}
+
+variable "port_type" {
+  type    = string
+  default = "NORTH_PORT"
+}
+
+variable "dns_enabled" {
+  type    = bool
+  default = true
+}
+
+###===================================================================================###
+###--- NFS/SMB View Policy Settings
+###===================================================================================###
+/* variable "nfs_basic_policy_name" {
+  type = string
+}
+ */
+variable "nfs_basic_policy_flavor" {
+  type    = string
+  default = "MIXED_LAST_WINS"
+}
+
+# Not needed - breaks automation
+variable "nfs_audit_protocols" {
+  type    = list(string)
+  default = ["NFS"]
+}
+
+variable "nfs_no_squash" {
+  type    = set(string)
+  default = []
+}
+
+variable "nfs_read_write" {
+  type    = set(string)
+  default = ["*"]
+}
+
+variable "nfs_read_only" {
+  type    = set(string)
+  default = []
+}
+
+variable "smb_read_write" {
+  type    = set(string)
+  default = ["*"]
+}
+
+variable "smb_read_only" {
+  type    = set(string)
+  default = []
+}
+
+variable "vippool_permissions" {
+  type    = string
+  default = "RW"
+}
+
+
+###===================================================================================###
+###--- NFS/SMB View Polices
+###===================================================================================###
+variable "nfs_policies" {
+  type = map(any)
+  description = "Map of NFS policies to create"
+}
+
+variable "s3_policies" {
+  type = map(any)
+  description = "Map of S3 policies to create"
+}
+
+
+###===================================================================================###
+###--- NFS/SMB View Settings
+###===================================================================================###
+variable "num_views" {
+  type    = number
+  default = 0
+}
+
+variable "path_name" {
+  type    = string
+  default = "nfsview"
+}
+
+variable "create_dir" {
+  type    = bool
+  default = true
+}
+
+variable "file_views_config" {
+  description = "Map of NFS/SMB views to create with their configuration"
+  type = map(object({
+    name       : string
+    path       : string
+    protocols  : list(string)
+    create_dir : bool
+  }))
+  default = {
+    nfsview01 = {
+      name       = "nfsview01"
+      path       = "/nfs01"
+      protocols  = ["NFS"]
+      create_dir = true
+    }
+  }
+}
+
+
+#--------------------------------------
+# S3 View & Policy Settings
+#--------------------------------------
+
+variable "s3_basic_policy_flavor" {
+  type    = string
+  default = "S3_NATIVE"
+}
+
+variable "s3_audit_protocols" {
+  type    = list(string)
+  default = ["S3"]
+}
+
+variable "s3_basic_policy_name" {
+  type = string
+}
+
+variable "s3_flavor" {
+  type    = string
+  default = "S3_NATIVE"
+}
+
+variable "s3_special_chars_support" {
+  type    = bool
+  default = false
+}
+
+variable "s3_views_config" {
+  type = map(object({
+    name                      = string
+    bucket                    = string
+    path                      = string
+    protocols                 = list(string)
+    create_dir                = bool
+    bucket_owner              = string
+    allow_s3_anonymous_access = optional(bool)
+  }))
+}
+
+variable "s3_allowall_policy_name" {
+  type = string
+}
+
+variable "s3_allowall_policy_file" {
+  type = string
+}
+
+#--------------------------------------
+# Users, Groups, Tenants
+#--------------------------------------
+variable "groups" {
+  type = map(object({
+    gid = number
+  }))
+}
+
+variable "users" {
+  type = map(object({
+    uid                  = number
+    leading_group_name   = string
+    supplementary_groups = list(string)
+    allow_create_bucket  = optional(bool, false)
+    allow_delete_bucket  = optional(bool, false)
+    s3_superuser         = optional(bool, false)
+  }))
+}
+
+variable "tenants" {
+  description = "Map of tenants with their allowed client IP ranges"
+  type = map(object({
+    client_ip_ranges = list(object({
+      start_ip = string
+      end_ip   = string
+    }))
+  }))
+}
+
+
+#--------------------------------------
+# PGP Keys
+#--------------------------------------
+variable "s3pgpkey" {
+  type = string
+}
+
+variable "pgp_key_users" {
+  type    = list(string)
+  default = ["s3user1", "dbuser1"]
+}
+
+#--------------------------------------
+# Active Directory / LDAP
+#--------------------------------------
+variable "ou_name" {
+  type = string
+}
+
+variable "ad_ou" {
+  type = string
+}
+
+variable "use_ad" {
+  type    = bool
+  default = true
+}
+
+variable "bind_dn" {
+  type = string
+}
+
+variable "bindpw" {
+  type      = string
+  sensitive = true
+}
+
+variable "ldap" {
+  type    = bool
+  default = true
+}
+
+variable "ad_domain" {
+  type = string
+}
+
+variable "method" {
+  type    = string
+  default = "simple"
+}
+
+variable "query_mode" {
+  type    = string
+  default = "tokenGroups"
+}
+
+variable "use_tls" {
+  type    = bool
+  default = true
+}
+
+variable "ldap_urls" {
+  type    = list(string)
+  default = []
+}
+
+#--------------------------------------
+# Authentication / Access Settings
+#--------------------------------------
+variable "use_auth_provider" {
+  type    = bool
+  default = true
+}
+
+variable "auth_source" {
+  type    = string
+  default = "RPC_AND_PROVIDERS"
+}
+
+variable "access_flavor" {
+  type    = string
+  default = "ALL"
+}
+{
+  "address": "vastdata_view_policy.default",
+  "mode": "managed",
+  "type": "vastdata_view_policy",
+  "name": "default",
+  "provider_name": "registry.terraform.io/vast-data/vastdata",
+  "schema_version": 0,
+  "values": {
+    "access_flavor": "ALL",
+    "allowed_characters": "LCD",
+    "apple_sid": true,
+    "atime_frequency": null,
+    "auth_source": "RPC",
+    "change": [],
+    "cluster": "voc1-cluster01f",
+    "cluster_id": 1,
+    "count_views": 1,
+    "created": "2025-11-20T22:37:51.125898Z",
+    "data_create_delete": null,
+    "data_modify": null,
+    "data_read": null,
+    "disable_handle_lease": false,
+    "disable_read_lease": false,
+    "disable_write_lease": false,
+    "enable_access_to_snapshot_dir_in_subdirs": true,
+    "enable_listing_of_snapshot_dir": false,
+    "enable_snapshot_lookup": true,
+    "enable_visibility_of_snapshot_dir": false,
+    "expose_id_in_fsid": false,
+    "flavor": "NFS",
+    "full": [],
+    "gid_inheritance": "LINUX",
+    "guid": "b26d46ad-58d4-4f36-a599-d18187b10a8d",
+    "id": 1,
+    "inherit_parent_mode_bits": false,
+    "internal": false,
+    "is_s3_default_policy": false,
+    "log_deleted": null,
+    "log_full_path": null,
+    "log_hostname": null,
+    "log_username": null,
+    "name": "default",
+    "nfs_all_squash": [],
+    "nfs_case_insensitive": false,
+    "nfs_enforce_tls": false,
+    "nfs_enforce_tls_relaxed": false,
+    "nfs_minimal_protection_level": "SYSTEM",
+    "nfs_no_squash": [],
+    "nfs_posix_acl": false,
+    "nfs_read_only": null,
+    "nfs_read_write": [
+      "*"
+    ],
+    "nfs_return_open_permissions": false,
+    "nfs_root_squash": [
+      "*"
+    ],
+    "path_length": "LCD",
+    "pretty_atime_frequency": null,
+    "pretty_auth_source": "Client",
+    "protocols": [],
+    "protocols_audit": {
+      "create_delete_files_dirs_objects": false,
+      "log_deleted_files_dirs": null,
+      "log_full_path": false,
+      "log_username": false,
+      "modify_data_md": false,
+      "read_data": false,
+      "session_create_close": null
+    },
+    "read": [],
+    "read_only": [],
+    "read_write": [
+      "*"
+    ],
+    "s3_bucket_listing": null,
+    "s3_bucket_read": null,
+    "s3_bucket_read_acp": null,
+    "s3_bucket_write": null,
+    "s3_bucket_write_acp": null,
+    "s3_flavor_allow_free_listing": false,
+    "s3_flavor_detect_full_pathname": false,
+    "s3_object_full_control": null,
+    "s3_object_read": null,
+    "s3_object_read_acp": null,
+    "s3_object_write": null,
+    "s3_object_write_acp": null,
+    "s3_read_only": [],
+    "s3_read_write": [
+      "*"
+    ],
+    "s3_special_chars_support": true,
+    "s3_visibility": [],
+    "s3_visibility_groups": [],
+    "serves_tenant": null,
+    "smb_directory_mode": 755,
+    "smb_directory_mode_padded": "755",
+    "smb_file_mode": 644,
+    "smb_file_mode_padded": "644",
+    "smb_is_ca": false,
+    "smb_read_only": [],
+    "smb_read_write": [
+      "*"
+    ],
+    "sync": "SYNCED",
+    "sync_time": "2025-11-20T22:45:39.606350Z",
+    "tenant_id": 1,
+    "tenant_name": "default",
+    "title": "default",
+    "trash_access": [],
+    "url": "https://vms:443/api/v5/viewpolicies/1",
+    "use_32bit_fileid": false,
+    "use_auth_provider": false,
+    "vip_pools": null
+  },
+  "sensitive_values": {
+    "change": [],
+    "full": [],
+    "nfs_all_squash": [],
+    "nfs_no_squash": [],
+    "nfs_read_write": [
+      false
+    ],
+    "nfs_root_squash": [
+      false
+    ],
+    "protocols": [],
+    "protocols_audit": {},
+    "read": [],
+    "read_only": [],
+    "read_write": [
+      false
+    ],
+    "s3_read_only": [],
+    "s3_read_write": [
+      false
+    ],
+    "s3_visibility": [],
+    "s3_visibility_groups": [],
+    "smb_read_only": [],
+    "smb_read_write": [
+      false
+    ],
+    "trash_access": []
+  }
+}
+#  Active Directory integration Notes
+
+### Getting Active Directory Information for Configuring a Cluster
+
+Sometimes it can be difficult to get the exact information you need through GUIs or asking questions. Fortunately there are a few PowerShell commands you can use.  
+
+You need (example values):
+
+```hcl
+ou_name         = "voc-cluster01"
+ad_ou           = "OU=VAST,DC=ginaz,DC=org "
+bind_dn         = "CN=Administrator,CN=Users,DC=ginaz,DC=org"
+bindpw          = "Chalc0pyr1te!123"
+ad_domain       = "ginaz.org"
+```
+  
+The sequence of PowerShell commands below will extract this in a usable form from a Domain Controller.   
+**NOTE:** You will need the AD PowerShell Modules but most AD domain controllers should have them installed, and must run them in an Admin console.    
+
+- Domain Information
+
+  ```powershell
+     PS C:\> (Get-ADDomain).DistinguishedName
+     DC=ginaz,DC=org
+  ```
+
+- OUs for adding Servers (VAST was added)
+
+  ```powershell
+     PS C:\> Get-ADOrganizationalUnit -Filter * | Select-Object Name, DistinguishedName
+    
+     Name               DistinguishedName                    
+     ----               -----------------                    
+     Domain Controllers OU=Domain Controllers,DC=ginaz,DC=org
+     VAST               OU=VAST,DC=ginaz,DC=org              
+  ```
+
+- Find the Admin users
+
+  ```powershell
+  	PS C:\> Get-ADGroupMember -Identity "Domain Admins" -Recursive | Select-Object Name, SamAccountName, ObjectClass
+  	
+  	Name          SamAccountName ObjectClass
+  	----          -------------- -----------
+      Administrator Administrator  user       
+  ```
+
+- Get the Bind DN for an Admin user that can add servers (clusters) to a domain
+
+  ```powershell
+      PS C:\> Get-ADUser -Identity "Administrator" | Select-Object DistinguishedName
+    
+      DistinguishedName                        
+      -----------------                        
+      CN=Administrator,CN=Users,DC=ginaz,DC=org
+  ```
+
+#### For Extra Credit  
+If you have access to the Domain Controllers (Lab) or the customer is interested, you can add a new OU for VAST clusters.  
+
+- Create a new OU with a different name (VAST):
+
+  ```powershell
+     New-ADOrganizationalUnit -Name "VAST" -Path "DC=ginaz,DC=org"
+  ```
+
+- Redirect new VAST Clusters you add to the OU:
+
+  ```powershell
+     redircmp "OU=VAST,DC=ginaz,DC=org"
+  ```
+
+- Move existing ones to the new OU (careful with this one - it needs to be more selective - use at your own risk):
+
+  ```powershell
+      Get-ADComputer -SearchBase "CN=Computers,DC=ginaz,DC=org" -Filter * |
+      ForEach-Object {
+        Move-ADObject -Identity $_.DistinguishedName -TargetPath "OU=Workstations,DC=ginaz,DC=org"
+      }
+  ```
+
+---
+
+###  Key Resources
+
+| Resource                              | Purpose                                           |
+|---------------------------------------|---------------------------------------------------|
+| `vastdata_active_directory2`          | Configure Active Directory Domain integration     |
+|---------------------------------------|---------------------------------------------------|
+
+---
+
+#### Author
+
+* **Karl Vietmeier**
+
+#### License
+
+This project is licensed under the Apache License - see the [LICENSE.md](../../LICENSE.md) file for details
+
+#### Acknowledgments
+
+* Josh Wentzel for getting me started down this path.
+# Full End-to-End Configuration of a VAST Data Cluster from Scratch
+
+This folder will always have the latest working version using recent Providers.
+
+
+### VAST Data Cluster Demo/POC Setup
+
+This project contains Terraform a configuration to automate the setup of a complete VAST Data cluster suitable for **demo or proof-of-concept (POC)** scenarios. The configuration includes:
+
+- VAST Provider and authentication
+- VIP Pools for `PROTOCOLS`, `REPLICATION`
+- NFS view policy and NFS views
+- S3 view policy and NFS views
+- S3 View for Database
+- Creates empty database instance
+- S3 User policies
+- S3 User keys
+- DNS configuration
+- Basic multi-tenant setup with users and groups
+- Active Directory integration
+
+---
+
+### Prerequisites
+- Terraform installed
+- VAST provider plugin initialized
+- Access to a VAST Data cluster (on GCP or other supported platforms)
+- Accessible Active Directory DC
+- DNS Forwarder or Delegation configured to point to the VAST DNS domain/s
+- Valid PGP public key in "armored" format
+
+### Elements Created
+
+####  Provider Configuration
+Establishes a connection to a VAST Data cluster using credentials and API endpoint info.
+
+####  VIP Pools
+Defines 3 VIP Pools:
+- `sharesPool`: Assigned the `PROTOCOLS` role
+- `s3pool`: Assigned the `PROTOCOLS` role
+- `targetPool`: Assigned the `REPLICATION` role
+
+**NOTE**: VIP pools are sized dynamically based on number of nodes.
+
+This Terraform configuration dynamically calculates VIP pool ranges and sets up S3 views for a VAST Data deployment. It automatically computes the end_ip for each VIP pool based on the number of nodes and VIPs per node, ensuring each node has the correct number of IPs. Pools are categorized by role (protocols or replication), and S3 views are automatically assigned the appropriate policy. This setup makes it easy to scale nodes and VIPs without manually updating IP ranges or view configurations.
+
+Example:  (This calculation assumes all VIPs are in the same /24 subnet.)
+
+  ```hcl
+  # Example VIP pool calculation:
+  start_ip = "10.0.0.5"
+  number_of_nodes = 11
+  vips_per_node = 3
+
+  # Computed end_ip:
+  end_ip = "10.0.0.37"
+  ```
+
+####  Tenants, Groups, and Users
+- Dynamically creates tenants from a list.
+- Groups and users are provisioned with specified GIDs/UIDs and group relationships.
+- S3 users have keys uploaded
+
+####  NFS View Policy
+Creates a VAST NFS view policy with:
+- Authentication sources
+- Read/write permissions
+- VIP pool assignment
+
+####  NFS Views
+Provisioned from a list where each view can be configured uniquely
+
+####  S3 View Policy
+Basic policy with no extra settings (Isn't working right now)
+
+####  S3 Views
+- 2 views - one for standard S3, one for Database
+
+####  S3 User Policies
+- Sample configurations loaded from json files in ../policies
+
+####  S3 User Keys
+- Add PGP key for S3
+- Use local script to recover the keys
+
+####  Database
+- Created when you add "DATABASE" to an S3 View - named after the bucket
+
+####  DNS
+Defines a VAST DNS server for the VAST cluster, using the `busab.org` domain suffix and specified VIP address.
+- `viewpool.busab.org`
+- `s3pool.busab.org`
+- Forwarding domain setup in GCP.
+
+####  Active Directory
+Configure Active Directory integration to join the `ginaz.org` domain.
+
+---
+
+## Examples:
+
+The online documentation doesn't have very good examples of things like DNS and setting up S3 and the LLMs do not have correct information on the Provider. As I figure out how to configure them I will try to put some examples here with explantions.
+
+### DNS
+It isn't immediately clear from the documentation that you need to configure it in 2 places to get a complete implementation.  
+  
+#### Important Note  
+*The `domain_suffix` can only be used with VIP Pools assigned the `PROTOCOLS` role.*  
+  
+- In the DNS resource "*domain_suffix*" is the root domain of the FQDN or properly the "*domain name*":
+
+  ```hcl
+  resource "vastdata_dns" "protocol_dns" {
+    provider      = vastdata.GCPCluster
+    name          = var.dns_name
+    vip           = var.dns_vip
+    net_type      = var.port_type
+    domain_suffix = var.dns_domain_suffix
+    enabled       = var.dns_enabled
+  }
+  ```
+- In the VIP Pool resource it can be confusing because the attribute you need to set is named incorrectly - it is called the "*domain_name*" when it is more correctly refered to as the "*short, or host name*". *Not sure it is required but just in case I added a dependency on DNS being setup first*:
+
+  ```hcl
+  resource "vastdata_vip_pool" "protocols" {
+  provider     = vastdata.GCPCluster
+  name         = var.vip1_name
+  domain_name  = var.dns_shortname
+  role         = var.role1
+  subnet_cidr  = var.cidr
+  gw_ip        = var.gw1
+  ip_ranges {
+        start_ip = var.vip1_startip
+        end_ip   = var.vip1_endip
+    }
+    
+  depends_on = [vastdata_dns.protocol_dns]
+  }
+  ```
+
+---
+
+###  Key Resources
+
+| Resource                              | Purpose                                           |
+|---------------------------------------|---------------------------------------------------|
+| `vastdata_tenant`                     | Creates tenants (multi-tenant support)            |
+| `vastdata_group`                      | Defines user groups                               |
+| `vastdata_user`                       | Creates users with group associations             |
+| `vastdata_vip_pool`                   | Configures VIP Pools for network access           |
+| `vastdata_view_policy`                | View policy for NFS and SMB access                |
+| `vastdata_view`                       | Provision of NFS views                            |
+| `vastdata_dns`                        | DNS setup for VAST domain resolution              |
+| `vastdata_active_directory2`          | Configure Active Directory Domain integration     |
+| `vastdata_s3_policy`                  | Define an S3 User Policy     |
+|---------------------------------------|---------------------------------------------------|
+
+---
+
+#### Author
+
+* **Karl Vietmeier**
+
+#### License
+
+This project is licensed under the Apache License - see the [LICENSE.md](../../LICENSE.md) file for details
+
+#### Acknowledgments
+
+* Josh Wentzel for getting me started down this path.# vastdata_view_policy.nfs_basic_policy:
+resource "vastdata_view_policy" "nfs_basic_policy" {
+    access_flavor                            = "ALL"
+    allowed_characters                       = "LCD"
+    apple_sid                                = true
+    auth_source                              = "RPC"
+    change                                   = []
+    cluster                                  = "voc1-cluster01d"
+    cluster_id                               = 1
+    count_views                              = 3
+    created                                  = "2025-09-29T22:59:09.546625Z"
+    disable_handle_lease                     = false
+    disable_read_lease                       = false
+    disable_write_lease                      = false
+    enable_access_to_snapshot_dir_in_subdirs = true
+    enable_listing_of_snapshot_dir           = false
+    enable_snapshot_lookup                   = true
+    enable_visibility_of_snapshot_dir        = false
+    expose_id_in_fsid                        = false
+    flavor                                   = "MIXED_LAST_WINS"
+    full                                     = []
+    gid_inheritance                          = "LINUX"
+    guid                                     = "a3ee1172-df34-495d-b709-689cfe37ad01"
+    id                                       = 13
+    inherit_parent_mode_bits                 = false
+    internal                                 = false
+    is_s3_default_policy                     = false
+    name                                     = "nfs-view-policy"
+    nfs_all_squash                           = []
+    nfs_case_insensitive                     = false
+    nfs_enforce_tls                          = false
+    nfs_minimal_protection_level             = "NONE"
+    nfs_no_squash                            = []
+    nfs_posix_acl                            = false
+    nfs_read_write                           = [
+        "*",
+    ]
+    nfs_return_open_permissions              = false
+    nfs_root_squash                          = [
+        "*",
+    ]
+    path_length                              = "LCD"
+    pretty_auth_source                       = "Client"
+    protocols                                = []
+    protocols_audit                          = {
+        create_delete_files_dirs_objects = false
+        log_full_path                    = false
+        log_username                     = false
+        modify_data_md                   = false
+        read_data                        = false
+    }
+    read                                     = []
+    read_only                                = []
+    read_write                               = [
+        "*",
+    ]
+    s3_flavor_allow_free_listing             = false
+    s3_flavor_detect_full_pathname           = false
+    s3_read_only                             = []
+    s3_read_write                            = [
+        "*",
+    ]
+    s3_special_chars_support                 = true
+    s3_visibility                            = []
+    s3_visibility_groups                     = []
+    smb_directory_mode                       = 755
+    smb_directory_mode_padded                = "755"
+    smb_file_mode                            = 644
+    smb_file_mode_padded                     = "644"
+    smb_is_ca                                = false
+    smb_read_only                            = []
+    smb_read_write                           = [
+        "*",
+    ]
+    sync                                     = "SYNCED"
+    sync_time                                = "2025-09-29T23:00:05.803108Z"
+    tenant_id                                = 1
+    tenant_name                              = "default"
+    title                                    = "nfs-view-policy"
+    trash_access                             = []
+    url                                      = "https://vms:443/api/v5/viewpolicies/13"
+    use_32bit_fileid                         = false
+    use_auth_provider                        = false
+}
+# vastdata_view_policy.s3_basic_policy:
+resource "vastdata_view_policy" "s3_basic_policy" {
+    access_flavor                            = "ALL"
+    allowed_characters                       = "LCD"
+    apple_sid                                = true
+    auth_source                              = "RPC"
+    change                                   = []
+    cluster                                  = "voc1-cluster01d"
+    cluster_id                               = 1
+    count_views                              = 2
+    created                                  = "2025-09-29T22:59:08.847050Z"
+    disable_handle_lease                     = false
+    disable_read_lease                       = false
+    disable_write_lease                      = false
+    enable_access_to_snapshot_dir_in_subdirs = true
+    enable_listing_of_snapshot_dir           = false
+    enable_snapshot_lookup                   = true
+    enable_visibility_of_snapshot_dir        = false
+    expose_id_in_fsid                        = false
+    flavor                                   = "S3_NATIVE"
+    full                                     = []
+    gid_inheritance                          = "LINUX"
+    guid                                     = "52f9bc17-1b4f-4421-8d64-6b0b6af99f20"
+    id                                       = 12
+    inherit_parent_mode_bits                 = false
+    internal                                 = false
+    is_s3_default_policy                     = false
+    name                                     = "StandardS3Policy"
+    nfs_all_squash                           = []
+    nfs_case_insensitive                     = false
+    nfs_enforce_tls                          = false
+    nfs_minimal_protection_level             = "NONE"
+    nfs_no_squash                            = []
+    nfs_posix_acl                            = false
+    nfs_read_write                           = [
+        "*",
+    ]
+    nfs_return_open_permissions              = false
+    nfs_root_squash                          = [
+        "*",
+    ]
+    path_length                              = "LCD"
+    pretty_auth_source                       = "Client"
+    protocols                                = []
+    protocols_audit                          = {
+        create_delete_files_dirs_objects = false
+        log_full_path                    = false
+        log_username                     = false
+        modify_data_md                   = false
+        read_data                        = false
+    }
+    read                                     = []
+    read_only                                = []
+    read_write                               = [
+        "*",
+    ]
+    s3_flavor_allow_free_listing             = false
+    s3_flavor_detect_full_pathname           = false
+    s3_read_only                             = []
+    s3_read_write                            = [
+        "*",
+    ]
+    s3_special_chars_support                 = true
+    s3_visibility                            = []
+    s3_visibility_groups                     = []
+    smb_directory_mode                       = 755
+    smb_directory_mode_padded                = "755"
+    smb_file_mode                            = 644
+    smb_file_mode_padded                     = "644"
+    smb_is_ca                                = false
+    smb_read_only                            = []
+    smb_read_write                           = [
+        "*",
+    ]
+    sync                                     = "SYNCED"
+    sync_time                                = "2025-09-29T23:00:05.836581Z"
+    tenant_id                                = 1
+    tenant_name                              = "default"
+    title                                    = "StandardS3Policy"
+    trash_access                             = []
+    url                                      = "https://vms:443/api/v5/viewpolicies/12"
+    use_32bit_fileid                         = false
+    use_auth_provider                        = false
+}
