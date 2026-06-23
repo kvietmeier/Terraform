@@ -1,104 +1,101 @@
-# Full End-to-End Configuration of a VAST Data Cluster from Scratch
+```text
+# Full End-to-End Configuration of a VAST Data Cluster
 
-### VAST Data Cluster Demo/POC Setup
+### VAST Data Cluster Lab Automation Engine
 
-This project contains Terraform a configuration to automate the setup of a complete VAST Data cluster suitable for **demo or proof-of-concept (POC)** scenarios. The configuration includes:
+This repository contains a modular Terraform workflow orchestrated by an automation script wrapper (cluster_setup.sh). It provisions VAST Data configurations (Views, Tenants, Policies, Users, and Network VIP Pools) sequentially across a list of cluster infrastructure endpoints. It maintains isolated state files in a single remote bucket.
 
-- VAST Provider and authentication
-- NFS view policy and NFS views
-- S3 view policy and NFS views
-- S3 View for Database
-- Creates empty database instance
-- S3 User policies
-- S3 User keys
-- Basic multi-tenant setup with users and groups
+The system features:
+* State Isolation: Maps distinct Google Cloud Storage (GCS) tracking prefixes per cluster target to prevent state file overwrites.
+* Portable Directory Execution: Evaluates system environment path roots so the repository works across different local user profiles when cloned.
+* Sequential Processing: Validates existing healthy clusters using the remote backend, applying changes only where configuration drift is detected.
 
 ---
 
 ### Prerequisites
 
-- Terraform installed
-- VAST provider plugin initialized
-- Access to a VAST Data cluster (on GCP or other supported platforms)
-- Valid PGP public key in "armored" format
-
-### Elements Created
-
-#### Provider Configuration
-
-Establishes a connection to a VAST Data cluster using credentials and API endpoint info.
-
-#### Tenants, Groups, and Users
-
-- Dynamically creates tenants from a list.
-- Groups and users are provisioned with specified GIDs/UIDs and group relationships.
-- S3 users have keys uploaded
-
-#### NFS View Policy
-
-Creates a VAST NFS view policy with:
-
-- Authentication sources
-- Read/write permissions
-- VIP pool assignment
-
-#### NFS Views
-
-Provisioned from a list where each view can be configured uniquely
-
-#### S3 View Policy
-
-Basic policy with no extra settings (Isn't working right now)
-
-#### S3 Views
-
-- 2 views - one for standard S3, one for Database
-
-#### S3 User Policies
-
-- Sample configurations loaded from json files in ../policies
-
-#### S3 User Keys
-
-- Add PGP key for S3
-- Use local script to recover the keys
-
-#### Database
-
-- Created when you add "DATABASE" to an S3 View - named after the bucket
+* Terraform CLI (>= 1.5.0) installed locally.
+* Google Cloud CLI (gcloud) authenticated to the project hosting the remote tracking bucket.
+* Access to a Google Cloud Storage bucket (clouddev-itdesk124-tfstate) for state management.
+* Network line-of-sight to the control IP endpoints listed in the tracking inventory file.
 
 ---
 
-## Examples
+### Project Architecture & Directories
 
-The online documentation doesn't have very good examples of things like DNS and setting up S3 and the LLMs do not have correct information on the Provider. As I figure out how to configure them I will try to put some examples here with explantions.
+cluster_basic/
+├── cluster_setup.sh         # The main automation script
+├── cluster_list.txt         # Your cluster inventory list (StandardName,IP)
+└── base-config/             # Your master configuration template files
+    ├── locals.tf            # Computes dynamic values and mapping loops
+    ├── main.tf              # Base infrastructure mapping for NFS and S3 targets
+    ├── outputs.tf           # Structured return value maps
+    ├── provider.tf          # Core VAST provider schema requirements
+    ├── terraform.tfvars     # Reusable global variables payload
+    ├── users.tf             # Definitions for POSIX users, groups, and tenants
+    └── variables.tf         # Master typing schema constraints
 
 ---
 
-###  Key Resources
+### Core Automation Orchestrator Pipeline
 
-| Resource                              | Purpose                                           |
-|---------------------------------------|---------------------------------------------------|
-| `vastdata_tenant`                     | Creates tenants (multi-tenant support)            |
-| `vastdata_group`                      | Defines user groups                               |
-| `vastdata_user`                       | Creates users with group associations             |
-| `vastdata_vip_pool`                   | Configures VIP Pools for network access           |
-| `vastdata_view_policy`                | View policy for NFS and SMB access                |
-| `vastdata_view`                       | Provision of NFS views                            |
-| `vastdata_active_directory2`          | Configure Active Directory Domain integration     |
-| `vastdata_s3_policy`                  | Define an S3 User Policy     |
-|---------------------------------------|---------------------------------------------------|
+The loop engine manages structural dependencies by reading profiles out of cluster_list.txt. It soft-links the master schemas into temporary local work_<Cluster_Name> directories, appends the explicit cluster endpoint credentials, and initializes the backend tracking dynamically.
+
+#### Execution Lifecycle Commands
+
+To run configuration deployments, scale additions, or check existing configurations:
+
+  chmod +x cluster_setup.sh
+  ./cluster_setup.sh --apply
+
+To clean tear down and permanently erase all infrastructure resources for the targets currently tracking in your file inventory:
+
+  ./cluster_setup.sh --destroy
+
+---
+
+### Inventory Map Matrix (cluster_list.txt)
+
+Populate your cluster target systems using a comma-separated format (StandardName,IP_or_FQDN). The script uses the standard descriptive label to structure your workspace paths and GCS cloud buckets, and uses the IP address to bind network connections:
+
+  lab-cluster-01,10.129.12.10
+  lab-cluster-02,10.129.12.11
+  lab-cluster-03,10.129.12.12
+
+---
+
+### Key Resources & Schema Coverage
+
+* vastdata_tenant: Provisions multi-tenant sandbox isolations.
+* vastdata_group: Outlines POSIX system user group parameters.
+* vastdata_user: Provisions programmatic users with GID/UID maps.
+* vastdata_vip_pool: Assigns flat IP ranges to specific client routing protocols.
+* vastdata_view_policy: Configures protocol characteristics (NFS, S3, Mixed-Mode).
+* vastdata_view: Provisions data pathways, mount points, and S3 buckets.
+* vastdata_user_key: Uploads PGP-armored keys for S3 user identity access.
+
+---
+
+## Technical Notes & Architecture Learnings
+
+* Explicit Provider Aliasing: Resources must map to an explicitly aliased provider target (e.g., alias = "GCPCluster") inside the working environment. Omitting the aliased provider configuration causes the compilation runtime to search for a default, non-existent hashicorp/vastdata provider block instead of the correct vast-data/vastdata source namespace.
+
+* The Multi-Tenancy Boundary Constraint: When provisioning isolated environments using vastdata_tenant, you must explicitly pass tenant_id mappings into your vastdata_view_policy and vastdata_view blocks. Omitting the tenant identification tag defaults resources to the Global Tenant environment context, rendering your intended multi-tenant design empty.
+
+* Dynamic Backend Partial Configurations: Leaving the backend "gcs" {} container configuration block empty inside the master files allows you to input custom bucket destinations and dynamic object target tracking fields (-backend-config="prefix=...") during the command line initialization phase.
 
 ---
 
 #### Author
 
-* **Karl Vietmeier**
+* Karl Vietmeier
 
 #### License
 
-This project is licensed under the Apache License - see the [LICENSE.md](../../LICENSE.md) file for details
+This project is licensed under the Apache License. See the LICENSE.md file for details.
 
 #### Acknowledgments
 
 * Josh Wentzel for getting me started down this path.
+
+```

@@ -27,8 +27,8 @@
 locals {
 
   # Extract s3Pool and sharesPool keys
-  s3pool_key     = [for k, v in local.protocols_pools : k if v.name == "s3Pool"][0]
-  sharespool_key = [for k, v in local.protocols_pools : k if v.name == "sharesPool"][0]
+  #s3pool_key     = [for k, v in local.protocols_pools : k if v.name == "s3Pool"][0]
+  #sharespool_key = [for k, v in local.protocols_pools : k if v.name == "sharesPool"][0]
 
   # Effective number of views
   effective_num_views = var.num_views != null ? var.num_views : var.number_of_nodes

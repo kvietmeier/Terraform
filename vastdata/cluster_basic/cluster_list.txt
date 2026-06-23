@@ -1,0 +1,21 @@
+### TechSummit Cluster List ###
+#techsummit-lab-01,10.129.10.10
+#techsummit-lab-02,10.129.11.10
+techsummit-lab-03,10.129.12.10
+#techsummit-lab-04,10.129.13.10
+#techsummit-lab-05,10.129.14.10
+#techsummit-lab-06,10.129.15.10
+#techsummit-lab-07,10.129.16.10
+#techsummit-lab-08,10.129.17.10
+#techsummit-lab-09,10.129.18.10
+#techsummit-lab-10,10.129.19.10
+#techsummit-lab-11,10.129.20.10
+#techsummit-lab-12,10.129.21.10
+#techsummit-lab-13,10.129.22.10
+#techsummit-lab-14,10.129.23.10
+#techsummit-lab-15,10.129.24.10
+#techsummit-lab-16,10.129.25.10
+#techsummit-lab-17,10.129.26.10
+#techsummit-lab-18,10.129.27.10
+#techsummit-lab-19,10.129.28.10
+#techsummit-lab-20,10.129.29.10

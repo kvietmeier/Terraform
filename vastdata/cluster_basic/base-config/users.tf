@@ -70,5 +70,5 @@ resource "vastdata_user_key" "s3keys" {
   
   user_id       = vastdata_user.users[each.key].id
   enabled       = true
-  pgp_public_key = file(var.s3pgpkey)
+  #pgp_public_key = file(var.s3pgpkey)
 }

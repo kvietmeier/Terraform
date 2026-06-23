@@ -1,0 +1,267 @@
+###===================================================================================###
+# VAST Data – Demo/POC Configuration Input Variables (.tfvars)
+#
+# This file provides input values for provisioning a VAST Data cluster with:
+# - Multiple VIP Pools (PROTOCOLS, REPLICATION, VAST_CATALOG roles)
+# - NFS and S3 view policies and view configurations
+# - Tenant, user, and group mappings for access control
+# - DNS service setup for cluster networking
+# - Active Directory integration settings (disabled by default)
+#
+# Notes:
+# - Designed for demo or proof-of-concept deployments; IPs and credentials
+#   are simplified and should be secured for production use.
+# - VIP Pools include optional gateways and DNS names.
+# - Supports multiple NFS views and a single S3 view with custom policies.
+# - Users can have POSIX groups and bucket creation/deletion permissions.
+###===================================================================================###
+
+###===================================================================================###
+# Provider Configuration
+###===================================================================================###
+
+vast_username                = "admin"
+vast_password                = "123456"
+vast_host                    = "10.129.12.10"
+vast_port                    = "443"
+vast_skip_ssl_verify         = true
+vast_version_validation_mode = "warn"
+
+
+###===================================================================================###
+#   VIP Pool Configuration (see locals for explanation)
+###===================================================================================###
+number_of_nodes = 4
+
+
+###===================================================================================###
+#   Common View Policy Settings
+###===================================================================================###
+flavor                  = "MIXED_LAST_WINS"
+use_auth_provider       = true
+auth_source             = "RPC_AND_PROVIDERS"
+access_flavor           = "ALL"
+
+
+###===================================================================================###
+#   NFS Settings
+###===================================================================================###
+
+###---  NFS View Policy Settings
+nfs_basic_policy_name      = "nfs-view-policy"
+vippool_permissions        = "RW"
+nfs_basic_policy_flavor    = "MIXED_LAST_WINS" 
+#nfs_audit_protocols = ["NFS"]
+nfs_no_squash         = ["0.0.0.0/0"]
+nfs_read_write        = ["0.0.0.0/0"]
+nfs_read_only         = []
+smb_read_write        = []
+smb_read_only         = []
+
+
+###---  File View Settings
+
+file_views_config = {
+  fileview01 = {
+    name       = "labuser01"
+    path       = "/labuser01"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
+  fileview02 = {
+    name       = "labuser02"
+    path       = "/labuser02"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
+  fileview03 = {
+    name       = "labuser03"
+    path       = "/labuser03"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
+  fileview04 = {
+    name       = "labuser04"
+    path       = "/labuser04"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+  
+  fileview05 = {
+    name       = "labuser05"
+    path       = "/labuser05"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+}
+
+
+###===================================================================================###
+#   S3 Settings
+###===================================================================================###
+
+###--- Basic S3 View Policy Settings
+s3_basic_policy_name       = "StandardS3Policy"
+s3_basic_policy_flavor     = "S3_NATIVE" 
+#s3_audit_protocols  = ["S3"]
+s3_special_chars_support   = true
+
+
+###--- S3 View Settings
+s3_views_config = {
+  s3 = {
+    name                      = "s3view01"
+    bucket                    = "bucket01"
+    path                      = "/s3"
+    protocols                 = ["S3"]
+    create_dir                = true
+    bucket_owner              = "s3user1"
+    allow_s3_anonymous_access = false
+  }
+  db = {
+    name                      = "vastdb_view"
+    bucket                    = "vastdb01"
+    path                      = "/vastdb"
+    protocols                 = ["S3", "DATABASE"]
+    create_dir                = true
+    bucket_owner              = "dbuser1"
+    allow_s3_anonymous_access = true
+  }
+}
+
+
+###===================================================================================###
+#   User/Tenant Settings using maps
+###===================================================================================###
+
+
+#- User View Polices json files
+s3_allowall_policy_file = "../../policies/s3Policy-VastAllowAll.json"
+#s3_detailed_policy_file = "s3Policy-Detailed.example.json"
+
+# Policy names
+s3_allowall_policy_name = "s3_user_AllowAll"
+#s3_detailed_policy_name = "s3policy_user_detailed"
+
+###--- Keys - do this on the Mac? ---###
+s3pgpkey = "../../secrets/s3_pgp_key.asc"
+pgp_key_users = [
+  "dbuser1",
+  "s3user1",
+  "labuser01",
+  "labuser02",
+  "labuser03",
+  "labuser04",
+  "labuser05"
+  ]
+
+groups = {
+  s3users  = { gid = 1000 }
+  nfsusers = { gid = 1100 }
+  allusers = { gid = 1200 }
+}
+
+users = {
+  labuser01 = {
+    uid                  = 2111
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+  labuser02 = {
+    uid                  = 2112
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+  labuser03 = {
+    uid                  = 2113
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+  labuser04 = {
+    uid                  = 2114
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+  labuser05 = {
+    uid                  = 2115
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    # allow_create_bucket and allow_delete_bucket default to false
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+  # Need these?
+  s3user1 = {
+    uid                  = 2116
+    leading_group_name   = "allusers"
+    supplementary_groups = ["nfsusers", "s3users"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+
+
+  # Need these?
+  dbuser1 = {
+    uid                  = 2117
+    leading_group_name   = "allusers"
+    supplementary_groups = ["nfsusers", "s3users"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+}
+
+tenants = {
+  tenant1 = {
+    client_ip_ranges = [
+      { start_ip = "10.10.1.0", end_ip = "10.10.1.254" }
+    ]
+  }
+  tenant2 = {
+    client_ip_ranges = [
+      { start_ip = "10.10.2.0", end_ip = "10.10.2.254" }
+    ]
+  }
+  tenant3 = {
+    client_ip_ranges = [
+      { start_ip = "10.10.3.0", end_ip = "10.10.3.254" }
+    ]
+  }
+  tenant4 = {
+    client_ip_ranges = [
+      { start_ip = "10.10.4.0", end_ip = "10.10.4.254" }
+    ]
+  }
+  tenant5= {
+    client_ip_ranges = [
+      { start_ip = "10.10.5.0", end_ip = "10.10.5.254" }
+    ]
+  }
+}
+

@@ -22,7 +22,7 @@
 
 vast_username                = "admin"
 vast_password                = "123456"
-vast_host                    = "vms"
+vast_host                    = "10.129.12.10"
 vast_port                    = "443"
 vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
@@ -217,7 +217,7 @@ users = {
 
   # Need these?
   s3user1 = {
-    uid                  = 2112
+    uid                  = 2116
     leading_group_name   = "allusers"
     supplementary_groups = ["nfsusers", "s3users"]
     allow_create_bucket  = true
@@ -228,7 +228,7 @@ users = {
 
   # Need these?
   dbuser1 = {
-    uid                  = 2113
+    uid                  = 2117
     leading_group_name   = "allusers"
     supplementary_groups = ["nfsusers", "s3users"]
     allow_create_bucket  = true

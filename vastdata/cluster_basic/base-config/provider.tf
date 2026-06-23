@@ -14,6 +14,10 @@ terraform {
       #version = "2.0"
     }
   }
+   backend "gcs" {
+     bucket = "clouddev-itdesk124-tfstate"
+     prefix = "terraform/state/vast-fleet" # Acts as a placeholder base path
+   }
 }
 
 provider "vastdata" {
