@@ -209,7 +209,7 @@ variable "users" {
     s3_superuser         = optional(bool, false)
   }))
 }
-
+/* 
 variable "tenants" {
   description = "Map of tenants with their allowed client IP ranges"
   type = map(object({
@@ -219,7 +219,7 @@ variable "tenants" {
     }))
   }))
 }
-
+ */
 
 #--------------------------------------
 # PGP Keys

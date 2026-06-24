@@ -1,101 +1,38 @@
-```text
-# Full End-to-End Configuration of a VAST Data Cluster
+## Full End-To-End Configuration of a VAST Data Cluster
 
 ### VAST Data Cluster Lab Automation Engine
 
-This repository contains a modular Terraform workflow orchestrated by an automation script wrapper (cluster_setup.sh). It provisions VAST Data configurations (Views, Tenants, Policies, Users, and Network VIP Pools) sequentially across a list of cluster infrastructure endpoints. It maintains isolated state files in a single remote bucket.
+This repository contains a modular Terraform workflow orchestrated by an advanced automation orchestrator wrapper (`cluster_setup.sh`). It dynamically provisions VAST Data storage resources, POSIX data-plane identities, and matching interactive VMS management logins sequentially across up to 20 cluster infrastructure endpoints.
 
 The system features:
-* State Isolation: Maps distinct Google Cloud Storage (GCS) tracking prefixes per cluster target to prevent state file overwrites.
-* Portable Directory Execution: Evaluates system environment path roots so the repository works across different local user profiles when cloned.
-* Sequential Processing: Validates existing healthy clusters using the remote backend, applying changes only where configuration drift is detected.
+* **Workspace Isolation via Symlinks:** Generates unique `work_<Cluster_Name>` runtime directories, symlinking core HCL modules from a centralized core block to isolate states and locks.
+* **Dual-Plane Identity Synchronization:** Simultaneously provisions POSIX data-plane users/groups and VMS management-plane administrative manager accounts (`LOCAL_ADMIN`) bound to an immutable cluster security role.
+* **Auto-Loading Master Variables:** Automatically mirrors your master variable definitions (`base-config/terraform.tfvars`) into each isolated workspace path, eradicating old evaluation conflicts caused by legacy `.auto.tfvars` overrides.
+* **Sequential Processing:** Validates and fires the dependency engine only against targeted, active cluster tracking endpoints.
 
 ---
 
 ### Prerequisites
 
-* Terraform CLI (>= 1.5.0) installed locally.
-* Google Cloud CLI (gcloud) authenticated to the project hosting the remote tracking bucket.
-* Access to a Google Cloud Storage bucket (clouddev-itdesk124-tfstate) for state management.
-* Network line-of-sight to the control IP endpoints listed in the tracking inventory file.
+* **Terraform CLI** (`>= 1.5.0`) installed locally.
+* **Network Line-of-Sight** to the VMS control plane IP endpoints listed in your tracking inventory file.
+* **Correct Provider Binaries:** Ensure your workspace has access to the updated `vast-data/vastdata` provider supporting management-plane layout configurations.
 
 ---
 
 ### Project Architecture & Directories
 
+```text
 cluster_basic/
-├── cluster_setup.sh         # The main automation script
-├── cluster_list.txt         # Your cluster inventory list (StandardName,IP)
-└── base-config/             # Your master configuration template files
-    ├── locals.tf            # Computes dynamic values and mapping loops
-    ├── main.tf              # Base infrastructure mapping for NFS and S3 targets
-    ├── outputs.tf           # Structured return value maps
-    ├── provider.tf          # Core VAST provider schema requirements
-    ├── terraform.tfvars     # Reusable global variables payload
-    ├── users.tf             # Definitions for POSIX users, groups, and tenants
+├── cluster_setup.sh         # Core automation orchestrator loop wrapper
+├── cluster_list.txt         # Comma-separated cluster inventory (Name,IP)
+└── base-config/             # Your master configuration template files (Source-of-Truth)
+    ├── locals.tf            # Computes local variables and password string mappings
+    ├── main.tf              # Storage view configuration layer (NFS & S3 targets)
+    ├── outputs.tf           # Structured infrastructure return value maps
+    ├── provider.tf          # Core VAST provider schema block
+    ├── terraform.tfvars     # Master 10-user payload list variable configurations
+    ├── users.tf             # Unified POSIX accounts, groups, and VMS managers manifest
     └── variables.tf         # Master typing schema constraints
-
----
-
-### Core Automation Orchestrator Pipeline
-
-The loop engine manages structural dependencies by reading profiles out of cluster_list.txt. It soft-links the master schemas into temporary local work_<Cluster_Name> directories, appends the explicit cluster endpoint credentials, and initializes the backend tracking dynamically.
-
-#### Execution Lifecycle Commands
-
-To run configuration deployments, scale additions, or check existing configurations:
-
-  chmod +x cluster_setup.sh
-  ./cluster_setup.sh --apply
-
-To clean tear down and permanently erase all infrastructure resources for the targets currently tracking in your file inventory:
-
-  ./cluster_setup.sh --destroy
-
----
-
-### Inventory Map Matrix (cluster_list.txt)
-
-Populate your cluster target systems using a comma-separated format (StandardName,IP_or_FQDN). The script uses the standard descriptive label to structure your workspace paths and GCS cloud buckets, and uses the IP address to bind network connections:
-
-  lab-cluster-01,10.129.12.10
-  lab-cluster-02,10.129.12.11
-  lab-cluster-03,10.129.12.12
-
----
-
-### Key Resources & Schema Coverage
-
-* vastdata_tenant: Provisions multi-tenant sandbox isolations.
-* vastdata_group: Outlines POSIX system user group parameters.
-* vastdata_user: Provisions programmatic users with GID/UID maps.
-* vastdata_vip_pool: Assigns flat IP ranges to specific client routing protocols.
-* vastdata_view_policy: Configures protocol characteristics (NFS, S3, Mixed-Mode).
-* vastdata_view: Provisions data pathways, mount points, and S3 buckets.
-* vastdata_user_key: Uploads PGP-armored keys for S3 user identity access.
-
----
-
-## Technical Notes & Architecture Learnings
-
-* Explicit Provider Aliasing: Resources must map to an explicitly aliased provider target (e.g., alias = "GCPCluster") inside the working environment. Omitting the aliased provider configuration causes the compilation runtime to search for a default, non-existent hashicorp/vastdata provider block instead of the correct vast-data/vastdata source namespace.
-
-* The Multi-Tenancy Boundary Constraint: When provisioning isolated environments using vastdata_tenant, you must explicitly pass tenant_id mappings into your vastdata_view_policy and vastdata_view blocks. Omitting the tenant identification tag defaults resources to the Global Tenant environment context, rendering your intended multi-tenant design empty.
-
-* Dynamic Backend Partial Configurations: Leaving the backend "gcs" {} container configuration block empty inside the master files allows you to input custom bucket destinations and dynamic object target tracking fields (-backend-config="prefix=...") during the command line initialization phase.
-
----
-
-#### Author
-
-* Karl Vietmeier
-
-#### License
-
-This project is licensed under the Apache License. See the LICENSE.md file for details.
-
-#### Acknowledgments
-
-* Josh Wentzel for getting me started down this path.
 
 ```

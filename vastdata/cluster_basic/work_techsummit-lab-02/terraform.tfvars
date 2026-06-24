@@ -4,22 +4,16 @@
 # This file provides input values for provisioning a VAST Data cluster with:
 # - Multiple VIP Pools (PROTOCOLS, REPLICATION, VAST_CATALOG roles)
 # - NFS and S3 view policies and view configurations
-# - Tenant, user, and group mappings for access control
-# - DNS service setup for cluster networking
-# - Active Directory integration settings (disabled by default)
+# - Local user and group mappings for centralized access control
 #
 # Notes:
-# - Designed for demo or proof-of-concept deployments; IPs and credentials
-#   are simplified and should be secured for production use.
-# - VIP Pools include optional gateways and DNS names.
-# - Supports multiple NFS views and a single S3 view with custom policies.
-# - Users can have POSIX groups and bucket creation/deletion permissions.
+# - Dropped multi-tenant isolation overhead to allow straight-line lab access.
+# - Users are now dual-provisioned as POSIX IDs and local VMS administrative logins.
 ###===================================================================================###
 
 ###===================================================================================###
 # Provider Configuration
 ###===================================================================================###
-
 vast_username                = "admin"
 vast_password                = "123456"
 vast_host                    = "10.129.12.10"
@@ -27,76 +21,87 @@ vast_port                    = "443"
 vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
 
-
 ###===================================================================================###
-#   VIP Pool Configuration (see locals for explanation)
+#   VIP Pool Configuration
 ###===================================================================================###
 number_of_nodes = 4
-
 
 ###===================================================================================###
 #   Common View Policy Settings
 ###===================================================================================###
-flavor                  = "MIXED_LAST_WINS"
-use_auth_provider       = true
-auth_source             = "RPC_AND_PROVIDERS"
-access_flavor           = "ALL"
-
+flavor            = "MIXED_LAST_WINS"
+use_auth_provider = true
+auth_source       = "RPC_AND_PROVIDERS"
+access_flavor     = "ALL"
 
 ###===================================================================================###
 #   NFS Settings
 ###===================================================================================###
 
 ###---  NFS View Policy Settings
-nfs_basic_policy_name      = "nfs-view-policy"
-vippool_permissions        = "RW"
-nfs_basic_policy_flavor    = "MIXED_LAST_WINS" 
-#nfs_audit_protocols = ["NFS"]
-nfs_no_squash         = ["0.0.0.0/0"]
-nfs_read_write        = ["0.0.0.0/0"]
-nfs_read_only         = []
-smb_read_write        = []
-smb_read_only         = []
-
+nfs_basic_policy_name   = "nfs-view-policy"
+vippool_permissions     = "RW"
+nfs_basic_policy_flavor = "MIXED_LAST_WINS" 
+nfs_no_squash           = ["*"]
+nfs_read_write          = ["*"]
+nfs_read_only           = []
+smb_read_write          = []
+smb_read_only           = []
 
 ###---  File View Settings
-
 file_views_config = {
-  fileview01 = {
+  labview01 = {
     name       = "labuser01"
     path       = "/labuser01"
     protocols  = ["NFS"]
     create_dir = true
   }
-
-  fileview02 = {
+  labview02 = {
     name       = "labuser02"
     path       = "/labuser02"
     protocols  = ["NFS"]
     create_dir = true
   }
-
-  fileview03 = {
+  labview03 = {
     name       = "labuser03"
     path       = "/labuser03"
     protocols  = ["NFS"]
     create_dir = true
   }
-
-  fileview04 = {
+  labview04 = {
     name       = "labuser04"
     path       = "/labuser04"
     protocols  = ["NFS"]
     create_dir = true
   }
-  
-  fileview05 = {
+  labview05 = {
     name       = "labuser05"
     path       = "/labuser05"
     protocols  = ["NFS"]
     create_dir = true
   }
+  labview06 = {
+    name       = "labuser06"
+    path       = "/labuser06"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+  labview07 = {
+    name       = "labuser07"
+    path       = "/labuser07"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+  labview0 = {
+    name       = "labuser08"
+    path       = "/labuser08"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
 }
+
+
+
 
 
 ###===================================================================================###
@@ -104,11 +109,9 @@ file_views_config = {
 ###===================================================================================###
 
 ###--- Basic S3 View Policy Settings
-s3_basic_policy_name       = "StandardS3Policy"
-s3_basic_policy_flavor     = "S3_NATIVE" 
-#s3_audit_protocols  = ["S3"]
-s3_special_chars_support   = true
-
+s3_basic_policy_name     = "StandardS3Policy"
+s3_basic_policy_flavor   = "S3_NATIVE" 
+s3_special_chars_support = true
 
 ###--- S3 View Settings
 s3_views_config = {
@@ -132,21 +135,12 @@ s3_views_config = {
   }
 }
 
-
 ###===================================================================================###
-#   User/Tenant Settings using maps
+#   User/Group Settings using maps
 ###===================================================================================###
-
-
-#- User View Polices json files
 s3_allowall_policy_file = "../../policies/s3Policy-VastAllowAll.json"
-#s3_detailed_policy_file = "s3Policy-Detailed.example.json"
-
-# Policy names
 s3_allowall_policy_name = "s3_user_AllowAll"
-#s3_detailed_policy_name = "s3policy_user_detailed"
 
-###--- Keys - do this on the Mac? ---###
 s3pgpkey = "../../secrets/s3_pgp_key.asc"
 pgp_key_users = [
   "dbuser1",
@@ -155,8 +149,11 @@ pgp_key_users = [
   "labuser02",
   "labuser03",
   "labuser04",
-  "labuser05"
-  ]
+  "labuser05",
+  "labuser06",
+  "labuser07",
+  "labuser08"
+]
 
 groups = {
   s3users  = { gid = 1000 }
@@ -169,66 +166,76 @@ users = {
     uid                  = 2111
     leading_group_name   = "allusers"
     supplementary_groups = ["s3users", "nfsusers"]
-    # allow_create_bucket and allow_delete_bucket default to false
     allow_create_bucket  = true
     allow_delete_bucket  = true
     s3_superuser         = true
   }
-
   labuser02 = {
     uid                  = 2112
     leading_group_name   = "allusers"
     supplementary_groups = ["s3users", "nfsusers"]
-    # allow_create_bucket and allow_delete_bucket default to false
     allow_create_bucket  = true
     allow_delete_bucket  = true
     s3_superuser         = true
   }
-
   labuser03 = {
     uid                  = 2113
     leading_group_name   = "allusers"
     supplementary_groups = ["s3users", "nfsusers"]
-    # allow_create_bucket and allow_delete_bucket default to false
     allow_create_bucket  = true
     allow_delete_bucket  = true
     s3_superuser         = true
   }
-
   labuser04 = {
     uid                  = 2114
     leading_group_name   = "allusers"
     supplementary_groups = ["s3users", "nfsusers"]
-    # allow_create_bucket and allow_delete_bucket default to false
     allow_create_bucket  = true
     allow_delete_bucket  = true
     s3_superuser         = true
   }
-
   labuser05 = {
     uid                  = 2115
     leading_group_name   = "allusers"
     supplementary_groups = ["s3users", "nfsusers"]
-    # allow_create_bucket and allow_delete_bucket default to false
     allow_create_bucket  = true
     allow_delete_bucket  = true
     s3_superuser         = true
   }
-
-  # Need these?
-  s3user1 = {
+  labuser06 = {
     uid                  = 2116
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+  labuser07 = {
+    uid                  = 2117
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+  labuser08 = {
+    uid                  = 2118
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+  s3user1 = {
+    uid                  = 2119
     leading_group_name   = "allusers"
     supplementary_groups = ["nfsusers", "s3users"]
     allow_create_bucket  = true
     allow_delete_bucket  = true
     s3_superuser         = true
   }
-
-
-  # Need these?
   dbuser1 = {
-    uid                  = 2117
+    uid                  = 2120
     leading_group_name   = "allusers"
     supplementary_groups = ["nfsusers", "s3users"]
     allow_create_bucket  = true
@@ -237,7 +244,10 @@ users = {
   }
 }
 
-tenants = {
+###===================================================================================###
+#   REMOVED SYSTEM BOUNDARIES (Tenant definitions commented out to use default plane)
+###===================================================================================###
+/* tenants = {
   tenant1 = {
     client_ip_ranges = [
       { start_ip = "10.10.1.0", end_ip = "10.10.1.254" }
@@ -264,4 +274,4 @@ tenants = {
     ]
   }
 }
-
+*/

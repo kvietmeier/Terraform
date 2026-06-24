@@ -1,162 +1,114 @@
 #!/usr/bin/env bash
+###===================================================================================###
+# FILE: cluster_setup.sh
+# PURPOSE: Loops through cluster_list.txt, updates symlinks, syncs tfvars, applies TF.
+###===================================================================================###
 
-set -euo pipefail
+INVENTORY_FILE="cluster_list.txt"
+BASE_CONFIG_DIR="$(pwd)/base-config"
 
-# --- DYNAMIC REPO ENVIRONMENT PATHING ---
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEMPLATE_DIR="${ROOT_DIR}/base-config"
-HOSTS_FILE="${ROOT_DIR}/cluster_list.txt"
-
-# --- GLOBAL STORAGE DETAILS ---
-BACKEND_BUCKET="clouddev-itdesk124-tfstate"
-BASE_PREFIX="terraform/state/lab_clusters" 
-
-# --- ANSI TERMINAL COLORS ---
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[0;33m'
-NC='\033[0m' 
-
-# ==============================================================================
-# ENGINE HELPER FUNCTIONS
-# ==============================================================================
-
-log_msg() { echo -e "${GREEN}[LAB ENGINE] $(date +'%Y-%m-%d %H:%M:%S') - $1${NC}"; }
-log_warn() { echo -e "${YELLOW}[LAB WARN]   $(date +'%Y-%m-%d %H:%M:%S') - $1${NC}"; }
-log_err() { echo -e "${RED}[LAB ERROR]  $(date +'%Y-%m-%d %H:%M:%S') - $1${NC}" >&2; }
-
-print_usage() {
-    echo "Usage: $0 [action]"
-    echo "Actions:"
-    echo "  --apply    Initialize, update, or skip existing VAST clusters safely."
-    echo "  --destroy  Tear down all configured infrastructure for clusters listed in the inventory."
+# Verification checkpoint
+if [ ! -f "$INVENTORY_FILE" ]; then
+    echo "[-] Error: Cluster tracking file not found at: $INVENTORY_FILE"
     exit 1
-}
+fi
 
-# Ensure baseline operational assets exist before running
-validate_environment() {
-    if [ ! -f "$HOSTS_FILE" ]; then
-        log_err "CRITICAL: Inventory tracking file not found at $HOSTS_FILE"
-        exit 1
+echo "[+] Starting VAST Multi-Cluster Sync & Deployment..."
+echo "[+] Processing inventory from $INVENTORY_FILE"
+
+success_count=0
+fail_count=0
+failed_clusters=()
+
+while IFS= read -r line || [ -n "$line" ]; do
+    line=$(echo "$line" | xargs)
+
+    # Skip empty lines and comment headers (#)
+    if [ -z "$line" ] || [[ "$line" =~ ^# ]]; then
+        continue
     fi
-    if [ ! -d "$TEMPLATE_DIR" ]; then
-        log_err "CRITICAL: Base templates directory not found at $TEMPLATE_DIR"
-        exit 1
+
+    # Parse cluster_name, ip_address
+    IFS=',' read -r cluster_name ip_address <<< "$line"
+    cluster_name=$(echo "$cluster_name" | xargs)
+    ip_address=$(echo "$ip_address" | xargs)
+
+    WORKSPACE_DIR="work_${cluster_name}"
+
+    echo "======================================================================"
+    echo "[+] ORCHESTRATING WORKSPACE: $WORKSPACE_DIR ($ip_address)"
+    echo "======================================================================"
+
+    # 1. Generate the workspace folder if it's missing
+    if [ ! -d "$WORKSPACE_DIR" ]; then
+        echo "[+] Generating missing workspace structure: $WORKSPACE_DIR"
+        mkdir -p "$WORKSPACE_DIR"
     fi
-}
 
-# Build out the symlinked workspace execution tracking paths
-prepare_workspace() {
-    local cluster_name=$1
-    local ip_address=$2
-    local work_dir="${ROOT_DIR}/work_${cluster_name}"
-
-    mkdir -p "$work_dir"
-    
-    # Symlink all baseline *.tf modules smoothly
-    for master_file in "${TEMPLATE_DIR}"/*.tf; do
-        if [ -f "$master_file" ]; then
-            local filename=$(basename "$master_file")
-            ln -sf "$master_file" "${work_dir}/${filename}"
+    # 2. Maintain / Create Symlinks to base-config exactly like your tree schema
+    for tf_file in locals.tf main.tf outputs.tf provider.tf users.tf variables.tf; do
+        if [ ! -L "$WORKSPACE_DIR/$tf_file" ]; then
+            echo "    -> Linking $tf_file"
+            ln -s "$BASE_CONFIG_DIR/$tf_file" "$WORKSPACE_DIR/$tf_file"
         fi
     done
 
-    # Recover the global template payload attributes if present
-    if [ -f "${TEMPLATE_DIR}/terraform.tfvars" ]; then
-        cp "${TEMPLATE_DIR}/terraform.tfvars" "${work_dir}/cluster_payload.auto.tfvars"
-    else
-        log_warn "No static terraform.tfvars dictionary found in base-config/"
+    # 3. CRITICAL SYNC: Overwrite the local tfvars file with your new 10-user master list
+    if [ -f "$BASE_CONFIG_DIR/terraform.tfvars" ]; then
+        echo "    -> Syncing master terraform.tfvars into workspace..."
+        cp "$BASE_CONFIG_DIR/terraform.tfvars" "$WORKSPACE_DIR/terraform.tfvars"
     fi
 
-    # Inject the runtime target connection configurations over the workspace payload
-    cat <<EOF > "${work_dir}/terraform.tfvars"
-vast_username = "admin"
-vast_password = "123456"
-vast_host     = "${ip_address}"
-vast_port     = 443
-EOF
+    # 4. Check for safety block
+    if [ ! -f "$WORKSPACE_DIR/terraform.tfvars" ]; then
+        echo "[-] FAILURE: Missing terraform.tfvars in $WORKSPACE_DIR"
+        ((fail_count++))
+        failed_clusters+=("$cluster_name ($ip_address) - Missing terraform.tfvars")
+        continue
+    fi
 
-    echo "$work_dir"
-}
+    # 5. Jump into the target workspace directory
+    pushd "$WORKSPACE_DIR" > /dev/null || continue
 
-# ==============================================================================
-# MAIN CORE LIFECYCLE PIPELINE
-# ==============================================================================
+    # 6. Initialize the unique workspace
+    terraform init -upgrade > /dev/null
 
-run_lifecycle() {
-    local action=$1
-    validate_environment
+    # 7. Execute the plan
+    terraform apply \
+      -var="vast_host=$ip_address" \
+      -auto-approve
 
-    # Clean out any loose workspace configurations from aborted runs
-    rm -rf "${ROOT_DIR}"/work_*/
+    if [ $? -eq 0 ]; then
+        echo "[+] SUCCESS: State tracking metrics synced on $cluster_name."
+        ((success_count++))
+    else
+        echo "[-] FAILURE: Terraform execution sequence faulted on $cluster_name."
+        ((fail_count++))
+        failed_clusters+=("$cluster_name ($ip_address)")
+    fi
 
-    while IFS= read -r line || [ -n "$line" ]; do
-        line=$(echo "$line" | xargs)
+    # 8. Step back to root cleanly
+    popd > /dev/null || continue
+    echo ""
 
-        # Skip empty strings and shell comment headings
-        if [ -z "$line" ] || [[ "$line" =~ ^# ]]; then
-            continue
-        fi
+done < "$INVENTORY_FILE"
 
-        local cluster_name=$(echo "$line" | cut -d',' -f1 | xargs)
-        local ip_address=$(echo "$line" | cut -d',' -f2 | xargs)
+#=====================================================================================
+# FINAL SUMMARY RUN REPORT
+#=====================================================================================
+echo "======================================================================"
+echo " LAB DEPLOYMENT LIFECYCLE SUMMARY REPORT"
+echo "======================================================================"
+echo "[+] Successfully provisioned: $success_count cluster(s)."
 
-        log_msg "=========================================================="
-        log_msg "Starting Target Execution: ${cluster_name} (${ip_address})"
-        log_msg "=========================================================="
-
-        # Call our workspace setup function
-        local active_workspace=$(prepare_workspace "$cluster_name" "$ip_address")
-        cd "$active_workspace"
-
-        local cluster_prefix="${BASE_PREFIX}/${cluster_name}"
-        log_msg "Connecting backend infrastructure to path: ${cluster_prefix}"
-
-        # Initialize tracking maps safely
-        terraform init -input=false -reconfigure \
-            -backend-config="bucket=${BACKEND_BUCKET}" \
-            -backend-config="prefix=${cluster_prefix}"
-
-        # Evaluate and route lifecycle action execution maps
-        if [ "$action" == "apply" ]; then
-            log_msg "Synchronizing configuration updates..."
-            if terraform apply -input=false -auto-approve -var-file="terraform.tfvars"; then
-                log_msg "SUCCESS: Operations application stabilized for ${cluster_name}."
-            else
-                log_err "FAILURE: Lifecycle sync broke on cluster target: ${cluster_name}."
-                continue
-            fi
-        elif [ "$action" == "destroy" ]; then
-            log_warn "WARNING: Initiating complete infrastructure destruction sequence..."
-            if terraform destroy -input=false -auto-approve -var-file="terraform.tfvars"; then
-                log_msg "SUCCESS: Clean teardown completed for ${cluster_name}."
-            else
-                log_err "FAILURE: Destruction pipeline execution failed on target: ${cluster_name}."
-                continue
-            fi
-        fi
-
-    done < "$HOSTS_FILE"
-}
-
-# ==============================================================================
-# ENTRYPOINT EXECUTION PARSER
-# ==============================================================================
-
-if [ $# -ne 1 ]; then
-    print_usage
+if [ $fail_count -gt 0 ]; then
+    echo "[-] Critical Errors: $fail_count cluster(s) failed deployment."
+    echo "[-] Failed Target Inventory List:"
+    for bad_node in "${failed_clusters[@]}"; do
+        echo "    -> $bad_node"
+    done
+    exit 1
+else
+    echo "[+] Global Deployment Status: ALL SYNCED AND READY FOR LAB USE."
+    exit 0
 fi
-
-case "$1" in
-    --apply)
-        run_lifecycle "apply"
-        ;;
-    --destroy)
-        run_lifecycle "destroy"
-        ;;
-    *)
-        print_usage
-        ;;
-esac
-
-log_msg "Pipeline runtime tracking routine terminated successfully."

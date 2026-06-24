@@ -1,6 +1,5 @@
 ######################################################################
-# VAST Data Cluster: View Policies and Views
-#
+# main.tf
 # This Terraform file defines:
 #   1. View policies for NFS and S3 protocols
 #   2. NFS file system views
@@ -13,39 +12,30 @@
 #   - SMB or AD-integrated views can be added as needed.
 #   - Resources use the 'vastdata.GCPCluster' provider.
 ######################################################################
-
 ###=============================================================================
 ###--- VIEW POLICIES
 ###=============================================================================
 
 # NFS Basic Policy
-# - Flavor and protocols are configurable via variables:
-#     var.nfs_basic_policy_flavor
-#     var.nfs_basic_policy_protocols
 resource "vastdata_view_policy" "nfs_basic_policy" {
-  provider  = vastdata.GCPCluster
-  name      = var.nfs_basic_policy_name
-  flavor    = var.nfs_basic_policy_flavor
-  #protocols = var.nfs_basic_policy_protocols # This is optional and breaks automation
+  provider       = vastdata.GCPCluster
+  name           = var.nfs_basic_policy_name
+  flavor         = var.nfs_basic_policy_flavor
+  nfs_no_squash  = var.nfs_no_squash
+  nfs_read_write = var.nfs_read_write
 }
 
 # S3 Basic Policy
-# - Flavor and protocols are configurable via variables:
-#     var.s3_basic_policy_flavor
-#     var.s3_basic_policy_protocols
 resource "vastdata_view_policy" "s3_basic_policy" {
-  provider  = vastdata.GCPCluster
-  name      = var.s3_basic_policy_name
-  flavor    = var.s3_basic_policy_flavor
-  #protocols = var.s3_basic_policy_protocols This is optional and breaks automation
+  provider = vastdata.GCPCluster
+  name     = var.s3_basic_policy_name
+  flavor   = var.s3_basic_policy_flavor
 }
 
-#=============================================================================
-# NFS VIEWS
-#=============================================================================
-# Creates NFS views from var.file_views_config
-# - Each view is assigned the NFS basic policy
-# - The 'create_dir' flag creates the path if parent exists
+###=============================================================================
+###--- NFS VIEWS
+###=============================================================================
+# Creates NFS data path mappings directly from var.file_views_config map
 resource "vastdata_view" "file_views" {
   provider = vastdata.GCPCluster
   for_each = var.file_views_config
@@ -57,47 +47,27 @@ resource "vastdata_view" "file_views" {
   create_dir = each.value.create_dir
 }
 
-#=============================================================================
-# S3 VIEWS
-#=============================================================================
-# Creates S3 views from local.s3_views
-# - Each view references a specific policy via each.value.policy_id
-# - Supports bucket owner and optional anonymous access
-# - Depends on vastdata_user.users for proper permissions
+###=============================================================================
+###--- S3 VIEWS
+###=============================================================================
+# Creates S3 and Database views straight from your var.s3_views_config map
 resource "vastdata_view" "s3_views" {
-  provider   = vastdata.GCPCluster
-  for_each   = local.s3_views
+  provider = vastdata.GCPCluster
+  for_each = var.s3_views_config
 
   name       = each.value.name
   path       = each.value.path
   bucket     = each.value.bucket
   protocols  = each.value.protocols
   create_dir = each.value.create_dir
-  policy_id  = each.value.policy_id
+  
+  # References the centralized global S3 policy id dynamically
+  policy_id  = vastdata_view_policy.s3_basic_policy.id
 
+  # Maps bucket owners to the POSIX data-plane identities
   bucket_owner              = each.value.bucket_owner
   allow_s3_anonymous_access = lookup(each.value, "allow_s3_anonymous_access", false)
 
+  # Explicitly wait for users and groups to exist before creating storage targets
   depends_on = [vastdata_user.users]
 }
-
-
-# The below is an alternative S3 view resource definition that uses var.s3_views_config directly.
-# It is functionally equivalent to the active s3_views resource above.
-
-/* resource "vastdata_view" "s3_views" {
-  for_each = local.s3_views
-
-  provider   = vastdata.GCPCluster
-  policy_id  = each.value.policy_id
-  name       = each.value.name
-  bucket     = each.value.bucket
-  path       = each.value.path
-  protocols  = each.value.protocols
-  create_dir = each.value.create_dir
-  bucket_owner = each.value.bucket_owner
-  allow_s3_anonymous_access = lookup(each.value, "allow_s3_anonymous_access", false)
-
-  depends_on = [vastdata_user.users]
-}
- */

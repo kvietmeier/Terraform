@@ -1,8 +1,8 @@
 ### TechSummit Cluster List ###
 #techsummit-lab-01,10.129.10.10
-#techsummit-lab-02,10.129.11.10
-techsummit-lab-03,10.129.12.10
-#techsummit-lab-04,10.129.13.10
+techsummit-lab-02,10.129.11.221
+#techsummit-lab-03,10.129.12.10
+techsummit-lab-04,10.129.13.58
 #techsummit-lab-05,10.129.14.10
 #techsummit-lab-06,10.129.15.10
 #techsummit-lab-07,10.129.16.10

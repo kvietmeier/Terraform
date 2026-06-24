@@ -1,36 +1,34 @@
 ###===================================================================================###
-# VAST Data Cluster – Demo/POC Basic Setup
-#
-# Description:
-# This Terraform file provisions user/tenant resources for a VAST Data cluster, intended
-# for demo or proof-of-concept use cases. It defines the following:
-#
-# - Tenant creation from variable map (supports multiple tenants)
-# - POSIX group and user creation with GID/UID mapping
-# - Active Directory integration settings (without domain join)
-# - Adds a key for S3 access
-#
-# Notes:
-# - AD configuration uses bind credentials and supports LDAPS/TLS
-# - Group/user relationships are mapped via supplementary and leading GIDs
-# - VIP Pools and view policies referenced externally (not defined in this file)
-# - `provider = vastdata.GCPCluster` must be declared elsewhere
-#
+# 1. CORE DATA SOURCE LAYER
 ###===================================================================================###
+# Targets the built-in admin role directly via its absolute system ID
+data "vastdata_administrator_role" "platform_admin" {
+  provider = vastdata.GCPCluster
+  id       = 1
+}
 
 ###===================================================================================###
-# Groups
+# 2. LOCAL DYNAMIC VARIABLES
+###===================================================================================###
+locals {
+  # Universal secure password meeting VAST complexity baseline (>=12 chars)
+  common_student_password = "Chalc0pyr1te!"
+}
+
+###===================================================================================###
+# 3. DIRECTORY POSIX GROUPS
 ###===================================================================================###
 resource "vastdata_group" "groups" {
   provider = vastdata.GCPCluster
   for_each = var.groups
 
-  name = each.key
-  gid  = each.value.gid
+  name              = each.key
+  gid               = each.value.gid
+  local_provider_id = 1
 }
 
 ###===================================================================================###
-# Users
+# 4. DIRECTORY POSIX USERS (Data Plane Isolation Profiles)
 ###===================================================================================###
 resource "vastdata_user" "users" {
   provider = vastdata.GCPCluster
@@ -45,30 +43,29 @@ resource "vastdata_user" "users" {
   allow_delete_bucket = each.value.allow_delete_bucket
   s3_superuser        = each.value.s3_superuser
 
+  local_provider_id = 1
+
   depends_on = [vastdata_group.groups]
 }
 
 ###===================================================================================###
-# Tenants
+# 5. VMS SYSTEM MANAGERS (Validated Production Schema)
 ###===================================================================================###
-resource "vastdata_tenant" "tenants" {
+resource "vastdata_administrator_manager" "student_admins" {
   provider = vastdata.GCPCluster
-  for_each = var.tenants
-  name     = each.key
+  for_each = var.users
 
-  client_ip_ranges = [
-    for r in each.value.client_ip_ranges : [r.start_ip, r.end_ip]
-  ]
-}
-
-###===================================================================================###
-# S3 User Keys
-###===================================================================================###
-resource "vastdata_user_key" "s3keys" {
-  provider      = vastdata.GCPCluster
-  for_each      = toset(var.pgp_key_users)
+  username                     = each.key
+  password                     = local.common_student_password
+  password_expiration_disabled = true
   
-  user_id       = vastdata_user.users[each.key].id
-  enabled       = true
-  #pgp_public_key = file(var.s3pgpkey)
+  first_name                   = "Lab"
+  last_name                    = each.key
+
+  # Securely maps your students to the resolved default cluster role ID attribute
+  roles = [
+    data.vastdata_administrator_role.platform_admin.id
+  ]
+
+  depends_on = [vastdata_user.users]
 }
