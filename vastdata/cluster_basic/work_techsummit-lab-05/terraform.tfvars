@@ -48,7 +48,7 @@ nfs_read_only           = []
 smb_read_write          = []
 smb_read_only           = []
 
-###---  File View Settings
+###---  File View Settings (Fixed Typos & Expanded 01 through 10)
 file_views_config = {
   labview01 = {
     name       = "labuser01"
@@ -92,17 +92,25 @@ file_views_config = {
     protocols  = ["NFS"]
     create_dir = true
   }
-  labview0 = {
+  labview08 = {                 # Fixed structural key naming from labview0
     name       = "labuser08"
     path       = "/labuser08"
     protocols  = ["NFS"]
     create_dir = true
   }
+  labview09 = {                 # New Clone User Add
+    name       = "labuser09"
+    path       = "/labuser09"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+  labview10 = {                 # New Clone User Add
+    name       = "labuser10"
+    path       = "/labuser10"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
 }
-
-
-
-
 
 ###===================================================================================###
 #   S3 Settings
@@ -152,7 +160,9 @@ pgp_key_users = [
   "labuser05",
   "labuser06",
   "labuser07",
-  "labuser08"
+  "labuser08",
+  "labuser09",
+  "labuser10"
 ]
 
 groups = {
@@ -226,16 +236,32 @@ users = {
     allow_delete_bucket  = true
     s3_superuser         = true
   }
-  s3user1 = {
+  labuser09 = {                  # Continuous incremental UID assignment
     uid                  = 2119
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+  labuser10 = {                  # Continuous incremental UID assignment
+    uid                  = 2120
+    leading_group_name   = "allusers"
+    supplementary_groups = ["s3users", "nfsusers"]
+    allow_create_bucket  = true
+    allow_delete_bucket  = true
+    s3_superuser         = true
+  }
+  s3user1 = {                    # Pushed down to keep index sequence pristine
+    uid                  = 2121
     leading_group_name   = "allusers"
     supplementary_groups = ["nfsusers", "s3users"]
     allow_create_bucket  = true
     allow_delete_bucket  = true
     s3_superuser         = true
   }
-  dbuser1 = {
-    uid                  = 2120
+  dbuser1 = {                    # Pushed down to keep index sequence pristine
+    uid                  = 2122
     leading_group_name   = "allusers"
     supplementary_groups = ["nfsusers", "s3users"]
     allow_create_bucket  = true
@@ -248,30 +274,5 @@ users = {
 #   REMOVED SYSTEM BOUNDARIES (Tenant definitions commented out to use default plane)
 ###===================================================================================###
 /* tenants = {
-  tenant1 = {
-    client_ip_ranges = [
-      { start_ip = "10.10.1.0", end_ip = "10.10.1.254" }
-    ]
-  }
-  tenant2 = {
-    client_ip_ranges = [
-      { start_ip = "10.10.2.0", end_ip = "10.10.2.254" }
-    ]
-  }
-  tenant3 = {
-    client_ip_ranges = [
-      { start_ip = "10.10.3.0", end_ip = "10.10.3.254" }
-    ]
-  }
-  tenant4 = {
-    client_ip_ranges = [
-      { start_ip = "10.10.4.0", end_ip = "10.10.4.254" }
-    ]
-  }
-  tenant5= {
-    client_ip_ranges = [
-      { start_ip = "10.10.5.0", end_ip = "10.10.5.254" }
-    ]
-  }
-}
+...
 */

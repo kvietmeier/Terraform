@@ -5,17 +5,17 @@
 # tailored for compute-heavy AI workloads while maintaining tight budget compliance[cite: 4, 34].
 #
 # INFRASTRUCTURE SUMMARY:
-# - Default Pool: Destroyed immediately upon creation (GKE best practice to isolate critical [cite: 28]
-#   control plane infrastructure from volatile workload environments)[cite: 28, 89].
-# - System Pool: "system-pool" anchoring core Kubernetes management pods (e.g., kube-dns)[cite: 29, 66].
-#   Runs 24/7 utilizing right-sized e2-standard-4 compute nodes, securely scaled to a minimum [cite: 31, 67]
-#   of TWO instances to maintain strict site reliability and high availability[cite: 31, 68].
-# - Workload Pool: "de-team-pool1" consisting of heavy-duty n4-standard-16 (16 vCPUs) instances [cite: 71, 72]
-#   backed by 256GB hyperdisk-balanced boot storage[cite: 73, 74]. Leverages Cluster Autoscaling [cite: 34]
-#   mechanisms to automatically terminate instances completely down to ZERO nodes when idle[cite: 34].
+# - Default Pool: Destroyed immediately upon creation (GKE best practice to isolate critical 
+#   control plane infrastructure from volatile workload environments)
+# - System Pool: "system-pool" anchoring core Kubernetes management pods (e.g., kube-dns)
+#   Runs 24/7 utilizing right-sized e2-standard-4 compute nodes, securely scaled to a minimum 
+#   of TWO instances to maintain strict site reliability and high availability
+# - Workload Pool: "de-team-pool1" consisting of heavy-duty n4-standard-16 (16 vCPUs) instances 
+#   backed by 256GB hyperdisk-balanced boot storage[cite: 73, 74]. Leverages Cluster Autoscaling
+#   mechanisms to automatically terminate instances completely down to ZERO nodes when idle
 # - Metadata & Security: Formally injected with the "vast-client" network target tag to filter 
-#   ingress traffic via firewall policy, and stamped with mandatory corporate tracking labels [cite: 77, 83]
-#   (longrun=yes, used_by=solutions, owner=solutions) for unified GCP/K8s resource billing[cite: 77, 78, 83].
+#   ingress traffic via firewall policy, and stamped with mandatory corporate tracking labels
+#   (longrun=yes, used_by=solutions, owner=solutions) for unified GCP/K8s resource billing
 ###===============================================================================================###
 
 

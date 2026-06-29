@@ -42,6 +42,7 @@ resource "vastdata_view" "file_views" {
 
   name       = each.value.name
   path       = each.value.path
+  alias      = each.value.path
   protocols  = each.value.protocols
   policy_id  = vastdata_view_policy.nfs_basic_policy.id
   create_dir = each.value.create_dir

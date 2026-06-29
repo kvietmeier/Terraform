@@ -72,7 +72,18 @@ while IFS= read -r line || [ -n "$line" ]; do
 
     # 6. Initialize the unique workspace
     terraform init -upgrade > /dev/null
-
+    
+    # --- Emergency Lab Sync Hook: Purge old conflicting local group entries via API ---
+    echo "    [!] Running API pre-clearance on target cluster..."
+    curl -k -s -X DELETE -u "admin:123456" "https://$ip_address/api/latest/groups/1/" > /dev/null
+    curl -k -s -X DELETE -u "admin:123456" "https://$ip_address/api/latest/groups/2/" > /dev/null
+    curl -k -s -X DELETE -u "admin:123456" "https://$ip_address/api/latest/groups/3/" > /dev/null
+    
+    # Clears out historical view conflicts 3 through 11
+    for view_id in {3..11}; do
+        curl -k -s -X DELETE -u "admin:123456" "https://$ip_address/api/latest/views/$view_id/" > /dev/null
+    done
+    
     # 7. Execute the plan
     terraform apply \
       -var="vast_host=$ip_address" \
