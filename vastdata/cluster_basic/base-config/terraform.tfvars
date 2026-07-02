@@ -48,7 +48,7 @@ nfs_read_only           = []
 smb_read_write          = []
 smb_read_only           = []
 
-###---  File View Settings (Fixed Typos & Expanded 01 through 10)
+/* ###---  File View Settings (Fixed Typos & Expanded 01 through 10)
 file_views_config = {
   labview01 = {
     name       = "labuser01"
@@ -111,6 +111,16 @@ file_views_config = {
     create_dir = true
   }
 }
+ */
+
+file_views_config = {
+  labview01 = {
+    name       = "gns-dst"
+    path       = "/gns-dst"
+    protocols  = ["NFS"]
+    create_dir = true
+  }
+
 
 ###===================================================================================###
 #   S3 Settings

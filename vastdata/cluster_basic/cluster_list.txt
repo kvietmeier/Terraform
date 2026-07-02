@@ -14,8 +14,3 @@ techsummit-lab-12,10.129.21.27
 techsummit-lab-13,10.129.22.31
 techsummit-lab-14,10.129.23.29
 techsummit-lab-15,10.129.24.23
-techsummit-lab-16,10.129.25.21
-techsummit-lab-17,10.129.26.13
-#techsummit-lab-18,10.129.27.10
-#techsummit-lab-19,10.129.28.10
-#techsummit-lab-20,10.129.29.10
