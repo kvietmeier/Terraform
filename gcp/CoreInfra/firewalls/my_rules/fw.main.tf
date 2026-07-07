@@ -2,35 +2,156 @@
 #  File:        fw.main.tf
 #  Author:      Karl Vietmeier
 #
-#  Purpose:     Define and apply custom firewall rules for the 'karlv-corevpc' VPC 
-#               on Google Cloud Platform (GCP). Rules are scoped using target tags 
-#               to enforce role-based access for standard services, Active Directory,
-#               VAST infrastructure, and security controls (e.g., ICMP restrictions).
+#  Purpose:     Define and apply custom firewall rules for the 'karlv-corevpc' VPC.
+#               Uses highly secure network tags and self-referencing loops for VAST 
+#               infrastructure, Spark, standard management services, and Active Directory.
 #
 #  Usage:
-#    terraform plan -var-file="fw.terraform.tfvars"
-#    terraform apply --auto-approve -var-file="fw.terraform.tfvars"
-#    terraform destroy --auto-approve -var-file="fw.terraform.tfvars"
+#    terraform plan 
+#    terraform apply --auto-approve 
+#    terraform destroy --auto-approve 
 #
 #  Structure:
-#    - Standard service rules (TCP, UDP, ICMP for SSH, DNS, HTTP, etc.)
-#    - Application-specific rules (e.g., VAST on Cloud)
-#    - Active Directory support (LDAP, Kerberos, DNS, etc.)
-#    - ICMP control: allow trusted sources, deny public pings
-#
-#  Related Files:
-#    - fw.variables.tf       → Variable declarations
-#    - fw.terraform.tfvars   → Environment-specific values (excluded from repo)
+#    - VAST Application Rules (Internal All-Pass, Segmented Client/External Access)
+#    - Spark on VAST Component Interconnects
+#    - Standard service management baseline rules (TCP, UDP, ICMP)
+#    - Active Directory Domain Support & Controller Sync Loops
 #
 ###===================================================================================###
 
 ###===================================================================================###
 #     Start creating infrastructure resources
+###===================================================================================##
+
+
+###===================================================================================###
+#     VAST Cluster Firewall Rules
 ###===================================================================================###
 
-###--- Create the FW Rule/s for standard services
+# 1. VAST Internal Cluster (Self-Referencing - ALL Traffic)
+resource "google_compute_firewall" "vast_internal" {
+  name        = "${var.vast_rules_name}-internal"
+  network     = var.vpc_name              
+  description = "Self-referencing rule allowing ALL traffic between VAST cluster nodes"
+  direction   = var.ingress_rule
+  priority    = var.vast_priority
+
+  # Allow all protocols internally for the cluster (BKM)
+  allow {
+    protocol = "all"
+  }
+
+  source_tags = ["voc-internal"]
+  target_tags = ["voc-internal"]   
+}
+
+# 2. VAST Client Access (Tagged Clients)
+resource "google_compute_firewall" "vast_client_access" {
+  name        = "${var.vast_rules_name}-clients"
+  network     = var.vpc_name              
+  description = "Allow tagged clients to mount storage and access APIs"
+  direction   = var.ingress_rule
+  priority    = var.vast_priority
+
+  allow {
+    protocol = "tcp"
+    ports    = var.external_ingress_tcp
+  }
+  allow {
+    protocol = "udp"
+    ports    = var.external_ingress_udp
+  }
+
+  source_tags = ["voc-clients"]
+  target_tags = ["voc-internal"]   
+}
+
+# 3. VAST Replication
+resource "google_compute_firewall" "vast_replication" {
+  name        = "${var.vast_rules_name}-replication"
+  network     = var.vpc_name              
+  description = "Allow VAST replication traffic from designated peers"
+  direction   = var.ingress_rule
+  priority    = var.vast_priority
+
+  allow {
+    protocol = "tcp"
+    ports    = ["49001", "49002"]
+  }
+
+  source_tags = ["voc-replication-peer", "voc-internal", "voc-clients"]
+  target_tags = ["voc-internal"]   
+}
+
+# 4. VAST GCP Services (Health Checks, IAP, etc.)
+resource "google_compute_firewall" "vast_gcp_services" {
+  name        = "${var.vast_rules_name}-gcp-services"
+  network     = var.vpc_name              
+  description = "Allow GCP Health Checks and IAP to access VAST"
+  direction   = var.ingress_rule
+  priority    = var.vast_priority
+
+  allow {
+    protocol = "tcp"
+    ports    = var.external_ingress_tcp
+  }
+  allow {
+    protocol = "icmp"
+  }
+
+  source_ranges = var.gcp_service_cidrs  
+  target_tags   = ["voc-internal"]
+}
+
+# 5. External Ingress - non-GCP sources (e.g., on-prem, remote offices) 
+resource "google_compute_firewall" "vast_external_ingress" {
+  name        = "${var.vast_rules_name}-external"
+  network     = var.vpc_name              
+  description = "Allow distant systems and on-prem networks to mount storage and access APIs"
+  direction   = var.ingress_rule
+  priority    = var.vast_priority
+
+  allow {
+    protocol = "tcp"
+    ports    = var.external_ingress_tcp
+  }
+  allow {
+    protocol = "udp"
+    ports    = var.external_ingress_udp
+  }
+  allow {
+    protocol = "icmp"
+  }
+
+  source_ranges = var.external_ingress  
+  target_tags   = ["voc-internal"]
+}
+
+###===================================================================================###
+#     Spark on VAST Rules
+###===================================================================================###
+
+resource "google_compute_firewall" "spark_rules" {
+  name        = "spark-cluster-rules"
+  network     = var.vpc_name              
+  description = "Spark Cluster rules - Internal self-referencing for Spark components"
+  direction   = var.ingress_rule
+  priority    = var.vast_priority
+
+  allow {
+    protocol = "tcp"
+    ports    = concat(var.spark_tcp, var.spark_vast_tcp)
+  }
+
+  source_tags   = ["spark-node", "voc-internal"]
+  target_tags   = ["spark-node"]   
+}
+
+###===================================================================================###
+#     Standard Services Rule
+###===================================================================================###
+
 resource "google_compute_firewall" "default_services_rules" {
-  
   name        = var.myrules_name
   network     = var.vpc_name              
   description = var.description
@@ -48,106 +169,37 @@ resource "google_compute_firewall" "default_services_rules" {
   }
 
   allow {
-    protocol = "icmp"                    # ICMP for ping/diagnostic
+    protocol = "icmp"                    
   }
 
-  source_ranges = var.ingress_filter     # CIDR - Ingress filter
-  
-  # Optional: restrict to specific target tags
-  #target_tags = ["standard-services"]   # Tag for instances needing this firewall rule
-
+  source_ranges = var.ingress_filter     
+  target_tags   = ["standard-services"]   
 }
 
-###--- Create the FW Rule/s for Applications
-resource "google_compute_firewall" "custom_app_rules" {
-  
-  name        = var.vast_rules_name
-  network     = var.vpc_name              
-  description = var.description
-  direction   = var.ingress_rule
-  priority    = var.vast_priority
+###===================================================================================###
+#     Active Directory Rules
+###===================================================================================###
 
-  
-  allow {
-    protocol = "tcp"
-    ports    = var.vast_tcp
-  }
-
-  allow {
-    protocol = "udp"
-    ports    = var.vast_udp
-  }
-
-  allow {
-    protocol = "icmp"                    # ICMP for ping/diagnostic
-  }
-
-  source_ranges = var.ingress_filter     # CIDR - Ingress filter
-  
-  # Optional: restrict to specific target tags
-  #target_tags = ["standard-services"]   
-
-}
-
-###--- Create the FW Rule/s for Active Directory
 resource "google_compute_firewall" "addc_rules" {
-  
-  ###--- Rules for Active Directory
   name        = var.addc_name
   network     = var.vpc_name              
-  description = var.description
+  description = "Active Directory Domain Controller replication and client access"
   direction   = var.ingress_rule
   priority    = var.addc_priority
 
   allow {
     protocol = "icmp"
   }
-
   allow {
     protocol = "tcp"
     ports    = var.addc_tcp_ports
   }
-
   allow {
     protocol = "udp"
     ports    = var.addc_udp_ports
   }
 
-  source_ranges = var.ingress_filter     # CIDR - Ingress filter
-  
-  # Optional: restrict to specific target tags
-  #source_tags   = ["ad-domaincontroller"]
-  #target_tags   = ["ad-domaincontroller"]
-}
-
-resource "google_compute_firewall" "allow_ha_vpn_bgp" {
-  name          = "allow-ha-vpn-control" # Renamed for clarity
-  network       = var.vpc_name
-  direction     = "INGRESS"
-  description   = "Allow IKE/IPsec/BGP from Azure Public IPs for HA VPN establishment"
-  
-  # CRITICAL: Priority must be low (e.g., 100) for security, 
-  # NOT 1000, which is the default internet route priority.
-  priority      = 100 
-
-  # --- IPsec/IKE Protocols from the Azure Public Gateway ---
-  allow {
-    protocol = "tcp"
-    ports    = ["179"] 	# BGP (Though often unneeded if tunnel is established)
-  }
-
-  allow {
-    protocol = "udp"
-    ports    = ["500", "4500"] 	# IKE (500) + NAT-T (4500)
-  }
-
-  allow {
-    protocol = "esp" 			# IPsec ESP traffic (Required for data integrity)
-  }
-
-  # CRITICAL: Use the Azure Public Gateway IPs as the source.
-  source_ranges = [
-    var.azure_public_ip_01,
-    var.azure_public_ip_02
-  ]
+  source_ranges = var.ingress_filter     
+  source_tags   = ["ad-domaincontroller"]
+  target_tags   = ["ad-domaincontroller"]
 }

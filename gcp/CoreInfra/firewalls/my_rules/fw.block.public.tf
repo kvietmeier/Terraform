@@ -43,7 +43,7 @@ resource "google_compute_firewall" "deny_public_ingress" {
   source_ranges = ["0.0.0.0/0"]
 
   # Optional: restrict to specific target tags
-  # target_tags = ["no-public-access"]
+  target_tags = ["no-public-access"]
 
   disabled = false
 }

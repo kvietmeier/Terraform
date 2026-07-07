@@ -1,19 +1,7 @@
 ###===================================================================================###
 #  File:        fw.variables.tf
-#  Author:      Karl Vietmeier (Refactored by Gemini Code Assist)
-#
-#  File:  fw.variables.tf
-#  Created By: Karl Vietmeier
+#  Author:      Karl Vietmeier 
 #  Purpose:     Variable definitions for custom firewall rules.
-#
-#  Variable definitions with defaults
-#  Structure:
-#    - `ingress_firewall_rules`: A map of rule objects to dynamically create firewall
-#      rules, reducing code duplication.
-#    - `vpc_name`: The target VPC for the firewall rules.
-#    - `ingress_filter`: Source IP ranges for ingress traffic.
-#    - HA VPN specific variables for the BGP peering connection.
-#
 ###===================================================================================###
 
 ###--- Provider Info
@@ -163,24 +151,26 @@ variable "addc_udp_ports" {
   type        = list(string)
 }
 
-variable "vast_tcp" {
-  description = "TCP ports required for VAST Data"
+###--- External and Demo-Specific Port Lists
+
+variable "external_ingress_tcp" {
+  description = "Subset of TCP ports allowed for external/on-prem ingress"
   type        = list(string)
 }
 
-variable "vast_udp" {
-  description = "UDP ports required for VAST Data"
+variable "external_ingress_udp" {
+  description = "Subset of UDP ports allowed for external/on-prem ingress"
   type        = list(string)
 }
 
-###--- HA VPN Control Plane Variables
+###--- External and Demo-Specific IP CIDRs
 
-variable "azure_public_ip_01" {
-  description = "Public IP of the first Azure VPN gateway for HA VPN."
-  type        = string
+variable "gcp_service_cidrs" {
+  description = "Static GCP Service ranges (e.g., Health Checks: 130.211.0.0/22, 35.191.0.0/16, IAP: 35.235.240.0/20)"
+  type        = list(string)
 }
 
-variable "azure_public_ip_02" {
-  description = "Public IP of the second Azure VPN gateway for HA VPN."
-  type        = string
+variable "external_ingress" {
+  description = "External/On-prem CIDRs that require access to VAST via external rules"
+  type        = list(string)
 }
