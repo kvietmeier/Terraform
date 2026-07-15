@@ -48,7 +48,7 @@ nfs_read_only           = []
 smb_read_write          = []
 smb_read_only           = []
 
-/* ###---  File View Settings (Fixed Typos & Expanded 01 through 10)
+###---  File View Settings (Fixed Typos & Expanded 01 through 10)
 file_views_config = {
   labview01 = {
     name       = "labuser01"
@@ -86,33 +86,9 @@ file_views_config = {
     protocols  = ["NFS"]
     create_dir = true
   }
-  labview07 = {
-    name       = "labuser07"
-    path       = "/labuser07"
-    protocols  = ["NFS"]
-    create_dir = true
-  }
-  labview08 = {                 # Fixed structural key naming from labview0
-    name       = "labuser08"
-    path       = "/labuser08"
-    protocols  = ["NFS"]
-    create_dir = true
-  }
-  labview09 = {                 # New Clone User Add
-    name       = "labuser09"
-    path       = "/labuser09"
-    protocols  = ["NFS"]
-    create_dir = true
-  }
-  labview10 = {                 # New Clone User Add
-    name       = "labuser10"
-    path       = "/labuser10"
-    protocols  = ["NFS"]
-    create_dir = true
-  }
 }
- */
 
+/* 
 file_views_config = {
   labview01 = {
     name       = "gns-dst"
@@ -120,6 +96,7 @@ file_views_config = {
     protocols  = ["NFS"]
     create_dir = true
   }
+ */
 
 
 ###===================================================================================###
@@ -168,11 +145,7 @@ pgp_key_users = [
   "labuser03",
   "labuser04",
   "labuser05",
-  "labuser06",
-  "labuser07",
-  "labuser08",
-  "labuser09",
-  "labuser10"
+  "labuser06"
 ]
 
 groups = {
@@ -224,38 +197,6 @@ users = {
   }
   labuser06 = {
     uid                  = 2116
-    leading_group_name   = "allusers"
-    supplementary_groups = ["s3users", "nfsusers"]
-    allow_create_bucket  = true
-    allow_delete_bucket  = true
-    s3_superuser         = true
-  }
-  labuser07 = {
-    uid                  = 2117
-    leading_group_name   = "allusers"
-    supplementary_groups = ["s3users", "nfsusers"]
-    allow_create_bucket  = true
-    allow_delete_bucket  = true
-    s3_superuser         = true
-  }
-  labuser08 = {
-    uid                  = 2118
-    leading_group_name   = "allusers"
-    supplementary_groups = ["s3users", "nfsusers"]
-    allow_create_bucket  = true
-    allow_delete_bucket  = true
-    s3_superuser         = true
-  }
-  labuser09 = {                  # Continuous incremental UID assignment
-    uid                  = 2119
-    leading_group_name   = "allusers"
-    supplementary_groups = ["s3users", "nfsusers"]
-    allow_create_bucket  = true
-    allow_delete_bucket  = true
-    s3_superuser         = true
-  }
-  labuser10 = {                  # Continuous incremental UID assignment
-    uid                  = 2120
     leading_group_name   = "allusers"
     supplementary_groups = ["s3users", "nfsusers"]
     allow_create_bucket  = true

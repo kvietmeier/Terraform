@@ -13,7 +13,7 @@
 
 vast_username                = "admin"
 vast_password                = "123456"
-vast_host                    = "10.129.12.10"
+vast_host                    = "10.105.28.28"
 vast_port                    = "443"
 vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"

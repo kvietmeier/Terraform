@@ -3,11 +3,6 @@
 #  File:  terraform.tfvars
 #  Created By: Karl Vietmeier
 #
-#  This is a "sanitized" version of the terraform.tfvars file that is excluded from the repo. 
-#  Any values that aren't sensitive are left defined, amy sensitive values are stubbed out.
-#
-#  Edit as required
-#
 ###===================================================================================###
 
 region       = "us-east-1"

@@ -1,10 +1,9 @@
-## Full End-To-End Configuration of a VAST Data Cluster
+## VAST Data Cluster Lab Automation Engine
 
-### VAST Data Cluster Lab Automation Engine
-
-This repository contains a modular Terraform workflow orchestrated by an advanced automation orchestrator wrapper (`cluster_setup.sh`). It dynamically provisions VAST Data storage resources, POSIX data-plane identities, and matching interactive VMS management logins sequentially across up to 20 cluster infrastructure endpoints.
+This repository contains a modular Terraform workflow orchestrated by an automation wrapper (`cluster_setup.sh`). It dynamically provisions VAST Data storage resources, POSIX data-plane identities, and matching interactive VMS management logins sequentially across up to 20 cluster infrastructure endpoints.
 
 The system features:
+
 * **Workspace Isolation via Symlinks:** Generates unique `work_<Cluster_Name>` runtime directories, symlinking core HCL modules from a centralized core block to isolate states and locks.
 * **Dual-Plane Identity Synchronization:** Simultaneously provisions POSIX data-plane users/groups and VMS management-plane administrative manager accounts (`LOCAL_ADMIN`) bound to an immutable cluster security role.
 * **Auto-Loading Master Variables:** Automatically mirrors your master variable definitions (`base-config/terraform.tfvars`) into each isolated workspace path, eradicating old evaluation conflicts caused by legacy `.auto.tfvars` overrides.

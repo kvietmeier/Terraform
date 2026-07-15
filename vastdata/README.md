@@ -51,7 +51,7 @@ tenant_id = 1
 
 ### Setting up a fully functioning cluster from scratch
 
-**For a complete example of setting up a cluster see (cluster_config):**
+**For a complete example of setting up a cluster see (cluster_full):**
 
 * VAST provider setup
 * VIP Pool definitions for protocol and replication roles
@@ -68,12 +68,11 @@ tenant_id = 1
 * Uses dynamic constructs (e.g., `maps`, `count`, `for_each`) for scalability
 * Compatible with VAST provider v1.6.8+
 
-
 ---
 
 ### Misc Notes
 
-#### Example: Use existing VIP Pool for resources like Views
+#### Example: Using an existing VIP Pool for resources like Views
 
 
 - Get the VIP Pool metadata - you need the tenantID that owns the Pool and the PoolID.
