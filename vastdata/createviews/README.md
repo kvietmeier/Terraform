@@ -4,10 +4,10 @@
 
 This Terraform module automates the creation of VAST Data **view policies** and **NFS views** using an existing VIP pool on a VAST cluster.
 
-- ✅ Uses provider alias for targeting a specific VAST cluster (e.g. GCP, On-Prem)
-- ✅ Supports NFS and SMB protocols
-- ✅ Leverages existing VIP Pools via a data source
-- ✅ Fully parameterized via `terraform.tfvars`
+- Uses provider alias for targeting a specific VAST cluster (e.g. GCP, On-Prem)
+- Supports NFS and SMB protocols
+- Leverages existing VIP Pools via a data source
+- Fully parameterized via `terraform.tfvars`
 
 ---
 
@@ -37,6 +37,7 @@ This Terraform module automates the creation of VAST Data **view policies** and 
 ### Step 1: Customize Inputs
 
 Edit the `terraform.tfvars` with your desired configuration:
+
 ```hcl
 vip_pool_existing       = "protocolsPool"
 policy_name             = "vpolicy-nfs"
@@ -47,3 +48,4 @@ nfs_no_squash           = ["0.0.0.0/0"]
 nfs_read_write          = ["*"]
 num_views               = 3
 path_name               = "vastview"
+```
