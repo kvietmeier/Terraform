@@ -72,3 +72,15 @@ resource "vastdata_view" "s3_views" {
   # Explicitly wait for users and groups to exist before creating storage targets
   depends_on = [vastdata_user.users]
 }
+
+###===================================================================================###
+# DNS Configuration
+###===================================================================================###
+resource "vastdata_dns" "protocol_dns" {
+  provider      = vastdata.GCPCluster
+  name          = var.dns_name
+  vip           = var.dns_vip
+  net_type      = var.port_type
+  domain_suffix = var.dns_domain_suffix
+  enabled       = var.dns_enabled
+}

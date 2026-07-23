@@ -250,3 +250,28 @@ variable "access_flavor" {
   type    = string
   default = "ALL"
 }
+
+###===================================================================================
+###--- DNS Configuration 
+###===================================================================================
+variable "dns_name" {
+  type = string
+}
+
+variable "dns_vip" {
+  type = string
+}
+
+variable "dns_domain_suffix" {
+  type = string
+}
+
+variable "port_type" {
+  type    = string
+  default = "NORTH_PORT"
+}
+
+variable "dns_enabled" {
+  type    = bool
+  default = true
+}

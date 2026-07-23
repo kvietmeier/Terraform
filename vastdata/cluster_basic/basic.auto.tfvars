@@ -14,7 +14,7 @@
 ###===================================================================================###
 vast_username                = "admin"
 vast_password                = "123456"
-vast_host                    = "10.105.28.28"
+vast_host                    = "10.105.28.66"
 vast_port                    = "443"
 vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
@@ -222,9 +222,14 @@ users = {
   }
 }
 
+
 ###===================================================================================###
-#   REMOVED SYSTEM BOUNDARIES (Tenant definitions commented out to use default plane)
+#   DNS Settings
 ###===================================================================================###
-/* tenants = {
-...
-*/
+# Set DNS VIP to match subnet cidr and updsare forwarder if needed.
+dns_name          = "vastdns"
+dns_vip           = "10.105.28.250"
+port_type         = "NORTH_PORT"
+dns_domain_suffix = "vastlab.org"
+dns_enabled       = true
+#vip_gateway       = "172.1.4.1"
