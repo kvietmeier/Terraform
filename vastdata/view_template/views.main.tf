@@ -38,10 +38,12 @@ provider "vastdata" {
 # ------------------------------------------------------------------------------
 # 1. Policy Resource Block
 # ------------------------------------------------------------------------------
-resource "vastdata_view_policy" "this" {
-  for_each = var.view_policies_config
+# main_lab.tf
 
-  name          = each.value.name
+resource "vastdata_view_policy" "lab_policies" {
+  for_each = var.lab_view_policies_config
+
+  name          = coalesce(each.value.name, each.key)
   cluster       = each.value.cluster
   tenant_name   = each.value.tenant_name
   flavor        = each.value.flavor
@@ -99,6 +101,7 @@ resource "vastdata_view_policy" "this" {
   protocols_audit = each.value.protocols_audit
 }
 
+### - these need work
 # ------------------------------------------------------------------------------
 # 2. View Resource Block
 # ------------------------------------------------------------------------------

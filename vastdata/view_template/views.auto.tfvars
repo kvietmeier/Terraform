@@ -5,130 +5,66 @@ vast_skip_ssl_verify = true
 
 
 
-# View Policies
-view_policies_config = {
-  "nfs_standard_policy" = {
-    name                                     = "nfs_standard_policy"
-    cluster                                  = "voc1-cluster01f"
-    tenant_name                              = "default"
-    flavor                                   = "NFS"
-    access_flavor                            = "ALL"
-    auth_source                              = "RPC"
-    allowed_characters                       = "LCD"
-    path_length                              = "LCD"
-    gid_inheritance                          = "LINUX"
-    inherit_parent_mode_bits                 = false
-    enable_access_to_snapshot_dir_in_subdirs = true
-    enable_listing_of_snapshot_dir           = false
-    enable_snapshot_lookup                   = true
-    enable_visibility_of_snapshot_dir        = false
-    nfs_minimal_protection_level             = "SYSTEM"
-    nfs_case_insensitive                     = false
-    nfs_enforce_tls                          = false
-    nfs_enforce_tls_relaxed                  = false
-    nfs_posix_acl                            = false
-    nfs_return_open_permissions              = false
-    nfs_read_write                           = ["*"]
-    nfs_root_squash                          = ["*"]
-    nfs_all_squash                           = []
-    nfs_no_squash                            = []
-    nfs_read_only                            = []
-    is_s3_default_policy                     = false
-    s3_flavor_allow_free_listing             = false
-    s3_flavor_detect_full_pathname           = false
-    s3_special_chars_support                 = true
-    s3_read_write                            = []
-    s3_read_only                             = []
-    apple_sid                                = false
-    disable_handle_lease                     = false
-    disable_read_lease                       = false
-    disable_write_lease                      = false
-    smb_directory_mode                       = 755
-    smb_file_mode                            = 644
-    smb_is_ca                                = false
-    smb_read_write                           = []
-    smb_read_only                            = []
-    expose_id_in_fsid                        = false
-    use_32bit_fileid                         = false
-    use_auth_provider                        = false
-    read_write                               = ["*"]
-    read_only                                = []
-    vip_pools                                = null
-    serves_tenant                            = null
-    protocols_audit = {
-      create_delete_files_dirs_objects = false
-      log_full_path                    = false
-      log_username                     = false
-      modify_data_md                   = false
-      read_data                        = false
-    }
+###----------------------------- View Policies -------------------------------###
+### The type of policy is determined by the choice of settings for the following attributes:
+#   flavor: NFS, SMB, S3
+#   access_flavor: ALL, READ_ONLY, READ_WRITE
+#   auth_source: RPC, RPC_AND_PROVIDERS, PROVIDERS
+#   use_auth_provider: true, false
+#   
+
+###--- Lab View Policies
+lab_view_policies_config = {
+
+  # Standard Lab NFS Policy
+  "lab_nfs_policy" = {
+    flavor             = "NFS"
+    auth_source        = "RPC"
+    allowed_characters = "LCD"
+    path_length        = "LCD"
+    nfs_read_write     = ["*"]
+    nfs_read_only      = []
+    nfs_root_squash    = ["*"]
+    nfs_no_squash      = []
+    gid_inheritance    = "LINUX"
   },
-  "s3_standard_policy" = {
-    name                                     = "s3_standard_policy"
-    cluster                                  = "voc1-cluster01f"
-    tenant_name                              = "default"
-    flavor                                   = "S3"
-    access_flavor                            = "ALL"
-    auth_source                              = "RPC"
-    allowed_characters                       = "LCD"
-    path_length                              = "LCD"
-    gid_inheritance                          = "LINUX"
-    inherit_parent_mode_bits                 = false
-    enable_access_to_snapshot_dir_in_subdirs = false
-    enable_listing_of_snapshot_dir           = false
-    enable_snapshot_lookup                   = false
-    enable_visibility_of_snapshot_dir        = false
-    nfs_minimal_protection_level             = "SYSTEM"
-    nfs_case_insensitive                     = false
-    nfs_enforce_tls                          = false
-    nfs_enforce_tls_relaxed                  = false
-    nfs_posix_acl                            = false
-    nfs_return_open_permissions              = false
-    nfs_read_write                           = []
-    nfs_root_squash                          = []
-    nfs_all_squash                           = []
-    nfs_no_squash                            = []
-    nfs_read_only                            = []
-    is_s3_default_policy                     = true
-    s3_flavor_allow_free_listing             = true
-    s3_flavor_detect_full_pathname           = true
-    s3_special_chars_support                 = true
-    s3_read_write                            = ["*"]
-    s3_read_only                             = []
-    apple_sid                                = false
-    disable_handle_lease                     = false
-    disable_read_lease                       = false
-    disable_write_lease                      = false
-    smb_directory_mode                       = 755
-    smb_file_mode                            = 644
-    smb_is_ca                                = false
-    smb_read_write                           = []
-    smb_read_only                            = []
-    expose_id_in_fsid                        = false
-    use_32bit_fileid                         = false
-    use_auth_provider                        = false
-    read_write                               = ["*"]
-    read_only                                = []
-    vip_pools                                = null
-    serves_tenant                            = null
-    protocols_audit = {
-      create_delete_files_dirs_objects = false
-      log_full_path                    = false
-      log_username                     = false
-      modify_data_md                   = false
-      read_data                        = false
-    }
+
+  # Standard Lab SMB Policy
+  "lab_smb_policy" = {
+    flavor             = "SMB"
+    auth_source        = "RPC_AND_PROVIDERS"
+    allowed_characters = "LCD"
+    path_length        = "LCD"
+    smb_read_write     = ["*"]
+    smb_read_only      = []
+    smb_file_mode      = 644
+    smb_directory_mode = 755
+    use_auth_provider  = true
+  },
+
+  # Standard Lab S3 Policy
+  "lab_s3_policy" = {
+    flavor                         = "S3_NATIVE"
+    auth_source                    = "RPC"
+    allowed_characters             = "NPL"
+    path_length                    = "NPL"
+    s3_read_write                  = ["*"]
+    s3_read_only                   = []
+    s3_special_chars_support       = true
+    s3_flavor_allow_free_listing   = false
+    s3_flavor_detect_full_pathname = false
   }
+
 }
 
-# File Views
+###----------------------------- File Views -------------------------------###
 file_views_config = {
   "nfs_export_view" = {
     name        = "nfs_data_export"
     path        = "/exports/nfs_data"
     protocols   = ["NFS"]
     create_dir  = true
-    policy_key  = "nfs_standard_policy"
+    policy_key  = "lab_nfs_policy"
     tenant_name = "default"
     vip_pools   = null
   },
@@ -137,13 +73,23 @@ file_views_config = {
     path        = "/buckets/app_data"
     protocols   = ["S3"]
     create_dir  = true
-    policy_key  = "s3_standard_policy"
+    policy_key  = "lab_s3_policy"
+    tenant_name = "default"
+    vip_pools   = null
+  }
+  "SMB_share_view" = {
+    name        = "smb_shared_data"
+    path        = "/shares/smb_data"
+    protocols   = ["SMB"]
+    create_dir  = true
+    policy_key  = "lab_smb_policy"
     tenant_name = "default"
     vip_pools   = null
   }
 }
 
-# Block Hosts
+
+###-------------------------------- Block Hosts -------------------------------###
 block_hosts_config = {
   "db_server_01" = {
     name        = "db-server-01"

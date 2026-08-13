@@ -31,78 +31,98 @@ variable "vast_skip_ssl_verify" {
   default     = true
 }
 
+###------  Placeholders
 
 
 # ------------------------------------------------------------------------------
 # View Policy Schema
 # ------------------------------------------------------------------------------
-variable "view_policies_config" {
-  description = "Map of user-configurable parameters for VAST Data View Policies."
+
+variable "lab_view_policies_config" {
+  description = "Streamlined map for rapid testing and benchmarking VAST View Policies."
   type = map(object({
-    name          = string
-    cluster       = string
-    tenant_name   = string
-    flavor        = string
-    access_flavor = string
-    auth_source   = string
+    # Core Identification
+    name        = optional(string)
+    cluster     = optional(string, "voc1-cluster01f")
+    tenant_name = optional(string, "default")
 
-    allowed_characters       = string
-    path_length              = string
-    gid_inheritance          = string
-    inherit_parent_mode_bits = bool
+    # Required Policy Attributes
+    flavor             = string
+    auth_source        = string
+    allowed_characters = string
+    path_length        = string
 
-    enable_access_to_snapshot_dir_in_subdirs = bool
-    enable_listing_of_snapshot_dir          = bool
-    enable_snapshot_lookup                  = bool
-    enable_visibility_of_snapshot_dir       = bool
+    # General Defaults
+    access_flavor            = optional(string, "ALL")
+    gid_inheritance          = optional(string, "LINUX")
+    inherit_parent_mode_bits = optional(bool, false)
 
-    nfs_minimal_protection_level = string
-    nfs_case_insensitive         = bool
-    nfs_enforce_tls              = bool
-    nfs_enforce_tls_relaxed      = bool
-    nfs_posix_acl                = bool
-    nfs_return_open_permissions  = bool
-    nfs_read_write               = list(string)
-    nfs_root_squash              = list(string)
-    nfs_all_squash               = list(string)
-    nfs_no_squash                = list(string)
-    nfs_read_only                = list(string)
+    # Snapshot Toggles
+    enable_access_to_snapshot_dir_in_subdirs = optional(bool, true)
+    enable_listing_of_snapshot_dir           = optional(bool, false)
+    enable_snapshot_lookup                   = optional(bool, true)
+    enable_visibility_of_snapshot_dir        = optional(bool, false)
 
-    is_s3_default_policy           = bool
-    s3_flavor_allow_free_listing   = bool
-    s3_flavor_detect_full_pathname = bool
-    s3_special_chars_support       = bool
-    s3_read_write                  = list(string)
-    s3_read_only                   = list(string)
+    # NFS Attributes & Defaults
+    nfs_minimal_protection_level = optional(string, "SYSTEM")
+    nfs_case_insensitive         = optional(bool, false)
+    nfs_enforce_tls              = optional(bool, false)
+    nfs_enforce_tls_relaxed      = optional(bool, false)
+    nfs_posix_acl                = optional(bool, false)
+    nfs_return_open_permissions  = optional(bool, false)
+    nfs_read_write               = optional(list(string), [])
+    nfs_read_only                = optional(list(string), [])
+    nfs_root_squash              = optional(list(string), [])
+    nfs_all_squash               = optional(list(string), [])
+    nfs_no_squash                = optional(list(string), [])
 
-    apple_sid            = bool
-    disable_handle_lease = bool
-    disable_read_lease   = bool
-    disable_write_lease  = bool
-    smb_directory_mode   = number
-    smb_file_mode        = number
-    smb_is_ca            = bool
-    smb_read_write       = list(string)
-    smb_read_only        = list(string)
+    # SMB Attributes & Defaults
+    apple_sid            = optional(bool, false)
+    disable_handle_lease = optional(bool, false)
+    disable_read_lease   = optional(bool, false)
+    disable_write_lease  = optional(bool, false)
+    smb_directory_mode   = optional(number, 755)
+    smb_file_mode        = optional(number, 644)
+    smb_is_ca            = optional(bool, false)
+    smb_read_write       = optional(list(string), [])
+    smb_read_only        = optional(list(string), [])
 
-    expose_id_in_fsid = bool
-    use_32bit_fileid  = bool
-    use_auth_provider = bool
-    read_write        = list(string)
-    read_only         = list(string)
+    # S3 Attributes & Defaults
+    is_s3_default_policy           = optional(bool, false)
+    s3_flavor_allow_free_listing   = optional(bool, false)
+    s3_flavor_detect_full_pathname = optional(bool, false)
+    s3_special_chars_support       = optional(bool, false)
+    s3_read_write                  = optional(list(string), [])
+    s3_read_only                   = optional(list(string), [])
 
-    vip_pools     = optional(list(string))
-    serves_tenant = optional(string)
+    # Global Access
+    expose_id_in_fsid = optional(bool, false)
+    use_32bit_fileid  = optional(bool, false)
+    use_auth_provider = optional(bool, false)
+    read_write        = optional(list(string), ["*"])
+    read_only         = optional(list(string), [])
 
-    protocols_audit = object({
+    vip_pools     = optional(list(string), null)
+    serves_tenant = optional(string, null)
+
+    # Audit Controls
+    protocols_audit = optional(object({
       create_delete_files_dirs_objects = bool
       log_full_path                    = bool
       log_username                     = bool
       modify_data_md                   = bool
       read_data                        = bool
+    }), {
+      create_delete_files_dirs_objects = false
+      log_full_path                    = false
+      log_username                     = false
+      modify_data_md                   = false
+      read_data                        = false
     })
   }))
+  default = {}
 }
+
 
 # ------------------------------------------------------------------------------
 # File Views Schema (NFS / SMB / S3)
