@@ -1,6 +1,8 @@
 # Terraform Projects
 
-### Directories (subject to change)
+- [VAST Data Terraform Docs](https://registry.terraform.io/providers/vast-data/vastdata/latest/docs)
+
+## Directories (subject to change)
 
 ```text
 ├── README.md
@@ -131,4 +133,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 #### Acknowledgments
 
-* None so far other than the many good examples out there.
+* Josh Wentzell at VAST for getting me started and answering many basic questions.
