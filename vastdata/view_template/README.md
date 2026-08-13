@@ -26,32 +26,6 @@ The project is structured into 4 primary Terraform files:
 └── views.auto.tfvars      # Environment-specific values and default parameters
 ```
 
-```text
-                   ┌────────────────────────┐
-                   │      variables.tf      │
-                   │   (Defines Schema &    │
-                   │   Default Values)      │
-                   └───────────┬────────────┘
-                               │
-         ┌─────────────────────┼──────────────────────┐
-         │                     │                      │
-         ▼                     ▼                      ▼
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│   lab.tfvars     │  │ full_doc.tfvars  │  │   prod.tfvars    │
-│ (Minimal testing)│  │ (Exhaustive doc) │  │  (Production)    │
-└────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘
-         │                     │                     │
-         └─────────────────────┼─────────────────────┘
-                               │
-                               ▼
-                    ┌────────────────────┐
-                    │      main.tf       │
-                    │ (Creates Resources │
-                    │   in VAST VMS)     │
-                    └────────────────────┘
-                    
-```
-
 ---
 
 ### Usage
