@@ -1,59 +1,19 @@
 # Terraform Projects
 
-Terraform projects - recently added VAST Data.
-
-### Installing Terraform
-
-[Hashicorp Instructions](https://developer.hashicorp.com/terraform/install)
-
-* InstallUpgradeTerraform.ps1 is a small PS script I wrote to upgrade/install the Terraform binary
-
-* Terraform can now be installed and maintained with winget
-  
-  ```powershell
-  KV C:\Users\karl.vietmeier\repos> winget list terraform
-  Name                Id                  Version Available Source
-  ----------------------------------------------------------------
-  Hashicorp Terraform Hashicorp.Terraform 1.9.5   1.9.8     winget
-  ```
-
-  Upgrade it
-  
-  ```powershell
-  KV C:\Users\karl.vietmeier\repos> winget update terraform
-  Found Hashicorp Terraform [Hashicorp.Terraform] Version 1.9.8
-  This application is licensed to you by its owner.
-  Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
-  Downloading https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_windows_amd64.zip
-  ██████████████████████████████  26.0 MB / 26.0 MB
-  Successfully verified installer hash
-  Extracting archive...
-  Successfully extracted archive
-  Starting package install...
-  Command line alias added: "terraform"
-  Successfully installed
-
-  KV C:\Users\karl.vietmeier\repos> winget list terraform
-  Name                Id                  Version Source
-  -------------------------------------------------------
-  Hashicorp Terraform Hashicorp.Terraform 1.9.8   winget
-  
-  KV C:\Users\karl.vietmeier\repos>
-  ```
-
----
-
 ### Directories (subject to change)
 
 ```text
-├.
-├── aws
-├── azure
-├── gcp
-├── scripts
-├── vastdata
-├── LICENSE.md
-└── README.md
+├── README.md
+├── basic_cluster
+├── cluster_full
+├── createviews
+├── lab_setup
+├── policies
+├── protected_path
+├── simple_query
+├── templates
+└── view_template
+
 ```
 
 ---
@@ -64,69 +24,102 @@ Terraform projects - recently added VAST Data.
 
 Apply/destroy without prompting  
 
-```powershell
+```shell
 terraform destroy --auto-approve
 terraform apply --auto-approve
 ```
 
 Run and over-ride locks  
 
-```powershell
+```shell
 terraform destroy -lock=false --auto-approve
 terraform apply -lock=false --auto-approve
 ```
 
-Run with a .tfvars file  
+Run with a non-standard .tfvars file  
 
-```powershell
+```shell
 terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"
 terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"
 ```
 
-Put it all together  
+**Put it all together**
 
-```powershell
+```shell
 terraform apply --auto-approve -var-file=".\<fname>.tfvars"
 terraform destroy --auto-approve -var-file=".\<fname>.tfvars"
 ```
 
 ---
-**PowerShell Alias/Shortcuts**
+
+### Aliases/Shortcuts
+
 So you don't have to keep calling out the non-standard tfvars file.
 
-```powershell
-function tfapply {
-  # Run an apply using the tfvars file in the current folder
-  $VarFile=(Get-ChildItem -Path .  -Recurse -Filter "*.tfvars")
-  terraform apply --auto-approve -var-file="$VarFile"
+```shell
+tfapply() {
+    shopt -s nullglob
+    local var_files=(*.tfvars)
+    shopt -u nullglob
+    [[ ${#var_files[@]} -eq 0 ]] && { echo "No .tfvars files found."; return 1; }
+    terraform apply --auto-approve "${var_files[@]/#/-var-file=}"
 }
 ```
 
-```powershell
-function tfdestroy {
-  # Run a destroy using the tfvars file in the current folder 
-  $VarFile=(Get-ChildItem -Path .  -Recurse -Filter "*.tfvars")
-  terraform destroy --auto-approve -var-file="$VarFile"
+```shell
+tfdestroy() {
+    shopt -s nullglob
+    local var_files=(*.tfvars)
+    shopt -u nullglob
+    [[ ${#var_files[@]} -eq 0 ]] && { echo "No .tfvars files found."; return 1; }
+    terraform destroy --auto-approve "${var_files[@]/#/-var-file=}"
 }
 ```
 
-```powershell
-function tfshow {
-  # 
-  terraform show
+```shell
+tfplan() {
+    shopt -s nullglob
+    local var_files=(*.tfvars)
+    shopt -u nullglob
+    [[ ${#var_files[@]} -eq 0 ]] && { echo "No .tfvars files found."; return 1; }
+    terraform plan "${var_files[@]/#/-var-file=}"
 }
 ```
 
+```shell
+tfshow() { terraform output; }
+tfinit() { terraform init; }
+```
+
+---
+
+Cleanup Functions -
+
+```shell
+tfclean() {
+    echo "Removing .terraform dirs, tfstate files, and backups..."
+    find . -type d -name ".terraform" -exec rm -rf {} +
+    rm -f terraform.tfstate terraform.tfstate.backup
+    echo "Reinitializing Terraform..."
+    terraform init
+}
+```
+
+```shell
+tfclstate() {
+    echo "Removing tfstate files and backups (keeping .terraform)..."
+    rm -f terraform.tfstate terraform.tfstate.backup
+    terraform init
+}
+```
+
+---
 ---
   
 #### My code is Built With
 
 * [Visual Studio Code](https://code.visualstudio.com/) - Editor
 * [Terraform](https://www.terraform.io/) - Terraform
-
-#### All run under PowerShell on Windows 11
-
-* [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
 
 #### Authors
 
