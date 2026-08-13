@@ -14,8 +14,7 @@ The system features:
 ### Prerequisites
 
 * **Terraform CLI** (`>= 1.5.0`) installed locally.
-* **Network Line-of-Sight** to the VMS control plane IP endpoints listed in your tracking inventory file.
-* **Correct Provider Binaries:** Ensure your workspace has access to the updated `vast-data/vastdata` provider supporting management-plane layout configurations.
+* **Network Line-of-Sight** to the VMS IPs listed in your tracking inventory file.
 
 ---
 

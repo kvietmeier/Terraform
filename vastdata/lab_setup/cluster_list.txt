@@ -1,11 +1,11 @@
-### TechSummit Cluster List ###
-lhr-se-summit-1,10.129.10.58
-lhr-se-summit-2,10.129.11.245
-lhr-se-summit-3,10.129.12.41
-lhr-se-summit-4,10.129.13.220
-lhr-se-summit-5,10.129.14.5
-lhr-se-summit-6,10.129.15.214
-lhr-se-summit-7,10.129.16.61
-lhr-se-summit-8,10.129.17.195
-lhr-se-summit-9,10.129.18.215
-lhr-se-summit-10,10.129.19.204
+### Cluster List ###
+cluster1,172.1.172.58
+cluster2,172.1.11.245
+cluster3,172.1.12.41
+cluster4,172.1.13.220
+cluster5,172.1.14.5
+cluster6,172.1.15.214
+cluster7,172.1.16.61
+cluster8,172.1.17.195
+cluster9,172.1.18.215
+cluster10,172.1.19.204
