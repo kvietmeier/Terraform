@@ -1,7 +1,7 @@
 ## VAST Data Terraform Template: Views, Policies & Block Storage
 
-This repository provides a standardized, production-ready Terraform template for managing storage endpoints and access controls on **VAST Data** clusters. It contains the complete schema definition for the views, policies, and block resources.  
-It is not intended for use "as is" it is designed as a temnplate and reference to use in complete cluster configurations.  
+This repository is Terraform template for Views, View Policies, and Block Storage. It contains the complete schema definition cross referenced with the default settings.
+It is not intended for use "as is" it is designed as a template and reference.  
 
 ---
 
