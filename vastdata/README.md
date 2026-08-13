@@ -1,32 +1,5 @@
 ## VAST Data Terraform Template: Views, Policies & Block Storage
 
-### Architecture & Code Structure
-
-```text
-                   ┌────────────────────────┐
-                   │      variables.tf      │
-                   │   (Defines Schema &    │
-                   │   Default Values)      │
-                   └───────────┬────────────┘
-                               │
-         ┌─────────────────────┼──────────────────────┐
-         │                     │                      │
-         ▼                     ▼                      ▼
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│   lab.tfvars     │  │ full_doc.tfvars  │  │   prod.tfvars    │
-│ (Minimal testing)│  │ (Exhaustive doc) │  │  (Production)    │
-└────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘
-         │                     │                     │
-         └─────────────────────┼─────────────────────┘
-                               │
-                               ▼
-                    ┌────────────────────┐
-                    │      main.tf       │
-                    │ (Creates Resources │
-                    │   in VAST VMS)     │
-                    └────────────────────┘
-                    
-```
 
 ### Usage
 
