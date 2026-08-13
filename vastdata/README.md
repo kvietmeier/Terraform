@@ -18,9 +18,9 @@
 
 ---
 
-#### Terraform Notes
+### Terraform Notes
 
-**Terraform commands:**  
+#### Terraform commands
 
 Apply/destroy without prompting  
 
@@ -43,7 +43,7 @@ terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"
 terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"
 ```
 
-**Put it all together**
+#### Put it all together
 
 ```shell
 terraform apply --auto-approve -var-file=".\<fname>.tfvars"
