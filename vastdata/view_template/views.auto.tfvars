@@ -1,4 +1,9 @@
 # terraform.tfvars
+# Provider Connection Settings
+vast_port            = 443
+vast_skip_ssl_verify = true
+
+
 
 # View Policies
 view_policies_config = {

@@ -1,6 +1,39 @@
 # variables.tf
 
 # ------------------------------------------------------------------------------
+# VAST Provider Authentication & Connection Variables
+# ------------------------------------------------------------------------------
+variable "vast_host" {
+  description = "Management IP or hostname of the VAST cluster VMS."
+  type        = string
+}
+
+variable "vast_port" {
+  description = "Port number for the VAST VMS API (default: 443)."
+  type        = number
+  default     = 443
+}
+
+variable "vast_username" {
+  description = "Username for VAST VMS API authentication."
+  type        = string
+}
+
+variable "vast_password" {
+  description = "Password for VAST VMS API. Supplied via TF_VAR_vast_password environment variable."
+  type        = string
+  sensitive   = true # Prevents password from displaying in CLI logs
+}
+
+variable "vast_skip_ssl_verify" {
+  description = "Disable SSL certificate validation for VMS connection."
+  type        = bool
+  default     = true
+}
+
+
+
+# ------------------------------------------------------------------------------
 # View Policy Schema
 # ------------------------------------------------------------------------------
 variable "view_policies_config" {

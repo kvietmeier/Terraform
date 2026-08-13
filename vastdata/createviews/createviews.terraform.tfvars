@@ -7,9 +7,6 @@
 # =============================
 # VAST Cluster Authentication
 # =============================
-vast_username                = "admin"
-vast_password                = "N0mad1c!"
-vast_host                    = "vms"
 vast_port                    = "443"
 vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
