@@ -5,7 +5,6 @@
 ## Directories (subject to change)
 
 ```text
-├── README.md
 ├── basic_cluster
 ├── cluster_full
 ├── createviews
