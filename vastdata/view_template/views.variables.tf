@@ -31,11 +31,18 @@ variable "vast_skip_ssl_verify" {
   default     = true
 }
 
-###------  Placeholders
-
 
 # ------------------------------------------------------------------------------
-# View Policy Schema
+# view policy schema
+#
+# This schema defines the structure for VAST Data view policies. Administrators
+# apply these policies to NFS, SMB, and S3 views to manage access controls,
+# protocol settings, and audit logging.
+#
+#  Optional attributes leverage Terraform's optional() type modifier. If you omit 
+#  an optional attribute from your terraform.tfvars file, Terraform automatically 
+#  applies the factory default value specified in this schema. You can override 
+#  any default by explicitly defining the attribute in your tfvars file.
 # ------------------------------------------------------------------------------
 
 variable "lab_view_policies_config" {

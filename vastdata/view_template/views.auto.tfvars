@@ -6,11 +6,11 @@ vast_skip_ssl_verify = true
 
 
 ###----------------------------- View Policies -------------------------------###
-### The type of policy is determined by the choice of settings for the following attributes:
-#   flavor: NFS, SMB, S3
-#   access_flavor: ALL, READ_ONLY, READ_WRITE
-#   auth_source: RPC, RPC_AND_PROVIDERS, PROVIDERS
-#   use_auth_provider: true, false
+#   The type of policy is determined by the choice of settings for the following attributes:
+#     flavor: NFS, SMB, S3
+#     access_flavor: ALL, READ_ONLY, READ_WRITE
+#     auth_source: RPC, RPC_AND_PROVIDERS, PROVIDERS
+#     use_auth_provider: true, false
 #   
 
 ###--- Lab View Policies
@@ -76,7 +76,7 @@ file_views_config = {
     policy_key  = "lab_s3_policy"
     tenant_name = "default"
     vip_pools   = null
-  }
+  },
   "SMB_share_view" = {
     name        = "smb_shared_data"
     path        = "/shares/smb_data"
@@ -96,6 +96,12 @@ block_hosts_config = {
     tenant_name = "default"
     os_type     = "LINUX"
     initiators  = ["iqn.1994-05.com.redhat:db-server-01"]
+  },
+  "db_server_02" = {
+    name        = "db-server-02"
+    tenant_name = "default"
+    os_type     = "LINUX"
+    initiators  = ["iqn.1994-05.com.redhat:db-server-02"]
   }
 }
 
@@ -105,5 +111,10 @@ block_host_mappings_config = {
     host_key  = "db_server_01"
     volume_id = 101
     lun       = 1
+  },
+  "db_host_mapping_vol2" = {
+    host_key  = "db_server_02"
+    volume_id = 102
+    lun       = 2
   }
 }

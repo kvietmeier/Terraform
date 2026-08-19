@@ -141,12 +141,12 @@ tfclstate() {
   
 #### My code is Built With
 
-* [Visual Studio Code](https://code.visualstudio.com/) - Editor
-* [Terraform](https://www.terraform.io/) - Terraform
+- [Visual Studio Code](https://code.visualstudio.com/) - Editor
+- [Terraform](https://www.terraform.io/) - Terraform
 
 #### Authors
 
-* **Karl Vietmeier**
+- **Karl Vietmeier**
 
 #### License
 
@@ -154,4 +154,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 #### Acknowledgments
 
-* Josh Wentzell at VAST for getting me started and answering many basic questions.
+- Josh Wentzell at VAST for getting me started and answering many basic questions.
