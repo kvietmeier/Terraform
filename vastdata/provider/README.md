@@ -1,31 +1,58 @@
 # Using environment variables for the Terraform Provider
 
-You can declare a default provider alongside an aliased provider. In Terraform, any `provider` block defined without an `alias` argument automatically becomes the **default provider** for that resource type.
+Combining a default provider with an optional aliased provider in a single `provider.tf` creates a fully portable, environment-driven file. You can drop this standalone file into any new testing directory or reference it across multiple folders using a symbolic link.
 
-When a default provider exists, any resource or data lookup that omits the `provider = ...` meta-argument automatically uses the default configuration. You only need to explicitly specify `provider = vastdata.GCPCluster` on resources that need to target the aliased cluster.
+---
 
 ## Overview of the Solution
 
-This pattern allows you to write standard Terraform code without typing `provider = ...` on every single resource, while preserving the ability to target an explicit aliased provider when necessary.
+This pattern completely decouples your provider authentication from your infrastructure code. By combining native provider environment variables with Terraform's `TF_VAR_` mapping, your test folders remain clean, modular, and instantly executable.
 
 **Development Steps:**
 
-1. **Define a Default Provider Block:** Create a `provider "vastdata" {}` block without an `alias`. It auto-reads `VASTDATA_HOST`, `VASTDATA_PORT`, and your `TF_VAR_` environment variables.
-2. **Define an Aliased Provider Block (Optional):** Create a second `provider "vastdata"` block with `alias = "GCPCluster"` for explicit overrides or secondary endpoints.
-3. **Write Resources Naturally:** Omit `provider = ...` on standard resources to use the default configuration.
+1. **Define Default Provider:** Configure an un-aliased `provider "vastdata" {}` block so 90% of your scratchpad resources execute without needing explicit `provider = ...` tags.
+2. **Define Aliased Provider:** Include `alias = "GCPCluster"` inside a secondary provider block for multi-cluster testing.
+3. **Map Shell Inputs:** Declare input variables (`vast_username`, `vast_password`, etc.) so `TF_VAR_` environment variables automatically hydrate both provider blocks.
+4. **Enable Symlink Portability:** Store one master `provider.tf` centrally and link it dynamically into any scratch workspace.
 
 **Assumptions & Restrictions:**
 
-- You can only have **one** default (un-aliased) provider block per provider type (`vastdata`) in a workspace.
-- All standard `vastdata_*` resources will automatically inherit the default provider credentials unless explicitly directed elsewhere.
+- Your shell environment variables (`VASTDATA_HOST`, `TF_VAR_vast_username`, etc.) must be sourced in your terminal prior to running `terraform init` or `terraform plan`.
+- If a resource omits `provider = ...`, Terraform defaults to the un-aliased provider block.
+
+---
 
 ### Code Implementation
 
-#### `provider.tf`
+#### Set Environment variables in shell startup file/s
+
+Run these commands in your shell to load credentials without storing them in `.tf` files.
+
+```bash
+# ==============================================================================
+# Environment Variables for Aliased VAST Provider
+# ==============================================================================
+
+# Native provider fallbacks
+export VASTDATA_HOST="10.10.20.74"
+export VASTDATA_PORT="443"
+export VASTDATA_TENANT="default"
+
+# Mapped via TF_VAR_ prefix into Terraform variables
+export TF_VAR_vast_username="admin"
+export TF_VAR_vast_password="YourSecurePassword123"
+export TF_VAR_vast_skip_ssl_verify="true"
+export TF_VAR_vast_version_validation_mode="warn"
+```
+
+#### Self contained `provider.tf`
+
+This file configures the aliased provider and maps the `TF_VAR_` shell inputs.
 
 ```hcl
 # ==============================================================================
-# Dual Provider Setup: Default vs. Aliased
+# Standalone VAST Data Provider Configuration
+# Drop this file into any folder or symlink it from a central location.
 # ==============================================================================
 
 terraform {
@@ -37,7 +64,10 @@ terraform {
   }
 }
 
-# Shared Variable Declarations (Populated by TF_VAR_ environment variables)
+# -------------------------------------------------------------------------
+# Environment Variable Declarations (Populated via TF_VAR_ shell exports)
+# -------------------------------------------------------------------------
+
 variable "vast_username" {
   type      = string
   default   = null
@@ -55,32 +85,39 @@ variable "vast_skip_ssl_verify" {
   default = true
 }
 
-# -------------------------------------------------------------------------
-# 1. DEFAULT PROVIDER (No alias attribute)
-# Standard resources automatically use this block!
-# -------------------------------------------------------------------------
-provider "vastdata" {
-  # Automatically reads VASTDATA_HOST, VASTDATA_PORT, VASTDATA_TENANT
-  username        = var.vast_username
-  password        = var.vast_password
-  skip_ssl_verify = var.vast_skip_ssl_verify
+variable "vast_version_validation_mode" {
+  type    = string
+  default = "warn"
 }
 
-# -------------------------------------------------------------------------
-# 2. ALIASED PROVIDER (Explicit opt-in)
-# Used ONLY when 'provider = vastdata.GCPCluster' is specified
-# -------------------------------------------------------------------------
 variable "gcp_host" {
   type    = string
   default = null
 }
 
+# -------------------------------------------------------------------------
+# 1. DEFAULT PROVIDER
+# Standard resources automatically use this without needing 'provider = ...'
+# -------------------------------------------------------------------------
 provider "vastdata" {
-  alias           = "GCPCluster"
-  host            = var.gcp_host
-  username        = var.vast_username
-  password        = var.vast_password
-  skip_ssl_verify = var.vast_skip_ssl_verify
+  # Auto-reads VASTDATA_HOST, VASTDATA_PORT, VASTDATA_TENANT from shell
+  username                = var.vast_username
+  password                = var.vast_password
+  skip_ssl_verify         = var.vast_skip_ssl_verify
+  version_validation_mode = var.vast_version_validation_mode
+}
+
+# -------------------------------------------------------------------------
+# 2. ALIASED PROVIDER
+# Opt-in for multi-cluster or GCP-specific testing
+# -------------------------------------------------------------------------
+provider "vastdata" {
+  alias                   = "GCPCluster"
+  host                    = var.gcp_host != null ? var.gcp_host : null
+  username                = var.vast_username
+  password                = var.vast_password
+  skip_ssl_verify         = var.vast_skip_ssl_verify
+  version_validation_mode = var.vast_version_validation_mode
 }
 ```
 
@@ -143,8 +180,25 @@ resource "vastdata_host" "gcp_cluster_host" {
 }
 ```
 
+---
+
 ### Implementation Instructions
 
-1. **Save Configuration:** Place `provider.tf` in your working directory alongside `main.tf`.
-2. **Export Environment Variables:** Run your shell script (`source vast_env.sh`) to export `VASTDATA_HOST`, `TF_VAR_vast_username`, and `TF_VAR_vast_password`. 
-3. **Execute Terraform:** Run `terraform init` and `terraform plan`. Standard resources will execute seamlessly against your default cluster credentials without needing any inline provider tags.
+**Option A: Drop-in Copy** Copy `provider.tf` directly into any new scratch folder alongside your test `main.tf` file.
+  
+**Option B: Dynamic Symbolic Link (Recommended for Fast Scratchpads)** Keep one master `provider.tf` in a central directory (e.g., `~/tf_global/provider.tf`) and dynamically link it into any test folder:
+
+```bash
+# 1. Load your credentials into your current terminal session
+source ~/vast_env.sh
+
+# 2. Navigate to your new scratch testing folder
+cd ~/tf_tests/block_storage_test
+
+# 3. Create a symbolic link to the master provider file
+ln -s ~/tf_global/provider.tf ./provider.tf
+
+# 4. Initialize and test immediately
+terraform init
+terraform plan
+```
