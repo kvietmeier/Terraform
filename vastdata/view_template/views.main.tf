@@ -103,7 +103,7 @@ resource "vastdata_view_policy" "lab_policies" {
 
 ### - these need work
 # ------------------------------------------------------------------------------
-# 2. View Resource Block
+# 2. View Resource for Block
 # ------------------------------------------------------------------------------
 resource "vastdata_view" "file_views" {
   for_each = var.file_views_config
@@ -119,7 +119,7 @@ resource "vastdata_view" "file_views" {
 }
 
 # ------------------------------------------------------------------------------
-# 3. Block Host Resource Block
+# 3. Block Host Resource for Block
 # ------------------------------------------------------------------------------
 resource "vastdata_block_host" "hosts" {
   for_each = var.block_hosts_config
@@ -131,7 +131,7 @@ resource "vastdata_block_host" "hosts" {
 }
 
 # ------------------------------------------------------------------------------
-# 4. Block Host Mapping Resource Block
+# 4. Block Host Mapping Resource forBlock
 # ------------------------------------------------------------------------------
 resource "vastdata_block_host_mapping" "mappings" {
   for_each = var.block_host_mappings_config

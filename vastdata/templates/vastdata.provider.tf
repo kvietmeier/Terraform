@@ -1,29 +1,59 @@
 ###===================================================================================###
 ###                       Confgure VAST Cluster Provider   
+###
+###  Standardized provider configuration for VAST Data Terraform Provider
+###  This file is included in all other Terraform modules to ensure consistent
+###  provider configuration and variable declarations.
+###  
+###  Notes:
+###  - The provider block is configured to read from environment variables for sensitive information.
+###  - The provider version is pinned to ensure compatibility with the VAST Data Terraform Provider.
 ###===================================================================================###
-
-# Terraform version and required providers
-# versions can't be variables
+# 1. Provider Source & Version
 terraform {
-    required_version = ">=1.4"
-
-    required_providers {
-      vastdata = {
-        source  = "vast-data/vastdata"
-        version = "1.6.0"
+  required_providers {
+    vastdata = {
+      source  = "vast-data/vastdata"
+      version = "3.2.2"
     }
   }
 }
 
-# VAST Data Provider Configuration
-provider vastdata {
-  # Set values in .tfvars
-  # alias must be a string, not a variable
-  username                = var.vast_user
-  port                    = var.vast_port
-  password                = var.vast_passwd
-  host                    = var.vast_host
-  skip_ssl_verify         = var.skip_ssl
-  version_validation_mode = var.validation_mode
-  alias                   = "GCPCluster"
+# 2. Variable Declarations (Enables TF_VAR_ shell variable mapping)
+variable "vast_username" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "vast_password" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "vast_api_token" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "vast_skip_ssl_verify" {
+  type    = bool
+  default = true
+}
+
+variable "vast_version_validation_mode" {
+  type    = string
+  default = "warn"
+}
+
+# 3. Provider Configuration
+provider "vastdata" {
+  # Auto-reads VASTDATA_HOST, VASTDATA_PORT, VASTDATA_TENANT from shell
+  username                = var.vast_username
+  password                = var.vast_password
+  api_token               = var.vast_api_token
+  skip_ssl_verify         = var.vast_skip_ssl_verify
+  version_validation_mode = var.vast_version_validation_mode
 }

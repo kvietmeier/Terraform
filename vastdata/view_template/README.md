@@ -1,8 +1,9 @@
 ## VAST Data Terraform Template: Views, Policies & Block Storage
 
-This repository is Terraform template for Views, View Policies, and Block Storage. It contains the complete schema definition cross referenced with the default settings.
+This repository is Terraform template for Views, View Policies, and Block Storage. It contains the complete schema definition from swagger cross referenced with the Terraform resources in the latest provider docs.
+  
 It is not intended for use "as is" it is designed as a template and reference.  
-
+  
 ---
 
 ## Table of Contents
