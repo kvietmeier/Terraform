@@ -5,6 +5,8 @@
 ###  This file is included in all other Terraform modules to ensure consistent
 ###  provider configuration and variable declarations.
 ###  
+###  Simple Version
+###
 ###  Notes:
 ###  - The provider block is configured to read from environment variables for sensitive information.
 ###  - The provider version is pinned to ensure compatibility with the VAST Data Terraform Provider.
