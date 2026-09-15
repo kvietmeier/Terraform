@@ -1,0 +1,207 @@
+# Copy to terraform.tfvars (or private.auto.tfvars) and edit.
+# Secrets (VPN shared_key, SSH key paths) stay out of git.
+#
+# Source inventory: gcp/CoreInfra (unchanged). Full subnet list matches vpcs/core.
+
+project_id = "clouddev-itdesk124"
+region     = "us-west2"
+zone       = "us-west2-a"
+
+vpc_name = "karlv-corevpc"
+
+###--- Feature flags
+enable_firewalls           = true
+enable_dns_private         = true
+enable_dns_ad_forwarder    = true
+enable_dns_vast_forwarders = true
+enable_vpn                 = false # set true + fill vpn {} below
+enable_linux_vms           = false # needs ssh key + cloud-init paths
+enable_windows_vms         = false # needs sysprep script path
+enable_iap                 = false # set true + fill iap_user_emails
+
+###--- Subnets (from CoreInfra/vpcs/core/private.auto.tfvars)
+subnets = [
+  { name = "subnet-hub-us-central1", region = "us-central1", ip_cidr_range = "172.20.64.0/20" },
+  { name = "subnet-hub-us-central1-voc1", region = "us-central1", ip_cidr_range = "172.9.1.0/24" },
+  { name = "subnet-hub-us-central1-voc2", region = "us-central1", ip_cidr_range = "172.11.1.0/24" },
+  { name = "subnet-hub-us-west1-01", region = "us-west1", ip_cidr_range = "172.20.0.0/20" },
+  { name = "subnet-hub-us-west1-voc1", region = "us-west1", ip_cidr_range = "172.10.1.0/24" },
+  { name = "subnet-hub-us-west1-voc2", region = "us-west1", ip_cidr_range = "172.10.2.0/24" },
+  { name = "subnet-hub-us-west1-voc3", region = "us-west1", ip_cidr_range = "172.10.3.0/24" },
+  { name = "subnet-hub-us-west1-voc4", region = "us-west1", ip_cidr_range = "172.10.4.0/24" },
+  { name = "subnet-hub-us-west2", region = "us-west2", ip_cidr_range = "172.20.16.0/20" },
+  { name = "subnet-hub-us-west2-02", region = "us-west2", ip_cidr_range = "172.21.128.0/20" },
+  { name = "subnet-hub-us-west2-03", region = "us-west2", ip_cidr_range = "172.21.144.0/20" },
+  { name = "subnet-hub-us-west2-voc1", region = "us-west2", ip_cidr_range = "172.5.1.0/24" },
+  { name = "subnet-hub-us-west2-voc2", region = "us-west2", ip_cidr_range = "172.6.1.0/24" },
+  { name = "subnet-hub-us-west2-voc3", region = "us-west2", ip_cidr_range = "172.7.1.0/24" },
+  { name = "subnet-hub-us-west2-voc4", region = "us-west2", ip_cidr_range = "172.8.1.0/24" },
+  { name = "subnet-hub-us-west2-ipv6", region = "us-west2", ip_cidr_range = "192.20.16.0/20" },
+  { name = "subnet-hub-us-west3", region = "us-west3", ip_cidr_range = "172.20.32.0/20" },
+  { name = "subnet-hub-us-west4", region = "us-west4", ip_cidr_range = "172.20.48.0/20" },
+  { name = "subnet-hub-us-east1", region = "us-east1", ip_cidr_range = "172.20.96.0/20" },
+  { name = "subnet-hub-us-east1-voc1", region = "us-east1", ip_cidr_range = "172.10.5.0/24" },
+  { name = "subnet-hub-us-east1-voc2", region = "us-east1", ip_cidr_range = "172.10.6.0/24" },
+  { name = "subnet-hub-us-east1-voc3", region = "us-east1", ip_cidr_range = "172.10.7.0/24" },
+  { name = "subnet-hub-us-east1-voc4", region = "us-east1", ip_cidr_range = "172.10.8.0/24" },
+  { name = "subnet-hub-us-east4", region = "us-east4", ip_cidr_range = "172.20.112.0/20" },
+  { name = "subnet-hub-us-east5", region = "us-east5", ip_cidr_range = "172.20.128.0/20" },
+  { name = "subnet-hub-us-east5-tpu", region = "us-east5", ip_cidr_range = "172.10.10.0/29" },
+  { name = "subnet-hub-us-east5-tpu2", region = "us-east5", ip_cidr_range = "172.10.15.0/29" },
+  { name = "subnet-hub-us-east5-voc1", region = "us-east5", ip_cidr_range = "172.10.9.0/24" },
+  { name = "subnet-hub-us-south1", region = "us-south1", ip_cidr_range = "172.20.80.0/20" },
+  { name = "subnet-hub-europe-west1", region = "europe-west1", ip_cidr_range = "172.20.144.0/20" },
+  { name = "subnet-hub-europe-west2", region = "europe-west2", ip_cidr_range = "172.20.160.0/20" },
+  { name = "subnet-hub-europe-west2-ipv6", region = "europe-west2", ip_cidr_range = "192.20.160.0/20" },
+  { name = "subnet-hub-europe-west3", region = "europe-west3", ip_cidr_range = "172.20.176.0/20" },
+  { name = "subnet-hub-europe-west4", region = "europe-west4", ip_cidr_range = "172.20.192.0/20" },
+  { name = "subnet-hub-europe-west4-tpu", region = "europe-west4", ip_cidr_range = "172.10.12.0/29" },
+  { name = "subnet-hub-europe-west4-voc1", region = "europe-west4", ip_cidr_range = "172.10.11.0/24" },
+  { name = "subnet-hub-europe-north1", region = "europe-north1", ip_cidr_range = "172.20.208.0/20" },
+  { name = "subnet-hub-europe-north2", region = "europe-north2", ip_cidr_range = "172.20.224.0/20" },
+  { name = "subnet-hub-europe-central2", region = "europe-central2", ip_cidr_range = "172.20.240.0/20" },
+  { name = "subnet-hub-europe-southwest1", region = "europe-southwest1", ip_cidr_range = "172.21.0.0/20" },
+  { name = "subnet-hub-asia-northeast1", region = "asia-northeast1", ip_cidr_range = "172.21.96.0/20" },
+  { name = "subnet-hub-asia-northeast1-tpu", region = "asia-northeast1", ip_cidr_range = "172.10.14.0/29" },
+  { name = "subnet-hub-asia-northeast1-tpu2", region = "asia-northeast1", ip_cidr_range = "172.10.18.0/29" },
+  { name = "subnet-hub-asia-northeast1-tpu3", region = "asia-northeast1", ip_cidr_range = "172.10.16.0/29" },
+  { name = "subnet-hub-asia-northeast1-tpu4", region = "asia-northeast1", ip_cidr_range = "172.10.17.0/29" },
+  { name = "subnet-hub-asia-northeast1-voc1", region = "asia-northeast1", ip_cidr_range = "172.10.13.0/24" },
+  { name = "subnet-hub-asia-south1", region = "asia-south1", ip_cidr_range = "172.21.64.0/20" },
+  { name = "subnet-hub-asia-south2", region = "asia-south2", ip_cidr_range = "172.21.80.0/20" },
+  { name = "subnet-hub-asia-east2", region = "asia-east2", ip_cidr_range = "172.21.112.0/20" },
+  { name = "subnet-hub-me-west1", region = "me-west1", ip_cidr_range = "172.21.48.0/20" },
+  { name = "subnet-hub-me-central1", region = "me-central1", ip_cidr_range = "172.21.16.0/20" },
+  { name = "subnet-hub-me-central2", region = "me-central2", ip_cidr_range = "172.21.32.0/20" },
+]
+
+nat_enabled_regions = [
+  "us-west1",
+  "us-west2",
+  "us-west3",
+  "us-central1",
+  "us-east1",
+  "us-east5",
+  "europe-west1",
+  "europe-west4",
+  "europe-north1",
+  "asia-northeast1",
+  "asia-south1",
+]
+
+###--- Firewalls (override defaults as needed)
+firewall = {
+  ingress_filter = ["10.0.0.0/8", "192.168.0.0/16"]
+  tcp_ports      = ["20", "21", "22", "45", "53", "80", "88", "119", "443", "445", "563", "5551", "3389", "5173", "8080"]
+  udp_ports      = ["53", "67", "68"]
+  spark_tcp      = ["8081", "8481", "8080", "8480", "6066", "7077", "18080", "18480", "4040", "4440", "15002", "4041", "4441", "10000", "10001"]
+  spark_vast_tcp = ["9293", "9493", "9292", "9492", "6066", "2424", "18080", "18480", "4040", "4440", "15002", "4041", "4441", "10000", "10001"]
+  addc_tcp_ports = ["53", "88", "135", "137", "138", "139", "389", "445", "636", "49152-65535"]
+  addc_udp_ports = ["53", "88", "123", "135", "137", "138", "389", "445"]
+  external_ingress_tcp = [
+    "22", "53", "80", "111", "443", "445", "4420", "5551", "9092", "2049",
+    "20048", "20049", "20106", "20107", "20108", "49001", "49002"
+  ]
+  external_ingress_udp = ["53", "632", "2049", "20048", "20106", "20107", "20108"]
+  gcp_service_cidrs = [
+    "35.191.0.0/16", "130.211.0.0/22", "199.36.153.4/30",
+    "199.36.153.8/30", "35.235.240.0/20", "35.199.192.0/19"
+  ]
+  # Replace with your trusted external CIDRs
+  external_ingress = []
+}
+
+###--- Private DNS (VIP A records — trim or expand from CoreInfra/DNS/my_domains)
+dns_private = {
+  zone_name   = "vastclusters"
+  dns_name    = "arrakis.org."
+  description = "VIP Pool IPs"
+  a_records = {
+    sharevip1 = ["33.20.1.11"]
+    sharevip2 = ["33.20.1.12"]
+    repvip1   = ["33.21.1.11"]
+    repvip2   = ["33.21.1.12"]
+  }
+}
+
+dns_ad_forwarder = {
+  name        = "ad-forwarding-domain"
+  dns_name    = "ginaz.org."
+  description = "Forward AD Queries"
+  fw_target   = "172.20.16.3" # w22server01 private IP
+}
+
+dns_vast_forwarders = {
+  "vast-cluster-1" = {
+    dns_name       = "vastohio.com."
+    vastcluser_dns = "172.9.1.250"
+    description    = "Forwarder for VAST Cluster 1 DNS"
+  }
+  "vast-cluster-2" = {
+    dns_name       = "vastemea.com."
+    vastcluser_dns = "172.10.11.250"
+    description    = "Forwarder for VAST Cluster 2 DNS"
+  }
+}
+
+###--- VPN to Azure (enable_vpn = true)
+# vpn = {
+#   region            = "europe-north2"
+#   ha_vpn_gw_name    = "vpn-gateway-azure-central1"
+#   router_name       = "router-to-azure-sweden"
+#   external_gw_name  = "vpn-gateway-azure-central1"
+#   gcp_asn           = "65333"
+#   shared_key        = "CHANGE_ME"
+#   tunnel_if0        = "vpn-azure-tunnel0-central1"
+#   tunnel_if1        = "vpn-azure-tunnel1-central1"
+#   interface0        = "vpn-azure-tunnel0-interface0"
+#   interface1        = "vpn-azure-tunnel1-interface1"
+#   gcp_apipa_bgp_a   = "169.254.21.9"
+#   gcp_apipa_bgp_b   = "169.254.22.9"
+#   bgp_peer_if0      = "bgp-azure-peer-if0"
+#   bgp_peer_if1      = "bgp-azure-peer-if1"
+#   azure_pubip0      = "x.x.x.x"
+#   azure_pubip1      = "x.x.x.x"
+#   azure_apipa_bgp_a = "169.254.21.10"
+#   azure_apipa_bgp_b = "169.254.22.10"
+#   azure_asn         = "65010"
+# }
+
+###--- VMs (enable_*_vms = true; paths relative to this folder)
+# linux_vms = {
+#   devops01 = {
+#     region               = "us-west2"
+#     zone                 = "us-west2-a"
+#     vm_name              = "devops01"
+#     machine_type         = "e2-medium"
+#     sa_email             = "PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+#     ssh_user             = "karlv"
+#     ssh_key_file         = "../../secrets/karlv_ssh_keys.txt"
+#     cloudinit_configfile = "../scripts/gcp-cloud-init-multiOS.yaml"
+#     vm_tags              = ["karlv-vms", "karlv-linux", "karlv-infra", "standard-services"]
+#     subnet_name          = "subnet-hub-us-west2"
+#     public_ip_name       = "devops01-public-ip"
+#     private_ip_name      = "devops01-private-ip"
+#     private_ip           = "172.20.16.11"
+#   }
+# }
+#
+# windows_vms = {
+#   w22server01 = {
+#     region                 = "us-west2"
+#     zone                   = "us-west2-b"
+#     vm_name                = "w22server01"
+#     machine_type           = "c2-standard-4"
+#     sa_email               = "PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+#     windows_sysprep_script = "../scripts/windows-sysprep-config.ps1"
+#     vm_tags                = ["karlv-vms", "karlv-windows", "karlv-infra", "ad-domaincontroller", "standard-services"]
+#     subnet_name            = "subnet-hub-us-west2"
+#     public_ip_name         = "w22server01-public-ip"
+#     private_ip_name        = "w22server01-private-ip"
+#     private_ip             = "172.20.16.3"
+#   }
+# }
+
+# iap_user_emails = [
+#   "you@example.com",
+# ]
