@@ -1,4 +1,5 @@
-### Misc scripts used building VMs
+# Moved
 
-The cloud-init script in .gitignore
+Azure VM scripts now live at **`scripts/azure/vms/`**.
 
+Standard lab cloud-init: **`scripts/cloud-init/cloud-init-universal.yaml`**.

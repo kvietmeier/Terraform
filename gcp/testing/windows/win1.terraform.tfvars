@@ -24,7 +24,7 @@ machine_type    = "e2-medium"
 os_image        = "windows-server-2022-dc-v20241115"
 bootdisk_size   = "300"
 vm_tags         = [ "karlv-vms", "karlv-windows", "karlv-infra" ]
-windows-startup-script = "../../scripts/windows-startup-config.ps1"
+windows-startup-script = "../../../scripts/gcp/windows-startup-config.ps1"
 
 
 # VPC Config - existing

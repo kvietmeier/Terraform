@@ -21,7 +21,7 @@ machine_type         = "e2-medium"
 os_image             = "centos-stream-9-v20241009"
 bootdisk_size        = "60"
 ssh_key_file         = "../../../secrets/ssh_keys.txt"
-cloudinit_configfile = "../../scripts/gcp-cloud-init_dnf.yaml"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
 ssh_user             = "labuser"
 
 # VPC Config - existing

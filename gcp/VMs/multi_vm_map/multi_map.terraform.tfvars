@@ -31,7 +31,7 @@ subnet_name          = "subnet-hub-us-east1"
 ###===================================================================================###
 ssh_user             = "labuser"
 ssh_key_file         = "../../../secrets/ssh_keys.txt"
-cloudinit_configfile = "../../scripts/gcp-cloud-init-multiOS.yaml"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
 
 
 ###===================================================================================###

@@ -1,0 +1,72 @@
+#cloud-config
+# vim: syntax=yaml
+# -------------------------------------------------------------------------------
+# Standardized multi-cloud lab VM cloud-init (AWS / Azure / GCP)
+#
+# Design:
+#   - YAML handles portable package installs only
+#   - All OS/cloud branching lives in lab_bootstrap.sh (single source of truth)
+#   - Script is embedded as base64 so indentation cannot corrupt the shell
+#
+# Render (regenerate this file after editing lab_bootstrap.sh):
+#   ./render_cloud_init.sh
+#
+# Terraform (preferred for new modules):
+#   templatefile("${path}/cloud-init-universal.yaml.tftpl", {
+#     bootstrap_b64 = base64encode(file("${path}/lab_bootstrap.sh"))
+#   })
+#
+# Terraform (existing modules using file()):
+#   file("${path}/cloud-init-universal.yaml")   # committed render output
+#
+# Optional: set INSTALL_BENCH_TOOLS=false via a custom runcmd wrapper if you
+# only want comfort packages without fio/iperf/elbencho compiles.
+#
+# Author: Karl Vietmeier / KCV Consulting
+# License: Apache 2.0
+# -------------------------------------------------------------------------------
+
+package_update: true
+package_upgrade: false
+
+# Comfort / ops packages (no compile toolchain here — that is in lab_bootstrap.sh)
+packages:
+  - vim
+  - git
+  - curl
+  - wget
+  - unzip
+  - ca-certificates
+  - less
+  - python3
+  - tmux
+  - tree
+  - jq
+  - htop
+  - numactl
+  - sysstat
+  - traceroute
+  - nmap
+  - bc
+  - pkg-config
+  - libtool
+  - psmisc
+
+users:
+  - name: labuser
+    gecos: Lab User
+    groups: [sudo, wheel]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+
+write_files:
+  - path: /tmp/lab_bootstrap.sh
+    permissions: "0755"
+    encoding: b64
+    content: ${bootstrap_b64}
+
+runcmd:
+  - [bash, /tmp/lab_bootstrap.sh]
+
+final_message: "========= Multi-cloud lab bootstrap complete ========="

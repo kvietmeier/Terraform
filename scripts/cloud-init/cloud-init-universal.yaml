@@ -1,177 +1,72 @@
 #cloud-config
 # vim: syntax=yaml
 # -------------------------------------------------------------------------------
-# Copyright 2025 Karl Vietmeier / KCV Consulting
+# Standardized multi-cloud lab VM cloud-init (AWS / Azure / GCP)
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Design:
+#   - YAML handles portable package installs only
+#   - All OS/cloud branching lives in lab_bootstrap.sh (single source of truth)
+#   - Script is embedded as base64 so indentation cannot corrupt the shell
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# Render (regenerate this file after editing lab_bootstrap.sh):
+#   ./render_cloud_init.sh
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Terraform (preferred for new modules):
+#   templatefile("${path}/cloud-init-universal.yaml.tftpl", {
+#     bootstrap_b64 = base64encode(file("${path}/lab_bootstrap.sh"))
+#   })
 #
-# SUMMARY:
-# This cloud-init script bootstraps a multi-cloud performance lab environment.
-# It disables auto-upgrades/firewalls for benchmark stability, configures 
-# cloud-aware NTP (Azure/OCI/AWS), and compiles a suite of performance tools 
-# (FIO, iPerf, Dool, SockPerf, Elbencho) with specific fixes for Rocky 9/OpenSSL 3.
+# Terraform (existing modules using file()):
+#   file("${path}/cloud-init-universal.yaml")   # committed render output
+#
+# Optional: set INSTALL_BENCH_TOOLS=false via a custom runcmd wrapper if you
+# only want comfort packages without fio/iperf/elbencho compiles.
+#
+# Author: Karl Vietmeier / KCV Consulting
+# License: Apache 2.0
 # -------------------------------------------------------------------------------
 
 package_update: true
 package_upgrade: false
 
+# Comfort / ops packages (no compile toolchain here — that is in lab_bootstrap.sh)
 packages:
-  - tmux
+  - vim
   - git
-  - tree
-  - numactl
+  - curl
   - wget
-  - sysstat
+  - unzip
+  - ca-certificates
+  - less
+  - python3
+  - tmux
+  - tree
   - jq
-  - pkg-config
-  - libtool
+  - htop
+  - numactl
+  - sysstat
   - traceroute
   - nmap
   - bc
+  - pkg-config
+  - libtool
+  - psmisc
+
+users:
+  - name: labuser
+    gecos: Lab User
+    groups: [sudo, wheel]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
 
 write_files:
-  - path: /tmp/compiletools.sh
-    permissions: '0755'
-    content: |
-      #!/bin/bash
-      # Final Performance Lab Bootstrap
-      set -euo pipefail
-
-      exec > >(tee -a /tmp/compiletools-out.log) 2>&1
-      echo "compiletools.sh started at $(date)"
-
-      LOG_FILE="/tmp/cloud-init-out.txt"
-
-      wait_for_locks() {
-          echo "Waiting for system locks..."
-          while fuser /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock /var/cache/dnf/metadata_lock.pid >/dev/null 2>&1; do
-              sleep 5
-          done
-          while [ -f /etc/passwd.lock ] || [ -f /etc/group.lock ] || [ -f /etc/ptmp ] || [ -f /etc/gtmp ]; do
-              sleep 2
-          done
-      }
-
-      # --- Disable Auto-Updates & Firewalls ---
-      if [ -f /etc/debian_version ]; then
-          echo 'APT::Periodic::Update-Package-Lists "0";' > /etc/apt/apt.conf.d/20auto-upgrades
-          echo 'APT::Periodic::Unattended-Upgrade "0";' >> /etc/apt/apt.conf.d/20auto-upgrades
-          systemctl stop unattended-upgrades apt-daily.timer apt-daily-upgrade.timer || true
-          systemctl disable unattended-upgrades apt-daily.timer apt-daily-upgrade.timer || true
-          systemctl mask unattended-upgrades apt-daily.service apt-daily-upgrade.service || true
-          ufw disable || true
-      elif [ -f /etc/redhat-release ] || [ -f /etc/azurelinux-release ] || [ -f /etc/mariner-release ]; then
-          systemctl stop dnf-automatic.timer firewalld nftables || true
-          systemctl disable dnf-automatic.timer firewalld nftables || true
-      fi
-
-      # --- User & Directory Setup ---
-      wait_for_locks
-      if ! id -u labuser >/dev/null 2>&1; then
-          [ -f /etc/debian_version ] && GRP="sudo" || GRP="wheel"
-          useradd -m -s /bin/bash -G "$GRP" labuser
-          echo "labuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/labuser
-      fi
-
-      LABUSER_HOME="/home/labuser"
-      mkdir -p "$LABUSER_HOME/output" "$LABUSER_HOME/git" "/root/git"
-
-      ALIASES=$(cat <<'EOF'
-      alias la="ls -Av"
-      alias ls="ls -hF --color=auto"
-      alias l="ls -CFv"
-      alias ll='ls -lhvF --group-directories-first'
-      alias lla='ls -alhvF --group-directories-first'
-      alias grep='grep --color=auto'
-      alias cdb='cd -'
-      alias cdu='cd ..'
-      alias df='df -kh'
-      alias du='du -h'
-      set -o vi
-      bind 'set bell-style none'
-      EOF
-      )
-      echo "$ALIASES" >> "$LABUSER_HOME/.bashrc"
-      echo "$ALIASES" >> /root/.bashrc
-      chown -R labuser:labuser "$LABUSER_HOME"
-
-      # --- Package Installation ---
-      wait_for_locks
-      if [ -f /etc/debian_version ]; then
-          DEBIAN_FRONTEND=noninteractive apt-get update -y
-          DEBIAN_FRONTEND=noninteractive apt-get install -y \
-              build-essential debhelper libboost-dev libboost-program-options-dev \
-              libboost-system-dev libboost-thread-dev libssl-dev libncurses-dev \
-              libnuma-dev libaio-dev librdmacm1 cmake autoconf \
-              libcurl4-openssl-dev uuid-dev zlib1g-dev git python3-dev libarchive-dev chrony
-      elif [ -f /etc/redhat-release ] || [ -f /etc/azurelinux-release ] || [ -f /etc/mariner-release ]; then
-          dnf groupinstall -y "Development Tools"
-          dnf install -y epel-release || true
-          dnf install -y numactl-devel libaio-devel boost-devel ncurses-devel \
-              openssl-devel cmake rdma-core libcurl-devel libuuid-devel \
-              zlib zlib-devel git python3-devel libarchive-devel chrony
-      fi
-
-      # --- Cloud-Aware Chrony ---
-      [ -f /etc/debian_version ] && CHRONY_CONF="/etc/chrony/chrony.conf" || CHRONY_CONF="/etc/chrony.conf"
-      if curl -s --connect-timeout 1 http://169.254.169.254/opc/v1/instance/ >/dev/null 2>&1; then
-          echo "server 169.254.169.254 iburst" > $CHRONY_CONF # OCI
-      elif curl -s --connect-timeout 1 -H "Metadata:true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" >/dev/null 2>&1; then
-          echo "server 169.254.169.254 prefer iburst" > $CHRONY_CONF # Azure
-      elif curl -s --connect-timeout 1 http://169.254.169.254/latest/meta-data/ >/dev/null 2>&1; then
-          echo "server 169.254.169.123 prefer iburst" > $CHRONY_CONF # AWS
-      else
-          echo "pool pool.ntp.org iburst" > $CHRONY_CONF
-      fi
-      cat <<EOF >> $CHRONY_CONF
-      driftfile /var/lib/chrony/drift
-      makestep 1.0 3
-      rtcsync
-      EOF
-      systemctl enable --now chronyd || systemctl enable --now chrony
-
-      # --- Tools Compilation ---
-      _smart_build() {
-          local url=$1 dir=$2 cmd=$3
-          cd /root/git
-          [ -d "$dir" ] && return 0
-          git clone "$url" "$dir" && cd "$dir"
-          eval "$cmd" || { cd /root/git && rm -rf "$dir"; return 1; }
-      }
-
-      _smart_build "https://github.com/scottchiefbaker/dool.git" "dool" "./install.py"
-      _smart_build "https://github.com/axboe/fio.git" "fio" "./configure && make -j$(nproc) && make install"
-      _smart_build "https://github.com/esnet/iperf.git" "iperf" "./configure && make -j$(nproc) && make install && echo '/usr/local/lib' > /etc/ld.so.conf.d/iperf.conf && ldconfig"
-      _smart_build "https://github.com/mellanox/sockperf" "sockperf" "./autogen.sh && ./configure && make -j$(nproc) && make install"
-
-      # Elbencho (Rocky/AzureLinux Fix)
-      if [ -f /etc/redhat-release ] || [ -f /etc/azurelinux-release ] || [ -f /etc/mariner-release ]; then
-          EL_CMD="find . -name 'CMakeCache.txt' -delete && \
-                  export OPENSSL_ROOT_DIR=/usr OPENSSL_LIBRARIES=/usr/lib64 OPENSSL_INCLUDE_DIR=/usr/include && \
-                  make S3_SUPPORT=1 -j $(nproc) && make rpm && dnf install -y ./packaging/RPMS/x86_64/elbencho*.rpm"
-      else
-          EL_CMD="make S3_SUPPORT=1 -j $(nproc) && make install"
-      fi
-      _smart_build "https://github.com/breuner/elbencho.git" "elbencho" "$EL_CMD"
-
-      # User Scripts
-      cd "$LABUSER_HOME"
-      git clone https://github.com/kvietmeier/scripts.git || true
-      chown -R labuser:labuser "$LABUSER_HOME/scripts"
-      echo "compiletools.sh completed at $(date)" >> "$LOG_FILE"
+  - path: /tmp/lab_bootstrap.sh
+    permissions: "0755"
+    encoding: b64
+    content: IyEvYmluL2Jhc2gKIyMjPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0jIyMKIyBsYWJfYm9vdHN0cmFwLnNoIOKAlCBzaW5nbGUgc291cmNlIG9mIHRydXRoIGZvciBtdWx0aS1jbG91ZCBsYWIgVk0gYm9vdHN0cmFwCiMKIyBJbnZva2VkIGJ5IGNsb3VkLWluaXQgKHNlZSBjbG91ZC1pbml0LXVuaXZlcnNhbC55YW1sKS4gU2FmZSB0byBydW4gc3RhbmRhbG9uZQojIGFzIHJvb3QgZm9yIGRlYnVnZ2luZzogIHN1ZG8gYmFzaCBsYWJfYm9vdHN0cmFwLnNoCiMKIyBDb3ZlcnM6IEFXUywgQXp1cmUsIEdDUCAoYW5kIE9DSSBOVFAgaWYgcHJlc2VudCkgb24gRGViaWFuL1VidW50dSBhbmQKIyBSSEVML1JvY2t5L0NlbnRPUy9BenVyZSBMaW51eC4KIwojIEVudiBrbm9iczoKIyAgIElOU1RBTExfQkVOQ0hfVE9PTFM9dHJ1ZXxmYWxzZSAgIENvbXBpbGUgZmlvL2lwZXJmL2Rvb2wvc29ja3BlcmYvZWxiZW5jaG8KIyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIChkZWZhdWx0OiB0cnVlIGZvciBiZW5jaG1hcmsgbGFiIGltYWdlcykKIyAgIENMT05FX0xBQl9TQ1JJUFRTPXRydWV8ZmFsc2UgICAgIENsb25lIGt2aWV0bWVpZXIvc2NyaXB0cyBpbnRvIGxhYnVzZXIgaG9tZQojICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKGRlZmF1bHQ6IHRydWUpCiMKIyBBdXRob3I6IEthcmwgVmlldG1laWVyCiMgTGljZW5zZTogQXBhY2hlIDIuMAojIyM9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSMjIwoKc2V0IC11CiMgRG8gTk9UIHVzZSBzZXQgLWUgZ2xvYmFsbHkg4oCUIGJlbmNoIGNvbXBpbGVzIG11c3Qgbm90IGZhaWwgdGhlIHdob2xlIGJvb3RzdHJhcC4KCklOU1RBTExfQkVOQ0hfVE9PTFM9IiR7SU5TVEFMTF9CRU5DSF9UT09MUzotdHJ1ZX0iCkNMT05FX0xBQl9TQ1JJUFRTPSIke0NMT05FX0xBQl9TQ1JJUFRTOi10cnVlfSIKCkxPR19GSUxFPSIvdG1wL2Nsb3VkLWluaXQtb3V0LnR4dCIKQk9PVF9MT0c9Ii90bXAvbGFiX2Jvb3RzdHJhcC1vdXQubG9nIgoKZXhlYyA+ID4odGVlIC1hICIkQk9PVF9MT0ciKSAyPiYxCmVjaG8gImxhYl9ib290c3RyYXAuc2ggc3RhcnRlZCBhdCAkKGRhdGUpIgplY2hvICJJTlNUQUxMX0JFTkNIX1RPT0xTPSR7SU5TVEFMTF9CRU5DSF9UT09MU30gQ0xPTkVfTEFCX1NDUklQVFM9JHtDTE9ORV9MQUJfU0NSSVBUU30iCgpsb2coKSB7IGVjaG8gIiQqIiB8IHRlZSAtYSAiJExPR19GSUxFIjsgfQoKbG9nX2FuZF9jb250aW51ZSgpIHsKICAgIGxvY2FsIGRlc2M9IiQxIgogICAgc2hpZnQKICAgIGxvZyAiPj4gJGRlc2MiCiAgICBpZiAiJEAiOyB0aGVuCiAgICAgICAgbG9nICJPSzogJGRlc2MiCiAgICAgICAgcmV0dXJuIDAKICAgIGZpCiAgICBsb2cgIldBUk46ICRkZXNjIGZhaWxlZCAoY29udGludWluZykiCiAgICByZXR1cm4gMAp9Cgp3YWl0X2Zvcl9sb2NrcygpIHsKICAgIGVjaG8gIldhaXRpbmcgZm9yIHBhY2thZ2UvdXNlciBsb2Nrcy4uLiIKICAgIGxvY2FsIGk9MAogICAgaWYgY29tbWFuZCAtdiBmdXNlciA+L2Rldi9udWxsIDI+JjE7IHRoZW4KICAgICAgICB3aGlsZSBmdXNlciAvdmFyL2xpYi9kcGtnL2xvY2stZnJvbnRlbmQgL3Zhci9saWIvYXB0L2xpc3RzL2xvY2sgXAogICAgICAgICAgICAgIC92YXIvY2FjaGUvZG5mL21ldGFkYXRhX2xvY2sucGlkID4vZGV2L251bGwgMj4mMTsgZG8KICAgICAgICAgICAgc2xlZXAgNQogICAgICAgICAgICBpPSQoKGkgKyAxKSkKICAgICAgICAgICAgW1sgJGkgLWd0IDYwIF1dICYmIGJyZWFrCiAgICAgICAgZG9uZQogICAgZmkKICAgIHdoaWxlIFtbIC1mIC9ldGMvcGFzc3dkLmxvY2sgfHwgLWYgL2V0Yy9ncm91cC5sb2NrIHx8IC1mIC9ldGMvcHRtcCB8fCAtZiAvZXRjL2d0bXAgXV07IGRvCiAgICAgICAgc2xlZXAgMgogICAgICAgIGk9JCgoaSArIDEpKQogICAgICAgIFtbICRpIC1ndCA2MCBdXSAmJiBicmVhawogICAgZG9uZQp9Cgppc19kZWJpYW4oKSB7IFtbIC1mIC9ldGMvZGViaWFuX3ZlcnNpb24gXV07IH0KaXNfcmhlbCgpIHsKICAgIFtbIC1mIC9ldGMvcmVkaGF0LXJlbGVhc2UgfHwgLWYgL2V0Yy9henVyZWxpbnV4LXJlbGVhc2UgfHwgLWYgL2V0Yy9tYXJpbmVyLXJlbGVhc2UgXV0KfQoKIyMjLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0jIyMKIyMjIERpc2FibGUgYXV0by11cGRhdGVzIC8gaG9zdCBmaXJld2FsbHMgKGJlbmNoIHN0YWJpbGl0eSkKIyMjLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0jIyMKZGlzYWJsZV9ub2lzZSgpIHsKICAgIGlmIGlzX2RlYmlhbjsgdGhlbgogICAgICAgIGNhdCA+IC9ldGMvYXB0L2FwdC5jb25mLmQvMjBhdXRvLXVwZ3JhZGVzIDw8J0VPRicKQVBUOjpQZXJpb2RpYzo6VXBkYXRlLVBhY2thZ2UtTGlzdHMgIjAiOwpBUFQ6OlBlcmlvZGljOjpVbmF0dGVuZGVkLVVwZ3JhZGUgIjAiOwpFT0YKICAgICAgICBzeXN0ZW1jdGwgc3RvcCB1bmF0dGVuZGVkLXVwZ3JhZGVzIGFwdC1kYWlseS50aW1lciBhcHQtZGFpbHktdXBncmFkZS50aW1lciAyPi9kZXYvbnVsbCB8fCB0cnVlCiAgICAgICAgc3lzdGVtY3RsIGRpc2FibGUgdW5hdHRlbmRlZC11cGdyYWRlcyBhcHQtZGFpbHkudGltZXIgYXB0LWRhaWx5LXVwZ3JhZGUudGltZXIgMj4vZGV2L251bGwgfHwgdHJ1ZQogICAgICAgIHN5c3RlbWN0bCBtYXNrIHVuYXR0ZW5kZWQtdXBncmFkZXMgYXB0LWRhaWx5LnNlcnZpY2UgYXB0LWRhaWx5LXVwZ3JhZGUuc2VydmljZSAyPi9kZXYvbnVsbCB8fCB0cnVlCiAgICAgICAgY29tbWFuZCAtdiB1ZncgPi9kZXYvbnVsbCAyPiYxICYmIHVmdyBkaXNhYmxlIHx8IHRydWUKICAgIGVsaWYgaXNfcmhlbDsgdGhlbgogICAgICAgIHN5c3RlbWN0bCBzdG9wIGRuZi1hdXRvbWF0aWMudGltZXIgZmlyZXdhbGxkIG5mdGFibGVzIDI+L2Rldi9udWxsIHx8IHRydWUKICAgICAgICBzeXN0ZW1jdGwgZGlzYWJsZSBkbmYtYXV0b21hdGljLnRpbWVyIGZpcmV3YWxsZCBuZnRhYmxlcyAyPi9kZXYvbnVsbCB8fCB0cnVlCiAgICBmaQp9CgojIyMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMjIwojIyMgbGFidXNlciArIHNoZWxsIGNvbWZvcnQKIyMjLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0jIyMKZW5zdXJlX2xhYnVzZXIoKSB7CiAgICB3YWl0X2Zvcl9sb2NrcwogICAgaWYgISBpZCAtdSBsYWJ1c2VyID4vZGV2L251bGwgMj4mMTsgdGhlbgogICAgICAgIGxvY2FsIGdycD0id2hlZWwiCiAgICAgICAgaXNfZGViaWFuICYmIGdycD0ic3VkbyIKICAgICAgICB1c2VyYWRkIC1tIC1zIC9iaW4vYmFzaCAtRyAiJGdycCIgbGFidXNlcgogICAgICAgIGVjaG8gImxhYnVzZXIgQUxMPShBTEwpIE5PUEFTU1dEOkFMTCIgPiAvZXRjL3N1ZG9lcnMuZC9sYWJ1c2VyCiAgICAgICAgY2htb2QgNDQwIC9ldGMvc3Vkb2Vycy5kL2xhYnVzZXIKICAgIGZpCgogICAgbG9jYWwgaG9tZT0iL2hvbWUvbGFidXNlciIKICAgIG1rZGlyIC1wICIkaG9tZS9vdXRwdXQiICIkaG9tZS9naXQiIC9yb290L2dpdAoKICAgICMgQXBwZW5kIG9uY2UgKGlkZW1wb3RlbnQgbWFya2VyKQogICAgbG9jYWwgbWFya2VyPSIjID4+PiBsYWJfYm9vdHN0cmFwIGFsaWFzZXMgPj4+IgogICAgbG9jYWwgYWxpYXNlcwogICAgYWxpYXNlcz0kKGNhdCA8PCdFT0YnCiMgPj4+IGxhYl9ib290c3RyYXAgYWxpYXNlcyA+Pj4KYWxpYXMgbGE9ImxzIC1BdiIKYWxpYXMgbHM9ImxzIC1oRiAtLWNvbG9yPWF1dG8iCmFsaWFzIGw9ImxzIC1DRnYiCmFsaWFzIGxsPSdscyAtbGh2RiAtLWdyb3VwLWRpcmVjdG9yaWVzLWZpcnN0JwphbGlhcyBsbGE9J2xzIC1hbGh2RiAtLWdyb3VwLWRpcmVjdG9yaWVzLWZpcnN0JwphbGlhcyBncmVwPSdncmVwIC0tY29sb3I9YXV0bycKYWxpYXMgY2RiPSdjZCAtJwphbGlhcyBjZHU9J2NkIC4uJwphbGlhcyBkZj0nZGYgLWtoJwphbGlhcyBkdT0nZHUgLWgnCnNldCAtbyB2aQpiaW5kICdzZXQgYmVsbC1zdHlsZSBub25lJyAyPi9kZXYvbnVsbCB8fCB0cnVlCiMgPDw8IGxhYl9ib290c3RyYXAgYWxpYXNlcyA8PDwKRU9GCikKCiAgICBmb3IgcmMgaW4gIiRob21lLy5iYXNocmMiIC9yb290Ly5iYXNocmM7IGRvCiAgICAgICAgdG91Y2ggIiRyYyIKICAgICAgICBpZiAhIGdyZXAgLXFGICIkbWFya2VyIiAiJHJjIiAyPi9kZXYvbnVsbDsgdGhlbgogICAgICAgICAgICBwcmludGYgJ1xuJXNcbicgIiRhbGlhc2VzIiA+PiAiJHJjIgogICAgICAgIGZpCiAgICBkb25lCiAgICBjaG93biAtUiBsYWJ1c2VyOmxhYnVzZXIgIiRob21lIgp9CgojIyMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMjIwojIyMgQnVpbGQgZGVwZW5kZW5jaWVzIChvbmx5IHdoZW4gY29tcGlsaW5nIGJlbmNoIHRvb2xzKQojIyMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMjIwppbnN0YWxsX2J1aWxkX2RlcHMoKSB7CiAgICB3YWl0X2Zvcl9sb2NrcwogICAgaWYgaXNfZGViaWFuOyB0aGVuCiAgICAgICAgZXhwb3J0IERFQklBTl9GUk9OVEVORD1ub25pbnRlcmFjdGl2ZQogICAgICAgIGFwdC1nZXQgdXBkYXRlIC15CiAgICAgICAgYXB0LWdldCBpbnN0YWxsIC15IFwKICAgICAgICAgICAgYnVpbGQtZXNzZW50aWFsIGRlYmhlbHBlciBjbWFrZSBhdXRvY29uZiBwa2ctY29uZmlnIGxpYnRvb2wgXAogICAgICAgICAgICBsaWJib29zdC1kZXYgbGliYm9vc3QtcHJvZ3JhbS1vcHRpb25zLWRldiBsaWJib29zdC1zeXN0ZW0tZGV2IGxpYmJvb3N0LXRocmVhZC1kZXYgXAogICAgICAgICAgICBsaWJzc2wtZGV2IGxpYm5jdXJzZXMtZGV2IGxpYm51bWEtZGV2IGxpYmFpby1kZXYgbGlicmRtYWNtMSBcCiAgICAgICAgICAgIGxpYmN1cmw0LW9wZW5zc2wtZGV2IHV1aWQtZGV2IHpsaWIxZy1kZXYgbGliYXJjaGl2ZS1kZXYgXAogICAgICAgICAgICBnaXQgcHl0aG9uMy1kZXYgY2hyb255IHBzbWlzYyBjdXJsCiAgICBlbGlmIGlzX3JoZWw7IHRoZW4KICAgICAgICBkbmYgZ3JvdXBpbnN0YWxsIC15ICJEZXZlbG9wbWVudCBUb29scyIgfHwgdHJ1ZQogICAgICAgIGRuZiBpbnN0YWxsIC15IGVwZWwtcmVsZWFzZSB8fCB0cnVlCiAgICAgICAgZG5mIGluc3RhbGwgLXkgXAogICAgICAgICAgICBjbWFrZSBhdXRvY29uZiBsaWJ0b29sIHBrZ2NvbmYtcGtnLWNvbmZpZyBcCiAgICAgICAgICAgIG51bWFjdGwtZGV2ZWwgbGliYWlvLWRldmVsIGJvb3N0LWRldmVsIG5jdXJzZXMtZGV2ZWwgXAogICAgICAgICAgICBvcGVuc3NsLWRldmVsIHJkbWEtY29yZSBsaWJjdXJsLWRldmVsIGxpYnV1aWQtZGV2ZWwgXAogICAgICAgICAgICB6bGliIHpsaWItZGV2ZWwgbGliYXJjaGl2ZS1kZXZlbCBcCiAgICAgICAgICAgIGdpdCBweXRob24zLWRldmVsIGNocm9ueSBwc21pc2MgY3VybAogICAgZWxzZQogICAgICAgIGxvZyAiV0FSTjogdW5rbm93biBkaXN0cm87IHNraXBwaW5nIGJ1aWxkIGRlcHMiCiAgICBmaQp9CgojIyMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSMjIwojIyMgQ2xvdWQtYXdhcmUgY2hyb255IChBV1MgLyBBenVyZSAvIEdDUCAvIE9DSSkKIyMjLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0jIyMKY29uZmlndXJlX2Nocm9ueSgpIHsKICAgIGxvY2FsIGNvbmYKICAgIGlmIGlzX2RlYmlhbjsgdGhlbgogICAgICAgIGNvbmY9Ii9ldGMvY2hyb255L2Nocm9ueS5jb25mIgogICAgICAgIG1rZGlyIC1wIC9ldGMvY2hyb255CiAgICBlbHNlCiAgICAgICAgY29uZj0iL2V0Yy9jaHJvbnkuY29uZiIKICAgIGZpCgogICAgbG9jYWwgc2VydmVyX2xpbmU9InBvb2wgcG9vbC5udHAub3JnIGlidXJzdCIKCiAgICAjIE9yZGVyIG1hdHRlcnM6IHByb2JlIGNsb3VkIG1ldGFkYXRhIGVuZHBvaW50cwogICAgaWYgY3VybCAtcyAtLWNvbm5lY3QtdGltZW91dCAxIC1IICJNZXRhZGF0YS1GbGF2b3I6IEdvb2dsZSIgXAogICAgICAgIGh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQvY29tcHV0ZU1ldGFkYXRhL3YxLyA+L2Rldi9udWxsIDI+JjE7IHRoZW4KICAgICAgICBzZXJ2ZXJfbGluZT0ic2VydmVyIG1ldGFkYXRhLmdvb2dsZS5pbnRlcm5hbCBpYnVyc3QiICAgICAgICAgICMgR0NQCiAgICBlbGlmIGN1cmwgLXMgLS1jb25uZWN0LXRpbWVvdXQgMSAtSCAiTWV0YWRhdGE6dHJ1ZSIgXAogICAgICAgICJodHRwOi8vMTY5LjI1NC4xNjkuMjU0L21ldGFkYXRhL2luc3RhbmNlP2FwaS12ZXJzaW9uPTIwMjEtMDItMDEiID4vZGV2L251bGwgMj4mMTsgdGhlbgogICAgICAgIHNlcnZlcl9saW5lPSJzZXJ2ZXIgMTY5LjI1NC4xNjkuMjU0IHByZWZlciBpYnVyc3QiICAgICAgICAgICAgIyBBenVyZQogICAgZWxpZiBjdXJsIC1zIC0tY29ubmVjdC10aW1lb3V0IDEgaHR0cDovLzE2OS4yNTQuMTY5LjI1NC9vcGMvdjEvaW5zdGFuY2UvID4vZGV2L251bGwgMj4mMTsgdGhlbgogICAgICAgIHNlcnZlcl9saW5lPSJzZXJ2ZXIgMTY5LjI1NC4xNjkuMjU0IGlidXJzdCIgICAgICAgICAgICAgICAgICAgIyBPQ0kKICAgIGVsaWYgY3VybCAtcyAtLWNvbm5lY3QtdGltZW91dCAxIGh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQvbGF0ZXN0L21ldGEtZGF0YS8gPi9kZXYvbnVsbCAyPiYxOyB0aGVuCiAgICAgICAgc2VydmVyX2xpbmU9InNlcnZlciAxNjkuMjU0LjE2OS4xMjMgcHJlZmVyIGlidXJzdCIgICAgICAgICAgICAjIEFXUwogICAgZmkKCiAgICBjYXQgPiAiJGNvbmYiIDw8RU9GCiMgTWFuYWdlZCBieSBsYWJfYm9vdHN0cmFwLnNoCiRzZXJ2ZXJfbGluZQpkcmlmdGZpbGUgL3Zhci9saWIvY2hyb255L2RyaWZ0Cm1ha2VzdGVwIDEuMCAzCnJ0Y3N5bmMKRU9GCgogICAgc3lzdGVtY3RsIGVuYWJsZSAtLW5vdyBjaHJvbnlkIDI+L2Rldi9udWxsIHx8IHN5c3RlbWN0bCBlbmFibGUgLS1ub3cgY2hyb255IDI+L2Rldi9udWxsIHx8IHRydWUKICAgIGxvZyAiY2hyb255OiAkc2VydmVyX2xpbmUiCn0KCiMjIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIyMjCiMjIyBCZW5jaCB0b29sIGNvbXBpbGVzIChzb2Z0LWZhaWwgcGVyIHRvb2wpCiMjIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIyMjCnNtYXJ0X2J1aWxkKCkgewogICAgbG9jYWwgdXJsPSIkMSIgZGlyPSIkMiIgY21kPSIkMyIKICAgIG1rZGlyIC1wIC9yb290L2dpdAogICAgY2QgL3Jvb3QvZ2l0IHx8IHJldHVybiAwCiAgICBpZiBbWyAtZCAiJGRpciIgXV07IHRoZW4KICAgICAgICBsb2cgInNraXAgJGRpciAoYWxyZWFkeSBwcmVzZW50KSIKICAgICAgICByZXR1cm4gMAogICAgZmkKICAgIGxvZ19hbmRfY29udGludWUgImNsb25lICRkaXIiIGdpdCBjbG9uZSAiJHVybCIgIiRkaXIiCiAgICBpZiBbWyAhIC1kICIkZGlyIiBdXTsgdGhlbgogICAgICAgIHJldHVybiAwCiAgICBmaQogICAgKAogICAgICAgIGNkICIvcm9vdC9naXQvJGRpciIgfHwgZXhpdCAxCiAgICAgICAgZXZhbCAiJGNtZCIKICAgICkgJiYgbG9nICJPSzogYnVpbGQgJGRpciIgfHwgbG9nICJXQVJOOiBidWlsZCAkZGlyIGZhaWxlZCIKfQoKaW5zdGFsbF9iZW5jaF90b29scygpIHsKICAgIHNtYXJ0X2J1aWxkICJodHRwczovL2dpdGh1Yi5jb20vc2NvdHRjaGllZmJha2VyL2Rvb2wuZ2l0IiAiZG9vbCIgXAogICAgICAgICIuL2luc3RhbGwucHkiCgogICAgc21hcnRfYnVpbGQgImh0dHBzOi8vZ2l0aHViLmNvbS9heGJvZS9maW8uZ2l0IiAiZmlvIiBcCiAgICAgICAgIi4vY29uZmlndXJlICYmIG1ha2UgLWpcJChucHJvYykgJiYgbWFrZSBpbnN0YWxsIgoKICAgIHNtYXJ0X2J1aWxkICJodHRwczovL2dpdGh1Yi5jb20vZXNuZXQvaXBlcmYuZ2l0IiAiaXBlcmYiIFwKICAgICAgICAiLi9jb25maWd1cmUgJiYgbWFrZSAtalwkKG5wcm9jKSAmJiBtYWtlIGluc3RhbGwgJiYgZWNobyAvdXNyL2xvY2FsL2xpYiA+IC9ldGMvbGQuc28uY29uZi5kL2lwZXJmLmNvbmYgJiYgbGRjb25maWciCgogICAgc21hcnRfYnVpbGQgImh0dHBzOi8vZ2l0aHViLmNvbS9tZWxsYW5veC9zb2NrcGVyZiIgInNvY2twZXJmIiBcCiAgICAgICAgIi4vYXV0b2dlbi5zaCAmJiAuL2NvbmZpZ3VyZSAmJiBtYWtlIC1qXCQobnByb2MpICYmIG1ha2UgaW5zdGFsbCIKCiAgICBsb2NhbCBlbF9jbWQKICAgIGlmIGlzX3JoZWw7IHRoZW4KICAgICAgICBlbF9jbWQ9ImZpbmQgLiAtbmFtZSBDTWFrZUNhY2hlLnR4dCAtZGVsZXRlOyBcCiAgICAgICAgICAgIGV4cG9ydCBPUEVOU1NMX1JPT1RfRElSPS91c3IgT1BFTlNTTF9MSUJSQVJJRVM9L3Vzci9saWI2NCBPUEVOU1NMX0lOQ0xVREVfRElSPS91c3IvaW5jbHVkZTsgXAogICAgICAgICAgICBtYWtlIFMzX1NVUFBPUlQ9MSAtalwkKG5wcm9jKSAmJiBtYWtlIHJwbSAmJiBkbmYgaW5zdGFsbCAteSAuL3BhY2thZ2luZy9SUE1TL3g4Nl82NC9lbGJlbmNobyoucnBtIgogICAgZWxzZQogICAgICAgIGVsX2NtZD0ibWFrZSBTM19TVVBQT1JUPTEgLWpcJChucHJvYykgJiYgbWFrZSBpbnN0YWxsIgogICAgZmkKICAgIHNtYXJ0X2J1aWxkICJodHRwczovL2dpdGh1Yi5jb20vYnJldW5lci9lbGJlbmNoby5naXQiICJlbGJlbmNobyIgIiRlbF9jbWQiCn0KCmNsb25lX2xhYl9zY3JpcHRzKCkgewogICAgbG9jYWwgaG9tZT0iL2hvbWUvbGFidXNlciIKICAgIGNkICIkaG9tZSIgfHwgcmV0dXJuIDAKICAgIGlmIFtbIC1kICIkaG9tZS9zY3JpcHRzLy5naXQiIF1dOyB0aGVuCiAgICAgICAgbG9nICJsYWIgc2NyaXB0cyBhbHJlYWR5IGNsb25lZCIKICAgIGVsc2UKICAgICAgICBsb2dfYW5kX2NvbnRpbnVlICJjbG9uZSBsYWIgc2NyaXB0cyIgXAogICAgICAgICAgICBnaXQgY2xvbmUgaHR0cHM6Ly9naXRodWIuY29tL2t2aWV0bWVpZXIvc2NyaXB0cy5naXQgIiRob21lL3NjcmlwdHMiCiAgICBmaQogICAgY2hvd24gLVIgbGFidXNlcjpsYWJ1c2VyICIkaG9tZS9zY3JpcHRzIiAyPi9kZXYvbnVsbCB8fCB0cnVlCn0KCiMjIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIyMjCiMjIyBNYWluCiMjIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIyMjCm1haW4oKSB7CiAgICBkaXNhYmxlX25vaXNlCiAgICBlbnN1cmVfbGFidXNlcgogICAgY29uZmlndXJlX2Nocm9ueQoKICAgIGlmIFtbICIkSU5TVEFMTF9CRU5DSF9UT09MUyIgPT0gInRydWUiIF1dOyB0aGVuCiAgICAgICAgaW5zdGFsbF9idWlsZF9kZXBzCiAgICAgICAgaW5zdGFsbF9iZW5jaF90b29scwogICAgZWxzZQogICAgICAgIGxvZyAiU2tpcHBpbmcgYmVuY2ggdG9vbCBjb21waWxlIChJTlNUQUxMX0JFTkNIX1RPT0xTPWZhbHNlKSIKICAgIGZpCgogICAgaWYgW1sgIiRDTE9ORV9MQUJfU0NSSVBUUyIgPT0gInRydWUiIF1dOyB0aGVuCiAgICAgICAgY2xvbmVfbGFiX3NjcmlwdHMKICAgIGZpCgogICAgbG9nICJsYWJfYm9vdHN0cmFwLnNoIGNvbXBsZXRlZCBhdCAkKGRhdGUpIgogICAgZWNobyAibGFiX2Jvb3RzdHJhcC5zaCBjb21wbGV0ZWQgYXQgJChkYXRlKSIgPiAvcm9vdC9DT05GSUdVUkVEX0JZX0xBQl9CT09UU1RSQVAKfQoKbWFpbiAiJEAiCg==
 
 runcmd:
-  - bash /tmp/compiletools.sh
-  - echo "cloud-init completed successfully at $(date)" > /root/CONFIGURED_BY_CLOUD_INIT
+  - [bash, /tmp/lab_bootstrap.sh]
 
-final_message: "========= Multi-Cloud Bootstrap Complete ========="
+final_message: "========= Multi-cloud lab bootstrap complete ========="

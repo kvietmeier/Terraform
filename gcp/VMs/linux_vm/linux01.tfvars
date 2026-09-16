@@ -54,4 +54,4 @@ vm_tags          = ["karlv-vms", "karlv-linux", "karlv-infra"]
 
 ssh_user             = "karlv"
 ssh_key_file         = "../../../secrets/ssh_keys.txt"
-cloudinit_configfile = "../../scripts/gcp-cloud-init-multiOS.yaml"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"

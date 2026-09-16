@@ -15,7 +15,7 @@ zone                 = "us-west2-a"
 # Common VM Info
 ssh_user             = "labuser"
 ssh_key_file         = "../../../secrets/ssh_keys.txt"
-cloudinit_configfile = "../../scripts/gcp-cloud-init_dnf.yaml"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
 
 # VPC Config - existing
 vpc_name             = "default"
@@ -32,7 +32,7 @@ vm_instances = {
     os_image     = "centos-stream-9-v20241009"
     network      = "default"
     subnetwork   = "infrasubnet01"
-    #cloudinit    = "../../scripts/gcp-cloud-init_dnf.yaml"
+    #cloudinit    = "../../../scripts/cloud-init/cloud-init-universal.yaml"
   }
   vm2 = {
     machine_type = "e2-medium"
@@ -41,7 +41,7 @@ vm_instances = {
     os_image     = "centos-stream-9-v20241009"
     network      = "default"
     subnetwork   = "infrasubnet01"
-    #cloudinit    = "../../scripts/gcp-cloud-init_dnf.yaml"
+    #cloudinit    = "../../../scripts/cloud-init/cloud-init-universal.yaml"
   }
   vm3 = {
     machine_type = "e2-medium"
@@ -50,6 +50,6 @@ vm_instances = {
     os_image     = "centos-stream-9-v20241009"
     network      = "default"
     subnetwork   = "infrasubnet01"
-    #cloudinit    = "../../scripts/gcp-cloud-init_dnf.yaml"
+    #cloudinit    = "../../../scripts/cloud-init/cloud-init-universal.yaml"
   }
 }

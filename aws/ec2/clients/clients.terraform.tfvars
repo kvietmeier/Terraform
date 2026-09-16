@@ -14,7 +14,7 @@ subnet_cidr = "10.0.0.0/24"
 
 ssh_key_name         = "labuser-key"
 ssh_key_file         = "../../../secrets/ssh_keys.txt"
-cloudinit_configfile = "../../scripts/aws-cloud-init-multiOS.yaml"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
 
 iam_instance_profile = "LabInstanceProfile"
 
