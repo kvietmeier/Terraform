@@ -63,7 +63,7 @@ resource "google_compute_instance" "vm_instance" {
   metadata = {
     # Windows post install config
     #enable-windows-automatic-updates = "true"
-    windows-startup-script-ps1       = file("../../../scripts/gcp/windows-startup-config.ps1")
+    windows-startup-script-ps1       = file("../../../scripts/windows/windows-startup-config.ps1")
     admin-password                   = "Chalc0pyr1te123$"  
   }
 

@@ -46,12 +46,18 @@ Terraform projects - recently added VAST Data.
 ### Directories (subject to change)
 
 ```text
-├.
-├── aws
-├── azure
-├── gcp
-├── scripts
-├── vastdata
+.
+├── aws/                 # AWS stacks
+├── azure/               # Azure stacks
+├── gcp/                 # GCP stacks (+ configure-project)
+├── oci/                 # OCI stacks
+├── vastdata/            # VAST Data Terraform
+├── scripts/             # Shared helpers (see scripts/README.md)
+│   ├── cloud-init/      # Universal Linux lab bootstrap (all clouds)
+│   ├── windows/         # Generic Windows sysprep / static-IP scripts
+│   ├── gcp/             # GCP-only (gcloud listing, GCE AD metadata)
+│   ├── azure/           # Azure-only (vms/, aks/)
+│   └── aws/             # AWS-only helpers
 ├── LICENSE.md
 └── README.md
 ```

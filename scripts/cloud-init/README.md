@@ -7,10 +7,11 @@
 #
 # ```text
 # scripts/
-#   cloud-init/     # THIS DIR — shared universal bootstrap
-#   gcp/            # GCP-specific helpers (Windows sysprep, etc.)
+#   cloud-init/     # THIS DIR — shared universal Linux bootstrap
+#   windows/        # Generic Windows sysprep / static IP
+#   gcp/            # GCP-only (gcloud, GCE AD metadata)
 #   azure/          # Azure-specific (vms/, aks/)
-#   aws/            # AWS-specific (reserved)
+#   aws/            # AWS-specific
 #   *.ps1 / vast.*  # cross-cutting utilities at scripts/ root
 # ```
 #

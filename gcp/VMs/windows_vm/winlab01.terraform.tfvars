@@ -27,7 +27,7 @@ machine_type    = "c2-standard-4"
 os_image        = "windows-server-2022-dc-v20241115"
 bootdisk_size   = "300"
 vm_tags         = [ "karlv-vms", "karlv-windows", "karlv-infra" ]
-windows-sysprep-script = "../../../scripts/gcp/windows-sysprep-test.ps1"
+windows-sysprep-script = "../../../scripts/windows/windows-sysprep-test.ps1"
 
 
 # VPC Config - existing
