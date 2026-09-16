@@ -24,9 +24,10 @@ Do **not** add new scripts under `gcp/scripts`, `azure/VMs/scripts`, or `azure/A
 
 | Need | Path |
 |------|------|
-| Linux lab user-data | [`cloud-init/`](cloud-init/) |
+| Linux lab user-data | [`cloud-init/`](cloud-init/) — use **`cloud-init-universal.yaml`** day-to-day |
 | Windows specialize / sysprep | [`windows/`](windows/) |
 | GCP instance listing | [`gcp/`](gcp/) |
 | Azure AKS helpers | [`azure/aks/`](azure/aks/) |
 
-See [`cloud-init/README.md`](cloud-init/README.md) for bootstrap details.
+Cloud-init has both a `.yaml` (ready to `file()`) and a `.tftpl` (for `templatefile`).  
+See [`cloud-init/README.md`](cloud-init/README.md) — **rule of thumb: use the `.yaml`**.
