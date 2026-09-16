@@ -29,5 +29,5 @@ Do **not** add new scripts under `gcp/scripts`, `azure/VMs/scripts`, or `azure/A
 | GCP instance listing | [`gcp/`](gcp/) |
 | Azure AKS helpers | [`azure/aks/`](azure/aks/) |
 
-Cloud-init has both a `.yaml` (ready to `file()`) and a `.tftpl` (for `templatefile`).  
-See [`cloud-init/README.md`](cloud-init/README.md) — **rule of thumb: use the `.yaml`**.
+Cloud-init: use **`cloud-init-universal.yaml`** day-to-day (Workflow A).  
+See [`cloud-init/README.md`](cloud-init/README.md) for `.yaml` vs `.tftpl` workflows.

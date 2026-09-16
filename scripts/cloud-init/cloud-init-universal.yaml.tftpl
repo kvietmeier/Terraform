@@ -20,7 +20,7 @@
 #   file("${path}/cloud-init-universal.yaml")   # committed render output
 #
 # Optional: set INSTALL_BENCH_TOOLS=false via a custom runcmd wrapper if you
-# only want comfort packages without fio/iperf/elbencho compiles.
+# only want the standard devops toolset without fio/iperf/elbencho compiles.
 #
 # Author: Karl Vietmeier / KCV Consulting
 # License: Apache 2.0
@@ -29,7 +29,7 @@
 package_update: true
 package_upgrade: false
 
-# Comfort / ops packages (no compile toolchain here — that is in lab_bootstrap.sh)
+# Standard devops toolset (compile toolchain / bench tools are in lab_bootstrap.sh)
 packages:
   - vim
   - git

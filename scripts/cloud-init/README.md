@@ -2,47 +2,60 @@
 
 Standardized Linux VM user-data for AWS, Azure, and GCP (Debian/Ubuntu and RHEL-family).
 
-YAML installs portable packages. All OS/cloud branching lives in `lab_bootstrap.sh`.
+- **YAML** installs the standard devops toolset (`packages:`)
+- **`lab_bootstrap.sh`** does everything that branches by OS/cloud (chrony, labuser, optional bench compiles)
 
-## `.yaml` vs `.tftpl` — which to use?
+## Files
 
-These are **not** two different cloud-init designs. The `.tftpl` is how we *build* the `.yaml`.
+| File | Role |
+|------|------|
+| `lab_bootstrap.sh` | Bootstrap logic — **source of truth** |
+| `cloud-init-universal.yaml.tftpl` | Template with `${bootstrap_b64}` placeholder |
+| `cloud-init-universal.yaml` | Ready-to-use file (script already embedded) |
+| `render_cloud_init.sh` | Builds `.yaml` from `.tftpl` + `lab_bootstrap.sh` |
+| `deprecated/` | Old per-cloud copies — do not use |
 
-| File | What it is |
-|------|------------|
-| `lab_bootstrap.sh` | Real bootstrap logic (**source of truth**) |
-| `cloud-init-universal.yaml.tftpl` | Template with placeholder `${bootstrap_b64}` for the script |
-| `cloud-init-universal.yaml` | Ready-to-use copy — script already baked in as base64 |
-| `render_cloud_init.sh` | Fills the template → writes the committed `.yaml` |
-| `deprecated/` | Old per-cloud embeds — do not use for new work |
+`.yaml` and `.tftpl` are **not** two designs. The template builds the yaml.
 
-**Rule of thumb:** use the **`.yaml`** unless you are wiring a new module with `templatefile`. You can ignore `.tftpl` until then.
+## Workflow A — existing stacks (default)
 
-### Why both exist
+Most modules use `file(var.cloudinit_configfile)`. Use the **`.yaml`**.
 
-- Older modules only know `file("something.yaml")` → need the rendered `.yaml`
-- Embedding the script as base64 avoids the old bug where indented YAML corrupted the shell script
-- `.tftpl` is the clean long-term path; `.yaml` is the compatibility artifact
-
-## Day-to-day / existing stacks
-
-Use the rendered file:
+### 1. Point Terraform at the rendered file
 
 ```hcl
 cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
 ```
 
-### After editing `lab_bootstrap.sh`
-
-If stacks use the **`.yaml`**, re-render and commit it:
+### 2. Apply as usual
 
 ```bash
-cd scripts/cloud-init && ./render_cloud_init.sh
+terraform apply
 ```
 
-## New modules (optional)
+VM boots → cloud-init installs packages → runs `/tmp/lab_bootstrap.sh`.
 
-Terraform fills the placeholder at plan/apply — no render step required:
+### 3. When you change bootstrap behavior
+
+```bash
+# edit the script
+vim scripts/cloud-init/lab_bootstrap.sh
+
+# rebuild the .yaml so file() stacks pick up the change
+cd scripts/cloud-init && ./render_cloud_init.sh
+
+# commit both
+git add lab_bootstrap.sh cloud-init-universal.yaml
+git commit -m "Update lab bootstrap"
+```
+
+Ignore `.tftpl` for this workflow.
+
+## Workflow B — new modules (optional)
+
+Use `templatefile` so Terraform embeds `lab_bootstrap.sh` at plan/apply. No render step.
+
+### 1. Wire the template
 
 ```hcl
 locals {
@@ -63,13 +76,36 @@ data "cloudinit_config" "lab" {
 }
 ```
 
-If stacks use **`.tftpl` + `templatefile`**, just commit `lab_bootstrap.sh` — no `render_cloud_init.sh` needed.
+Attach `data.cloudinit_config.lab.rendered` as user-data / metadata.
+
+### 2. When you change bootstrap behavior
+
+```bash
+vim scripts/cloud-init/lab_bootstrap.sh
+git add lab_bootstrap.sh
+git commit -m "Update lab bootstrap"
+# no ./render_cloud_init.sh — Terraform reads the script directly
+```
+
+## What gets installed
+
+| Layer | What | Where |
+|-------|------|--------|
+| Standard devops toolset | vim, git, curl, python3, tmux, tree, jq, htop, sysstat, … | YAML `packages:` |
+| Bench tools (optional) | fio, iperf, dool, sockperf, elbencho | `lab_bootstrap.sh` when `INSTALL_BENCH_TOOLS=true` |
 
 ## Environment knobs
 
+Set on the guest before bootstrap (or wrap `runcmd`):
+
 | Variable | Default | Meaning |
 |----------|---------|---------|
-| `INSTALL_BENCH_TOOLS` | `true` | Compile fio, iperf, dool, sockperf, elbencho |
+| `INSTALL_BENCH_TOOLS` | `true` | Compile fio / iperf / dool / sockperf / elbencho |
 | `CLONE_LAB_SCRIPTS` | `true` | Clone helper scripts into `/home/labuser` |
 
-Comfort packages (vim, git, python3, tmux, …) always install via the YAML `packages:` list.
+## Quick decision
+
+```text
+Using file(cloudinit_configfile)?  →  Workflow A  (.yaml + render after script edits)
+Wiring a new module?               →  Workflow B  (.tftpl + templatefile, no render)
+```
