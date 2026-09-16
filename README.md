@@ -1,49 +1,20 @@
 # Terraform Projects
 
-Terraform projects - recently added VAST Data.
+Terraform projects — recently added VAST Data.
 
-### Installing Terraform
+## Installing Terraform
 
 [Hashicorp Instructions](https://developer.hashicorp.com/terraform/install)
 
-* InstallUpgradeTerraform.ps1 is a small PS script I wrote to upgrade/install the Terraform binary
+* `scripts/InstallUpgradeTerraForm.ps1` upgrades/installs the Terraform binary
+* Terraform can also be installed and maintained with winget
 
-* Terraform can now be installed and maintained with winget
-  
-  ```powershell
-  KV C:\Users\karl.vietmeier\repos> winget list terraform
-  Name                Id                  Version Available Source
-  ----------------------------------------------------------------
-  Hashicorp Terraform Hashicorp.Terraform 1.9.5   1.9.8     winget
-  ```
+```powershell
+winget list terraform
+winget update terraform
+```
 
-  Upgrade it
-  
-  ```powershell
-  KV C:\Users\karl.vietmeier\repos> winget update terraform
-  Found Hashicorp Terraform [Hashicorp.Terraform] Version 1.9.8
-  This application is licensed to you by its owner.
-  Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
-  Downloading https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_windows_amd64.zip
-  ██████████████████████████████  26.0 MB / 26.0 MB
-  Successfully verified installer hash
-  Extracting archive...
-  Successfully extracted archive
-  Starting package install...
-  Command line alias added: "terraform"
-  Successfully installed
-
-  KV C:\Users\karl.vietmeier\repos> winget list terraform
-  Name                Id                  Version Source
-  -------------------------------------------------------
-  Hashicorp Terraform Hashicorp.Terraform 1.9.8   winget
-  
-  KV C:\Users\karl.vietmeier\repos>
-  ```
-
----
-
-### Directories (subject to change)
+## Directories
 
 ```text
 .
@@ -62,86 +33,68 @@ Terraform projects - recently added VAST Data.
 └── README.md
 ```
 
----
+## Terraform notes
 
-#### Terraform Notes
+### Commands
 
-**Terraform commands:**  
-
-Apply/destroy without prompting  
+Apply/destroy without prompting:
 
 ```powershell
 terraform destroy --auto-approve
 terraform apply --auto-approve
 ```
 
-Run and over-ride locks  
+Override locks:
 
 ```powershell
 terraform destroy -lock=false --auto-approve
 terraform apply -lock=false --auto-approve
 ```
 
-Run with a .tfvars file  
+Use a `.tfvars` file:
 
 ```powershell
 terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"
 terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"
 ```
 
-Put it all together  
+Combined:
 
 ```powershell
 terraform apply --auto-approve -var-file=".\<fname>.tfvars"
 terraform destroy --auto-approve -var-file=".\<fname>.tfvars"
 ```
 
----
-**PowerShell Alias/Shortcuts**
+### PowerShell shortcuts
+
 So you don't have to keep calling out the non-standard tfvars file.
 
 ```powershell
 function tfapply {
-  # Run an apply using the tfvars file in the current folder
-  $VarFile=(Get-ChildItem -Path .  -Recurse -Filter "*.tfvars")
+  $VarFile = (Get-ChildItem -Path . -Recurse -Filter "*.tfvars")
   terraform apply --auto-approve -var-file="$VarFile"
 }
-```
 
-```powershell
 function tfdestroy {
-  # Run a destroy using the tfvars file in the current folder 
-  $VarFile=(Get-ChildItem -Path .  -Recurse -Filter "*.tfvars")
+  $VarFile = (Get-ChildItem -Path . -Recurse -Filter "*.tfvars")
   terraform destroy --auto-approve -var-file="$VarFile"
 }
-```
 
-```powershell
 function tfshow {
-  # 
   terraform show
 }
 ```
 
----
-  
-#### My code is Built With
+## Built with
 
-* [Visual Studio Code](https://code.visualstudio.com/) - Editor
-* [Terraform](https://www.terraform.io/) - Terraform
+* [Visual Studio Code](https://code.visualstudio.com/)
+* [Terraform](https://www.terraform.io/)
+* [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) (PowerShell on Windows 11)
 
-#### All run under PowerShell on Windows 11
+## Author
 
-* [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) - Console
+**Karl Vietmeier**
 
-#### Authors
+## License
 
-* **Karl Vietmeier**
-
-#### License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-#### Acknowledgments
-
-* None so far other than the many good examples out there.
+MIT — see [LICENSE.md](LICENSE.md).

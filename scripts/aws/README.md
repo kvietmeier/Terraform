@@ -1,6 +1,8 @@
-# AWS scripts
+# scripts/aws/
 
 AWS-specific helpers belong here.
 
-Shared Linux lab bootstrap (all clouds): `../cloud-init/`.
-Legacy AWS cloud-init YAML: `../cloud-init/deprecated/`.
+## Related
+
+- Linux lab bootstrap → [`../cloud-init/`](../cloud-init/)
+- Legacy AWS cloud-init YAML → [`../cloud-init/deprecated/`](../cloud-init/deprecated/)

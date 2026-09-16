@@ -2,4 +2,7 @@
 
 Historical per-cloud YAML with inlined bootstrap scripts. Kept for reference only.
 
-**Use instead:** `../cloud-init-universal.yaml` + `../lab_bootstrap.sh`.
+## Use instead
+
+- [`../cloud-init-universal.yaml`](../cloud-init-universal.yaml)
+- [`../lab_bootstrap.sh`](../lab_bootstrap.sh)

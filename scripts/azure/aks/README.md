@@ -1,12 +1,12 @@
-## Utility Scripts For Working with AKS
+# scripts/azure/aks/
 
-Misc scripts that might come in handy.
+Utility scripts for working with AKS / Arc.
 
-### Author/s
+## Author
 
-* **Karl Vietmeier**
-* **Misc Internet Sources - Acknowledged in the scripts**
+- Karl Vietmeier
+- Misc internet sources (acknowledged in individual scripts)
 
-#### License
+## License
 
-This project is licensed under the Apache License - see the [LICENSE.md](LICENSE.md) file for details
+Apache 2.0 — see [LICENSE.md](LICENSE.md).
