@@ -1,29 +1,49 @@
-# Terraform Projects
+# vastdata/
 
-- [VAST Data Terraform Docs](https://registry.terraform.io/providers/vast-data/vastdata/latest/docs)
+Terraform examples and templates for the [VAST Data provider](https://registry.terraform.io/providers/vast-data/vastdata/latest/docs).
 
-## Directories (subject to change)
+## Layout
 
 ```text
-├── basic_cluster
-├── cluster_full
-├── createviews
-├── lab_setup
-├── policies
-├── protected_path
-├── simple_query
-├── templates
-└── view_template
-
+vastdata/
+├── provider/                  # Portable provider.tf pattern (env-driven auth)
+├── simple_query/              # Auth / connectivity smoke test (read default tenant)
+├── basic_cluster/             # Demo/POC baseline cluster config
+├── complete_cluster_config/   # Full end-to-end cluster config (VIP, DNS, AD, …)
+├── lab_setup/                 # Multi-cluster lab orchestrator (Polaris / VoC style)
+├── createviews/               # NFS/SMB views + policies against an existing VIP pool
+├── view_template/             # Reference schema for views, policies, and block storage
+├── block_volumes/             # Block subsystem views / Windows block examples
+├── protected_path/            # Protected path / multi-cluster examples
+├── policies/                  # S3 / view-policy JSON samples and dumps
+└── templates/                 # Shared variable stubs and S3 policy JSON examples
 ```
 
----
+| Directory | Purpose |
+|-----------|---------|
+| [`provider/`](provider/) | Drop-in / symlinkable `vastdata` provider using `TF_VAR_*` / env auth |
+| [`simple_query/`](simple_query/) | Lightweight login test before larger applies |
+| [`basic_cluster/`](basic_cluster/) | POC baseline: tenants, users, NFS/S3 views and policies |
+| [`complete_cluster_config/`](complete_cluster_config/) | Full cluster from scratch (VIP pools, DNS, AD, keys, …) |
+| [`lab_setup/`](lab_setup/) | Scripted multi-cluster lab setup (`labclusters_setup.sh`) |
+| [`createviews/`](createviews/) | Create views/policies on an existing cluster/VIP pool |
+| [`view_template/`](view_template/) | Documented resource template (not meant to apply as-is) |
+| [`block_volumes/`](block_volumes/) | Block view / policy examples |
+| [`protected_path/`](protected_path/) | Protected path resources across clusters |
+| [`policies/`](policies/) | Policy JSON samples and setting dumps |
+| [`templates/`](templates/) | Reusable variables / S3 policy JSON snippets |
 
-### Usage
+## Prerequisites
 
-You will need to set the cluster VMS information as environment variables.
+- Terraform installed
+- Network access to the VAST VMS
+- [VAST Data Terraform provider](https://registry.terraform.io/providers/vast-data/vastdata/latest/docs)
 
-Linux:
+## Authentication
+
+Set VMS connection details as environment variables (preferred over committing secrets).
+
+Linux / macOS:
 
 ```bash
 export TF_VAR_vast_host="192.168.1.100"
@@ -31,7 +51,7 @@ export TF_VAR_vast_username="admin"
 export TF_VAR_vast_password="YourActualVMSPasswordHere"
 ```
 
-Windows:
+Windows PowerShell:
 
 ```powershell
 $env:TF_VAR_vast_host = "192.168.1.100"
@@ -39,119 +59,32 @@ $env:TF_VAR_vast_username = "admin"
 $env:TF_VAR_vast_password = "YourActualVMSPasswordHere"
 ```
 
----
+Some stacks also honor native provider env vars (see [`provider/README.md`](provider/README.md)).
 
-### Terraform Notes
+## Typical workflow
 
-#### Terraform commands
+1. Start with [`simple_query/`](simple_query/) to verify credentials.
+2. Use [`basic_cluster/`](basic_cluster/) or [`complete_cluster_config/`](complete_cluster_config/) for a full POC setup.
+3. Use [`createviews/`](createviews/) or [`block_volumes/`](block_volumes/) against an existing cluster.
+4. For many Polaris/VoC lab clusters, use [`lab_setup/`](lab_setup/).
 
-Apply/destroy without prompting  
-
-```shell
-terraform destroy --auto-approve
-terraform apply --auto-approve
+```bash
+cd vastdata/simple_query
+terraform init
+terraform plan
+terraform apply
 ```
 
-Run and over-ride locks  
+## Notes
 
-```shell
-terraform destroy -lock=false --auto-approve
-terraform apply -lock=false --auto-approve
-```
+- Prefer `*.auto.tfvars` / env vars over committing real passwords.
+- `view_template/` and much of `templates/` / `policies/` are **reference material**, not turnkey stacks.
+- Repo-wide Terraform shortcuts (`tfapply`, etc.) live in the parent [README.md](../README.md) and bash helpers under `../scripts/` / system-tools.
 
-Run with a non-standard .tfvars file  
+## Author
 
-```shell
-terraform apply -var-file=".\MultiLinuxVM-vars.tfvars"
-terraform destroy -var-file=".\MultiLinuxVM-vars.tfvars"
-```
+**Karl Vietmeier**
 
-#### Put it all together
+## Acknowledgments
 
-```shell
-terraform apply --auto-approve -var-file=".\<fname>.tfvars"
-terraform destroy --auto-approve -var-file=".\<fname>.tfvars"
-```
-
----
-
-### Aliases/Shortcuts
-
-So you don't have to keep calling out the non-standard tfvars file.
-
-```shell
-tfapply() {
-    shopt -s nullglob
-    local var_files=(*.tfvars)
-    shopt -u nullglob
-    [[ ${#var_files[@]} -eq 0 ]] && { echo "No .tfvars files found."; return 1; }
-    terraform apply --auto-approve "${var_files[@]/#/-var-file=}"
-}
-```
-
-```shell
-tfdestroy() {
-    shopt -s nullglob
-    local var_files=(*.tfvars)
-    shopt -u nullglob
-    [[ ${#var_files[@]} -eq 0 ]] && { echo "No .tfvars files found."; return 1; }
-    terraform destroy --auto-approve "${var_files[@]/#/-var-file=}"
-}
-```
-
-```shell
-tfplan() {
-    shopt -s nullglob
-    local var_files=(*.tfvars)
-    shopt -u nullglob
-    [[ ${#var_files[@]} -eq 0 ]] && { echo "No .tfvars files found."; return 1; }
-    terraform plan "${var_files[@]/#/-var-file=}"
-}
-```
-
-```shell
-tfshow() { terraform output; }
-tfinit() { terraform init; }
-```
-
----
-
-Cleanup Functions -
-
-```shell
-tfclean() {
-    echo "Removing .terraform dirs, tfstate files, and backups..."
-    find . -type d -name ".terraform" -exec rm -rf {} +
-    rm -f terraform.tfstate terraform.tfstate.backup
-    echo "Reinitializing Terraform..."
-    terraform init
-}
-```
-
-```shell
-tfclstate() {
-    echo "Removing tfstate files and backups (keeping .terraform)..."
-    rm -f terraform.tfstate terraform.tfstate.backup
-    terraform init
-}
-```
-
----
----
-  
-#### My code is Built With
-
-- [Visual Studio Code](https://code.visualstudio.com/) - Editor
-- [Terraform](https://www.terraform.io/) - Terraform
-
-#### Authors
-
-- **Karl Vietmeier**
-
-#### License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-#### Acknowledgments
-
-- Josh Wentzell at VAST for getting me started and answering many basic questions.
+Josh Wentzell at VAST for getting this started and answering many basic questions.
