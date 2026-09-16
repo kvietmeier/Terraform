@@ -19,7 +19,7 @@ subnet_name          = "REPLACE_ME_SUBNET_NAME"
 # VM Info
 ssh_user             = "REPLACE_ME_SSH_USER"
 ssh_key_file         = "REPLACE_ME_PATH_TO_SSH_KEY_FILE"       # e.g., "../../../secrets/ssh_keys.txt"
-cloudinit_configfile = "REPLACE_ME_CLOUDINIT_CONFIG_PATH"      # e.g., "../../scripts/gcp-cloud-init.yaml"
+cloudinit_configfile = "REPLACE_ME_CLOUDINIT_CONFIG_PATH"      # e.g., "../../../scripts/cloud-init/cloud-init-universal.yaml"
 
 # VM Configuration Map
 vms = {

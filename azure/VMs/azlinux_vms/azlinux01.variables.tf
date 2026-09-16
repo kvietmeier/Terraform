@@ -123,7 +123,7 @@ variable "vtpm_enabled" {
 ### System Config
 variable "cloud_init_path" {
   # Update this path to your real cloud-init file
-  default = "aws-cloud-init-multiOS.yaml"
+  default = "cloud-init-universal.yaml"  # resolve under scripts/cloud-init/
 }
 
 ### User Variables

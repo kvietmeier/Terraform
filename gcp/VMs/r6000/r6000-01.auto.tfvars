@@ -50,4 +50,4 @@ vm_tags        = ["karlv-vms", "isaac-workstation"] # Add tag for your firewall 
 
 ssh_user             = "karlv"
 ssh_key_file         = "../../../secrets/ssh_keys.txt"
-#cloudinit_configfile = "../../scripts/gcp-cloud-init-multiOS.yaml"
+#cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"

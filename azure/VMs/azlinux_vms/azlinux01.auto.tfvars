@@ -47,7 +47,7 @@ vtpm_enabled = true
 ssh_key_path = "../../../../personal/ssh_keys/ghostw11.id_rsa.pub"
 
 # Using the path found in your PowerShell script 
-cloud_init_path = "../../../scripts/cloud-init/azure-cloud-init-multiOS.yaml"
+cloud_init_path = "../../../../scripts/cloud-init/cloud-init-universal.yaml"
 
 
 # --- Networking Configuration ---

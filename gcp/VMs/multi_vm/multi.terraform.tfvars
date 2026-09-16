@@ -26,7 +26,7 @@ os_image             = "rocky-linux-9-v20250212"
 bootdisk_size        = "150"
 ssh_user             = "labuser"
 ssh_key_file         = "../../../secrets/ssh_keys.txt"
-cloudinit_configfile = "../../scripts/gcp-cloud-init_dnf-test.yaml"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
 
 
 service_account = {

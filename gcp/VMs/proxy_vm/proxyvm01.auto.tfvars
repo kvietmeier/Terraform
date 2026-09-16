@@ -51,4 +51,4 @@ ipforwarding     = false
 
 ssh_user             = "demo01"
 ssh_key_file         = "../../../../personal/secrets/ssh_keys.txt"
-cloudinit_configfile = "../../../scripts/cloud-init/gcp-cloud-init-multiOS.yaml"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
