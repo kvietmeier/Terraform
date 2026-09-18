@@ -83,6 +83,26 @@ Provider examples for configuring VAST clusters (tenants, views, VIP pools, AD, 
 
 Smaller collections under [`aws/`](aws/) (EC2, basic auth, CloudFormation) and [`oci/`](oci/) (templates, multi-VM). Use the same per-folder apply pattern as the other clouds.
 
+## Where Terraform lives (avoid fragmentation)
+
+This repo is the **canonical home for personal / multi-cloud lab IaC** and **VAST provider examples**. Related GitLab repos hold private VAST/work material — do not grow new TF roots there unless they clearly belong.
+
+| Repo | Host | Put new Terraform here when… |
+|------|------|------------------------------|
+| **This repo** (`github.com/kvietmeier/Terraform`) | GitHub | Cloud lab stacks (AWS/Azure/GCP/OCI), CoreInfra / `configure-project`, VAST **provider** examples under `vastdata/` |
+| [`vastoncloud`](https://git.vastdata.com/karlv/vastoncloud) | GitLab (private) | Polaris/VOC **cluster modules**, versioned VoC packages, deploy snapshots, credentials, private lab kits (`lima-vcdev/`) |
+| [`automation-tools`](https://git.vastdata.com/karlv/automation-tools) | GitLab | Scripts / Polaris API helpers — **not** new Terraform. Existing `terraform/` is legacy overlap with `vastdata/` |
+
+**Overlaps to treat as legacy (prefer this repo):**
+
+| GitLab (`automation-tools/terraform/`) | Canonical here |
+|----------------------------------------|----------------|
+| `simple_query/` | [`vastdata/simple_query/`](vastdata/simple_query/) |
+| `setup_lab/` | [`vastdata/lab_setup/`](vastdata/lab_setup/) |
+| `cluster_gcp/` | [`vastdata/complete_cluster_config/`](vastdata/complete_cluster_config/) |
+
+Edit and extend the GitHub paths. Do not keep fixing both copies.
+
 ## Conventions
 
 - **One stack per folder** — treat each leaf with its own `.tf` files as an independent root module.
