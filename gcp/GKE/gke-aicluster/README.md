@@ -4,7 +4,7 @@
 **Code:** [`gke-scalable.main.tf`](gke-scalable.main.tf)  
 **Examples:** [`examples/`](examples/)
 
-Shared **private, VPC-native GKE** for lab/demo work. Platform owns the cluster; **Solutions (and other app teams) only deploy apps** — they do not create clusters.
+Shared **private, VPC-native GKE** for lab/demo work. Platform owns the cluster(s); **Solutions (and other app teams) only deploy apps** — they do not create clusters.
 
 ---
 
@@ -12,19 +12,89 @@ Shared **private, VPC-native GKE** for lab/demo work. Platform owns the cluster;
 
 | Role | Does | Does not |
 |------|------|----------|
-| **Platform / IT** | Build & maintain the cluster (Terraform), VPC/alias CIDRs, NAT, firewalls, existing node pools | Day-to-day app deploys |
-| **Solutions / app teams** | `kubectl apply` manifests; stage on `apps-pool`; promote to GPU/CPU; use timers / scale to 0 | Create GKE clusters, invent pod CIDRs, or manage node pools day-to-day |
-| **Request to platform** | “Please add a node pool for SKU *X* (e.g. A100, TPU v5e)” | — |
+| **Platform / IT** | Build & maintain regional clusters (Terraform), VPC/alias CIDRs, NAT, firewalls, node pools; **apply / destroy** when capacity is needed or not | Day-to-day app deploys |
+| **Solutions / app teams** | `kubectl apply` manifests; stage on `apps-pool`; promote to GPU/CPU/TPU; use timers / scale to 0 | Create GKE clusters, invent pod CIDRs, or manage node pools day-to-day |
+| **Request to platform** | “Please add a node pool for SKU *X*” or “bring up / tear down the *region* cluster” | — |
 
-**Correct mental model:** the cluster and pools are already there (declared in Terraform, scaled from zero). Worst case for a new accelerator is a **request to add an instance type / pool** — not a new cluster project.
+**Correct mental model:** pools are declared in Terraform and scale from zero while a cluster exists. Worst case for a new accelerator is a **pool request**. For quiet periods, platform can **shut the whole cluster down** (see below) — Solutions still never builds GKE themselves.
 
 ```text
-  Solutions team                         Platform (once)
-  ──────────────                         ───────────────
-  kubectl apply -f my-app.yaml    ◄────  terraform apply  (this folder)
-  pick pool via nodeSelector             VPC + alias ranges + NAT
+  Solutions team                         Platform
+  ──────────────                         ────────
+  kubectl apply -f my-app.yaml    ◄────  terraform apply   (bring cluster up)
+  pick pool via nodeSelector             terraform destroy (full shutdown)
   timer / scale → 0 when done            add pool if new GPU/TPU SKU needed
 ```
+
+---
+
+## Multi-region: one cluster where the accelerators are
+
+Do **not** run one mega-cluster and hope GPUs/TPUs appear everywhere. Accelerator inventory is **regional (often zonal)**. The intended footprint is **one GKE cluster per accelerator region** — colocated with the TPU/GPU capacity you actually use.
+
+Typical pattern (example — pick the four regions that match your quotas and VAST/VPN footprint):
+
+| Region (example) | Why a dedicated cluster |
+|------------------|-------------------------|
+| `us-central1` | Common GPU / TPU availability |
+| `us-east5` | TPU-heavy capacity in many orgs |
+| `europe-west4` | EU accelerator + data locality |
+| `asia-northeast1` | APAC accelerator + data locality |
+
+```text
+  VPC (shared hub) + VPN
+       │
+       ├── GKE us-central1     ← colocated with GPU/TPU stock there
+       ├── GKE us-east5        ← colocated with TPU/GPU stock there
+       ├── GKE europe-west4
+       └── GKE asia-northeast1
+
+  Same Terraform pattern per region (this folder as the template).
+  Solutions: get-credentials for the region they need → deploy apps only.
+```
+
+**Why colocate**
+
+- GPUs/TPUs cannot be scheduled from a cluster in another region.  
+- Cold-start and quota checks stay local to where capacity exists.  
+- You can leave three regions **destroyed** and only `apply` the region you need for a demo or engagement.  
+- Each cluster still uses **scale-from-zero** node pools — and can be torn down entirely when idle for longer stretches.
+
+This folder is the **template** for one regional cluster (today’s defaults point at a single zone). Replicate with per-region state/vars (or workspaces) — same code, different `location` / subnet / alias CIDRs.
+
+---
+
+## Full shutdown vs scale-to-zero
+
+Two cost levers; use both.
+
+| Lever | What happens | When to use |
+|-------|----------------|-------------|
+| **Scale-to-zero (pools)** | GPU/CPU/apps nodes → 0; **control plane + system-pool still bill** | Between Jobs the same day / week |
+| **Shut down the cluster** | Delete the GKE cluster (and its nodes) | Weekend, between projects, region not in use |
+
+### Terraform apply / destroy (recommended)
+
+Because the cluster is code in this repo, platform can treat it as **ephemeral infrastructure**:
+
+```bash
+cd gcp/GKE/gke-aicluster
+terraform init
+terraform apply     # create or update the regional cluster when needed
+# … Solutions deploys apps …
+terraform destroy   # full teardown when the region is idle — no control-plane charge
+```
+
+- **`apply`** when an engagement needs that region’s GPUs/TPUs.  
+- **`destroy`** when finished (or destroy only the unused regional states).  
+- Recreate is expected to be **repeatable** (same VPC/alias plan, same pool definitions).  
+- Ensure `deletion_protection = false` on the cluster (already set in this template) so destroy is not blocked.  
+- App manifests live in git (`examples/` or team repos) — they are re-applied after the next `apply` + `get-credentials`.
+
+### Without destroying (cluster left up)
+
+- Scale Deployments/Jobs to 0 / use timer examples → expensive pools → 0.  
+- You still pay for the **GKE control plane** (and the small `system-pool`). For long idle periods, prefer **`terraform destroy`**.
 
 ---
 
@@ -32,138 +102,78 @@ Shared **private, VPC-native GKE** for lab/demo work. Platform owns the cluster;
 
 | Goal | How we meet it |
 |------|----------------|
-| Solutions doesn’t manage GKE | One shared cluster; teams only deploy pods |
-| Control cloud spend | GPU / CPU-heavy pools **scale from 0** — no idle L4/n4 VMs |
+| Solutions doesn’t manage GKE | Shared regional clusters; teams only deploy pods |
+| Accelerators where they live | One cluster per GPU/TPU region (up to ~4) |
+| Control cloud spend | Pools **scale from 0**; idle regions **destroy** entirely |
 | Safe onboarding | Cheap **`apps-pool`** staging before GPU/TPU |
-| Reach apps over VPN | **Andromeda / VPC-native**: Pod IPs are VPC **alias** addresses |
+| Reach apps over VPN | **VPC-native / Andromeda**: Pod IPs are VPC **alias** addresses |
 | Talk to VAST | Nodes tagged `vast-client` for existing firewall rules |
-| Demo guardrails | Timed Jobs + autostop CronJobs so nothing burns overnight |
-
-**Always-on cost is small on purpose:** only `system-pool` (kube-system) stays up. Everything else is demand-driven.
+| Demo guardrails | Timed Jobs + autostop CronJobs |
 
 ```text
   Developer flow (Solutions)
-  ──────────────────────────
   1. Stage on apps-pool (cheap e2)     → prove VPN, Flask, VAST I/O
-  2. Promote to GPU / CPU-heavy        → same cluster, different nodeSelector
-  3. Finish or timer fires             → pods gone → expensive pools → 0 nodes
-```
-
-```text
-  kubectl apply (GPU Job) ──► pending pod ──► gpu-l4-pool 0→1 ──► run ──► Job ends
-                                                                      │
-                                                                      ▼
-                                                              nodes → 0 again
+  2. Promote to GPU / CPU / TPU        → same regional cluster, different nodeSelector
+  3. Finish or timer fires             → pods gone → expensive pools → 0
+  4. (Platform) long idle              → terraform destroy that regional cluster
 ```
 
 ---
 
-## Architecture
+## Architecture (single regional cluster)
 
 ### Node pools
 
 | Pool | Machine (default) | Min nodes | Purpose |
 |------|-------------------|-----------|---------|
-| `system-pool` | `e2-standard-4` | fixed (default **1**) | Kubernetes system pods only |
-| `apps-pool` | `e2-standard-2` | **0** (optional `1` tiny staging floor) | Staging: Flask, smoke tests, VAST client I/O |
+| `system-pool` | `e2-standard-4` | fixed (default **1**) | kube-system only (while cluster exists) |
+| `apps-pool` | `e2-standard-2` | **0** (optional `1`) | Staging: Flask, smoke tests, VAST I/O |
 | `de-team-pool1` | `n4-standard-16` | **0** | CPU-heavy |
 | `gpu-l4-pool` | `g2-standard-8` + NVIDIA L4 | **0** | GPU |
 
-Terraform **declares** pools so they are ready to schedule into. Autoscaler **creates VMs only** when a matching pod is pending; when pods are gone, nodes return to **zero**.
-
-```text
-  system-pool     ── always on (small e2) — platform cost
-  apps-pool       ── cheap staging (prefer min=0)
-  cpu-heavy / GPU ── min=0 forever; cold-start beats idle burn
-```
-
-Need H100 / TPU / another GPU? **Request a new pool** (same pattern: `min_node_count = 0`). Do not stand up a second cluster for that.
+Need H100 / TPU / another GPU in **this** region? **Request a new pool** (`min_node_count = 0`). Need that SKU in **another** region? Use (or `apply`) the cluster colocated there.
 
 ### Networking (required pattern)
 
-**One subnet** with **alias IP ranges** (VPC-native / Andromeda). Pod IPs are real VPC addresses — VPN clients that get the VPC plan can reach Flask/web **in the pod**.
+**One subnet per regional cluster** with **alias IP ranges** (VPC-native). Pod IPs are real VPC addresses — reachable over VPN if that plan is advertised.
 
-**Example:** advertise **`10.199.0.0/20`** on the VPN for the **whole VPC** (other apps too). Do **not** give GKE the entire `/20`.
+**Example carve** — `10.199.0.0/20` as a **VPC plan** (other apps included). Do **not** give GKE the entire `/20`. Each region needs its own non-overlapping primary + `gke-pods` / `gke-services` secondaries on that region’s subnet.
 
-| Slice | Example CIDR | Size | Role |
-|-------|--------------|------|------|
-| VPC plan (VPN) | `10.199.0.0/20` | 4096 | Entire lab VPC routable space |
-| Subnet primary | `10.199.0.0/24` | 256 | Node IPs + other VMs on this subnet |
-| Alias `gke-pods` | `10.199.8.0/22` | 1024 | Pod IPs (VPN-reachable apps) |
-| Alias `gke-services` | `10.199.12.0/24` | 256 | Service ClusterIPs |
-| Leftover in `/20` | rest | — | Other subnets, apps, growth |
+| Slice | Example CIDR | Role |
+|-------|--------------|------|
+| VPC plan (VPN) | `10.199.0.0/20` (example) | Shared routable space — plan per region carefully |
+| Subnet primary | e.g. `10.199.0.0/24` | Node IPs + other VMs on that subnet |
+| Alias `gke-pods` | e.g. `10.199.8.0/22` | Pod IPs (VPN-reachable apps) |
+| Alias `gke-services` | e.g. `10.199.12.0/24` | Service ClusterIPs |
+| Leftover | rest of plan | Other subnets / apps / growth |
 
-```text
-                    VPN advertises 10.199.0.0/20  (whole VPC plan)
-                                    │
-     on-prem / laptop               │
-     curl http://10.199.8.37:8080   │   (Flask / web running IN a pod)
-              │                     ▼
-              │              summit-vpc
-              │    ┌─────────────────────────────────────────────┐
-              │    │  ONE subnet: subnet19-us-central1           │
-              │    │                                             │
-              │    │  primary 10.199.0.0/24                      │
-              │    │    ├─ GKE nodes                             │
-              │    │    └─ other VMs / apps on same subnet       │
-              │    │                                             │
-              └───►│  alias gke-pods 10.199.8.0/22  ◄── Andromeda│
-                   │    └─ Pod 10.199.8.37  Flask/web            │
-                   │                                             │
-                   │  alias gke-services 10.199.12.0/24          │
-                   │    └─ ClusterIPs (in-cluster)               │
-                   │                                             │
-                   │  (rest of 10.199.0.0/20 → other resources)  │
-                   └─────────────────────────────────────────────┘
-
-  RIGHT: Pod IPs are VPC alias IPs → VPN route to /20 reaches the pod.
-  WRONG: Routes-based GKE, or burning all of /20 as “the pod CIDR”.
-```
-
-```mermaid
-flowchart TB
-  VPN["VPN clients<br/>route 10.199.0.0/20"]
-  subgraph VPC["VPC plan 10.199.0.0/20 — NOT all for GKE"]
-    subgraph SUB["ONE subnet — primary + alias ranges"]
-      PRI["Primary 10.199.0.0/24<br/>nodes + other apps"]
-      PODS["Alias gke-pods 10.199.8.0/22<br/>Flask / web pods"]
-      SVC["Alias gke-services 10.199.12.0/24"]
-    end
-    OTHER["Leftover /20<br/>other subnets & apps"]
-  end
-  VPN -->|Andromeda alias IP| PODS
-  PRI --- PODS
-  PRI --- SVC
-```
-
-Named secondaries must exist on the subnet **before** cluster apply. Private nodes need **Cloud NAT** + **Private Google Access**.
+Named secondaries must exist **before** `terraform apply`. Private nodes need **Cloud NAT** + **Private Google Access** on that subnet.
 
 ---
 
 ## Usage
 
-### Platform — create / update the cluster (rarely)
+### Platform — bring a region up or tear it down
 
 ```bash
 cd gcp/GKE/gke-aicluster
 terraform init
-terraform plan
-terraform apply
+terraform apply      # create / update
+terraform destroy    # full shutdown when the region is not needed
 ```
 
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `project_id` | set for env | GCP project |
-| `vpc_name` / `subnet_name` | summit-vpc / subnet19-… | Network |
-| `system_node_count` | `1` | Only always-on system nodes |
-| `apps_min_nodes` | `0` | Prefer `0`; `1` = tiny staging floor |
-| `enable_apps_pool` / `enable_gpu_l4_pool` / `enable_cpu_heavy_pool` | `true` | Pool presence (GPU/CPU still min=0) |
+| `location` | `us-central1-a` | Zone/region for **this** cluster (colocate with GPU/TPU) |
+| `vpc_name` / `subnet_name` | summit-vpc / subnet19-… | Regional subnet with alias ranges |
+| `system_node_count` | `1` | Only always-on nodes while cluster exists |
+| `apps_min_nodes` | `0` | Prefer `0` |
+| `enable_*_pool` | `true` | Pool definitions (GPU/CPU still min=0) |
 
 ```bash
 gcloud container clusters get-credentials <cluster> --zone <zone> --project <project>
 ```
-
-**Adding a new instance type:** platform copies an existing pool block (same `min_node_count = 0`, labels/taints), opens a small PR — Solutions keeps deploying apps the same way with a new `nodeSelector`.
 
 ### Solutions — deploy apps only
 
@@ -171,7 +181,6 @@ gcloud container clusters get-credentials <cluster> --zone <zone> --project <pro
 
 ```bash
 kubectl apply -f examples/apps-staging-flask.yaml
-# Verify VPN → pod, VAST I/O, basic behavior
 kubectl scale deploy/apps-staging-flask --replicas=0
 ```
 
@@ -179,7 +188,6 @@ kubectl scale deploy/apps-staging-flask --replicas=0
 
 ```bash
 kubectl apply -f examples/job-gpu-l4-timed.yaml
-# activeDeadlineSeconds → Job dies → GPU nodes → 0
 ```
 
 **3. Long-running demos must autostop**
@@ -206,17 +214,17 @@ kubectl apply -f examples/deployment-autostop-cronjob.yaml
 
 ## Cost expectations
 
-- **Cold start** on first GPU/CPU-heavy pod after idle is expected (no idle burn).  
-- **Forgotten** `replicas ≥ 1` Deployments keep nodes up — use timers / CronJobs / scale to 0.  
-- **system-pool** = only required always-on compute.  
-- New SKU = **pool request**, not a new cluster.
+- **Pools at min=0** stop node burn between Jobs; **control plane** still costs if the cluster is left up.  
+- **Long idle / unused region:** `terraform destroy` — no cluster, no control plane.  
+- **Cold start** after scale-from-zero (or after recreate) is expected.  
+- New SKU = **pool request** in the right regional cluster; new geography = **another regional apply**, not one global cluster.
 
 ---
 
 ## Related
 
-- Short technical checklist: [`gke-scalable.md`](gke-scalable.md)  
-- GKE folder index: [`../README.md`](../README.md)  
+- Short checklist: [`gke-scalable.md`](gke-scalable.md)  
+- GKE index: [`../README.md`](../README.md)  
 - GCP map: [`../../README.md`](../../README.md)  
 - VPC secondaries: [`../../CoreInfra/vpcs/core/`](../../CoreInfra/vpcs/core/)  
 

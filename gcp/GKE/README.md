@@ -2,15 +2,14 @@
 
 | Directory | Purpose |
 |-----------|---------|
-| [`gke-aicluster/`](gke-aicluster/) | **Shared lab cluster** — Solutions deploys apps; platform owns Terraform. [IT / Solutions brief →](gke-aicluster/README.md) |
+| [`gke-aicluster/`](gke-aicluster/) | Regional lab cluster template — Solutions deploys apps; platform `apply`/`destroy`. [Brief →](gke-aicluster/README.md) |
 | [`gke-testing/`](gke-testing/) | Older experiment — not the reference |
 | [`kubernetes/`](kubernetes/) | Sample manifests |
 
-## Model for Solutions
+## Model
 
-- **Do not create GKE clusters.** Use the shared AI/lab cluster.  
-- **Deploy apps** (`kubectl apply`), stage on `apps-pool`, then GPU/CPU as needed.  
-- **Worst case:** request platform to **add a node pool / instance type** (still `min=0`).  
-- Scale to zero / use the timer examples when done.
+- **Solutions:** deploy apps only (`kubectl`); no cluster create.  
+- **Platform:** one cluster **per accelerator region** (colocate with GPU/TPU); scale-from-zero pools; **`terraform destroy`** when a region is idle.  
+- **Worst case for Solutions:** request a new pool SKU, or ask platform to bring a region up.
 
-Full story + diagrams: **[`gke-aicluster/README.md`](gke-aicluster/README.md)**.
+Full story: **[`gke-aicluster/README.md`](gke-aicluster/README.md)**.
