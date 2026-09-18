@@ -1,0 +1,57 @@
+# Timed GPU Job — scales pool from 0, then back to 0 when the timer fires
+#
+# activeDeadlineSeconds  = hard wall clock for the Job (saves $$$)
+# ttlSecondsAfterFinished = auto-delete Job object after finish
+#
+# kubectl apply -f job-gpu-l4-timed.yaml
+# kubectl logs -f job/gpu-l4-timed-demo
+#
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gpu-l4-timed-demo
+  labels:
+    app: gpu-l4-timed-demo
+    cost-profile: scale-from-zero
+spec:
+  # Kill the Job (and its pods) after 1 hour even if still running
+  activeDeadlineSeconds: 3600
+  # Remove Job object 10 minutes after it finishes/fails
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: gpu-l4-timed-demo
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        accelerator: l4
+        pool: gpu-l4
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Equal
+          value: present
+          effect: NoSchedule
+      containers:
+        - name: workload
+          # Replace with your training/inference image
+          image: nvidia/cuda:12.2.0-base-ubuntu22.04
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              echo "GPU Job started at $(date -Is); will be killed by activeDeadlineSeconds if still running"
+              nvidia-smi || true
+              # Demo: run up to ~50 minutes, then exit cleanly so nodes can scale to 0
+              # (deadline above is the hard stop at 1h)
+              sleep 3000
+              echo "Work finished at $(date -Is); exiting so gpu-l4-pool can scale to 0"
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+            requests:
+              nvidia.com/gpu: "1"
+              cpu: "2"
+              memory: 8Gi

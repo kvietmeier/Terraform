@@ -9,7 +9,7 @@ gcp/
 ├── CoreInfra/          # Discrete production-style pieces (VPC, FW, DNS, NAT, VPN, IAP, VMs)
 ├── configure-project/  # Roll-up of CoreInfra into one apply (preferred for a full project)
 ├── VMs/                # Standalone VM patterns
-├── GKE/                # GKE clusters + sample apps
+├── GKE/                # GKE — see GKE/README.md (AI cluster is the IT reference)
 ├── tpus/               # TPU node / discovery experiments
 ├── templates/          # Starters
 ├── testing/            # Scratch (AD domain, misc VMs, …)
@@ -21,7 +21,7 @@ gcp/
 | [`CoreInfra/`](CoreInfra/) | VPCs, firewalls, DNS forwarders/zones, NAT, VPN, IAP, core VMs — apply piece by piece |
 | [`configure-project/`](configure-project/) | Single root module wiring CoreInfra modules with feature flags |
 | [`VMs/`](VMs/) | Multi-VM, proxy, Windows, image, migration examples |
-| [`GKE/`](GKE/) | GKE testing / AI cluster + Kubernetes sample apps |
+| [`GKE/`](GKE/) | GKE labs — **IT brief:** [`GKE/gke-aicluster/README.md`](GKE/gke-aicluster/README.md) (scale-from-zero AI cluster, apps staging, VPN/alias networking) |
 | [`tpus/`](tpus/) | TPU nodes and discovery helpers |
 | [`templates/`](templates/), [`testing/`](testing/) | Reference and experimental stacks |
 

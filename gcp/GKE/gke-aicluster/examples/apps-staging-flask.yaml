@@ -1,0 +1,54 @@
+# Staging on apps-pool — cheap e2 before GPU/TPU
+#
+# Use this to prove Flask/VPN/VAST client paths (nodes tagged vast-client).
+# When happy, retarget to gpu-l4 / CPU-heavy and use timed Job / autostop.
+#
+# kubectl apply -f apps-staging-flask.yaml
+# kubectl scale deploy/apps-staging-flask --replicas=0   # → apps-pool scales toward 0
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apps-staging-flask
+  labels:
+    app: apps-staging-flask
+    tier: staging
+    cost-profile: scale-from-zero
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apps-staging-flask
+  template:
+    metadata:
+      labels:
+        app: apps-staging-flask
+        tier: staging
+    spec:
+      nodeSelector:
+        pool: apps
+        tier: staging
+      containers:
+        - name: app
+          # Swap for your Flask/VAST client image
+          image: gcr.io/google-samples/hello-app:1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apps-staging-flask
+spec:
+  selector:
+    app: apps-staging-flask
+  ports:
+    - port: 80
+      targetPort: 8080

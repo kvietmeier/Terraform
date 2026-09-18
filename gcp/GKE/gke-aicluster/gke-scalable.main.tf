@@ -1,20 +1,23 @@
 ###===============================================================================================###
 ### Terraform Configuration for GKE Scale-to-Zero Architecture
 ###===============================================================================================###
-# Single-zone GKE cluster (us-central1-a) for compute-heavy AI workloads with scale-to-zero.
+# COST RULE:
+#   - GPU / TPU / CPU-heavy pools: scale-from-zero ONLY (min=0). No idle accelerators.
+#   - system-pool: always-on (kube-system only) — cheapest necessary spend.
+#   - apps-pool: low-end general-purpose STAGING area (Flask, VAST I/O, smoke tests)
+#     before moving workloads to GPU/TPU. Default min=0; set apps_min_nodes=1 only if
+#     you accept a tiny always-on staging floor.
+#
+# Devs: target pool=apps first → prove VAST/app path → then retarget GPU/TPU + timers.
 #
 # NETWORKING (Andromeda / VPC-native — required):
-#   One subnet with alias (secondary) ranges. Pod IPs are real VPC addresses, so a VPN that
-#   advertises the VPC plan (example: 10.199.0.0/20) can reach Flask/web apps IN the pods.
+#   One subnet with alias ranges. VPN plan example 10.199.0.0/20 is whole VPC — don't
+#   burn it all on GKE; carve modest gke-pods / gke-services secondaries.
 #
-#   Do NOT burn the whole /20 on GKE — that block is the VPC plan for nodes, other apps,
-#   and leftover growth. GKE only takes named secondary slices (see variables).
-#
-# INFRASTRUCTURE SUMMARY:
-# - Default pool: created then removed (remove_default_node_pool)
-# - system-pool: e2-standard-4 × 2 (always on for kube-dns / system pods)
-# - de-team-pool1: n4-standard-16, hyperdisk-balanced, autoscaled 0..5, taint workload=heavy
-# - Network tag: vast-client  |  labels: longrun / used_by / owner = solutions
+# POOLS:
+# - system-pool: e2-standard-4 (kube-system)
+# - apps-pool:   e2-standard-2 staging (VAST I/O, basic apps) — default min=0
+# - de-team-pool1 / gpu-l4-pool: expensive, min=0 always
 ###===============================================================================================###
 
 
@@ -38,7 +41,7 @@ provider "google" {
 }
 
 # ==============================================================================
-# 2. VARIABLES & PARAMETERIZATION
+# 2. VARIABLES
 # ==============================================================================
 
 variable "project_id" {
@@ -61,7 +64,7 @@ variable "location" {
 
 variable "gke_version" {
   type        = string
-  description = "Optional min control-plane version (e.g. 1.30.5-gke.1014001). Empty = GKE default for the channel/location. Validate with: gcloud container get-server-config --zone=us-central1-a"
+  description = "Optional min control-plane version. Empty = GKE default. Validate: gcloud container get-server-config --zone=us-central1-a"
   default     = ""
 }
 
@@ -73,17 +76,13 @@ variable "vpc_name" {
 
 variable "subnet_name" {
   type        = string
-  description = "Single subnet that holds node primary IPs + GKE alias (secondary) ranges."
+  description = "Single subnet: node primary + GKE alias (secondary) ranges."
   default     = "subnet19-us-central1"
 }
 
-# --- VPC address plan (example) — advertise 10.199.0.0/20 over VPN ---
-# Only GKE's secondary slices are referenced here. Primary + leftovers stay for other apps.
-# These named secondaries MUST already exist on var.subnet_name (CoreInfra vpcs/core supports them).
-
 variable "pods_secondary_range_name" {
   type        = string
-  description = "Subnet secondary range name for Pod (alias) IPs."
+  description = "Subnet secondary range name for Pod alias IPs."
   default     = "gke-pods"
 }
 
@@ -95,19 +94,72 @@ variable "services_secondary_range_name" {
 
 variable "master_ipv4_cidr_block" {
   type        = string
-  description = "Private control-plane /28 — must not overlap the VPC plan or secondaries."
+  description = "Private control-plane /28 — must not overlap the VPC plan."
   default     = "172.16.0.16/28"
 }
 
-# Documentation-only defaults (must match what you put on the subnet):
-#   VPC plan (VPN):     10.199.0.0/20
-#   Subnet primary:     10.199.0.0/24     nodes + other VMs/apps on this subnet
-#   gke-pods:           10.199.8.0/22     alias IPs — Flask/web pods (VPN-reachable)
-#   gke-services:       10.199.12.0/24    ClusterIPs (cluster-local; still carved from plan)
-#   leftover in /20:    10.199.1–7, 13–15 for other subnets/apps/growth
+variable "system_node_count" {
+  type        = number
+  description = "Only always-on nodes (system pool). Use 1 for max lab savings; 2 for system-pod HA."
+  default     = 1
+}
+
+variable "enable_apps_pool" {
+  type        = bool
+  description = "Low-end apps/staging pool (VAST I/O, Flask, smoke tests before GPU/TPU)."
+  default     = true
+}
+
+variable "apps_machine_type" {
+  type        = string
+  description = "Cheap general-purpose SKU for staging apps."
+  default     = "e2-standard-2"
+}
+
+variable "apps_min_nodes" {
+  type        = number
+  description = "Apps pool min. Keep 0 (no idle). Set 1 only for a tiny always-on staging floor."
+  default     = 0
+}
+
+variable "apps_max_nodes" {
+  type        = number
+  description = "Apps pool max nodes."
+  default     = 3
+}
+
+variable "enable_cpu_heavy_pool" {
+  type        = bool
+  description = "n4 CPU pool, scale-from-zero."
+  default     = true
+}
+
+variable "enable_gpu_l4_pool" {
+  type        = bool
+  description = "L4 GPU pool, scale-from-zero (no idle GPUs)."
+  default     = true
+}
+
+variable "cpu_heavy_max_nodes" {
+  type        = number
+  description = "Max nodes for CPU heavy pool (min is always 0)."
+  default     = 5
+}
+
+variable "gpu_l4_max_nodes" {
+  type        = number
+  description = "Max nodes for L4 GPU pool (min is always 0)."
+  default     = 4
+}
+
+# Doc carve (must match subnet secondaries before apply):
+#   VPC plan (VPN): 10.199.0.0/20
+#   primary:        10.199.0.0/24
+#   gke-pods:       10.199.8.0/22
+#   gke-services:   10.199.12.0/24
 
 # ==============================================================================
-# 3. PARENT CLUSTER — VPC-NATIVE (ANDROMEDA) ON ONE SUBNET
+# 3. CLUSTER — VPC-NATIVE ON ONE SUBNET
 # ==============================================================================
 
 resource "google_container_cluster" "primary" {
@@ -119,15 +171,11 @@ resource "google_container_cluster" "primary" {
   network    = var.vpc_name
   subnetwork = var.subnet_name
 
-  # Provider 5.x defaults this to true — set false for lab destroy convenience.
   deletion_protection = false
 
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  # RIGHT WAY: named alias ranges on the SAME subnet (Andromeda / VPC-native).
-  # Pod IPs come from gke-pods — VPN clients that route 10.199.0.0/20 can hit Flask/web in-pod.
-  # Do not use routes-based clusters; do not auto-carve unmanaged CIDRs that collide with the plan.
   ip_allocation_policy {
     cluster_secondary_range_name  = var.pods_secondary_range_name
     services_secondary_range_name = var.services_secondary_range_name
@@ -143,8 +191,7 @@ resource "google_container_cluster" "primary" {
     master_ipv4_cidr_block  = var.master_ipv4_cidr_block
   }
 
-  # Private nodes need Cloud NAT (and usually Private Google Access) on this subnet —
-  # expect that from CoreInfra VPC/NAT, not created here.
+  # Private nodes need Cloud NAT + Private Google Access on the subnet (CoreInfra).
 
   resource_labels = {
     longrun = "yes"
@@ -161,7 +208,7 @@ resource "google_container_cluster" "primary" {
 }
 
 # ==============================================================================
-# 4. SYSTEM NODE POOL (always on)
+# 4. SYSTEM POOL — only permitted always-on spend
 # ==============================================================================
 
 resource "google_container_node_pool" "system_pool" {
@@ -169,22 +216,19 @@ resource "google_container_node_pool" "system_pool" {
   cluster    = google_container_cluster.primary.name
   location   = google_container_cluster.primary.location
   project    = google_container_cluster.primary.project
-  node_count = 2
+  node_count = var.system_node_count
 
   node_config {
     machine_type = "e2-standard-4"
     disk_size_gb = 100
     disk_type    = "pd-standard"
-
-    tags = ["vast-client"]
-
-    # Omit service_account → default Compute Engine SA.
-    # Do not set service_account = "default" (invalid for the API).
+    tags         = ["vast-client"]
 
     labels = {
       longrun = "yes"
       used_by = "solutions"
       owner   = "solutions"
+      pool    = "system"
     }
 
     metadata = {
@@ -198,10 +242,57 @@ resource "google_container_node_pool" "system_pool" {
 }
 
 # ==============================================================================
-# 5. WORKLOAD POOL (scale-to-zero)
+# 5. APPS / STAGING — low-end GP before GPU/TPU (VAST I/O, Flask, smoke tests)
+# ==============================================================================
+# Prefer min=0. Optional apps_min_nodes=1 = small always-on staging floor only.
+
+resource "google_container_node_pool" "apps" {
+  count = var.enable_apps_pool ? 1 : 0
+
+  name               = "apps-pool"
+  cluster            = google_container_cluster.primary.name
+  location           = google_container_cluster.primary.location
+  project            = google_container_cluster.primary.project
+  initial_node_count = var.apps_min_nodes
+
+  autoscaling {
+    min_node_count = var.apps_min_nodes
+    max_node_count = var.apps_max_nodes
+  }
+
+  node_config {
+    machine_type = var.apps_machine_type
+    disk_size_gb = 50
+    disk_type    = "pd-standard"
+    # vast-client: same firewall path as other lab nodes talking to VAST
+    tags         = ["vast-client"]
+
+    labels = {
+      longrun     = "yes"
+      used_by     = "solutions"
+      owner       = "solutions"
+      pool        = "apps"
+      accelerator = "none"
+      tier        = "staging"
+    }
+
+    # Soft preference: apps land here; GPU/CPU-heavy stay on their tainted pools.
+    # No NoSchedule taint so default pods can use this as the staging area.
+    metadata = {
+      disable-legacy-endpoints = "true"
+    }
+  }
+
+  depends_on = [google_container_node_pool.system_pool]
+}
+
+# ==============================================================================
+# 6. CPU HEAVY — scale-from-zero (mandatory min=0)
 # ==============================================================================
 
 resource "google_container_node_pool" "workload_pool" {
+  count = var.enable_cpu_heavy_pool ? 1 : 0
+
   name               = "de-team-pool1"
   cluster            = google_container_cluster.primary.name
   location           = google_container_cluster.primary.location
@@ -209,21 +300,22 @@ resource "google_container_node_pool" "workload_pool" {
   initial_node_count = 0
 
   autoscaling {
-    min_node_count = 0
-    max_node_count = 5
+    min_node_count = 0 # MANDATORY — no idle CPU heavy nodes
+    max_node_count = var.cpu_heavy_max_nodes
   }
 
   node_config {
     machine_type = "n4-standard-16"
     disk_size_gb = 256
     disk_type    = "hyperdisk-balanced"
-
-    tags = ["vast-client"]
+    tags         = ["vast-client"]
 
     labels = {
-      longrun = "yes"
-      used_by = "solutions"
-      owner   = "solutions"
+      longrun     = "yes"
+      used_by     = "solutions"
+      owner       = "solutions"
+      pool        = "cpu-heavy"
+      accelerator = "none"
     }
 
     taint {
@@ -241,7 +333,63 @@ resource "google_container_node_pool" "workload_pool" {
 }
 
 # ==============================================================================
-# 6. OUTPUTS
+# 7. GPU L4 — scale-from-zero (mandatory min=0)
+# ==============================================================================
+# Pool is declared in Terraform; VMs stay at 0 until a matching GPU pod is pending.
+
+resource "google_container_node_pool" "gpu_l4" {
+  count = var.enable_gpu_l4_pool ? 1 : 0
+
+  name               = "gpu-l4-pool"
+  cluster            = google_container_cluster.primary.name
+  location           = google_container_cluster.primary.location
+  project            = google_container_cluster.primary.project
+  initial_node_count = 0
+
+  autoscaling {
+    min_node_count = 0 # MANDATORY — no idle GPUs
+    max_node_count = var.gpu_l4_max_nodes
+  }
+
+  node_config {
+    machine_type = "g2-standard-8"
+    disk_size_gb = 200
+    disk_type    = "pd-balanced"
+    image_type   = "COS_CONTAINERD"
+    tags         = ["vast-client"]
+
+    guest_accelerator {
+      type  = "nvidia-l4"
+      count = 1
+      gpu_driver_installation_config {
+        gpu_driver_version = "DEFAULT"
+      }
+    }
+
+    labels = {
+      longrun     = "yes"
+      used_by     = "solutions"
+      owner       = "solutions"
+      pool        = "gpu-l4"
+      accelerator = "l4"
+    }
+
+    taint {
+      key    = "nvidia.com/gpu"
+      value  = "present"
+      effect = "NO_SCHEDULE"
+    }
+
+    metadata = {
+      disable-legacy-endpoints = "true"
+    }
+  }
+
+  depends_on = [google_container_node_pool.system_pool]
+}
+
+# ==============================================================================
+# 8. OUTPUTS
 # ==============================================================================
 
 output "kubernetes_endpoint" {
@@ -255,14 +403,24 @@ output "gcloud_auth_command" {
   value       = "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --zone ${google_container_cluster.primary.location} --project ${google_container_cluster.primary.project}"
 }
 
+output "cost_model" {
+  description = "How this cluster saves money."
+  value       = <<-EOT
+    Always-on: system-pool × ${var.system_node_count} (kube-system only).
+    Staging:   apps-pool (${var.apps_machine_type}) min=${var.apps_min_nodes} max=${var.apps_max_nodes}
+               — VAST I/O / Flask / smoke tests BEFORE GPU/TPU. Prefer min=0.
+    Scale-from-zero: CPU heavy=${var.enable_cpu_heavy_pool}, GPU L4=${var.enable_gpu_l4_pool}.
+    Flow: prove on apps-pool → then retarget GPU/TPU + use examples/ timers so nodes → 0.
+  EOT
+}
+
 output "networking_reminder" {
   description = "Expected subnet alias layout (must exist before apply)."
   value       = <<-EOT
-    VPC plan (VPN-advertised): 10.199.0.0/20  — whole VPC, not all for GKE
-    Subnet ${var.subnet_name} on ${var.vpc_name}:
-      primary:              nodes + other apps on this subnet (e.g. 10.199.0.0/24)
-      ${var.pods_secondary_range_name}:     e.g. 10.199.8.0/22   ← Flask/web pod alias IPs (VPN-reachable)
-      ${var.services_secondary_range_name}: e.g. 10.199.12.0/24  ← Service ClusterIPs
-    Leftover in /20: other subnets / apps / growth
+    VPC plan (VPN): 10.199.0.0/20 — whole VPC, not all for GKE
+    Subnet ${var.subnet_name}:
+      primary:              e.g. 10.199.0.0/24
+      ${var.pods_secondary_range_name}:     e.g. 10.199.8.0/22
+      ${var.services_secondary_range_name}: e.g. 10.199.12.0/24
   EOT
 }

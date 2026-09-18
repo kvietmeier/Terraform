@@ -69,7 +69,7 @@ Auth is usually via AzureRM env vars (`ARM_TENANT_ID`, `ARM_SUBSCRIPTION_ID`, `A
 | [`CoreInfra/`](gcp/CoreInfra/) | Production-style pieces: VPCs, firewalls, DNS, NAT, VPN, IAP, core VMs |
 | [`configure-project/`](gcp/configure-project/) | **Roll-up** of CoreInfra into one apply (feature flags) — preferred for a full project |
 | [`VMs/`](gcp/VMs/) | Standalone VM patterns (multi-VM, proxy, Windows, images, …) |
-| [`GKE/`](gcp/GKE/) | GKE clusters and sample Kubernetes apps |
+| [`GKE/`](gcp/GKE/) | Scale-from-zero AI/lab GKE — apps staging, GPU min=0, VPN/alias networking | [`gcp/GKE/gke-aicluster/README.md`](gcp/GKE/gke-aicluster/README.md) |
 | [`tpus/`](gcp/tpus/) | TPU node / discovery experiments |
 | [`templates/`](gcp/templates/), [`testing/`](gcp/testing/) | Starters and scratch |
 

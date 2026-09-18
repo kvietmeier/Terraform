@@ -1,0 +1,130 @@
+# Autostop pattern: run a Deployment (scales GPU/CPU pool up from 0),
+# then a CronJob scales replicas → 0 on a schedule so nodes drain to zero.
+#
+# Adjust schedule / names. Requires RBAC for the CronJob ServiceAccount to patch Deployments.
+#
+# kubectl apply -f deployment-autostop-cronjob.yaml
+#
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: scale-to-zero
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: scale-to-zero
+  namespace: default
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments", "deployments/scale"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: scale-to-zero
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: scale-to-zero
+subjects:
+  - kind: ServiceAccount
+    name: scale-to-zero
+    namespace: default
+---
+# Example GPU demo app — replace image; delete or scale to 0 when done
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-gpu-demo
+  namespace: default
+  labels:
+    app: flask-gpu-demo
+    cost-profile: scale-from-zero
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-gpu-demo
+  template:
+    metadata:
+      labels:
+        app: flask-gpu-demo
+    spec:
+      nodeSelector:
+        accelerator: l4
+        pool: gpu-l4
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Equal
+          value: present
+          effect: NoSchedule
+      containers:
+        - name: app
+          image: gcr.io/google-samples/hello-app:1.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+            requests:
+              nvidia.com/gpu: "1"
+---
+# Nightly (01:00 UTC): scale demo to 0 → GPU nodes → 0
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: flask-gpu-demo-autostop
+  namespace: default
+spec:
+  schedule: "0 1 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      template:
+        spec:
+          serviceAccountName: scale-to-zero
+          restartPolicy: Never
+          containers:
+            - name: scale-down
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -euo pipefail
+                  echo "Autostop: scaling flask-gpu-demo to 0 at $(date -Is)"
+                  kubectl -n default scale deployment/flask-gpu-demo --replicas=0
+                  echo "Done — gpu-l4-pool should scale to 0 after pods terminate"
+---
+# Optional: also stop after a one-shot timer Job (e.g. 2 hours from apply)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: flask-gpu-demo-stop-in-2h
+  namespace: default
+spec:
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      serviceAccountName: scale-to-zero
+      restartPolicy: Never
+      containers:
+        - name: wait-then-stop
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -euo pipefail
+              echo "Timer started $(date -Is); will scale flask-gpu-demo to 0 in 7200s"
+              sleep 7200
+              kubectl -n default scale deployment/flask-gpu-demo --replicas=0
+              echo "Scaled to 0 at $(date -Is)"
