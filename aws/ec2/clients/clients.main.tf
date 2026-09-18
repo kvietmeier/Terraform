@@ -1,97 +1,60 @@
 ###===================================================================================###
-# File: multi.aws.tf
-# Author: Karl Vietmeier
-# Purpose: Flat Terraform config to deploy multiple AWS EC2 instances with cloud-init,
-#          static private IPs, SSH access via key pair, IAM role, and tagging.
-# License: Apache 2.0
+#
+#  File:  clients.main.tf
+#  Created By: Karl Vietmeier
+#
+#  Purpose: Deploy multiple AWS EC2 client instances with cloud-init,
+#           existing key pair, IAM instance profile, and tagging.
+#           All inputs are variables — nothing hard-coded here.
+#
 ###===================================================================================###
 
-# --------------------------------------------------------------------------
-# Terraform / AWS provider
-# --------------------------------------------------------------------------
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.27.0"
-    }
+###===================================================================================###
+###                  Start creating infrastructure resources                          ###
+
+locals {
+  # Only look up AMIs for os_types actually used by var.vms
+  used_os_amis = {
+    for os_type, ami in var.os_amis : os_type => ami
+    if contains([for vm in var.vms : vm.os_type], os_type)
   }
 }
 
-provider "aws" {
-  region  = var.region
-  profile = var.aws_profile
-}
+# AMI lookups (one data source per os_type in use)
+data "aws_ami" "os" {
+  for_each = local.used_os_amis
 
-# --------------------------------------------------------------------------
-# Key pair for SSH access
-# --------------------------------------------------------------------------
-resource "aws_key_pair" "labuser" {
-  key_name   = var.ssh_key_name
-  public_key = file(var.ssh_key_file)
-}
-
-# --------------------------------------------------------------------------
-# Cloud-init template
-# --------------------------------------------------------------------------
-data "template_file" "cloudinit" {
-  template = local.cloudinit_config
-}
-
-# --------------------------------------------------------------------------
-# AMI lookups
-# --------------------------------------------------------------------------
-data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["099720109477"]
+  owners      = each.value.owners
+
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+    values = [each.value.name_filter]
   }
+
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
 }
 
-data "aws_ami" "rocky9" {
-  most_recent = true
-  owners      = ["679593333241"]
-  filter {
-    name   = "name"
-    values = ["Rocky-9.*-x86_64-GenericCloud-*"]
-  }
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
-# --------------------------------------------------------------------------
-# EC2 Instances
-# --------------------------------------------------------------------------
 resource "aws_instance" "vm_instance" {
-  for_each       = var.vms
+  for_each = var.vms
 
-  ami            = lookup(
-                     { "ubuntu" = data.aws_ami.ubuntu.id, "rocky" = data.aws_ami.rocky9.id },
-                     each.value.os_type,
-                     data.aws_ami.ubuntu.id
-                   )
-
-  instance_type  = each.value.machine_type
-  subnet_id      = var.subnet_id
-  private_ip     = cidrhost(var.subnet_cidr, each.value.ip_octet)
-  key_name       = aws_key_pair.labuser.key_name
-  iam_instance_profile = var.iam_instance_profile
-  user_data      = data.template_file.cloudinit.rendered
+  ami                    = data.aws_ami.os[each.value.os_type].id
+  instance_type          = each.value.machine_type
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = var.security_group_ids
+  key_name               = var.ssh_key_name
+  iam_instance_profile   = var.iam_instance_profile
+  user_data              = local.cloudinit_config
 
   root_block_device {
     volume_size = each.value.bootdisk_size
   }
 
   tags = merge(
-    local.common_tags,
+    var.common_tags,
     { Name = each.key }
   )
 }
@@ -100,6 +63,11 @@ resource "aws_instance" "vm_instance" {
 # Outputs
 # --------------------------------------------------------------------------
 output "vm_private_ips" {
-  value       = [for vm in aws_instance.vm_instance : vm.private_ip]
-  description = "List of private IP addresses of the VMs"
+  value       = { for name, vm in aws_instance.vm_instance : name => vm.private_ip }
+  description = "Map of VM name to private IP"
+}
+
+output "vm_ids" {
+  value       = { for name, vm in aws_instance.vm_instance : name => vm.id }
+  description = "Map of VM name to instance ID"
 }
