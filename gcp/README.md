@@ -1,45 +1,89 @@
-### Create VMs
----
+# gcp/
 
-#### GCP Quirks
+Terraform stacks for GCP lab and POC infrastructure: core networking/DNS, a project roll-up module, VMs, GKE, and TPUs.
 
-- Many Linux images provided on GCP do not have cloud-init installed!
-  You will need to use the metadata block in the VM resource to run a startup scrupt to install it
-  
-  This code runs a small script to install cloud-init and reboot then adds SSH keys to authorized_keys, enables serial port access and then adds the cloud-init.yml to configure the system.
+## Layout
 
-  ```terraform
-  metadata = {
-    # Install cloud-init if not available yet
-    startup-script = <<-EOT
-    #!/bin/bash
-    command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
-    EOT
-    
-    ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
-    user-data          = "${data.cloudinit_config.system_setup.rendered}"
-    serial-port-enable = true
-  }
-  ```
+```text
+gcp/
+├── CoreInfra/          # Discrete production-style pieces (VPC, FW, DNS, NAT, VPN, IAP, VMs)
+├── configure-project/  # Roll-up of CoreInfra into one apply (preferred for a full project)
+├── VMs/                # Standalone VM patterns
+├── GKE/                # GKE clusters + sample apps
+├── tpus/               # TPU node / discovery experiments
+├── templates/          # Starters
+├── testing/            # Scratch (AD domain, misc VMs, …)
+└── scripts/            # Stub → use ../../scripts/gcp instead
+```
 
-- Adding more than one SSH Key to a Linux host
-  By default you can only add one but Terraform and GCP allow you to reference a file with multiple keys in it.
+| Directory | Purpose |
+|-----------|---------|
+| [`CoreInfra/`](CoreInfra/) | VPCs, firewalls, DNS forwarders/zones, NAT, VPN, IAP, core VMs — apply piece by piece |
+| [`configure-project/`](configure-project/) | Single root module wiring CoreInfra modules with feature flags |
+| [`VMs/`](VMs/) | Multi-VM, proxy, Windows, image, migration examples |
+| [`GKE/`](GKE/) | GKE testing / AI cluster + Kubernetes sample apps |
+| [`tpus/`](tpus/) | TPU nodes and discovery helpers |
+| [`templates/`](templates/), [`testing/`](testing/) | Reference and experimental stacks |
 
-  You need to reference it in 3 places:
+GCP-only helpers (listing, AD metadata, SSH snippets): [`../scripts/gcp/`](../scripts/gcp/).
 
-  "metadata" - see user-data the line in the code above
-  As a variable in variables and tfvars
+## Prerequisites
 
----
+- Terraform installed
+- GCP project + credentials (`gcloud auth application-default login` or a service account)
+- [Google provider docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
 
-#### Author/s
+## Typical workflow
 
-- **Karl Vietmeier**
+**Full project (recommended when you want VPC + firewalls + DNS together):**
 
-#### License
+```bash
+cd gcp/configure-project
+cp terraform.tfvars.example terraform.tfvars
+# edit project_id, feature flags, secrets
+terraform init && terraform plan && terraform apply
+```
 
-This project is licensed under the Apache License - see the [LICENSE.md](../LICENSE.md) file for details
+Details and apply graph: [`configure-project/README.md`](configure-project/README.md).
 
-#### Acknowledgments
+**Individual CoreInfra pieces** (unchanged by the roll-up):
 
-- ChatGPT which feels kind of like cheating
+```bash
+cd gcp/CoreInfra/vpcs/core
+terraform init && terraform plan && terraform apply
+```
+
+## GCP quirks (VMs)
+
+Many Linux images on GCP do **not** ship with cloud-init. Stacks often install it via `startup-script` metadata, then attach user-data / SSH keys:
+
+```terraform
+metadata = {
+  startup-script = <<-EOT
+  #!/bin/bash
+  command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
+  EOT
+
+  ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
+  user-data          = "${data.cloudinit_config.system_setup.rendered}"
+  serial-port-enable = true
+}
+```
+
+Multiple SSH keys: put them in a file and reference that file from metadata, variables, and tfvars (GCP defaults to a single key otherwise).
+
+Day-to-day Linux bootstrap content: [`../scripts/cloud-init/`](../scripts/cloud-init/).
+
+## Docs
+
+- [Terraform on GCP](https://cloud.google.com/docs/terraform)
+- [HashiCorp Learn — GCP](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started)
+- [Google provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
+
+## Author
+
+**Karl Vietmeier**
+
+## License
+
+Apache 2.0 — see [LICENSE.md](../LICENSE.md).

@@ -1,50 +1,79 @@
-### Terraform Azure Templates
+# azure/
 
-Terraform templates for creating infrastructure in Azure.
+Terraform stacks for Azure lab and POC infrastructure: shared networking/identity, VMs, AKS, and AVD.
 
-#### Documentation Links
+## Layout
 
-- [Terraform on Azure](https://docs.microsoft.com/en-us/azure/developer/terraform/)
-- [HashiLearn - Azure](https://learn.hashicorp.com/collections/terraform/azure-get-started)
-- [AzureRM Registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+```text
+azure/
+├── CoreInfra/     # Shared infra (vNets, NSG, AADDS, VPN, storage, users)
+├── VMs/           # Linux / Windows / multi-VM / benchmarking
+├── AKS/           # AKS cluster examples
+├── AVD/           # Azure Virtual Desktop experiments
+├── templates/     # Reusable snippets / starters
+└── testing/       # Scratch / experimental modules
+```
 
-#### Misc Notes
+| Directory | Purpose |
+|-----------|---------|
+| [`CoreInfra/`](CoreInfra/) | vNets, NSGs, Azure AD DS, VPN gateway, storage, user management |
+| [`VMs/`](VMs/) | Single/multi Linux & Windows VMs, Azure Linux, DB/Linux benchmarks |
+| [`AKS/`](AKS/) | AKS clusters (`aks-1`, `aks-2`, deploy / bill-run variants) |
+| [`AVD/`](AVD/) | Azure Virtual Desktop test stacks |
+| [`templates/`](templates/) | Starter patterns (not always turnkey) |
+| [`testing/`](testing/) | Experiments (storage, maps, modules) |
 
-To make my code more portable across Tenants/Subscriptions I'm using the TF Environment variables set in the PowerShell profile:  
+Shared VM / AKS helper scripts live under [`../scripts/azure/`](../scripts/azure/), not under the stub `VMs/scripts` or `AKS/scripts` folders.
 
-Source a "secrets file" for the variables:
+## Prerequisites
+
+- Terraform installed
+- Azure subscription + service principal (or equivalent) with rights to create the targeted resources
+- [AzureRM provider docs](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+
+## Authentication
+
+Prefer Terraform AzureRM environment variables (portable across tenants/subscriptions) over hard-coding credentials.
+
+Source a local secrets file from your PowerShell profile:
 
 ```powershell
 . '<drive>:\.hideme\somesecretstuff.ps1'
 ```
 
-Set the variables:
+Then set:
 
 ```powershell
-$env:ARM_TENANT_ID       ="$TFM_TenantID"
-$env:ARM_SUBSCRIPTION_ID ="$TFM_SubID"
-$env:ARM_CLIENT_ID       ="$TFM_AppID"
-$env:ARM_CLIENT_SECRET   ="$TFM_AppSecret"
+$env:ARM_TENANT_ID       = "$TFM_TenantID"
+$env:ARM_SUBSCRIPTION_ID = "$TFM_SubID"
+$env:ARM_CLIENT_ID       = "$TFM_AppID"
+$env:ARM_CLIENT_SECRET   = "$TFM_AppSecret"
 ```
-  
-#### My code is Built With
 
-- [Visual Studio Code](https://code.visualstudio.com/) - Editor
-- [Terraform](https://www.terraform.io/) - Terraform
-- [Azure](portal.azure.com) - Azure Portal
+Backend helpers (optional): [`../scripts/create_azurerm_bkend.ps1`](../scripts/create_azurerm_bkend.ps1).
 
-#### All run under PowerShell on Windows 10/11
+## Typical workflow
 
-- [Use Windows Terminal Console](https://docs.microsoft.com/en-us/windows/terminal/)
+```bash
+cd azure/VMs/linuxvm_1   # or CoreInfra/vnets, AKS/aks-1, …
+# edit *.tfvars as needed
+terraform init
+terraform plan
+terraform apply
+```
 
-#### Author/s
+Repo-wide apply shortcuts and conventions: [parent README](../README.md).
 
-- **Karl Vietmeier**
+## Docs
 
-#### License
+- [Terraform on Azure](https://docs.microsoft.com/en-us/azure/developer/terraform/)
+- [HashiCorp Learn — Azure](https://learn.hashicorp.com/collections/terraform/azure-get-started)
+- [AzureRM Registry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
 
-This project is licensed under the Apache License - see the [LICENSE.md](../LICENSE.md) file for details
+## Author
 
-#### Acknowledgments
+**Karl Vietmeier**
 
-- None so far other than the many good examples out there.
+## License
+
+Apache 2.0 — see [LICENSE.md](../LICENSE.md).
