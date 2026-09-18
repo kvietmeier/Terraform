@@ -1,21 +1,20 @@
 ###===============================================================================================###
 ### Terraform Configuration for GKE Scale-to-Zero Architecture
 ###===============================================================================================###
-# This configuration provisions a single-zone GKE cluster in us-central1-a [cite: 24]
-# tailored for compute-heavy AI workloads while maintaining tight budget compliance[cite: 4, 34].
+# Single-zone GKE cluster (us-central1-a) for compute-heavy AI workloads with scale-to-zero.
+#
+# NETWORKING (Andromeda / VPC-native — required):
+#   One subnet with alias (secondary) ranges. Pod IPs are real VPC addresses, so a VPN that
+#   advertises the VPC plan (example: 10.199.0.0/20) can reach Flask/web apps IN the pods.
+#
+#   Do NOT burn the whole /20 on GKE — that block is the VPC plan for nodes, other apps,
+#   and leftover growth. GKE only takes named secondary slices (see variables).
 #
 # INFRASTRUCTURE SUMMARY:
-# - Default Pool: Destroyed immediately upon creation (GKE best practice to isolate critical 
-#   control plane infrastructure from volatile workload environments)
-# - System Pool: "system-pool" anchoring core Kubernetes management pods (e.g., kube-dns)
-#   Runs 24/7 utilizing right-sized e2-standard-4 compute nodes, securely scaled to a minimum 
-#   of TWO instances to maintain strict site reliability and high availability
-# - Workload Pool: "de-team-pool1" consisting of heavy-duty n4-standard-16 (16 vCPUs) instances 
-#   backed by 256GB hyperdisk-balanced boot storage[cite: 73, 74]. Leverages Cluster Autoscaling
-#   mechanisms to automatically terminate instances completely down to ZERO nodes when idle
-# - Metadata & Security: Formally injected with the "vast-client" network target tag to filter 
-#   ingress traffic via firewall policy, and stamped with mandatory corporate tracking labels
-#   (longrun=yes, used_by=solutions, owner=solutions) for unified GCP/K8s resource billing
+# - Default pool: created then removed (remove_default_node_pool)
+# - system-pool: e2-standard-4 × 2 (always on for kube-dns / system pods)
+# - de-team-pool1: n4-standard-16, hyperdisk-balanced, autoscaled 0..5, taint workload=heavy
+# - Network tag: vast-client  |  labels: longrun / used_by / owner = solutions
 ###===============================================================================================###
 
 
@@ -44,83 +43,114 @@ provider "google" {
 
 variable "project_id" {
   type        = string
-  description = "The target GCP Project ID for infrastructure allocation."
-  default     = "techsummit-498311" # [cite: 4325]
+  description = "GCP project ID."
+  default     = "techsummit-498311"
 }
 
 variable "cluster_name" {
   type        = string
-  description = "The unique identifier for the parent GKE cluster."
-  default     = "techsummit-de-team" # [cite: 4324]
+  description = "GKE cluster name."
+  default     = "techsummit-de-team"
 }
 
 variable "location" {
   type        = string
-  description = "The specific compute zone or region where resources are pinned."
-  default     = "us-central1-a" # [cite: 4326] (Corrected typo from source 'us-centrall-a')
+  description = "Zone (or region) for the cluster."
+  default     = "us-central1-a"
 }
 
 variable "gke_version" {
   type        = string
-  description = "The designated Kubernetes control plane version."
-  default     = "1.35.5-gke.1000000" # [cite: 4327]
+  description = "Optional min control-plane version (e.g. 1.30.5-gke.1014001). Empty = GKE default for the channel/location. Validate with: gcloud container get-server-config --zone=us-central1-a"
+  default     = ""
 }
 
 variable "vpc_name" {
   type        = string
-  description = "The primary VPC network name."
-  default     = "summit-vpc" # [cite: 4328]
+  description = "VPC network name."
+  default     = "summit-vpc"
 }
 
 variable "subnet_name" {
   type        = string
-  description = "The primary subnetwork interface name identifier."
-  default     = "subnet19-us-central1" # [cite: 4329]
+  description = "Single subnet that holds node primary IPs + GKE alias (secondary) ranges."
+  default     = "subnet19-us-central1"
 }
 
+# --- VPC address plan (example) — advertise 10.199.0.0/20 over VPN ---
+# Only GKE's secondary slices are referenced here. Primary + leftovers stay for other apps.
+# These named secondaries MUST already exist on var.subnet_name (CoreInfra vpcs/core supports them).
+
+variable "pods_secondary_range_name" {
+  type        = string
+  description = "Subnet secondary range name for Pod (alias) IPs."
+  default     = "gke-pods"
+}
+
+variable "services_secondary_range_name" {
+  type        = string
+  description = "Subnet secondary range name for Service ClusterIPs."
+  default     = "gke-services"
+}
+
+variable "master_ipv4_cidr_block" {
+  type        = string
+  description = "Private control-plane /28 — must not overlap the VPC plan or secondaries."
+  default     = "172.16.0.16/28"
+}
+
+# Documentation-only defaults (must match what you put on the subnet):
+#   VPC plan (VPN):     10.199.0.0/20
+#   Subnet primary:     10.199.0.0/24     nodes + other VMs/apps on this subnet
+#   gke-pods:           10.199.8.0/22     alias IPs — Flask/web pods (VPN-reachable)
+#   gke-services:       10.199.12.0/24    ClusterIPs (cluster-local; still carved from plan)
+#   leftover in /20:    10.199.1–7, 13–15 for other subnets/apps/growth
+
 # ==============================================================================
-# 3. PARENT CLUSTER SETUP & TEMPORARY POOL DELETION
+# 3. PARENT CLUSTER — VPC-NATIVE (ANDROMEDA) ON ONE SUBNET
 # ==============================================================================
 
 resource "google_container_cluster" "primary" {
-  name             = var.cluster_name
-  location         = var.location
-  project          = var.project_id
-  min_master_version = var.gke_version
+  name               = var.cluster_name
+  location           = var.location
+  project            = var.project_id
+  min_master_version = var.gke_version != "" ? var.gke_version : null
 
   network    = var.vpc_name
   subnetwork = var.subnet_name
 
-  # CRITICAL SRE PATTERN: Decoupling Default Pool Construction.
-  # GKE requires an initial node pool to boot, but we immediately destroy it
-  # to isolate the control plane from volatile default sizing configurations.
+  # Provider 5.x defaults this to true — set false for lab destroy convenience.
+  deletion_protection = false
+
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  # IP Allocation and Routing Topologies
+  # RIGHT WAY: named alias ranges on the SAME subnet (Andromeda / VPC-native).
+  # Pod IPs come from gke-pods — VPN clients that route 10.199.0.0/20 can hit Flask/web in-pod.
+  # Do not use routes-based clusters; do not auto-carve unmanaged CIDRs that collide with the plan.
   ip_allocation_policy {
-    # Utilizing Telco Carrier-Grade NAT (CGNAT) to completely bypass RFC 1918 limits
-    cluster_ipv4_cidr_block  = "100.64.0.0/21" # [cite: 4331, 4332]
-    services_ipv4_cidr_block = "100.64.8.0/27" # [cite: 4333]
+    cluster_secondary_range_name  = var.pods_secondary_range_name
+    services_secondary_range_name = var.services_secondary_range_name
   }
 
   default_snat_status {
     disabled = false
   }
 
-  # Security Hardening: Network isolation settings
   private_cluster_config {
-    enable_private_nodes    = true # [cite: 4377]
-    enable_private_endpoint = false # Allowed public access to endpoint for administrative operations
-    master_ipv4_cidr_block  = "172.16.0.16/28" # [cite: 4334]
+    enable_private_nodes    = true
+    enable_private_endpoint = false
+    master_ipv4_cidr_block  = var.master_ipv4_cidr_block
   }
 
-  # Cluster Metadata tracking applied across global cloud assets
+  # Private nodes need Cloud NAT (and usually Private Google Access) on this subnet —
+  # expect that from CoreInfra VPC/NAT, not created here.
+
   resource_labels = {
     longrun = "yes"
     used_by = "solutions"
     owner   = "solutions"
-  } # [cite: 4349]
+  }
 
   lifecycle {
     ignore_changes = [
@@ -131,36 +161,31 @@ resource "google_container_cluster" "primary" {
 }
 
 # ==============================================================================
-# 4. HIGH AVAILABILITY ANCHOR SYSTEM NODE POOL
+# 4. SYSTEM NODE POOL (always on)
 # ==============================================================================
 
 resource "google_container_node_pool" "system_pool" {
-  name       = "system-pool" # [cite: 4338]
+  name       = "system-pool"
   cluster    = google_container_cluster.primary.name
   location   = google_container_cluster.primary.location
   project    = google_container_cluster.primary.project
-  node_count = 2 # [cite: 4340]
+  node_count = 2
 
-  # Node Architecture Configuration
   node_config {
-    machine_type = "e2-standard-4" # [cite: 4339]
+    machine_type = "e2-standard-4"
     disk_size_gb = 100
     disk_type    = "pd-standard"
 
-    # Network Identity Management via Target Tags instead of literal IP filtering
-    tags = ["vast-client"] # 
+    tags = ["vast-client"]
 
-    # Least-Privilege IAM Integration
-    # Dev lab defaults to project Owner, but production requires custom service accounts.
-    # The default Compute Engine service account is used here for direct equivalence.
-    service_account = "default"
+    # Omit service_account → default Compute Engine SA.
+    # Do not set service_account = "default" (invalid for the API).
 
-    # Labels for infrastructure tracking and scheduling alignment
     labels = {
       longrun = "yes"
       used_by = "solutions"
       owner   = "solutions"
-    } # [cite: 4350]
+    }
 
     metadata = {
       disable-legacy-endpoints = "true"
@@ -173,46 +198,38 @@ resource "google_container_node_pool" "system_pool" {
 }
 
 # ==============================================================================
-# 5. SCALE-TO-ZERO SANDBOX WORKLOAD NODE POOL
+# 5. WORKLOAD POOL (scale-to-zero)
 # ==============================================================================
 
 resource "google_container_node_pool" "workload_pool" {
-  name       = "de-team-pool1" # [cite: 4343]
-  cluster    = google_container_cluster.primary.name
-  location   = google_container_cluster.primary.location
-  project    = google_container_cluster.primary.project
-  
-  # Set initial node counts to 0 to align with scale-to-zero parameters
-  initial_node_count = 0 # [cite: 4419]
+  name               = "de-team-pool1"
+  cluster            = google_container_cluster.primary.name
+  location           = google_container_cluster.primary.location
+  project            = google_container_cluster.primary.project
+  initial_node_count = 0
 
-  # Cluster Autoscaler settings enabling cost optimization mechanisms
   autoscaling {
-    min_node_count = 0 # [cite: 4415]
-    max_node_count = 5 # [cite: 4417]
+    min_node_count = 0
+    max_node_count = 5
   }
 
   node_config {
-    machine_type = "n4-standard-16" # [cite: 4344]
-    disk_size_gb = 256 # [cite: 4345]
-    disk_type    = "hyperdisk-balanced" # [cite: 4346]
+    machine_type = "n4-standard-16"
+    disk_size_gb = 256
+    disk_type    = "hyperdisk-balanced"
 
-    tags = ["vast-client"] # [cite: 4351]
-
-    service_account = "default"
+    tags = ["vast-client"]
 
     labels = {
       longrun = "yes"
       used_by = "solutions"
       owner   = "solutions"
-    } # [cite: 4350]
+    }
 
-    # SRE HARDENING PROTECTION BLOCK: Strict Kubernetes Taints
-    # Prevents lightweight, non-critical pods from triggering autoscaler events
-    # on expensive enterprise-grade hardware nodes.
     taint {
-      key    = "workload" # [cite: 4449, 4486]
-      value  = "heavy" # [cite: 4449, 4487]
-      effect = "NO_SCHEDULE" # [cite: 4449, 4488]
+      key    = "workload"
+      value  = "heavy"
+      effect = "NO_SCHEDULE"
     }
 
     metadata = {
@@ -220,20 +237,32 @@ resource "google_container_node_pool" "workload_pool" {
     }
   }
 
-  # Prevent race conditions by forcing the highly available system anchor online first
   depends_on = [google_container_node_pool.system_pool]
 }
 
 # ==============================================================================
-# 6. ARCHITECTURAL EXPORTS
+# 6. OUTPUTS
 # ==============================================================================
 
 output "kubernetes_endpoint" {
-  description = "The private or public control plane API connection string."
+  description = "Control plane API endpoint."
   value       = google_container_cluster.primary.endpoint
+  sensitive   = true
 }
 
 output "gcloud_auth_command" {
-  description = "Executable diagnostic terminal string to bind kubectl locally."
+  description = "Configure kubectl for this cluster."
   value       = "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --zone ${google_container_cluster.primary.location} --project ${google_container_cluster.primary.project}"
+}
+
+output "networking_reminder" {
+  description = "Expected subnet alias layout (must exist before apply)."
+  value       = <<-EOT
+    VPC plan (VPN-advertised): 10.199.0.0/20  — whole VPC, not all for GKE
+    Subnet ${var.subnet_name} on ${var.vpc_name}:
+      primary:              nodes + other apps on this subnet (e.g. 10.199.0.0/24)
+      ${var.pods_secondary_range_name}:     e.g. 10.199.8.0/22   ← Flask/web pod alias IPs (VPN-reachable)
+      ${var.services_secondary_range_name}: e.g. 10.199.12.0/24  ← Service ClusterIPs
+    Leftover in /20: other subnets / apps / growth
+  EOT
 }
