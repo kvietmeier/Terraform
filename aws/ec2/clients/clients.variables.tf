@@ -33,13 +33,19 @@ variable "security_group_ids" {
 
 ###--- Instance identity / access
 
-variable "iam_instance_profile" {
-  description = "IAM instance profile name to attach to EC2 instances"
+variable "ssh_key_name" {
+  description = "Name of an existing AWS EC2 Key Pair for SSH access"
   type        = string
 }
 
-variable "ssh_key_name" {
-  description = "Name of an existing AWS EC2 Key Pair for SSH access"
+variable "ssh_user" {
+  description = "OS user for SSH / Ansible (labuser after universal cloud-init)"
+  type        = string
+  default     = "labuser"
+}
+
+variable "ssh_private_key_path" {
+  description = "Local private key path shown in formatted ssh -i commands"
   type        = string
 }
 

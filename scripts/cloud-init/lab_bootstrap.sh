@@ -88,6 +88,45 @@ EOF
 }
 
 ###-----------------------------------------------------------------------------###
+### Copy the cloud key pair onto labuser (Ansible uses labuser, not ubuntu)
+### AWS/Azure/GCP inject the key into the image default user only.
+###-----------------------------------------------------------------------------###
+prepare_ansible_ssh() {
+    local home="$1"
+    local src=""
+    local candidate line
+
+    for candidate in \
+        /home/ubuntu/.ssh/authorized_keys \
+        /home/ec2-user/.ssh/authorized_keys \
+        /home/azureuser/.ssh/authorized_keys \
+        /home/opc/.ssh/authorized_keys \
+        /root/.ssh/authorized_keys
+    do
+        if [[ -s "$candidate" ]]; then
+            src="$candidate"
+            break
+        fi
+    done
+
+    if [[ -z "$src" ]]; then
+        log "WARN: no cloud SSH key found; labuser is not yet reachable by Ansible"
+        return 0
+    fi
+
+    mkdir -p "$home/.ssh"
+    touch "$home/.ssh/authorized_keys"
+    while IFS= read -r line; do
+        [[ -z "$line" || "$line" == \#* ]] && continue
+        grep -qxF "$line" "$home/.ssh/authorized_keys" || echo "$line" >> "$home/.ssh/authorized_keys"
+    done < "$src"
+    chmod 700 "$home/.ssh"
+    chmod 600 "$home/.ssh/authorized_keys"
+    chown -R labuser:labuser "$home/.ssh"
+    log "OK: copied SSH key from $src to labuser"
+}
+
+###-----------------------------------------------------------------------------###
 ### labuser + shell defaults
 ###-----------------------------------------------------------------------------###
 ensure_labuser() {
@@ -131,6 +170,7 @@ EOF
         fi
     done
     chown -R labuser:labuser "$home"
+    prepare_ansible_ssh "$home"
 }
 
 ###-----------------------------------------------------------------------------###

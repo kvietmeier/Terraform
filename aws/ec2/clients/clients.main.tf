@@ -4,7 +4,7 @@
 #  Created By: Karl Vietmeier
 #
 #  Purpose: Deploy multiple AWS EC2 client instances with cloud-init,
-#           existing key pair, IAM instance profile, and tagging.
+#           an existing key pair, and tagging.
 #           All inputs are variables — nothing hard-coded here.
 #
 ###===================================================================================###
@@ -46,8 +46,8 @@ resource "aws_instance" "vm_instance" {
   subnet_id              = var.subnet_id
   vpc_security_group_ids = var.security_group_ids
   key_name               = var.ssh_key_name
-  iam_instance_profile   = var.iam_instance_profile
-  user_data              = local.cloudinit_config
+  # AWS user_data max is 16 KiB. Gzip keeps the full embedded bootstrap under that.
+  user_data_base64       = base64gzip(local.cloudinit_config)
 
   root_block_device {
     volume_size = each.value.bootdisk_size
@@ -59,15 +59,3 @@ resource "aws_instance" "vm_instance" {
   )
 }
 
-# --------------------------------------------------------------------------
-# Outputs
-# --------------------------------------------------------------------------
-output "vm_private_ips" {
-  value       = { for name, vm in aws_instance.vm_instance : name => vm.private_ip }
-  description = "Map of VM name to private IP"
-}
-
-output "vm_ids" {
-  value       = { for name, vm in aws_instance.vm_instance : name => vm.id }
-  description = "Map of VM name to instance ID"
-}

@@ -11,11 +11,12 @@ region = "us-west-2"
 
 vpc_id             = "vpc-0537da718b8d70a6e"
 subnet_id          = "subnet-004098aa31ced3b4f"
-security_group_ids = ["sg-016ab6a15d774a78f"]
+security_group_ids = ["sg-030dad04c3ef5f05b"]
 
 ssh_key_name         = "karlv-aws_cloudkey"
+ssh_user             = "labuser"
+ssh_private_key_path = "$HOME/.ssh/admin_keys/karlv-aws_cloudkey.pem"
 cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
-iam_instance_profile = "LabInstanceProfile"
 
 common_tags = {
   UsedBy      = "vocsales"
@@ -34,7 +35,7 @@ os_amis = {
 
 # m6i.2xlarge = 8 vCPU / 32 GiB general purpose; Ubuntu 24.04 + universal cloud-init
 vms = {
-  "client01" = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
-  "client02" = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
-  "client03" = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
+  "voc-client01" = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
+  "voc-client02" = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
+  "voc-client03" = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
 }

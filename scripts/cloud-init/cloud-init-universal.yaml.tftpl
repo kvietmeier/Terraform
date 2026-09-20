@@ -53,12 +53,15 @@ packages:
   - psmisc
 
 users:
+  # Keep distro default (ubuntu/ec2-user/...) so the cloud key pair is injected.
+  - default
   - name: labuser
     gecos: Lab User
     groups: [sudo, wheel]
     shell: /bin/bash
     sudo: ALL=(ALL) NOPASSWD:ALL
     lock_passwd: true
+    # Key is copied onto labuser by lab_bootstrap.sh (prepare_ansible_ssh)
 
 write_files:
   - path: /tmp/lab_bootstrap.sh
