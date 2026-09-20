@@ -1,0 +1,50 @@
+###===================================================================================###
+#
+#  File:  solutions-sre.auto.tfvars.example
+#  Created By: Karl Vietmeier
+#
+#  STATUS: NOT TESTED — generic template only. Validate before production apply.
+#
+#  Copy to solutions-sre.auto.tfvars and fill in org-specific values.
+#  Apply against the Identity Center admin / delegated admin account.
+#
+###===================================================================================###
+
+# Identity Center home region
+region = "us-east-1"
+
+permission_set_name        = "Solutions-SRE"
+permission_set_description = "Solutions / SA / SRE lane — workloads inside platform-provided VPCs (not CI/QA)"
+session_duration           = "PT8H"
+
+attach_readonly_managed_policy = true
+iam_path_prefix                = "solutions"
+idc_group_display_name         = "Solutions-SRE"
+
+# Org-specific prefixes — replace or extend as needed
+s3_bucket_prefixes = [
+  "solutions-demo-",
+]
+
+tags = {
+  ManagedBy = "terraform"
+  Lane      = "solutions-sre"
+  Status    = "untested-template"
+}
+
+# principal_type = "GROUP" (preferred) or "USER"
+# principal_id   = Identity Store UUID
+#
+# Lookup examples:
+#   aws identitystore list-groups --identity-store-id <id> \
+#     --filters AttributePath=DisplayName,AttributeValue=Solutions-SRE
+#   aws identitystore list-users --identity-store-id <id> \
+#     --filters AttributePath=UserName,AttributeValue=user@example.com
+#
+account_assignments = {
+  # "solutions-sre-sandbox" = {
+  #   account_id     = "123456789012"
+  #   principal_type = "GROUP"
+  #   principal_id   = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+  # }
+}
