@@ -57,5 +57,10 @@ resource "aws_instance" "vm_instance" {
     var.common_tags,
     { Name = each.key }
   )
+
+  volume_tags = merge(
+    var.common_tags,
+    { Name = each.key }
+  )
 }
 

@@ -80,6 +80,13 @@ data "aws_iam_policy_document" "solutions_sre" {
       "ec2:ModifyVolume",
       "ec2:CreateSnapshot",
       "ec2:DeleteSnapshot",
+      # Golden / reusable lab AMIs (saves re-bootstrap time & $ vs cloud-init every launch)
+      "ec2:CreateImage",
+      "ec2:DeregisterImage",
+      "ec2:CopyImage",
+      "ec2:ModifyImageAttribute",
+      "ec2:DescribeImages",
+      "ec2:DescribeImageAttribute",
       "ec2:CreateLaunchTemplate",
       "ec2:DeleteLaunchTemplate",
       "ec2:ModifyLaunchTemplate",

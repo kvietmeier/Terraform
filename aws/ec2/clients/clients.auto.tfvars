@@ -19,10 +19,14 @@ ssh_private_key_path = "$HOME/.ssh/admin_keys/karlv-aws_cloudkey.pem"
 cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
 
 common_tags = {
-  UsedBy      = "vocsales"
+  UsedBy      = "solutions"
+  used_by     = "solutions"
+  owned       = "solutions"
+  longrun     = "yes"
   Project     = "VoC"
   Environment = "lab"
   Cluster     = "karlv-i8test-01"
+  Lifecycle   = "demo"
 }
 
 # AMI search criteria (only entries matching vms[].os_type are queried)
