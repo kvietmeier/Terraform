@@ -2,7 +2,7 @@
 
 Tiny Ubuntu EC2 whose **only job** is BIND9 conditional forwarding for VAST VIP-pool DNS when Route 53 Resolver / DHCP option sets are unavailable.
 
-Mini networking node: **Ubuntu + BIND9** (VAST conditional forwarder) with a minimized net-tools set. Default `ubuntu` user; basic aliases + `set -o vi`. Uses an **existing security group**. Edit `vast_zones` / `vast_dns_ips` after the cluster is up (not useful OOB).
+Mini networking node: **Ubuntu + BIND9** (VAST conditional forwarder) with a minimized net-tools set. Default `ubuntu` user; basic aliases + `set -o vi`. Uses an **existing security group**. Keep it **tiny** (`t3.micro` / nano) so cost stays quiet — and tag `AutoShutdown=true` so after-hours lab stop can catch it (see `../autoshutdown/`). Edit `vast_zones` / `vast_dns_ips` after the cluster is up (not useful OOB).
 
 Most of the time you only change two values in tfvars:
 

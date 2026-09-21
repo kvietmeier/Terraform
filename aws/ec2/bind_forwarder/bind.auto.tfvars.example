@@ -19,21 +19,22 @@ ssh_key_name         = "karlv-aws_cloudkey"
 ssh_user             = "ubuntu"
 ssh_private_key_path = "$HOME/.ssh/admin_keys/karlv-aws_cloudkey.pem"
 
-# Tiny is fine — BIND forwarder is nearly idle
+# Tiny is fine — BIND forwarder is nearly idle; cheap enough to leave up,
+# and a good AutoShutdown candidate for after-hours lab.
 instance_name = "bind-vast-fwd"
 instance_type = "t3.micro"
 bootdisk_size = 8
 
 # Standard Solutions IT tags (vast-client is always merged in Terraform)
 common_tags = {
-  UsedBy      = "solutions"
-  used_by     = "solutions"
-  owned       = "solutions"
-  longrun     = "yes"
-  Project     = "VoC"
-  Environment = "lab"
-  Lifecycle   = "demo"
-  # Omit AutoShutdown — this host should stay up while clients need DNS
+  UsedBy       = "solutions"
+  used_by      = "solutions"
+  owned        = "solutions"
+  longrun      = "yes"
+  Project      = "VoC"
+  Environment  = "lab"
+  Lifecycle    = "demo"
+  AutoShutdown = "true"
 }
 
 # --- The two knobs you usually change ---
