@@ -79,6 +79,7 @@
       "Action": [
         "ec2:DescribeInstances",
         "ec2:StopInstances",
+        "ec2:StartInstances",
         "ec2:CreateTags"
       ],
       "Resource": "*"

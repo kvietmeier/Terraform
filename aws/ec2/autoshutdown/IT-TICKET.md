@@ -1,53 +1,123 @@
-# IT ticket — after-hours lab auto-shutdown (IAM)
+# IT ticket — Solutions AWS access (band-aid NOW)
 
-**Copy/paste below into ITDESK / IdC.**
+**Copy/paste into ITDESK / IdC. One ticket — not drip-feed.**
 
 ---
 
 ## Summary
-Allow Solutions to create/modify after-hours EC2 auto-shutdown automation (EventBridge Scheduler → Lambda → StopInstances) so tagged lab/scratch VMs stop evenings/weekends and do not burn idle compute.
+Solutions needs a usable AWS envelope for lab clients, demos, cost control, and day-2 ops. Today the SSO role we inherit (`AWS-Polaris-Solutions` on account `110450271409`) can launch/terminate some things but blocks the basic actions that save money and let us operate. We are filing **one** ticket with everything confirmed denied — please fix as an interim band-aid on this permission set **or** stand up the agreed Solutions-SRE lane; do not trickle Allows over weeks.
+
+## Framing (important)
+- **Polaris / VastCloud = VAST clusters only.** Lab clients, DBs, scratch boxes, auto-shutdown, golden AMIs, demo LBs are **outside** that.
+- Role name says “Polaris-Solutions” but this is the accreted profile we use for Solutions work — not the long-term design.
+- **Preferred:** Solutions-SRE account + permission set + IdC group (overlay existing VPC; no underlay takeover).
+- **Acceptable interim:** widen **this** permission set (+ SCP exceptions where IAM already allows but Org denies) so we are not blocked Fri/Sat when IT is dark.
+- **Safety we want:** IT baseline SG = attach/detach only; deny unapproved `0.0.0.0/0` / `::/0`; path stays Cato → TGW. We are **not** asking for VPC/subnet/route/IGW/NAT/TGW create.
 
 ## Account / identity
 - Account: `110450271409`
-- Region: `us-west-2`
-- SSO role: `AWSReservedSSO_AWS-Polaris-Solutions_94be6ac475a41b4b` (current Solutions profile)
-- Preferred long-term: Solutions-SRE permission set / workload lane (not cluster CI)
+- Region (primary evidence): `us-west-2`
+- SSO role: `AWSReservedSSO_AWS-Polaris-Solutions_94be6ac475a41b4b`
+- Policy JSON for cost timer: `Terraform/aws/ec2/autoshutdown/iam-policy-autoshutdown.json`
+- Full exhibit log: `personal/notes/AWS Permissions.txt`
 
-## What failed (2026-09-20)
-Terraform apply of lab auto-shutdown stack denied:
+## Confirmed failures (please fix these)
 
+### A) Cost control — cannot even stop a VM
 ```
-AccessDenied: iam:CreateRole
-  on arn:aws:iam::110450271409:role/solutions-lab-autoshutdown-lambda
-  (same for solutions-lab-autoshutdown-scheduler)
+2026-09-21 — console StopInstances denied
+  instance i-04cb3ca1a93312b65
+  ec2:StopInstances → AccessDenied
 ```
+We **have** `TerminateInstances` (destructive) but **not** Stop/Start (safe, keeps disk). That is backwards for cost.
 
-Also blocked for this use case: `ec2:StopInstances` (Lambda needs it to stop tagged instances).
+**Need:** `ec2:StopInstances`, `ec2:StartInstances`
 
-## Ask
-Attach (or merge) the attached policy to our Solutions permission set so we can create and update:
+### B) After-hours auto-shutdown automation
+```
+2026-09-20 — terraform apply aws/ec2/autoshutdown/
+  iam:CreateRole denied for:
+    solutions-lab-autoshutdown-lambda
+    solutions-lab-autoshutdown-scheduler
+```
+Tag-driven weekday stop (`AutoShutdown=true`) cannot be deployed. Overnight lab burn continues.
 
-| Resource | Purpose |
-|----------|---------|
-| IAM roles under path `/solutions/` | Lambda execution + Scheduler invoke |
-| Lambda function `solutions-lab-autoshutdown` | Stop running instances tagged `AutoShutdown=true` |
-| EventBridge Scheduler schedule | Weekdays ~19:00 America/Los_Angeles (configurable) |
+**Need:** attach `iam-policy-autoshutdown.json` (IAM under `role/solutions/*` + Lambda + Scheduler + StopInstances)
 
-**Policy JSON (ready to attach):**  
-`Terraform/aws/ec2/autoshutdown/iam-policy-autoshutdown.json`
+### C) Change security group on a running instance
+```
+Failed to change security groups for ENI …
+  ec2:ModifyNetworkInterfaceAttribute → AccessDenied
+```
+Forces destroy/recreate of clients to attach IT baseline / Solutions SGs.
 
-Scoped IAM: `arn:aws:iam::*:role/solutions/*` only — not unrestricted CreateRole.
+**Need:** `ec2:ModifyNetworkInterfaceAttribute` (attach/detach SGs on ENI)
 
-## Why
-Cost control. Lab clients/scratch boxes left running overnight/weekends. Opt-in via tag `AutoShutdown=true`; leave unset on long-running services / always-on hosts. No VPC/underlay changes requested.
+### D) Create / modify Solutions-owned security groups (testing / error injection)
+IAM may list some SG actions; **Org SCP** still denies CreateSecurityGroup / Authorize / Revoke.
+We need to **create and modify our own SGs** for lab testing and controlled error injection
+(e.g. tighten/deny paths, break connectivity on purpose, then restore) without waiting on IT
+for every rule change. Forces workarounds or tickets for routine demo/test hygiene today.
 
-## Not in scope
-- No VPC / subnet / route / TGW / IGW changes
-- No changes to always-on / long-running service instances (tag opt-in only)
-- Not cluster deploy/CI lifecycle
+**Need:** SCP exception + IAM for Solutions-owned SG create/edit:
+- `ec2:CreateSecurityGroup` / `DeleteSecurityGroup`
+- `AuthorizeSecurityGroupIngress` / `Egress`
+- `RevokeSecurityGroupIngress` / `Egress`
+- `ModifySecurityGroupRules`
+- `UpdateSecurityGroupRuleDescriptionsIngress` / `Egress`
 
-## Acceptance
-1. `iam:CreateRole` succeeds for roles under `/solutions/`
-2. Can create/update Lambda + Scheduler for auto-shutdown
-3. Lambda role can `ec2:DescribeInstances` + `ec2:StopInstances`
-4. Manual test: `aws lambda invoke --function-name solutions-lab-autoshutdown …` stops only tagged running instances
+**Guardrails we accept:** IT baseline (“default”) SG = **attach/detach only** (we do not edit its rules).
+No unapproved public `0.0.0.0/0` / `::/0`. No VPC/subnet/route/TGW changes.
+
+### E) Golden AMI
+```
+2026-09-20 — ec2:CreateImage denied on i-0da3bb34640406a69
+```
+Cannot bake lab image after cloud-init; every launch re-pays bootstrap time/$.
+
+**Need:** `ec2:CreateImage`, `DeregisterImage`, `CopyImage`, `ModifyImageAttribute`
+
+### F) Serial console break-glass
+Account has Serial Console enabled; role cannot open session (`SendSerialConsoleSSHPublicKey` denied). Blocks recovery when SSH/cloud-init fails.
+
+**Need:** `ec2-instance-connect:SendSerialConsoleSSHPublicKey` (+ ideally `SendSSHPublicKey`); optional SSM StartSession
+
+### G) Demo ingress / AI (also blocked)
+ImplicitDeny / AccessDenied for: ELB create (LoadBalancer/TargetGroup), Route53 Resolver rule create/associate, Bedrock/SageMaker invoke.
+
+**Need:** ELB write (corp path), `route53resolver:CreateResolverRule` + Associate*, `bedrock:InvokeModel*`, `sagemaker:InvokeEndpoint*`
+
+### H) Observability / troubleshooting (easy to miss)
+Day-2 needs **read** access to prove failures, debug demos, and verify auto-shutdown. Prefer attaching **ReadOnlyAccess** (or ViewOnly) plus these if not already covered:
+
+| Area | Why | Actions (minimum) |
+|------|-----|-------------------|
+| **CloudWatch Logs** | View Lambda (autoshutdown), ALB, app /vpc flow if present | `logs:Describe*`, `logs:Get*`, `logs:FilterLogEvents`, `logs:StartQuery` / `GetQueryResults` |
+| **CloudWatch Metrics** | CPU/network, “is it idle?”, alarm hygiene | `cloudwatch:GetMetricData`, `GetMetricStatistics`, `ListMetrics`, `DescribeAlarms` |
+| **CloudTrail** | Document AccessDenied / who changed what | `cloudtrail:LookupEvents`, `DescribeTrails`, `GetTrailStatus`, `ListEventDataStores` |
+| **EC2 console output** | Boot/cloud-init without serial | `ec2:GetConsoleOutput`, `GetConsoleScreenshot` |
+| **SG rule read** | Console SG UI often needs this explicitly | `ec2:DescribeSecurityGroupRules` |
+| **VPC read hygiene** | Console VPC pages blank otherwise (seen on VOC-Admin) | `DescribeVpcAttribute`, `DescribeRouteTables`, `DescribeNetworkAcls`, `DescribeDhcpOptions` |
+| **SSM (optional)** | Break-glass without SSH | `ssm:StartSession`, `DescribeSessions`, `GetConnectionStatus` |
+| **Cost (optional but fits $$$ story)** | Show overnight burn before/after Stop | `ce:GetCostAndUsage`, `ce:GetCostForecast` (or Billing console read) |
+
+**Note:** Polaris-Solutions may already carry ReadOnlyAccess for some of this — please **confirm** Logs/Metrics/CloudTrail work in console; if not, grant explicitly. VOC-Admin historically lacked several Describe* and CloudTrail lookups.
+
+## Not asking for
+- CreateVpc / Subnet / Route / IGW / NAT / TGW / VPN
+- Unapproved public `0.0.0.0/0` or `::/0` ingress
+- Editing IT baseline SG **rules** (attach/detach only)
+- Turning DevQA CI accounts into SRE sandboxes
+
+## Acceptance (band-aid done when)
+1. Console can **Stop** and **Start** a lab instance we launched  
+2. Autoshutdown stack applies (`CreateRole` under `/solutions/` + schedule + Lambda stops tagged instances)  
+3. Can change SG on a running ENI without recreate  
+4. Can **create and modify** a Solutions-owned SG for testing / error injection (tighten, deny, restore) without an IT ticket per change; IT baseline SG rules untouched  
+5. `CreateImage` succeeds on a finished lab client  
+6. Serial console session opens for break-glass  
+7. (If in scope this ticket) ELB + Resolver rule + Bedrock/SageMaker invoke work for a simple demo  
+8. Can view CloudWatch Logs (FilterLogEvents) for our Lambda/ALB; CloudTrail LookupEvents; EC2 console output; SG rules in console  
+
+## Priority
+**Band-aid or now.** Cost controls and day-2 ops are blocked today; drip-feeding individual Allows does not work when IT is offline weekends.
