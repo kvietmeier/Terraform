@@ -83,45 +83,12 @@ Provider examples for configuring VAST clusters (tenants, views, VIP pools, AD, 
 
 Smaller collections under [`aws/`](aws/) (EC2, basic auth, CloudFormation) and [`oci/`](oci/) (templates, multi-VM). Use the same per-folder apply pattern as the other clouds.
 
-## Where Terraform lives (avoid fragmentation)
-
-### Hosting rule (important)
-
-| Host | Visibility | What belongs |
-|------|------------|--------------|
-| **GitHub** (`kvietmeier/*`) | **Public** (resume / tools / portfolio) — except **`personal`**, which stays private | Generic multi-cloud lab IaC, portable examples, no corporate product internals |
-| **`personal`** (GitHub) | **Private** | Notes, IT proposals, AccessDenied logs, org-specific IDs, handoffs |
-| **GitLab** (`git.vastdata.com`) | **Internal corporate** | Product references, cluster packages, credentials patterns, private lab kits |
-
-Do **not** put org-only Solutions SRE proposals, account IDs, Cato/TGW topology, or product-internal cluster bundles on public GitHub. Keep those in **`personal`** and/or **GitLab**.
-
-### Repo map
-
-| Repo | Host | Put work here when… |
-|------|------|---------------------|
-| **This repo** (`github.com/kvietmeier/Terraform`) | GitHub **public** | Generic cloud lab stacks (AWS/Azure/GCP/OCI), portable `vastdata/` **provider examples**, Solutions-shaped templates that stay **org-agnostic** (e.g. `aws/solutions-sre/` tfvars-driven, NOT TESTED) |
-| [`personal`](https://github.com/kvietmeier/personal) | GitHub **private** | Docs, proposals, permission exhibits, handoffs |
-| [`vastoncloud`](https://git.vastdata.com/karlv/vastoncloud) | GitLab **corporate** | Cluster Terraform **bundles** (originally manual cluster builds; may include a Polaris-related folder — the repo is **not** “Polaris-only”) |
-| [`automation-tools`](https://git.vastdata.com/karlv/automation-tools) | GitLab **corporate** | Scripts / API helpers — **not** new Terraform. Existing `terraform/` is legacy overlap with public `vastdata/` |
-
-**Planes:** Two org lanes — QA/Dev (engineering) vs Solutions. Polaris/VoC is the **product** (clusters via Polaris only), not a third account lane. Optional later: SE clean-room account with nightly shutdown.
-
-**Overlaps to treat as legacy (prefer this public repo for portable examples):**
-
-| GitLab (`automation-tools/terraform/`) | Canonical here (public) |
-|----------------------------------------|-------------------------|
-| `simple_query/` | [`vastdata/simple_query/`](vastdata/simple_query/) |
-| `setup_lab/` | [`vastdata/lab_setup/`](vastdata/lab_setup/) |
-| `cluster_gcp/` | [`vastdata/complete_cluster_config/`](vastdata/complete_cluster_config/) |
-
-Edit and extend the intended home. Do not keep fixing both copies. Never copy corporate-only material into this public tree.
-
 ## Conventions
 
 - **One stack per folder** — treat each leaf with its own `.tf` files as an independent root module.
 - **Secrets stay local** — use env vars or untracked `*.auto.tfvars` / private tfvars; do not commit passwords, keys, or org SG/subnet IDs.
 - **Examples stay public** — commit `*.tfvars.example` / `*.auto.tfvars.example` so users have a starting point (`cp …example …tfvars`).
-- **Backup real tfvars weekly** — walk the tree into private [`personal`](https://github.com/kvietmeier/personal): `scripts/sync-tfvars-personal.sh push` (restore with `pull`). Windows OneDrive twin still lives in `system-tools` (`TFvarsBackup.ps1`) if you need it; this repo’s `.ps1` sync is not supported.
+- **Keep real tfvars out of git** — use local `*.tfvars` / env vars only; optional helper: `scripts/sync-tfvars-personal.sh` for your own off-repo backup.
 - **Shared bootstrap** — Linux user-data: [`scripts/cloud-init/`](scripts/cloud-init/) (`cloud-init-universal.yaml` day-to-day). Windows: [`scripts/windows/`](scripts/windows/). Do not add new scripts under stale stubs like `gcp/scripts` or `azure/VMs/scripts` — those point at `scripts/`.
 - **`templates/`** folders are reference/starters; not every file is meant to apply as-is.
 

@@ -79,8 +79,8 @@ terraform apply
 
 - Prefer `*.auto.tfvars` / env vars over committing real passwords.
 - `view_template/` and much of `templates/` / `policies/` are **reference material**, not turnkey stacks.
-- Repo-wide Terraform shortcuts (`tfapply`, etc.) live in the parent [README.md](../README.md) and bash helpers under `../scripts/` / system-tools.
-- **Canonical copy** — this tree is the source of truth for VAST provider examples. Older mirrors under GitLab `automation-tools/terraform/` (`simple_query`, `setup_lab`, `cluster_gcp`) are legacy; prefer paths here. Polaris/VOC **cloud** Terraform (AWS/GCP/Azure cluster packages) stays in private GitLab `vastoncloud`, not here. See [Where Terraform lives](../README.md#where-terraform-lives-avoid-fragmentation).
+- Repo-wide Terraform shortcuts (`tfapply`, etc.) live in the parent [README.md](../README.md); bash helpers under [`../scripts/`](../scripts/).
+- Prefer the paths in this tree for VAST provider examples; treat older duplicate copies elsewhere as legacy.
 
 ## Author
 
