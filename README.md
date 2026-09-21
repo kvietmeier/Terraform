@@ -119,7 +119,9 @@ Edit and extend the intended home. Do not keep fixing both copies. Never copy co
 ## Conventions
 
 - **One stack per folder** — treat each leaf with its own `.tf` files as an independent root module.
-- **Secrets stay local** — use env vars or untracked `*.auto.tfvars` / private tfvars; do not commit passwords or keys.
+- **Secrets stay local** — use env vars or untracked `*.auto.tfvars` / private tfvars; do not commit passwords, keys, or org SG/subnet IDs.
+- **Examples stay public** — commit `*.tfvars.example` / `*.auto.tfvars.example` so users have a starting point (`cp …example …tfvars`).
+- **Backup real tfvars weekly** — walk the tree into private [`personal`](https://github.com/kvietmeier/personal): `scripts/sync-tfvars-personal.sh push` (restore with `pull`). Windows OneDrive twin still lives in `system-tools` (`TFvarsBackup.ps1`) if you need it; this repo’s `.ps1` sync is not supported.
 - **Shared bootstrap** — Linux user-data: [`scripts/cloud-init/`](scripts/cloud-init/) (`cloud-init-universal.yaml` day-to-day). Windows: [`scripts/windows/`](scripts/windows/). Do not add new scripts under stale stubs like `gcp/scripts` or `azure/VMs/scripts` — those point at `scripts/`.
 - **`templates/`** folders are reference/starters; not every file is meant to apply as-is.
 
