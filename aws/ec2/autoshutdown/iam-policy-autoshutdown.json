@@ -1,0 +1,87 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AutoshutdownIAMRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:GetRolePolicy",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:PassRole",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:UpdateAssumeRolePolicy"
+      ],
+      "Resource": [
+        "arn:aws:iam::*:role/solutions/*"
+      ]
+    },
+    {
+      "Sid": "AutoshutdownLambda",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:CreateFunction",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:DeleteFunction",
+        "lambda:GetFunction",
+        "lambda:InvokeFunction",
+        "lambda:AddPermission",
+        "lambda:RemovePermission",
+        "lambda:TagResource",
+        "lambda:UntagResource",
+        "lambda:ListFunctions",
+        "lambda:GetFunctionConfiguration"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AutoshutdownScheduler",
+      "Effect": "Allow",
+      "Action": [
+        "scheduler:CreateSchedule",
+        "scheduler:UpdateSchedule",
+        "scheduler:DeleteSchedule",
+        "scheduler:GetSchedule",
+        "scheduler:ListSchedules",
+        "scheduler:CreateScheduleGroup",
+        "scheduler:DeleteScheduleGroup",
+        "scheduler:GetScheduleGroup",
+        "scheduler:ListScheduleGroups",
+        "scheduler:TagResource",
+        "scheduler:UntagResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AutoshutdownLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DeleteLogGroup",
+        "logs:PutRetentionPolicy",
+        "logs:TagResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AutoshutdownEc2Stop",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:StopInstances",
+        "ec2:CreateTags"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

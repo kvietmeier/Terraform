@@ -121,6 +121,44 @@ data "aws_iam_policy_document" "solutions_sre" {
     resources = ["*"]
   }
 
+  # After-hours lab autoshutdown (EventBridge Scheduler → Lambda → StopInstances)
+  # See aws/ec2/autoshutdown/ — tag AutoShutdown=true to opt in.
+  statement {
+    sid = "LabAutoShutdownAutomation"
+    actions = [
+      "scheduler:CreateSchedule",
+      "scheduler:UpdateSchedule",
+      "scheduler:DeleteSchedule",
+      "scheduler:GetSchedule",
+      "scheduler:ListSchedules",
+      "scheduler:CreateScheduleGroup",
+      "scheduler:DeleteScheduleGroup",
+      "scheduler:GetScheduleGroup",
+      "scheduler:ListScheduleGroups",
+      "scheduler:TagResource",
+      "scheduler:UntagResource",
+      "lambda:CreateFunction",
+      "lambda:UpdateFunctionCode",
+      "lambda:UpdateFunctionConfiguration",
+      "lambda:DeleteFunction",
+      "lambda:GetFunction",
+      "lambda:InvokeFunction",
+      "lambda:AddPermission",
+      "lambda:RemovePermission",
+      "lambda:TagResource",
+      "lambda:UntagResource",
+      "lambda:ListFunctions",
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogGroups",
+      "logs:DeleteLogGroup",
+      "logs:PutRetentionPolicy",
+      "logs:TagResource",
+    ]
+    resources = ["*"]
+  }
+
   statement {
     sid = "AutoScaling"
     actions = [

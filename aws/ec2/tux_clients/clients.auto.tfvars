@@ -27,6 +27,8 @@ common_tags = {
   Environment = "lab"
   Cluster     = "karlv-i8test-01"
   Lifecycle   = "demo"
+  # Opt into after-hours stop (see ../autoshutdown/). Omit on long-running services.
+  AutoShutdown = "true"
 }
 
 # AMI search criteria (only entries matching vms[].os_type are queried)

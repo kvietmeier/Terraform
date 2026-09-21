@@ -47,7 +47,7 @@ resource "aws_instance" "vm_instance" {
   vpc_security_group_ids = var.security_group_ids
   key_name               = var.ssh_key_name
   # AWS user_data max is 16 KiB. Gzip keeps the full embedded bootstrap under that.
-  user_data_base64       = base64gzip(local.cloudinit_config)
+  user_data_base64 = base64gzip(local.cloudinit_config)
 
   root_block_device {
     volume_size = each.value.bootdisk_size
