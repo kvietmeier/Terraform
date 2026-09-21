@@ -45,16 +45,6 @@ output "ssh_command" {
   )
 }
 
-output "tag_update_command" {
-  description = "aws cli to (re)apply standard IT + vast-client tags"
-  value = format(
-    "aws ec2 create-tags --region %s --resources %s --tags Key=UsedBy,Value=solutions Key=used_by,Value=solutions Key=owned,Value=solutions Key=longrun,Value=yes Key=Project,Value=VoC Key=Environment,Value=lab Key=Lifecycle,Value=demo Key=vast-client,Value=true Key=Name,Value=%s Key=Role,Value=bind-vast-forwarder",
-    var.region,
-    aws_instance.bind.id,
-    var.instance_name
-  )
-}
-
 output "client_resolv_snippet" {
   description = "systemd-resolved drop-in for test clients (selective VAST domain routing)"
   value       = <<-EOT

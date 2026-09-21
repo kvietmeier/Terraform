@@ -68,9 +68,9 @@ variable "ssh_key_name" {
 }
 
 variable "ssh_user" {
-  description = "SSH user (labuser after tweaks; ubuntu also works)"
+  description = "SSH user (default Ubuntu AMI user)"
   type        = string
-  default     = "labuser"
+  default     = "ubuntu"
 }
 
 variable "ssh_private_key_path" {

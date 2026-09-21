@@ -1,8 +1,8 @@
-# AWS BIND DNS Forwarder (tiny VM)
+# AWS BIND DNS Forwarder (mini networking node)
 
 Tiny Ubuntu EC2 whose **only job** is BIND9 conditional forwarding for VAST VIP-pool DNS when Route 53 Resolver / DHCP option sets are unavailable.
 
-Uses an **existing security group** (same pattern as `tux_clients`). Minimal QoL only (vim, jq, curl, dig, aliases, `set -o vi`).
+Mini networking node: **Ubuntu + BIND9** (VAST conditional forwarder) with a minimized net-tools set. Default `ubuntu` user; basic aliases + `set -o vi`. Uses an **existing security group**. Edit `vast_zones` / `vast_dns_ips` after the cluster is up (not useful OOB).
 
 Most of the time you only change two values in tfvars:
 
@@ -27,40 +27,18 @@ Ensure the existing SG allows **UDP/TCP 53** from clients and egress to the VAST
 
 ## Tags
 
-Terraform applies standard Solutions IT tags from `common_tags`, plus always:
+Terraform applies `common_tags` from tfvars, plus always `vast-client=true`, `Role=bind-vast-forwarder`, and `Name`.
 
-| Key | Value |
-|-----|-------|
-| `vast-client` | `true` |
-| `Role` | `bind-vast-forwarder` |
-| `Name` | `instance_name` |
-
-### Update tags with AWS CLI
-
-After apply (or to fix tags on an existing instance):
+Example only (edit values / instance id as needed):
 
 ```bash
-# Replace INSTANCE_ID / NAME as needed (terraform output tag_update_command prints this filled in)
 aws ec2 create-tags \
   --region us-west-2 \
   --resources i-0123456789abcdef0 \
   --tags \
-    Key=UsedBy,Value=solutions \
-    Key=used_by,Value=solutions \
-    Key=owned,Value=solutions \
-    Key=longrun,Value=yes \
-    Key=Project,Value=VoC \
-    Key=Environment,Value=lab \
-    Key=Lifecycle,Value=demo \
     Key=vast-client,Value=true \
     Key=Name,Value=bind-vast-fwd \
     Key=Role,Value=bind-vast-forwarder
-```
-
-Or use the Terraform output:
-
-```bash
-terraform output -raw tag_update_command | bash
 ```
 
 ## How it works

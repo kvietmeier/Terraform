@@ -16,7 +16,7 @@ security_group_ids = ["sg-xxxxxxxx"]
 vpc_cidr           = "10.105.0.0/16"
 
 ssh_key_name         = "karlv-aws_cloudkey"
-ssh_user             = "labuser"
+ssh_user             = "ubuntu"
 ssh_private_key_path = "$HOME/.ssh/admin_keys/karlv-aws_cloudkey.pem"
 
 # Tiny is fine — BIND forwarder is nearly idle
