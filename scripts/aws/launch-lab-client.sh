@@ -1,21 +1,27 @@
 #!/usr/bin/env bash
 ###=============================================================================###
-# launch-lab-client.sh — non-Terraform VoC lab client launch (us-west-2)
+# launch-lab-client.sh — non-Terraform lab client launch
 #
 # Prefer a golden AMI (fast boot, no compile). Falls back to Canonical Ubuntu
 # 24.04 + gzipped universal cloud-init when AMI_ID is unset.
 #
+# Required env:
+#   SUBNET_ID  SG_ID  KEY_NAME
+#
 # Examples:
-#   # Golden AMI (once CreateImage is granted / AMI baked)
-#   AMI_ID=ami-0abc... ./launch-lab-client.sh voc-client04
+#   # Golden AMI
+#   SUBNET_ID=subnet-... SG_ID=sg-... KEY_NAME=mykey \
+#     AMI_ID=ami-0abc... ./launch-lab-client.sh lab-client01
 #
 #   # Fresh Ubuntu + full cloud-init bootstrap (slow first boot)
-#   ./launch-lab-client.sh voc-client04
+#   SUBNET_ID=subnet-... SG_ID=sg-... KEY_NAME=mykey \
+#     ./launch-lab-client.sh lab-client01
 #
 #   # Dry-run (prints aws CLI only)
-#   DRY_RUN=1 ./launch-lab-client.sh voc-client04
+#   DRY_RUN=1 SUBNET_ID=subnet-... SG_ID=sg-... KEY_NAME=mykey \
+#     ./launch-lab-client.sh lab-client01
 #
-# Requires: aws CLI, AWS_PROFILE with RunInstances + CreateTags.
+# Requires: aws CLI, credentials with RunInstances + CreateTags.
 # CreateImage is NOT needed to launch — only to bake the golden AMI.
 ###=============================================================================###
 
@@ -25,9 +31,9 @@ REGION="${AWS_REGION:-us-west-2}"
 NAME="${1:?usage: $0 <Name-tag>}"
 INSTANCE_TYPE="${INSTANCE_TYPE:-m6i.2xlarge}"
 VOLUME_SIZE="${VOLUME_SIZE:-256}"
-SUBNET_ID="${SUBNET_ID:-subnet-004098aa31ced3b4f}"
-SG_ID="${SG_ID:-sg-030dad04c3ef5f05b}"
-KEY_NAME="${KEY_NAME:-karlv-aws_cloudkey}"
+SUBNET_ID="${SUBNET_ID:?set SUBNET_ID}"
+SG_ID="${SG_ID:?set SG_ID}"
+KEY_NAME="${KEY_NAME:?set KEY_NAME}"
 AMI_ID="${AMI_ID:-}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CLOUDINIT_YAML="${CLOUDINIT_YAML:-${SCRIPT_DIR}/../cloud-init/cloud-init-universal.yaml}"
@@ -60,20 +66,13 @@ resolve_ami() {
     --output text
 }
 
-# Solutions lab tags (matches aws/ec2/tux_clients/clients.auto.tfvars)
 TAG_FILE="$(mktemp)"
 python3 - "$NAME" "$TAG_FILE" <<'PY'
 import json, sys
 name, path = sys.argv[1], sys.argv[2]
 common = [
     {"Key": "Name", "Value": name},
-    {"Key": "UsedBy", "Value": "solutions"},
-    {"Key": "used_by", "Value": "solutions"},
-    {"Key": "owned", "Value": "solutions"},
-    {"Key": "longrun", "Value": "yes"},
-    {"Key": "Project", "Value": "VoC"},
     {"Key": "Environment", "Value": "lab"},
-    {"Key": "Cluster", "Value": "karlv-i8test-01"},
     {"Key": "Lifecycle", "Value": "demo"},
 ]
 with open(path, "w") as f:
