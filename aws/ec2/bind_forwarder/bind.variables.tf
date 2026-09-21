@@ -17,7 +17,7 @@ variable "region" {
 ###--- Network
 
 variable "vpc_id" {
-  description = "VPC ID for the security group and instance"
+  description = "VPC ID (informational / future use)"
   type        = string
 }
 
@@ -26,25 +26,18 @@ variable "subnet_id" {
   type        = string
 }
 
+variable "security_group_ids" {
+  description = "Existing security group IDs (must allow UDP/TCP 53 + SSH as needed)"
+  type        = list(string)
+}
+
 variable "vpc_cidr" {
-  description = "VPC (or client subnet) CIDR allowed to query BIND and used in named ACL"
+  description = "VPC (or client subnet) CIDR used in named ACL allow-query"
   type        = string
 }
 
 variable "additional_query_cidrs" {
-  description = "Extra CIDRs allowed to query BIND (SG + named ACL)"
-  type        = list(string)
-  default     = []
-}
-
-variable "ssh_cidr" {
-  description = "CIDR allowed for SSH (defaults to vpc_cidr)"
-  type        = string
-  default     = ""
-}
-
-variable "extra_security_group_ids" {
-  description = "Optional extra SGs to attach (in addition to the BIND SG)"
+  description = "Extra CIDRs allowed to query BIND (named ACL only)"
   type        = list(string)
   default     = []
 }
@@ -75,7 +68,7 @@ variable "ssh_key_name" {
 }
 
 variable "ssh_user" {
-  description = "SSH user (labuser after lab_bootstrap; ubuntu also works)"
+  description = "SSH user (labuser after tweaks; ubuntu also works)"
   type        = string
   default     = "labuser"
 }
@@ -99,7 +92,7 @@ variable "ami_name_filter" {
 }
 
 variable "common_tags" {
-  description = "Tags applied to all resources"
+  description = "Standard IT tags (UsedBy/used_by/owned/…). vast-client is always merged on."
   type        = map(string)
   default     = {}
 }

@@ -10,9 +10,10 @@
 
 region = "us-west-2"
 
-vpc_id    = "vpc-xxxxxxxx"
-subnet_id = "subnet-xxxxxxxx"
-vpc_cidr  = "10.105.0.0/16"
+vpc_id             = "vpc-xxxxxxxx"
+subnet_id          = "subnet-xxxxxxxx"
+security_group_ids = ["sg-xxxxxxxx"]
+vpc_cidr           = "10.105.0.0/16"
 
 ssh_key_name         = "karlv-aws_cloudkey"
 ssh_user             = "labuser"
@@ -23,11 +24,16 @@ instance_name = "bind-vast-fwd"
 instance_type = "t3.micro"
 bootdisk_size = 8
 
+# Standard Solutions IT tags (vast-client is always merged in Terraform)
 common_tags = {
   UsedBy      = "solutions"
+  used_by     = "solutions"
+  owned       = "solutions"
+  longrun     = "yes"
   Project     = "VoC"
   Environment = "lab"
-  Role        = "bind-vast-forwarder"
+  Lifecycle   = "demo"
+  # Omit AutoShutdown — this host should stay up while clients need DNS
 }
 
 # --- The two knobs you usually change ---

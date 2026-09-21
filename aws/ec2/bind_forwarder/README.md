@@ -2,7 +2,7 @@
 
 Tiny Ubuntu EC2 whose **only job** is BIND9 conditional forwarding for VAST VIP-pool DNS when Route 53 Resolver / DHCP option sets are unavailable.
 
-Minimal QoL (vim, jq, curl, dig, aliases, `set -o vi`) — not a general lab client.
+Uses an **existing security group** (same pattern as `tux_clients`). Minimal QoL only (vim, jq, curl, dig, aliases, `set -o vi`).
 
 Most of the time you only change two values in tfvars:
 
@@ -11,25 +11,57 @@ Most of the time you only change two values in tfvars:
 | `vast_zones` | `["busab.org"]` | Domain(s) sent to VAST |
 | `vast_dns_ips` | `["10.105.28.250"]` | VAST DNS VIP(s) |
 
-Everything else (VPC, subnet, key pair) is normal lab wiring. Non-VAST queries are forwarded to the AWS VPC resolver (`169.254.169.253`).
-
-## Why a tiny VM?
-
-A forwarder does almost no work — `t3.micro` (or even `t3.nano`) is enough. This is a lab hack, not a replacement for Route 53 inbound/outbound endpoints.
-
 ## Deploy
 
 ```bash
 cd aws/ec2/bind_forwarder
 cp bind.auto.tfvars.example bind.auto.tfvars
-# edit: vpc_id, subnet_id, vpc_cidr, ssh_key_name, vast_zones, vast_dns_ips
+# edit: subnet_id, security_group_ids, vpc_cidr, ssh_key_name, vast_zones, vast_dns_ips
 
-export AWS_PROFILE=your-profile   # or use default credential chain
+export AWS_PROFILE=your-profile
 terraform init
 terraform apply
 ```
 
-Outputs include the forwarder private IP and a ready-made client `resolved.conf` snippet.
+Ensure the existing SG allows **UDP/TCP 53** from clients and egress to the VAST VIP + VPC resolver (`169.254.169.253`).
+
+## Tags
+
+Terraform applies standard Solutions IT tags from `common_tags`, plus always:
+
+| Key | Value |
+|-----|-------|
+| `vast-client` | `true` |
+| `Role` | `bind-vast-forwarder` |
+| `Name` | `instance_name` |
+
+### Update tags with AWS CLI
+
+After apply (or to fix tags on an existing instance):
+
+```bash
+# Replace INSTANCE_ID / NAME as needed (terraform output tag_update_command prints this filled in)
+aws ec2 create-tags \
+  --region us-west-2 \
+  --resources i-0123456789abcdef0 \
+  --tags \
+    Key=UsedBy,Value=solutions \
+    Key=used_by,Value=solutions \
+    Key=owned,Value=solutions \
+    Key=longrun,Value=yes \
+    Key=Project,Value=VoC \
+    Key=Environment,Value=lab \
+    Key=Lifecycle,Value=demo \
+    Key=vast-client,Value=true \
+    Key=Name,Value=bind-vast-fwd \
+    Key=Role,Value=bind-vast-forwarder
+```
+
+Or use the Terraform output:
+
+```bash
+terraform output -raw tag_update_command | bash
+```
 
 ## How it works
 
@@ -38,11 +70,9 @@ Client  --(busab.org)-->  BIND VM  --forward-->  VAST DNS VIP
 Client  --(other)------>  BIND VM  --forward-->  169.254.169.253 (AWS)
 ```
 
-You cannot push this BIND IP via DHCP option sets without affecting the whole VPC, so **clients must be pointed at it** (full resolver, or selective `Domains=~zone`).
+Clients must be pointed at this BIND IP (full resolver, or selective `Domains=~zone`) — DHCP option sets are not changed.
 
 ## Client override (systemd-resolved)
-
-On Ubuntu/RHEL clients, create:
 
 ```ini
 # /etc/systemd/resolved.conf.d/vast-forwarder.conf
@@ -51,14 +81,10 @@ DNS=<BIND_PRIVATE_IP>
 Domains=~busab.org
 ```
 
-Then:
-
 ```bash
 sudo systemctl restart systemd-resolved
 resolvectl query mycluster.busab.org
 ```
-
-`Domains=~busab.org` routes **only** that zone to BIND; other names stay on the normal VPC DNS. If you instead set the client’s sole `DNS=` to the BIND IP (no `~` routing), BIND must recurse everything — this stack already forwards unmatched queries to `169.254.169.253`.
 
 ## Verify on the BIND VM
 
@@ -71,23 +97,11 @@ dig @localhost mycluster.busab.org
 dig @localhost google.com
 ```
 
-## Network checklist
-
-Security group created by this stack:
-
-| Direction | Proto/Port | Source / Dest |
-|-----------|------------|---------------|
-| Inbound | UDP/TCP 53 | `vpc_cidr` (+ optional extras) |
-| Inbound | TCP 22 | `ssh_cidr` or `vpc_cidr` |
-| Outbound | UDP/TCP 53 | each `vast_dns_ips` + `cloud_resolver` |
-| Outbound | TCP 80/443 | `0.0.0.0/0` (apt) |
-
 ## Files
 
 | File | Role |
 |------|------|
-| `bind.main.tf` | AMI + EC2 + cloud-init |
-| `bind.network.tf` | Security group |
+| `bind.main.tf` | AMI + EC2 + cloud-init + tags |
 | `cloud-init-bind.yaml.tftpl` | Installs BIND, writes zone + options |
 | `bind.auto.tfvars.example` | Copy → `bind.auto.tfvars` |
 

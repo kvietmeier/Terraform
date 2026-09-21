@@ -15,9 +15,14 @@ output "bind_instance_id" {
   value       = aws_instance.bind.id
 }
 
-output "security_group_id" {
-  description = "Security group attached to the forwarder"
-  value       = aws_security_group.bind.id
+output "security_group_ids" {
+  description = "Existing security groups attached to the forwarder"
+  value       = var.security_group_ids
+}
+
+output "instance_tags" {
+  description = "Tags applied to the instance"
+  value       = local.instance_tags
 }
 
 output "vast_zones" {
@@ -37,6 +42,16 @@ output "ssh_command" {
     var.ssh_private_key_path,
     var.ssh_user,
     aws_instance.bind.private_ip
+  )
+}
+
+output "tag_update_command" {
+  description = "aws cli to (re)apply standard IT + vast-client tags"
+  value = format(
+    "aws ec2 create-tags --region %s --resources %s --tags Key=UsedBy,Value=solutions Key=used_by,Value=solutions Key=owned,Value=solutions Key=longrun,Value=yes Key=Project,Value=VoC Key=Environment,Value=lab Key=Lifecycle,Value=demo Key=vast-client,Value=true Key=Name,Value=%s Key=Role,Value=bind-vast-forwarder",
+    var.region,
+    aws_instance.bind.id,
+    var.instance_name
   )
 }
 
