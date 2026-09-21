@@ -85,23 +85,36 @@ Smaller collections under [`aws/`](aws/) (EC2, basic auth, CloudFormation) and [
 
 ## Where Terraform lives (avoid fragmentation)
 
-This repo is the **canonical home for personal / multi-cloud lab IaC** and **VAST provider examples**. Related GitLab repos hold private VAST/work material — do not grow new TF roots there unless they clearly belong.
+### Hosting rule (important)
 
-| Repo | Host | Put new Terraform here when… |
-|------|------|------------------------------|
-| **This repo** (`github.com/kvietmeier/Terraform`) | GitHub | Cloud lab stacks (AWS/Azure/GCP/OCI), CoreInfra / `configure-project`, VAST **provider** examples under `vastdata/` |
-| [`vastoncloud`](https://git.vastdata.com/karlv/vastoncloud) | GitLab (private) | Polaris/VOC **cluster modules**, versioned VoC packages, deploy snapshots, credentials, private lab kits (`lima-vcdev/`) |
-| [`automation-tools`](https://git.vastdata.com/karlv/automation-tools) | GitLab | Scripts / Polaris API helpers — **not** new Terraform. Existing `terraform/` is legacy overlap with `vastdata/` |
+| Host | Visibility | What belongs |
+|------|------------|--------------|
+| **GitHub** (`kvietmeier/*`) | **Public** (resume / tools / portfolio) — except **`personal`**, which stays private | Generic multi-cloud lab IaC, portable examples, no corporate product internals |
+| **`personal`** (GitHub) | **Private** | Notes, IT proposals, AccessDenied logs, org-specific IDs, handoffs |
+| **GitLab** (`git.vastdata.com`) | **Internal corporate** | Product references, cluster packages, credentials patterns, private lab kits |
 
-**Overlaps to treat as legacy (prefer this repo):**
+Do **not** put org-only Solutions SRE proposals, account IDs, Cato/TGW topology, or product-internal cluster bundles on public GitHub. Keep those in **`personal`** and/or **GitLab**.
 
-| GitLab (`automation-tools/terraform/`) | Canonical here |
-|----------------------------------------|----------------|
+### Repo map
+
+| Repo | Host | Put work here when… |
+|------|------|---------------------|
+| **This repo** (`github.com/kvietmeier/Terraform`) | GitHub **public** | Generic cloud lab stacks (AWS/Azure/GCP/OCI), portable `vastdata/` **provider examples**, Solutions-shaped templates that stay **org-agnostic** (e.g. `aws/solutions-sre/` tfvars-driven, NOT TESTED) |
+| [`personal`](https://github.com/kvietmeier/personal) | GitHub **private** | Docs, proposals, permission exhibits, handoffs |
+| [`vastoncloud`](https://git.vastdata.com/karlv/vastoncloud) | GitLab **corporate** | Cluster Terraform **bundles** (originally manual cluster builds; may include a Polaris-related folder — the repo is **not** “Polaris-only”) |
+| [`automation-tools`](https://git.vastdata.com/karlv/automation-tools) | GitLab **corporate** | Scripts / API helpers — **not** new Terraform. Existing `terraform/` is legacy overlap with public `vastdata/` |
+
+**Planes:** Two org lanes — QA/Dev (engineering) vs Solutions. Polaris/VoC is the **product** (clusters via Polaris only), not a third account lane. Optional later: SE clean-room account with nightly shutdown.
+
+**Overlaps to treat as legacy (prefer this public repo for portable examples):**
+
+| GitLab (`automation-tools/terraform/`) | Canonical here (public) |
+|----------------------------------------|-------------------------|
 | `simple_query/` | [`vastdata/simple_query/`](vastdata/simple_query/) |
 | `setup_lab/` | [`vastdata/lab_setup/`](vastdata/lab_setup/) |
 | `cluster_gcp/` | [`vastdata/complete_cluster_config/`](vastdata/complete_cluster_config/) |
 
-Edit and extend the GitHub paths. Do not keep fixing both copies.
+Edit and extend the intended home. Do not keep fixing both copies. Never copy corporate-only material into this public tree.
 
 ## Conventions
 
