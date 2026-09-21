@@ -93,6 +93,7 @@ git commit -m "Update lab bootstrap"
 |-------|------|--------|
 | Standard devops toolset | vim, git, curl, python3, tmux, tree, jq, htop, sysstat, … | YAML `packages:` |
 | Bench tools (optional) | fio, iperf, dool, sockperf, elbencho | `lab_bootstrap.sh` when `INSTALL_BENCH_TOOLS=true` |
+| Personal tools (optional) | `sys-perf-tools`, `system-tools` | `/home/labuser/tools/` when `CLONE_TOOLS_REPOS=true` |
 
 ## Environment knobs
 
@@ -102,6 +103,7 @@ Set on the guest before bootstrap (or wrap `runcmd`):
 |----------|---------|---------|
 | `INSTALL_BENCH_TOOLS` | `true` | Compile fio / iperf / dool / sockperf / elbencho |
 | `CLONE_LAB_SCRIPTS` | `true` | Clone helper scripts into `/home/labuser` |
+| `CLONE_TOOLS_REPOS` | `true` | Clone `sys-perf-tools` + `system-tools` into `/home/labuser/tools` |
 
 ## Quick decision
 

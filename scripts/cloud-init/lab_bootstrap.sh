@@ -13,6 +13,8 @@
 #                                    (default: true for benchmark lab images)
 #   CLONE_LAB_SCRIPTS=true|false     Clone kvietmeier/scripts into labuser home
 #                                    (default: true)
+#   CLONE_TOOLS_REPOS=true|false     Clone sys-perf-tools + system-tools into
+#                                    /home/labuser/tools (default: true)
 #
 # Author: Karl Vietmeier
 # License: Apache 2.0
@@ -23,13 +25,14 @@ set -u
 
 INSTALL_BENCH_TOOLS="${INSTALL_BENCH_TOOLS:-true}"
 CLONE_LAB_SCRIPTS="${CLONE_LAB_SCRIPTS:-true}"
+CLONE_TOOLS_REPOS="${CLONE_TOOLS_REPOS:-true}"
 
 LOG_FILE="/tmp/cloud-init-out.txt"
 BOOT_LOG="/tmp/lab_bootstrap-out.log"
 
 exec > >(tee -a "$BOOT_LOG") 2>&1
 echo "lab_bootstrap.sh started at $(date)"
-echo "INSTALL_BENCH_TOOLS=${INSTALL_BENCH_TOOLS} CLONE_LAB_SCRIPTS=${CLONE_LAB_SCRIPTS}"
+echo "INSTALL_BENCH_TOOLS=${INSTALL_BENCH_TOOLS} CLONE_LAB_SCRIPTS=${CLONE_LAB_SCRIPTS} CLONE_TOOLS_REPOS=${CLONE_TOOLS_REPOS}"
 
 log() { echo "$*" | tee -a "$LOG_FILE"; }
 
@@ -140,7 +143,7 @@ ensure_labuser() {
     fi
 
     local home="/home/labuser"
-    mkdir -p "$home/output" "$home/git" /root/git
+    mkdir -p "$home/output" "$home/git" "$home/tools" /root/git
 
     # Append once (idempotent marker)
     local marker="# >>> lab_bootstrap aliases >>>"
@@ -297,6 +300,33 @@ clone_lab_scripts() {
     chown -R labuser:labuser "$home/scripts" 2>/dev/null || true
 }
 
+# Clone personal tool repos for labuser (Ubuntu + CentOS/RHEL-family alike).
+# Layout: /home/labuser/tools/{sys-perf-tools,system-tools}
+clone_tools_repos() {
+    local home="/home/labuser"
+    local tools="$home/tools"
+    local name url dest
+
+    mkdir -p "$tools"
+
+    # name|url
+    for entry in \
+        "sys-perf-tools|https://github.com/kvietmeier/sys-perf-tools.git" \
+        "system-tools|https://github.com/kvietmeier/system-tools.git"
+    do
+        name="${entry%%|*}"
+        url="${entry##*|}"
+        dest="$tools/$name"
+        if [[ -d "$dest/.git" ]]; then
+            log "tools/$name already cloned"
+            continue
+        fi
+        log_and_continue "clone tools/$name" git clone "$url" "$dest"
+    done
+
+    chown -R labuser:labuser "$tools" 2>/dev/null || true
+}
+
 ###-----------------------------------------------------------------------------###
 ### Main
 ###-----------------------------------------------------------------------------###
@@ -314,6 +344,10 @@ main() {
 
     if [[ "$CLONE_LAB_SCRIPTS" == "true" ]]; then
         clone_lab_scripts
+    fi
+
+    if [[ "$CLONE_TOOLS_REPOS" == "true" ]]; then
+        clone_tools_repos
     fi
 
     log "lab_bootstrap.sh completed at $(date)"
