@@ -1,0 +1,123 @@
+#cloud-config
+# vim: syntax=yaml
+# -------------------------------------------------------------------------------
+# Tiny Ubuntu BIND9 VAST conditional forwarder — this VM does nothing else.
+#
+# Minimal QoL: vim/jq/curl + labuser aliases / set -o vi.
+# Day-2 knobs: vast_zones + vast_dns_ips
+#
+# Author: Karl Vietmeier
+# -------------------------------------------------------------------------------
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - bind9
+  - bind9utils
+  - dnsutils
+  - vim
+  - curl
+  - jq
+  - less
+  - htop
+  - tmux
+
+users:
+  - default
+  - name: labuser
+    gecos: Lab User
+    groups: [sudo, wheel]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+
+write_files:
+  - path: /etc/systemd/resolved.conf.d/bind-forwarder.conf
+    permissions: "0644"
+    content: |
+      [Resolve]
+      DNS=${cloud_resolver}
+      DNSStubListener=no
+
+  - path: /etc/bind/named.conf.options
+    permissions: "0644"
+    content: |
+      // Managed by cloud-init — BIND VAST conditional forwarder
+      acl internals {
+      %{ for cidr in query_cidrs ~}
+          ${cidr};
+      %{ endfor ~}
+      };
+
+      options {
+          directory "/var/cache/bind";
+          allow-query { internals; localhost; };
+          allow-recursion { internals; localhost; };
+          forwarders {
+              ${cloud_resolver};
+          };
+          forward only;
+          dnssec-validation auto;
+          listen-on port 53 { any; };
+          listen-on-v6 { any; };
+          recursion yes;
+      };
+
+  - path: /etc/bind/named.conf.local
+    permissions: "0644"
+    content: |
+      // Managed by cloud-init — VAST zone forwarders
+      %{ for zone in vast_zones ~}
+      zone "${zone}" {
+          type forward;
+          forward only;
+          forwarders {
+      %{ for ip in vast_dns_ips ~}
+              ${ip};
+      %{ endfor ~}
+          };
+      };
+      %{ endfor ~}
+
+  - path: /etc/skel/.bashrc.bind_fwd
+    permissions: "0644"
+    content: |
+      # >>> bind_fwd aliases >>>
+      alias la="ls -Av"
+      alias ls="ls -hF --color=auto"
+      alias l="ls -CFv"
+      alias ll='ls -lhvF --group-directories-first'
+      alias lla='ls -alhvF --group-directories-first'
+      alias grep='grep --color=auto'
+      alias cdb='cd -'
+      alias cdu='cd ..'
+      set -o vi
+      bind 'set bell-style none' 2>/dev/null || true
+      # <<< bind_fwd aliases <<<
+
+runcmd:
+  # Copy cloud SSH key onto labuser; append shell tweaks once
+  - |
+    for src in /home/ubuntu/.ssh/authorized_keys /root/.ssh/authorized_keys; do
+      if [ -s "$src" ]; then
+        mkdir -p /home/labuser/.ssh
+        cp "$src" /home/labuser/.ssh/authorized_keys
+        chmod 700 /home/labuser/.ssh
+        chmod 600 /home/labuser/.ssh/authorized_keys
+        chown -R labuser:labuser /home/labuser/.ssh
+        break
+      fi
+    done
+    for rc in /home/labuser/.bashrc /root/.bashrc /home/ubuntu/.bashrc; do
+      touch "$rc"
+      grep -qF 'bind_fwd aliases' "$rc" 2>/dev/null || cat /etc/skel/.bashrc.bind_fwd >> "$rc"
+    done
+    chown labuser:labuser /home/labuser/.bashrc 2>/dev/null || true
+  - [bash, -c, "ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf || true"]
+  - [systemctl, restart, systemd-resolved]
+  - [named-checkconf, /etc/bind/named.conf]
+  - [bash, -c, "systemctl enable --now bind9.service 2>/dev/null || systemctl enable --now named.service"]
+  - [bash, -c, "systemctl restart bind9.service 2>/dev/null || systemctl restart named.service"]
+
+final_message: "========= BIND VAST forwarder ready ========="
