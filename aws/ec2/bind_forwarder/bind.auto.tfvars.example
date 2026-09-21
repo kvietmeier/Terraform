@@ -3,7 +3,8 @@
 #  File:  bind.auto.tfvars.example
 #  Created By: Karl Vietmeier
 #
-#  Copy to bind.auto.tfvars and edit. Day-2 changes are usually just:
+#  Mini networking node — BIND VAST forwarder + net debug tools.
+#  Copy to bind.auto.tfvars and edit. After cluster up, set:
 #    vast_zones  +  vast_dns_ips
 #
 ###===================================================================================###
