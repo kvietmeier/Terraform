@@ -3,33 +3,23 @@
 #  File:  clients.main.tf
 #  Created By: Karl Vietmeier
 #
-#  Purpose: Deploy multiple AWS EC2 client instances with cloud-init,
-#           an existing key pair, and tagging.
-#           All inputs are variables — nothing hard-coded here.
+#  Purpose: Deploy a pool of identical AWS EC2 client instances (cloud-init,
+#           existing key pair, tagging). Scale with num_vm + vm_base_name.
+#           For unique per-VM specs, use ../linux_clients_map (map-driven).
 #
 ###===================================================================================###
 
 ###===================================================================================###
 ###                  Start creating infrastructure resources                          ###
 
-locals {
-  # Only look up AMIs for os_types actually used by var.vms
-  used_os_amis = {
-    for os_type, ami in var.os_amis : os_type => ami
-    if contains([for vm in var.vms : vm.os_type], os_type)
-  }
-}
-
-# AMI lookups (one data source per os_type in use)
+# Single AMI lookup for the shared os_type
 data "aws_ami" "os" {
-  for_each = local.used_os_amis
-
   most_recent = true
-  owners      = each.value.owners
+  owners      = var.os_amis[var.os_type].owners
 
   filter {
     name   = "name"
-    values = [each.value.name_filter]
+    values = [var.os_amis[var.os_type].name_filter]
   }
 
   filter {
@@ -39,10 +29,10 @@ data "aws_ami" "os" {
 }
 
 resource "aws_instance" "vm_instance" {
-  for_each = var.vms
+  for_each = toset(local.vm_names)
 
-  ami                    = data.aws_ami.os[each.value.os_type].id
-  instance_type          = each.value.machine_type
+  ami                    = data.aws_ami.os.id
+  instance_type          = var.machine_type
   subnet_id              = var.subnet_id
   vpc_security_group_ids = var.security_group_ids
   key_name               = var.ssh_key_name
@@ -50,7 +40,7 @@ resource "aws_instance" "vm_instance" {
   user_data_base64 = base64gzip(local.cloudinit_config)
 
   root_block_device {
-    volume_size = each.value.bootdisk_size
+    volume_size = var.bootdisk_size
   }
 
   tags = merge(
@@ -63,4 +53,3 @@ resource "aws_instance" "vm_instance" {
     { Name = each.key }
   )
 }
-

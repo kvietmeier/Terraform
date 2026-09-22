@@ -11,7 +11,8 @@ Not useful OOB — after the cluster is up, set the two knobs and point test cli
 | `vast_zones` | `["busab.org"]` | Domain(s) sent to VAST |
 | `vast_dns_ips` | `["10.105.28.250"]` | VAST DNS VIP(s) |
 
-Everything else is wiring: existing subnet + SG (same pattern as `tux_clients`), key pair, VPC CIDR for BIND’s query ACL.
+Everything else is wiring: existing subnet + SG (same pattern as `linux_clients`), key pair, VPC CIDR for BIND’s query ACL.
+
 
 ## What’s on the box
 

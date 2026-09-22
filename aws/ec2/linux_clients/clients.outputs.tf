@@ -3,9 +3,14 @@
 #  File:  clients.outputs.tf
 #  Created By: Karl Vietmeier
 #
-#  Connection helpers for the client VMs
+#  Connection helpers for the identical client pool
 #
 ###===================================================================================###
+
+output "vm_names" {
+  value       = local.vm_names
+  description = "Generated VM names (vm_base_name + 01, 02, ...)"
+}
 
 output "vm_private_ips" {
   value       = { for name, vm in aws_instance.vm_instance : name => vm.private_ip }

@@ -4,6 +4,7 @@
 #  Created By: Karl Vietmeier
 #
 #  Variable definitions — all values come from tfvars
+#  Pattern mirrors gcp/VMs/multi_vm (identical client pool via count + base name)
 #
 ###===================================================================================###
 
@@ -60,7 +61,7 @@ variable "common_tags" {
   default     = {}
 }
 
-###--- AMI lookups (keyed by os_type used in var.vms)
+###--- AMI lookup
 
 variable "os_amis" {
   description = "AMI search criteria keyed by os_type (e.g. ubuntu, rocky)"
@@ -70,18 +71,38 @@ variable "os_amis" {
   }))
 }
 
-###--- VMs
+###--- Identical VM pool (like gcp/VMs/multi_vm)
 
-variable "vms" {
-  description = "Map of VM configurations; key = instance Name tag"
-  type = map(object({
-    machine_type  = string
-    bootdisk_size = number
-    os_type       = string # must match a key in var.os_amis
-  }))
+variable "num_vm" {
+  description = "Number of identical client VMs to create"
+  type        = number
+}
+
+variable "vm_base_name" {
+  description = "Base name for instances; names are {vm_base_name}01, {vm_base_name}02, ..."
+  type        = string
+  default     = "voc-client"
+}
+
+variable "machine_type" {
+  description = "EC2 instance type for every VM in the pool"
+  type        = string
+}
+
+variable "bootdisk_size" {
+  description = "Root volume size (GiB) for every VM in the pool"
+  type        = number
+}
+
+variable "os_type" {
+  description = "OS key into var.os_amis (must match a key there)"
+  type        = string
 }
 
 ###=================          Locals                ==================###
 locals {
   cloudinit_config = file(var.cloudinit_configfile)
+
+  # voc-client01, voc-client02, ... (same naming as prior map keys → state-safe)
+  vm_names = [for i in range(var.num_vm) : format("%s%02d", var.vm_base_name, i + 1)]
 }
