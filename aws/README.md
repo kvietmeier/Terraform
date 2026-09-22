@@ -9,7 +9,6 @@ Terraform stacks and helpers for AWS lab / POC work.
 | [`ec2/`](ec2/) | EC2 examples — Linux/Windows clients, BIND forwarder, auto-shutdown |
 | [`solutions-sre/`](solutions-sre/) | Org-agnostic Solutions-style starter (tfvars-driven; not fully tested) |
 | [`basic_auth/`](basic_auth/) | Minimal auth / provider smoke pattern |
-| [`cloudformation/`](cloudformation/) | Small CloudFormation sample |
 
 Non-Terraform AWS helpers (e.g. `launch-lab-client.sh`): [`../scripts/aws/`](../scripts/aws/).
 
