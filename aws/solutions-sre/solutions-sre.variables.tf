@@ -51,9 +51,15 @@ variable "iam_path_prefix" {
 }
 
 variable "s3_bucket_prefixes" {
-  description = "S3 bucket name prefixes this lane may create/use (empty = no S3 write statements)"
+  description = "S3 bucket name prefixes this lane may create/use (demo + terraform state). Empty = no S3 write statements."
   type        = list(string)
-  default     = ["solutions-demo-"]
+  default     = ["solutions-demo-", "solutions-tfstate-"]
+}
+
+variable "dynamodb_lock_table_prefixes" {
+  description = "DynamoDB table name prefixes for Terraform state locking. Empty = no DynamoDB statements."
+  type        = list(string)
+  default     = ["solutions-tfstate-lock"]
 }
 
 variable "idc_group_display_name" {

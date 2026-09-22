@@ -41,9 +41,18 @@ Prefer assigning an Identity Center **group** over per-user assignments. After a
 
 ## Scope notes
 
-- **In lane:** EC2 workloads/SGs/ENIs, limited IAM under a path prefix, optional S3 by bucket-name prefix, plus common read/ops actions in the inline policy.
+- **In lane:** EC2 workloads/SGs/ENIs, limited IAM under a path prefix, optional S3 by bucket-name prefix (demo + `solutions-tfstate-*` remote state), DynamoDB lock tables (`solutions-tfstate-lock*`), plus common read/ops actions in the inline policy.
 - **Out of lane:** Underlay networking stays with platform/IT + org SCPs. Tune `solutions-sre.policies.tf` to match your envelope before any real use.
 - Defaults and tags mark this as an untested template (`Status = untested-template`).
+
+## Terraform remote state (IT ask)
+
+Polaris-Solutions today cannot create/write a state bucket. Copy-paste ask + attachable JSON:
+
+| Artifact | Use |
+|----------|-----|
+| [`IT-ASK-TFSTATE.md`](IT-ASK-TFSTATE.md) | Standalone ITDESK / IdC ask |
+| [`iam-policy-tfstate.json`](iam-policy-tfstate.json) | Minimal prefix-scoped S3 + DynamoDB lock policy |
 
 ## Files
 
@@ -55,6 +64,8 @@ Prefer assigning an Identity Center **group** over per-user assignments. After a
 | `solutions-sre.variables.tf` | Inputs |
 | `solutions-sre.outputs.tf` | ARNs, assignment keys, add-user hint |
 | `solutions-sre.auto.tfvars.example` | Sample tfvars |
+| `iam-policy-tfstate.json` | Band-aid / merge policy for remote state |
+| `IT-ASK-TFSTATE.md` | Copy-paste IT ask for S3 + DynamoDB lock |
 
 ## Disclaimer
 

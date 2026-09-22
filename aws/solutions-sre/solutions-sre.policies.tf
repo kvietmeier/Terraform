@@ -18,6 +18,11 @@ locals {
       "arn:aws:s3:::${prefix}*/*",
     ]
   ])
+
+  dynamodb_lock_table_arns = [
+    for prefix in var.dynamodb_lock_table_prefixes :
+    "arn:aws:dynamodb:*:*:table/${prefix}*"
+  ]
 }
 
 data "aws_iam_policy_document" "solutions_sre" {
@@ -349,7 +354,7 @@ data "aws_iam_policy_document" "solutions_sre" {
   dynamic "statement" {
     for_each = length(local.s3_bucket_arns) > 0 ? [1] : []
     content {
-      sid = "S3DemoBuckets"
+      sid = "S3DemoAndTfStateBuckets"
       actions = [
         "s3:CreateBucket",
         "s3:DeleteBucket",
@@ -361,8 +366,44 @@ data "aws_iam_policy_document" "solutions_sre" {
         "s3:GetLifecycleConfiguration",
         "s3:PutLifecycleConfiguration",
         "s3:GetBucketLocation",
+        # Remote Terraform state hardening
+        "s3:GetBucketVersioning",
+        "s3:PutBucketVersioning",
+        "s3:GetEncryptionConfiguration",
+        "s3:PutEncryptionConfiguration",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:PutBucketPublicAccessBlock",
       ]
       resources = local.s3_bucket_arns
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(local.dynamodb_lock_table_arns) > 0 ? [1] : []
+    content {
+      sid = "TfStateDynamoDBLock"
+      actions = [
+        "dynamodb:CreateTable",
+        "dynamodb:DeleteTable",
+        "dynamodb:DescribeTable",
+        "dynamodb:UpdateTable",
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:TagResource",
+        "dynamodb:UntagResource",
+        "dynamodb:ListTagsOfResource",
+      ]
+      resources = local.dynamodb_lock_table_arns
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(local.dynamodb_lock_table_arns) > 0 ? [1] : []
+    content {
+      sid       = "TfStateDynamoDBList"
+      actions   = ["dynamodb:ListTables"]
+      resources = ["*"]
     }
   }
 

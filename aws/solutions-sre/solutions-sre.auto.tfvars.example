@@ -22,8 +22,15 @@ iam_path_prefix                = "solutions"
 idc_group_display_name         = "Solutions-SRE"
 
 # Org-specific prefixes — replace or extend as needed
+# solutions-tfstate-*     = remote Terraform state buckets in the SRE QA / lab account
+# solutions-tfstate-lock* = DynamoDB lock tables for the S3 backend
 s3_bucket_prefixes = [
   "solutions-demo-",
+  "solutions-tfstate-",
+]
+
+dynamodb_lock_table_prefixes = [
+  "solutions-tfstate-lock",
 ]
 
 tags = {

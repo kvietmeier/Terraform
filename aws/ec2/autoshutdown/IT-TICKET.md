@@ -103,11 +103,38 @@ Day-2 needs **read** access to prove failures, debug demos, and verify auto-shut
 
 **Note:** Polaris-Solutions may already carry ReadOnlyAccess for some of this — please **confirm** Logs/Metrics/CloudTrail work in console; if not, grant explicitly. VOC-Admin historically lacked several Describe* and CloudTrail lookups.
 
+### I) Terraform remote state — cannot create / write S3 state bucket
+```
+2026-09-21 — IAM SimulatePrincipalPolicy on AWS-Polaris-Solutions (account 110450271409)
+  target: arn:aws:s3:::karlv-tfstate-110450271409
+  s3:CreateBucket                 → implicitDeny
+  s3:PutBucketVersioning          → implicitDeny
+  s3:PutEncryptionConfiguration   → implicitDeny
+  s3:PutBucketPublicAccessBlock   → implicitDeny
+  s3:PutObject                    → implicitDeny
+  s3:GetObject / ListBucket       → allowed (ReadOnlyAccess only)
+```
+Org SCP is fine (`AllowedByOrganizations: True`) — the permission set simply has **no S3 write**.
+Without a writable state bucket, every lab stack is local `terraform.tfstate` on a laptop (lost, unshared, no locking).
+
+**Need (prefix-scoped is fine):** in the Solutions / SRE **QA (or lab) account**, allow create + day-2 ops on a dedicated TF state bucket, e.g. prefix `solutions-tfstate-` / `*-tfstate-*`:
+- `s3:CreateBucket`, `DeleteBucket`, `ListBucket`, `GetBucketLocation`
+- `s3:PutBucketVersioning`, `GetBucketVersioning`
+- `s3:PutEncryptionConfiguration`, `GetEncryptionConfiguration`
+- `s3:PutBucketPublicAccessBlock`, `GetBucketPublicAccessBlock`
+- `s3:GetObject`, `PutObject`, `DeleteObject` (state read/write)
+- DynamoDB lock table: create/`PutItem`/`GetItem`/`DeleteItem`/`DescribeTable` on `solutions-tfstate-lock*`
+
+**Hand IT:** [`../../solutions-sre/iam-policy-tfstate.json`](../../solutions-sre/iam-policy-tfstate.json)  
+**Standalone ask:** [`../../solutions-sre/IT-ASK-TFSTATE.md`](../../solutions-sre/IT-ASK-TFSTATE.md)
+
+**Guardrails we accept:** no org-wide S3 admin; one (or few) named prefixes only; public access stays blocked; not asking to hijack CI artifact buckets.
+
 ## Not asking for
 - CreateVpc / Subnet / Route / IGW / NAT / TGW / VPN
 - Unapproved public `0.0.0.0/0` or `::/0` ingress
 - Editing IT baseline SG **rules** (attach/detach only)
-- Turning DevQA CI accounts into SRE sandboxes
+- Turning DevQA **CI** accounts into full SRE sandboxes (we do need TF state + lab clients in a **Solutions QA / lab** account)
 
 ## Acceptance (band-aid done when)
 1. Console can **Stop** and **Start** a lab instance we launched  
@@ -118,6 +145,7 @@ Day-2 needs **read** access to prove failures, debug demos, and verify auto-shut
 6. Serial console session opens for break-glass  
 7. (If in scope this ticket) ELB + Resolver rule + Bedrock/SageMaker invoke work for a simple demo  
 8. Can view CloudWatch Logs (FilterLogEvents) for our Lambda/ALB; CloudTrail LookupEvents; EC2 console output; SG rules in console  
+9. Can `CreateBucket` + enable versioning/encryption/public-block on a prefix-scoped TF state bucket, then `PutObject`/`GetObject`/`DeleteObject` state keys, plus DynamoDB lock table day-2 (`GetItem`/`PutItem`/`DeleteItem`)
 
 ## Priority
 **Band-aid or now.** Cost controls and day-2 ops are blocked today; drip-feeding individual Allows does not work when IT is offline weekends.
