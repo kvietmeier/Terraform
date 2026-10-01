@@ -1,0 +1,35 @@
+---
+description: Public GitHub vs internal GitLab — this repo is public examples only
+alwaysApply: true
+---
+
+# This repo is public GitHub
+
+`kvietmeier/Terraform` is a **stripped-down example library** for customers, colleagues, and a live CV — not a dump of lab/project state.
+
+## Do
+
+- Ship teachable stacks with placeholder IPs/domains/hostnames
+- Commit `*.auto.tfvars.example` / `*.tfvars.example` only
+- Keep real tfvars gitignored; sync privately via `scripts/sync-tfvars-personal.sh` → `~/github/personal/terraform-tfvars/`
+- Document auth with `TF_VAR_*` placeholders, not private `set_var*` helpers
+- Keep generic provider examples (including `vastdata/` patterns) if they teach with placeholders
+
+## Do not commit
+
+- Real `*.tfvars` / `*.auto.tfvars`
+- `*.tfstate`, `*.tfstate.*`, `.terraform/`, `.terraform.lock.hcl`
+- Internal hosts (`var54`, inventory names), org account/SSO IDs, IT tickets with live evidence
+- Personal domains, passwords, private notes paths, customer-specific VIP/SG lists
+- Project-specific VAST lab state (real clusters, VIP lists, customer configs) — examples only under `vastdata/`
+
+## Where project-specific work goes
+
+| Destination | Path |
+|-------------|------|
+| Internal GitLab | `~/gitlab/` (e.g. `vastoncloud/`, `sre-runbooks/`, cloud lab trees) |
+| Personal tfvars mirror | `~/github/personal/terraform-tfvars/` |
+
+Never “just this once” into this public repo.
+
+When scrubbing for publish, follow the personal skill `public-private-git-split`.
