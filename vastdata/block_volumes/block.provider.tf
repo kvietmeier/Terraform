@@ -37,6 +37,7 @@ variable "vast_password" {
   sensitive = true
 }
 
+# Declared so set_var54's TF_VAR_vast_api_token="" does not warn; unused (simple auth only).
 variable "vast_api_token" {
   type      = string
   default   = null
@@ -53,12 +54,13 @@ variable "vast_version_validation_mode" {
   default = "warn"
 }
 
+# Simple auth only (username/password). Do not pass api_token —
+# empty TF_VAR_vast_api_token conflicts with password auth on the provider.
 provider "vastdata" {
   host                    = var.vast_host
-  port                    = var.vast_port
+  port                    = tonumber(var.vast_port)
   username                = var.vast_username
   password                = var.vast_password
-  api_token               = var.vast_api_token
   skip_ssl_verify         = var.vast_skip_ssl_verify
   version_validation_mode = var.vast_version_validation_mode
 }
