@@ -56,11 +56,16 @@ variable "vast_version_validation_mode" {
 
 # Simple auth only (username/password). Do not pass api_token —
 # empty TF_VAR_vast_api_token conflicts with password auth on the provider.
+#
+# tenant must be empty: set_var54 exports VASTDATA_TENANT=default, and the
+# provider would otherwise send X-Tenant-Name on login (tenant-admin auth),
+# which 401s for cluster admin. Curl works without that header.
 provider "vastdata" {
   host                    = var.vast_host
   port                    = tonumber(var.vast_port)
   username                = var.vast_username
   password                = var.vast_password
+  tenant                  = ""
   skip_ssl_verify         = var.vast_skip_ssl_verify
   version_validation_mode = var.vast_version_validation_mode
 }
