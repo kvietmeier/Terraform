@@ -45,14 +45,9 @@ Prefer assigning an Identity Center **group** over per-user assignments. After a
 - **Out of lane:** Underlay networking stays with platform/IT + org SCPs. Tune `solutions-sre.policies.tf` to match your envelope before any real use.
 - Defaults and tags mark this as an untested template (`Status = untested-template`).
 
-## Terraform remote state (IT ask)
+## Terraform remote state
 
-Polaris-Solutions today cannot create/write a state bucket. Copy-paste ask + attachable JSON:
-
-| Artifact | Use |
-|----------|-----|
-| [`IT-ASK-TFSTATE.md`](IT-ASK-TFSTATE.md) | Standalone ITDESK / IdC ask |
-| [`iam-policy-tfstate.json`](iam-policy-tfstate.json) | Minimal prefix-scoped S3 + DynamoDB lock policy |
+If the current SSO lane cannot create/write a state bucket, attach a prefix-scoped S3 + DynamoDB lock policy (see [`iam-policy-tfstate.json`](iam-policy-tfstate.json)) or merge it into the permission set.
 
 ## Files
 
@@ -64,8 +59,7 @@ Polaris-Solutions today cannot create/write a state bucket. Copy-paste ask + att
 | `solutions-sre.variables.tf` | Inputs |
 | `solutions-sre.outputs.tf` | ARNs, assignment keys, add-user hint |
 | `solutions-sre.auto.tfvars.example` | Sample tfvars |
-| `iam-policy-tfstate.json` | Band-aid / merge policy for remote state |
-| `IT-ASK-TFSTATE.md` | Copy-paste IT ask for S3 + DynamoDB lock |
+| `iam-policy-tfstate.json` | Example prefix-scoped S3 + DynamoDB lock policy |
 
 ## Disclaimer
 

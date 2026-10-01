@@ -1,6 +1,6 @@
 ### GCP DNS Forwarding Zone for a VAST Data Cluster
 
-Provisions 1 or more **Cloud DNS private forwarding zones** in **Google Cloud Platform (GCP)**. It's used to forward DNS queries for **VAST Data Cluster** domains (e.g., `vastdata.com.`).
+Provisions 1 or more **Cloud DNS private forwarding zones** in **Google Cloud Platform (GCP)**. It's used to forward DNS queries for **VAST Data Cluster** domains (e.g., `cluster.example.com.`).
 
 ---
 

@@ -10,7 +10,7 @@ vastdata/
 ├── simple_query/              # Auth / connectivity smoke test (read default tenant)
 ├── basic_cluster/             # Demo/POC baseline cluster config
 ├── complete_cluster_config/   # Full end-to-end cluster config (VIP, DNS, AD, …)
-├── lab_setup/                 # Multi-cluster lab orchestrator (Polaris / VoC style)
+├── lab_setup/                 # Multi-cluster lab orchestrator (cloud-provisioned clusters)
 ├── createviews/               # NFS/SMB views + policies against an existing VIP pool
 ├── view_template/             # Reference schema for views, policies, and block storage
 ├── block_volumes/             # Block subsystem views / Windows block examples
@@ -66,7 +66,7 @@ Some stacks also honor native provider env vars (see [`provider/README.md`](prov
 1. Start with [`simple_query/`](simple_query/) to verify credentials.
 2. Use [`basic_cluster/`](basic_cluster/) or [`complete_cluster_config/`](complete_cluster_config/) for a full POC setup.
 3. Use [`createviews/`](createviews/) or [`block_volumes/`](block_volumes/) against an existing cluster.
-4. For many Polaris/VoC lab clusters, use [`lab_setup/`](lab_setup/).
+4. For many cloud-provisioned lab clusters, use [`lab_setup/`](lab_setup/).
 
 ```bash
 cd vastdata/simple_query

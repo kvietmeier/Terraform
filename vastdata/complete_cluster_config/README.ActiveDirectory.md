@@ -7,11 +7,11 @@ Sometimes it can be difficult to get the exact information you need through GUIs
 You need (example values):
 
 ```hcl
-ou_name         = "voc-cluster01"
-ad_ou           = "OU=VAST,DC=ginaz,DC=org "
-bind_dn         = "CN=Administrator,CN=Users,DC=ginaz,DC=org"
-bindpw          = "Chalc0pyr1te!123"
-ad_domain       = "ginaz.org"
+ou_name         = "lab-cluster01"
+ad_ou           = "OU=VAST,DC=lab,DC=example,DC=com"
+bind_dn         = "CN=Administrator,CN=Users,DC=lab,DC=example,DC=com"
+bindpw          = "YourSecurePasswordHere"
+ad_domain       = "lab.example.com"
 ```
   
 The sequence of PowerShell commands below will extract this in a usable form from a Domain Controller.   
@@ -21,7 +21,7 @@ The sequence of PowerShell commands below will extract this in a usable form fro
 
   ```powershell
      PS C:\> (Get-ADDomain).DistinguishedName
-     DC=ginaz,DC=org
+     DC=lab,DC=example,DC=com
   ```
 
 - OUs for adding Servers (VAST was added)
@@ -31,8 +31,8 @@ The sequence of PowerShell commands below will extract this in a usable form fro
     
      Name               DistinguishedName                    
      ----               -----------------                    
-     Domain Controllers OU=Domain Controllers,DC=ginaz,DC=org
-     VAST               OU=VAST,DC=ginaz,DC=org              
+     Domain Controllers OU=Domain Controllers,DC=lab,DC=example,DC=com
+     VAST               OU=VAST,DC=lab,DC=example,DC=com              
   ```
 
 - Find the Admin users
@@ -52,7 +52,7 @@ The sequence of PowerShell commands below will extract this in a usable form fro
     
       DistinguishedName                        
       -----------------                        
-      CN=Administrator,CN=Users,DC=ginaz,DC=org
+      CN=Administrator,CN=Users,DC=lab,DC=example,DC=com
   ```
 
 #### For Extra Credit  
@@ -61,21 +61,21 @@ If you have access to the Domain Controllers (Lab) or the customer is interested
 - Create a new OU with a different name (VAST):
 
   ```powershell
-     New-ADOrganizationalUnit -Name "VAST" -Path "DC=ginaz,DC=org"
+     New-ADOrganizationalUnit -Name "VAST" -Path "DC=lab,DC=example,DC=com"
   ```
 
 - Redirect new VAST Clusters you add to the OU:
 
   ```powershell
-     redircmp "OU=VAST,DC=ginaz,DC=org"
+     redircmp "OU=VAST,DC=lab,DC=example,DC=com"
   ```
 
 - Move existing ones to the new OU (careful with this one - it needs to be more selective - use at your own risk):
 
   ```powershell
-      Get-ADComputer -SearchBase "CN=Computers,DC=ginaz,DC=org" -Filter * |
+      Get-ADComputer -SearchBase "CN=Computers,DC=lab,DC=example,DC=com" -Filter * |
       ForEach-Object {
-        Move-ADObject -Identity $_.DistinguishedName -TargetPath "OU=Workstations,DC=ginaz,DC=org"
+        Move-ADObject -Identity $_.DistinguishedName -TargetPath "OU=Workstations,DC=lab,DC=example,DC=com"
       }
   ```
 

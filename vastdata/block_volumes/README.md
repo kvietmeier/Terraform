@@ -23,7 +23,7 @@ Add hosts/volumes in `block.variables.tfvars` and re-apply (idempotent `for_each
 ## Files
 
 ```text
-block.provider.tf              # vastdata 3.2.2; TF_VAR_* auth from set_var54
+block.provider.tf              # vastdata 3.2.2; TF_VAR_* / env auth
 block.main.tf                  # lookups + view / hosts / volumes / maps
 block.variables.tf             # input schema (no defaults)
 block.variables.tfvars         # shared lab values (hosts, volumes) — committed
@@ -35,12 +35,15 @@ block.outputs.tf               # subsystem / hosts / volumes / summary
 ## Usage
 
 ```bash
-source ~/.bash_environment.sh   # or your usual env
-set_var54
-tfinit
-tfplan
-tfapply
+# Export VMS auth (TF_VAR_vast_host, TF_VAR_vast_username, TF_VAR_vast_password, …)
+export TF_VAR_vast_host="192.168.1.100"
+export TF_VAR_vast_username="admin"
+export TF_VAR_vast_password="YourActualVMSPasswordHere"
+
+terraform init
+terraform plan
+terraform apply
 terraform output summary
 ```
 
-`tfplan` / `tfapply` pick up `*.tfvars` automatically via your wrappers.
+`*.tfvars` in this directory are picked up automatically.

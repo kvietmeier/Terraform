@@ -10,9 +10,9 @@ Edit `clients.auto.tfvars`:
 
 ```hcl
 vms = {
-  "voc-bench01" = { machine_type = "m6i.4xlarge", bootdisk_size = 512, os_type = "ubuntu" }
-  "voc-jump01"  = { machine_type = "t3.medium",   bootdisk_size = 64,  os_type = "ubuntu" }
-  "voc-rocky01" = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "rocky" }
+  "lab-bench01" = { machine_type = "m6i.4xlarge", bootdisk_size = 512, os_type = "ubuntu" }
+  "lab-jump01"  = { machine_type = "t3.medium",   bootdisk_size = 64,  os_type = "ubuntu" }
+  "lab-rocky01" = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "rocky" }
 }
 ```
 

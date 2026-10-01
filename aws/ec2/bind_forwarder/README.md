@@ -8,8 +8,8 @@ Not useful OOB — after the cluster is up, set the two knobs and point test cli
 
 | Knob | Example | Meaning |
 |------|---------|---------|
-| `vast_zones` | `["busab.org"]` | Domain(s) sent to VAST |
-| `vast_dns_ips` | `["10.105.28.250"]` | VAST DNS VIP(s) |
+| `vast_zones` | `["cluster.example.com"]` | Domain(s) sent to VAST |
+| `vast_dns_ips` | `["192.168.1.50"]` | VAST DNS VIP(s) |
 
 Everything else is wiring: existing subnet + SG (same pattern as `linux_clients`), key pair, VPC CIDR for BIND’s query ACL.
 
@@ -52,12 +52,12 @@ DHCP option sets are not changed — override DNS on test clients only.
 # /etc/systemd/resolved.conf.d/vast-forwarder.conf
 [Resolve]
 DNS=<BIND_PRIVATE_IP>
-Domains=~busab.org
+Domains=~cluster.example.com
 ```
 
 ```bash
 sudo systemctl restart systemd-resolved
-resolvectl query mycluster.busab.org
+resolvectl query mycluster.cluster.example.com
 ```
 
 ### Verify on the BIND VM
@@ -67,7 +67,7 @@ sudo named-checkconf /etc/bind/named.conf
 sudo systemctl status bind9
 sudo ss -tulpn | grep :53
 
-dig @localhost mycluster.busab.org
+dig @localhost mycluster.cluster.example.com
 dig @localhost google.com
 ```
 

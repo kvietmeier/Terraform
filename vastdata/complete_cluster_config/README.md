@@ -103,15 +103,15 @@ Basic policy with no extra settings (Isn't working right now)
 
 #### DNS
 
-Defines a VAST DNS server for the VAST cluster, using the `busab.org` domain suffix and specified VIP address.
+Defines a VAST DNS server for the VAST cluster, using a lab domain suffix and specified VIP address.
 
-- `viewpool.busab.org`
-- `s3pool.busab.org`
+- `viewpool.cluster.example.com`
+- `s3pool.cluster.example.com`
 - Forwarding domain setup in GCP.
 
 ####  Active Directory
 
-Configure Active Directory integration to join the `ginaz.org` domain.
+Configure Active Directory integration to join the `lab.example.com` domain.
 
 ---
 

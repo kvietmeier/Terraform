@@ -5,7 +5,7 @@
 #
 #  Description:
 #  Input variables for block_volumes. No defaults here — set values in
-#  block.variables.tfvars (and TF_VAR_* for provider auth via set_var54).
+#  block.variables.tfvars (and TF_VAR_* for provider auth).
 #
 ###===================================================================================###
 

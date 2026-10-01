@@ -10,7 +10,7 @@ Edit `clients.auto.tfvars`:
 
 ```hcl
 num_vm        = 3
-vm_base_name  = "voc-client"
+vm_base_name  = "lab-client"
 machine_type  = "m6i.2xlarge"
 bootdisk_size = 256
 os_type       = "ubuntu"

@@ -34,7 +34,7 @@ Run these commands in your shell to load credentials without storing them in `.t
 # ==============================================================================
 
 # Native provider fallbacks
-export VASTDATA_HOST="10.10.20.74"
+export VASTDATA_HOST="192.168.1.100"
 export VASTDATA_PORT="443"
 export VASTDATA_TENANT="default"
 
@@ -190,7 +190,7 @@ resource "vastdata_host" "gcp_cluster_host" {
 
 ```bash
 # 1. Load your credentials into your current terminal session
-source ~/vast_env.sh
+# source your usual env file that exports VASTDATA_* / TF_VAR_vast_*
 
 # 2. Navigate to your new scratch testing folder
 cd ~/tf_tests/block_storage_test

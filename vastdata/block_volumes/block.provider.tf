@@ -4,9 +4,9 @@
 #  Author:      Karl Vietmeier
 #
 #  Description:
-#  VAST provider (v3.2.2) for this stack. Auth via TF_VAR_* from set_var54 /
-#  _vast_apply. Username/password only; tenant="" so VASTDATA_TENANT does not
-#  force tenant-scoped login (which 401s cluster admin).
+#  VAST provider (v3.2.2) for this stack. Auth via TF_VAR_* env vars.
+#  Username/password only; tenant="" so VASTDATA_TENANT does not force
+#  tenant-scoped login (which 401s cluster admin).
 #
 ###===================================================================================###
 
@@ -19,7 +19,7 @@ terraform {
   }
 }
 
-# Populated via TF_VAR_* from set_var54 / _vast_apply
+# Populated via TF_VAR_* environment variables
 variable "vast_host" {
   type = string
 }
@@ -41,7 +41,7 @@ variable "vast_password" {
   sensitive = true
 }
 
-# Declared so set_var54's TF_VAR_vast_api_token="" does not warn; unused (simple auth only).
+# Declared so an empty TF_VAR_vast_api_token does not warn; unused (simple auth only).
 variable "vast_api_token" {
   type      = string
   default   = null
@@ -61,7 +61,7 @@ variable "vast_version_validation_mode" {
 # Simple auth only (username/password). Do not pass api_token —
 # empty TF_VAR_vast_api_token conflicts with password auth on the provider.
 #
-# tenant must be empty: set_var54 exports VASTDATA_TENANT=default, and the
+# tenant must be empty: if VASTDATA_TENANT=default is set in the shell, the
 # provider would otherwise send X-Tenant-Name on login (tenant-admin auth),
 # which 401s for cluster admin. Curl works without that header.
 provider "vastdata" {

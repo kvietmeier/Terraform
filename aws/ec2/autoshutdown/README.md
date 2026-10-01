@@ -33,14 +33,13 @@ Summary:
 
 IAM role resources are scoped to `arn:aws:iam::*:role/solutions/*` (matches `path = "/solutions/"` in this stack).
 
-**Exhibit (2026-09-20):** Polaris-Solutions denied `iam:CreateRole` (and `ec2:StopInstances`)
-when applying this stack — see `~/github/personal/notes/AWS Permissions.txt`.
-Full Solutions template: `../../solutions-sre/solutions-sre.policies.tf`.
+If your current SSO / permission set lacks `iam:CreateRole` or `ec2:StopInstances`,
+merge the JSON above (or use the Solutions template in `../../solutions-sre/solutions-sre.policies.tf`) before applying.
 
 ## Apply
 
 ```bash
-cd ~/github/Terraform/aws/ec2/autoshutdown
+cd aws/ec2/autoshutdown
 tfinit && tfapply
 ```
 

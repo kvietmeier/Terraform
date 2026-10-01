@@ -1,6 +1,6 @@
 ## VAST Data Cluster Lab Automation Engine
 
-This repository contains a modular Terraform workflow orchestrated by an automation wrapper (`cluster_setup.sh`). It dynamically provisions many VAST Clusters with basic lab resources; NFS view/policies, users, and tenants. It is designed to be used wih VAST on Cloud clusters created with Polaris so VIP Pools, DNS, and Active Direct ory are not configured.
+This repository contains a modular Terraform workflow orchestrated by an automation wrapper (`cluster_setup.sh`). It dynamically provisions many VAST Clusters with basic lab resources; NFS view/policies, users, and tenants. It is designed for cloud-provisioned VAST clusters where VIP Pools, DNS, and Active Directory are not configured.
 
 The system features:
 
