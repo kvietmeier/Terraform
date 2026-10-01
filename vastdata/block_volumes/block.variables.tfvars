@@ -4,22 +4,19 @@
 
 # Lookups (Existing Infrastructure)
 tenant_name          = "default"
-vip_pool_name        = "my_dedicated_vip_pool"
+vip_pool_name        = "vippool-block"
 
-# Policy Settings
-policy_name          = "win-block-policy"
-policy_flavor        = "NFS"
-policy_auth_source   = "RPC"
-policy_read_write    = ["*"]
+# Existing policy — lookup only, never own/modify
+block_policy_name    = "block_default_policy"
 
 # View Settings
 view_path            = "/windows_block_01"
 view_protocols       = ["BLOCK"]
 view_create_dir      = true
 
-# Host Settings
-host_name            = "win-server-01"
-host_nqn             = "nqn.2014-08.org.nvmexpress:uuid:11111111-2222-3333-4444-555555555555"
+# Host Settings (StarWind initiator: nqn.2008-08.com.starwind:<hostname>)
+host_name            = "starwind_ws2019-01"
+host_nqn             = "nqn.2008-08.com.starwind:ws2019-01"
 
 # Volume Settings
 volume_name          = "win_vol1"
