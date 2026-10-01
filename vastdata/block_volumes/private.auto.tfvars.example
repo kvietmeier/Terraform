@@ -1,0 +1,13 @@
+###===================================================================================###
+#
+#  File:        private.auto.tfvars.example
+#  Author:      Karl Vietmeier
+#
+#  Description:
+#  Example local overrides. Copy to private.auto.tfvars (gitignored) and set
+#  your initiator's vendor NQN prefix. Vendor-specific values: internal GitLab docs.
+#
+###===================================================================================###
+
+# NQN = <base_nqn_prefix>:<hostname>
+base_nqn_prefix = "nqn.example.vendor"

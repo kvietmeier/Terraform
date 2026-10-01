@@ -11,20 +11,25 @@ Block storage lab stack for an **existing** VAST cluster. Creates only our objec
 | Volumes | `vastdata_volume` | Size in bytes; naming like `2019_01_vol1` |
 | Mappings | `vastdata_block_host_mapping` | One map per volume → its host |
 
-Most initiators use a **standard NQN format** (vendor prefix + hostname or UUID). Set `base_nqn_prefix` in tfvars so each host gets `<prefix>:<hostname>`, or override per host with `hosts.*.nqn`.
+Most initiators use a **standard NQN format** (vendor prefix + hostname or UUID). Set `base_nqn_prefix` in **`private.auto.tfvars`** (gitignored) so each host gets `<prefix>:<hostname>`, or override per host with `hosts.*.nqn`.
 
-Vendor-specific NQN examples (and lab client notes) live in **internal GitLab docs** — this public tree keeps a generic placeholder prefix so the pattern stays reusable without exposing those details.
+```bash
+cp private.auto.tfvars.example private.auto.tfvars
+# edit base_nqn_prefix — vendor-specific examples: internal GitLab docs
+```
 
 Add hosts/volumes in `block.variables.tfvars` and re-apply (idempotent `for_each`). Do not adopt or modify existing lab hosts.
 
 ## Files
 
 ```text
-block.provider.tf       # vastdata 3.2.2; TF_VAR_* auth from set_var54
-block.main.tf           # lookups + view / hosts / volumes / maps
-block.variables.tf      # input schema (no defaults)
-block.variables.tfvars  # lab values (NQN prefix, hosts, volumes)
-block.outputs.tf        # subsystem / hosts / volumes / summary
+block.provider.tf              # vastdata 3.2.2; TF_VAR_* auth from set_var54
+block.main.tf                  # lookups + view / hosts / volumes / maps
+block.variables.tf             # input schema (no defaults)
+block.variables.tfvars         # shared lab values (hosts, volumes) — committed
+private.auto.tfvars.example   # copy → private.auto.tfvars for NQN prefix
+private.auto.tfvars           # local NQN prefix — gitignored
+block.outputs.tf               # subsystem / hosts / volumes / summary
 ```
 
 ## Usage

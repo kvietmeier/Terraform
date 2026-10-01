@@ -24,11 +24,9 @@ view_create_dir = true
 # -------------------------------------------------------------------------
 # Hosts — one per client. Start with one; uncomment to add later.
 # NQN = <base_nqn_prefix>:<hostname>
-# Set prefix to your initiator's standard vendor format (vendor-specific
-# examples live in internal GitLab docs — not committed here).
+# Set base_nqn_prefix in private.auto.tfvars (gitignored), not here.
+# See private.auto.tfvars.example; vendor-specific values: internal GitLab docs.
 # -------------------------------------------------------------------------
-base_nqn_prefix = "nqn.example.vendor"
-
 hosts = {
   "ws-2019bm-01" = {}
   # "ws-2019bm-02" = {}
