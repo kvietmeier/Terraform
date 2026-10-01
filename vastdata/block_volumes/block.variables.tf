@@ -22,6 +22,11 @@ variable "view_path" {
   type        = string
 }
 
+variable "view_name" {
+  description = "Display name for the block subsystem view"
+  type        = string
+}
+
 variable "view_protocols" {
   description = "Protocols for the block view (e.g., [\"BLOCK\"])"
   type        = list(string)
@@ -45,10 +50,10 @@ variable "hosts" {
 variable "volumes" {
   description = <<-EOT
     Map of volumes we own. Key = volume name (e.g. 2019_01_vol1).
-    host_key must match a key in var.hosts.
+    size is bytes (provider requires a number). host_key must match var.hosts.
   EOT
   type = map(object({
-    size     = string
+    size     = number
     host_key = string
   }))
 }

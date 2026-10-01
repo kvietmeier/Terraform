@@ -10,6 +10,7 @@ block_policy_name = "block_default_policy"
 
 # One shared block subsystem for these volumes
 view_path       = "/windows_block"
+view_name       = "windows_block"
 view_protocols  = ["BLOCK"]
 view_create_dir = true
 
@@ -26,20 +27,21 @@ hosts = {
 
 # -------------------------------------------------------------------------
 # Volumes — two per host. Naming: <osyear>_<hostnum>_volN
+# size is bytes (2 TiB = 2199023255552)
 # -------------------------------------------------------------------------
 volumes = {
   "2019_01_vol1" = {
-    size     = "2TB"
+    size     = 2199023255552
     host_key = "ws-2019bm-01"
   }
   "2019_01_vol2" = {
-    size     = "2TB"
+    size     = 2199023255552
     host_key = "ws-2019bm-01"
   }
-  # "2019_02_vol1" = { size = "2TB", host_key = "ws-2019bm-02" }
-  # "2019_02_vol2" = { size = "2TB", host_key = "ws-2019bm-02" }
-  # "2022_01_vol1" = { size = "2TB", host_key = "ws-2022bm-01" }
-  # "2022_01_vol2" = { size = "2TB", host_key = "ws-2022bm-01" }
-  # "2022_02_vol1" = { size = "2TB", host_key = "ws-2022bm-02" }
-  # "2022_02_vol2" = { size = "2TB", host_key = "ws-2022bm-02" }
+  # "2019_02_vol1" = { size = 2199023255552, host_key = "ws-2019bm-02" }
+  # "2019_02_vol2" = { size = 2199023255552, host_key = "ws-2019bm-02" }
+  # "2022_01_vol1" = { size = 2199023255552, host_key = "ws-2022bm-01" }
+  # "2022_01_vol2" = { size = 2199023255552, host_key = "ws-2022bm-01" }
+  # "2022_02_vol1" = { size = 2199023255552, host_key = "ws-2022bm-02" }
+  # "2022_02_vol2" = { size = 2199023255552, host_key = "ws-2022bm-02" }
 }

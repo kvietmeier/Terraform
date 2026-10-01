@@ -16,23 +16,25 @@ data "vastdata_view_policy" "selected_view_policy" {
 
 # -------------------------------------------------------------------------
 # Own only what we create: view / hosts / volumes / maps
-# Add host/volume keys in tfvars as you go (idempotent for_each)
+# Provider 3.x: vastdata_block_host + vastdata_block_host_mapping
 # -------------------------------------------------------------------------
 
 # Shared block subsystem for our Windows/StarWind volumes
 resource "vastdata_view" "windows_block" {
   path       = var.view_path
+  name       = var.view_name
   policy_id  = data.vastdata_view_policy.selected_view_policy.id
   protocols  = var.view_protocols
   create_dir = var.view_create_dir
 }
 
-# One VAST host per client server (initiator NQN)
-resource "vastdata_host" "this" {
+# One VAST block host per client server (initiator NQN)
+resource "vastdata_block_host" "this" {
   for_each = var.hosts
 
-  name = each.key
-  nqn  = coalesce(each.value.nqn, "nqn.2008-08.com.starwind:${each.key}")
+  name      = each.key
+  tenant_id = data.vastdata_tenant.selected_tenant.id
+  nqn       = coalesce(each.value.nqn, "nqn.2008-08.com.starwind:${each.key}")
 }
 
 # Two (or more) volumes per host; name keys like 2019_01_vol1
@@ -40,14 +42,14 @@ resource "vastdata_volume" "this" {
   for_each = var.volumes
 
   name    = each.key
-  size    = each.value.size
+  size    = each.value.size # bytes
   view_id = vastdata_view.windows_block.id
 }
 
 # Map each volume to its host
-resource "vastdata_volume_map" "this" {
+resource "vastdata_block_host_mapping" "this" {
   for_each = var.volumes
 
   volume_id = vastdata_volume.this[each.key].id
-  host_id   = vastdata_host.this[each.value.host_key].id
+  host_id   = vastdata_block_host.this[each.value.host_key].id
 }
