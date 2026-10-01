@@ -1,6 +1,13 @@
-# -------------------------------------------------------------------------
-# Outputs — cut-paste / screenshot reference for what we created
-# -------------------------------------------------------------------------
+###===================================================================================###
+#
+#  File:        block.outputs.tf
+#  Author:      Karl Vietmeier
+#
+#  Description:
+#  Cut-paste / screenshot reference for objects this stack creates:
+#  subsystem view, block hosts (initiator NQNs), and volumes.
+#
+###===================================================================================###
 
 output "subsystem" {
   description = "Block subsystem view we own (VAST target side)"

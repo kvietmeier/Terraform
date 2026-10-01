@@ -1,9 +1,13 @@
 ###===================================================================================###
-###                       Configure VAST Cluster Provider
-###
-###  Standardized provider drop-in (from vastdata/provider/).
-###  set_var54 / _vast_apply export TF_VAR_vast_* and VASTDATA_*.
-###  Wire host/port explicitly so plan does not prompt.
+#
+#  File:        block.provider.tf
+#  Author:      Karl Vietmeier
+#
+#  Description:
+#  VAST provider (v3.2.2) for this stack. Auth via TF_VAR_* from set_var54 /
+#  _vast_apply. Username/password only; tenant="" so VASTDATA_TENANT does not
+#  force tenant-scoped login (which 401s cluster admin).
+#
 ###===================================================================================###
 
 terraform {

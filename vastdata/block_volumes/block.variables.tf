@@ -1,5 +1,16 @@
+###===================================================================================###
+#
+#  File:        block.variables.tf
+#  Author:      Karl Vietmeier
+#
+#  Description:
+#  Input variables for block_volumes. No defaults here — set values in
+#  block.variables.tfvars (and TF_VAR_* for provider auth via set_var54).
+#
+###===================================================================================###
+
 # -------------------------------------------------------------------------
-# Variables Configuration (No defaults allowed here)
+# Shared lookups (existing lab objects — never managed by this stack)
 # -------------------------------------------------------------------------
 
 variable "tenant_name" {
@@ -16,6 +27,10 @@ variable "block_policy_name" {
   description = "Existing block view policy to use (lookup only — not managed)"
   type        = string
 }
+
+# -------------------------------------------------------------------------
+# Block subsystem view (we create this)
+# -------------------------------------------------------------------------
 
 variable "view_path" {
   description = "Mount path for our block subsystem view"
@@ -37,10 +52,19 @@ variable "view_create_dir" {
   type        = bool
 }
 
+###===================================================================================###
+###   Hosts and Volumes (we own these; one host per server, volumes mapped per host)
+###===================================================================================###
+
+variable "base_nqn_prefix" {
+  description = "Base initiator NQN prefix; full NQN is <prefix>:<hostname> unless hosts.*.nqn is set"
+  type        = string
+}
+
 variable "hosts" {
   description = <<-EOT
     Map of VAST block hosts we own. Key = hostname (e.g. ws-2019bm-01).
-    NQN defaults to nqn.2008-08.com.starwind:<hostname> unless overridden.
+    NQN defaults to <base_nqn_prefix>:<hostname> unless overridden.
   EOT
   type = map(object({
     nqn = optional(string)

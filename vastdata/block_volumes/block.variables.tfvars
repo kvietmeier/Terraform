@@ -1,7 +1,14 @@
-# =========================================================================
-# VAST Data Block Storage — our Windows/StarWind lab objects only
-# Shared tenant / VIP pool / policy are lookups; never adopt existing hosts
-# =========================================================================
+###===================================================================================###
+#
+#  File:        block.variables.tfvars
+#  Author:      Karl Vietmeier
+#
+#  Description:
+#  Lab values for block objects we own. Shared tenant / VIP pool / policy are
+#  names for lookups. Uncomment hosts/volumes to grow incrementally.
+#  base_nqn_prefix is the client initiator format (vendor-standard NQN).
+#
+###===================================================================================###
 
 # Lookups (existing shared infrastructure)
 tenant_name       = "default"
@@ -15,9 +22,13 @@ view_protocols  = ["BLOCK"]
 view_create_dir = true
 
 # -------------------------------------------------------------------------
-# Hosts — one per server. Start with 2019bm-01; uncomment to add later.
-# NQN default: nqn.2008-08.com.starwind:<hostname>
+# Hosts — one per client. Start with one; uncomment to add later.
+# NQN = <base_nqn_prefix>:<hostname>
+# Set prefix to your initiator's standard vendor format (vendor-specific
+# examples live in internal GitLab docs — not committed here).
 # -------------------------------------------------------------------------
+base_nqn_prefix = "nqn.example.vendor"
+
 hosts = {
   "ws-2019bm-01" = {}
   # "ws-2019bm-02" = {}
