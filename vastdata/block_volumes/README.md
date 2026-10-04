@@ -1,6 +1,6 @@
 # block_volumes/
 
-Block storage lab stack for an **existing** VAST cluster. Creates only our objects; shared tenant / VIP pool / block policy are lookups.
+Block storage lab stack for an **existing** VAST cluster. Creates only our objects - shared tenant, VIP pool, block policy, are lookups.
 
 ## What it creates
 
@@ -27,8 +27,8 @@ block.provider.tf              # vastdata 3.2.2; TF_VAR_* / env auth
 block.main.tf                  # lookups + view / hosts / volumes / maps
 block.variables.tf             # input schema (no defaults)
 block.variables.tfvars         # shared lab values (hosts, volumes) — committed
-private.auto.tfvars.example   # copy → private.auto.tfvars for NQN prefix
-private.auto.tfvars           # local NQN prefix — gitignored
+private.auto.tfvars.example    # copy → private.auto.tfvars for NQN prefix
+private.auto.tfvars            # local NQN prefix — gitignored
 block.outputs.tf               # subsystem / hosts / volumes / summary
 ```
 
