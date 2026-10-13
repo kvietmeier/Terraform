@@ -1,5 +1,5 @@
 ###===================================================================================###
-#  File:         multi.main.tf
+#  File:         image_vms.main.tf
 #  Created By:   Karl Vietmeier / KCV Consulting
 #  License:      Licensed under the Apache License, Version 2.0
 #                http://www.apache.org/licenses/LICENSE-2.0
@@ -7,9 +7,9 @@
 #  Description:  Deploys multiple VMs in GCP from prebuilt machine images.
 #
 #  Purpose:
-#    - Simplify migration of existing client VMs across zones/regions
-#    - Eliminate the need for cloud-init since the VMs are already configured
-#    - Ensure VM hostnames remain consistent (client01–client11)
+#    - Redeploy client VMs across zones/regions from captured machine images
+#    - Skip cloud-init when images are already configured
+#    - Keep hostnames consistent (e.g. lab-client01…)
 #
 #  Assumptions:
 #    - Required machine images (client01-img, client02-img, etc.) have already

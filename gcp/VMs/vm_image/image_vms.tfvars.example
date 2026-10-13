@@ -1,0 +1,37 @@
+###===================================================================================###
+# Stubbed for GitHub – copy to image_vms.tfvars (gitignored / keep private) and fill in.
+# Redeploy VMs from existing GCP machine images.
+###===================================================================================###
+
+project_id  = "REPLACE_ME_PROJECT_ID"
+region      = "us-central1"
+zone        = "us-central1-a"
+
+vpc_name    = "default"
+subnet_name = "REPLACE_ME_SUBNET_NAME"
+
+ssh_user     = "labuser"
+ssh_key_file = "../../../secrets/ssh_keys.txt"
+
+service_account = {
+  email  = "REPLACE_ME_SERVICE_ACCOUNT_EMAIL"
+  scopes = [
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/monitoring.write",
+    "https://www.googleapis.com/auth/logging.write",
+    "https://www.googleapis.com/auth/bigquery"
+  ]
+}
+
+vms = {
+  "lab-client01" = {
+    machine_type  = "n2-standard-8"
+    bootdisk_size = 100
+    machine_image = "projects/REPLACE_ME_PROJECT_ID/global/machineImages/lab-client01-img"
+  }
+  "lab-client02" = {
+    machine_type  = "n2-standard-8"
+    bootdisk_size = 100
+    machine_image = "projects/REPLACE_ME_PROJECT_ID/global/machineImages/lab-client02-img"
+  }
+}
