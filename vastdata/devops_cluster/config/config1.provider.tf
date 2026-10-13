@@ -1,17 +1,16 @@
 ###===================================================================================###
 # VAST Data – Terraform Provider Configuration
 #
-# Sets up the VAST provider (v1.6.8) with GCP cluster connection settings.
-# Uses input variables for credentials, host info, and SSL options.
-# Alias: GCPCluster_1
+# Local state (install_configure.py cleans/reinits this dir each run).
+# Auth via TF_VAR_vast_host / TF_VAR_vast_username / TF_VAR_vast_password.
+# Alias: GCPCluster
 ###===================================================================================###
 
 terraform {
   required_providers {
     vastdata = {
       source  = "vast-data/vastdata"
-      version = "2.1.1"
-      #version = "2.0"
+      version = "3.2.2"
     }
   }
 }
@@ -23,5 +22,5 @@ provider "vastdata" {
   port                    = var.vast_port
   skip_ssl_verify         = var.vast_skip_ssl_verify
   version_validation_mode = var.vast_version_validation_mode
-  alias                   = "GCPCluster_1"
+  alias                   = "GCPCluster"
 }

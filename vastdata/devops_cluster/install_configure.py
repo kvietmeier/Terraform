@@ -8,7 +8,7 @@
 #    End-to-end cloud cluster bring-up living under vastdata/devops_cluster/:
 #    Stage 1 provisions infra via vastcloud; this script captures endpoints from
 #    Terraform outputs, polls until ONLINE, waits for VMS settle, then applies
-#    config/ Terraform. Extracted S3 keys land in secrets/.
+#    config/ Terraform (basic_cluster + DNS; no AD/SMB). S3 keys → secrets/.
 #
 #    Workflow:
 #      1. Stage 1 — vastcloud cluster create (CLI log redirected to disk; UX only).
@@ -16,7 +16,7 @@
 #         ~/.vast/clusters/<name>/terraform/<provider>/… — baseline truth.
 #      3. Poll VAST API until ONLINE (up to 60 minutes).
 #      4. Wait 5 minutes for database synchronization.
-#      5. Clean / reinit and apply ./config Terraform.
+#      5. Clean / reinit and apply ./config Terraform (NFS/S3/DNS).
 #      6. Extract/decrypt S3 keys into ./secrets and print an access guide.
 #
 #  Stage 1 env (or --create-env KEY=VALUE file):
@@ -324,15 +324,15 @@ def capture_cluster_endpoints(cluster_name, tf_dir):
         )
         sys.exit(1)
 
-    # TF_VAR_vms_host: prefer dns_vip; else derive .253 from vip CIDR if present.
+    # dns_vip for protocol DNS; prefer VOC output, else derive .253 from vip CIDR.
     if dns_vip:
-        vms_host = dns_vip
+        resolved_dns_vip = dns_vip
     elif vip_cidr:
-        vms_host = get_dns_ip_from_cidr(vip_cidr)
+        resolved_dns_vip = get_dns_ip_from_cidr(vip_cidr)
     else:
-        vms_host = vms_ip
+        resolved_dns_vip = None
         log_stage("WARNING: no dns_vip/vip_pool_cidr in TF outputs; "
-                  "TF_VAR_vms_host falls back to vms_ip")
+                  "set dns_vip in config/*.auto.tfvars or TF_VAR_dns_vip")
 
     management_url = mgmt_url or f"https://{vms_ip}"
 
@@ -340,8 +340,7 @@ def capture_cluster_endpoints(cluster_name, tf_dir):
         "cluster_name": cluster_name,
         "vms_ip": vms_ip,
         "private_ip": private_ip,
-        "dns_vip": dns_vip,
-        "vms_host": vms_host,
+        "dns_vip": resolved_dns_vip,
         "vip_cidr": vip_cidr,
         "protocol_vips": protocol_vips,
         "management_url": management_url,
@@ -354,7 +353,8 @@ def capture_cluster_endpoints(cluster_name, tf_dir):
     log_stage(f"  VMS IP     : {vms_ip}")
     if private_ip:
         log_stage(f"  Private IP : {private_ip}")
-    log_stage(f"  TF_VAR host: {vms_host}")
+    if resolved_dns_vip:
+        log_stage(f"  DNS VIP    : {resolved_dns_vip}")
     if protocol_vips:
         log_stage(f"  Protocol   : {', '.join(protocol_vips)}")
     return capture
@@ -555,6 +555,10 @@ def main():
     if args.create_env:
         load_env_file(args.create_env)
 
+    global USERNAME, PASSWORD
+    USERNAME = os.getenv("VAST_USERNAME", USERNAME)
+    PASSWORD = os.getenv("VAST_PASSWORD", PASSWORD)
+
     cluster_name = args.cluster or os.getenv("VAST_CLUSTER_NAME", "").strip()
     cloud_provider = (args.provider or os.getenv("VAST_CLOUD_PROVIDER", "")).strip().lower()
     skip_create = args.skip_create or os.getenv("VAST_SKIP_CREATE", "").strip() in ("1", "true", "yes")
@@ -591,7 +595,12 @@ def main():
     # Capture endpoints from VOC Terraform outputs only
     capture = capture_cluster_endpoints(cluster_name, vast_tf_dir)
     vms_ip = capture["vms_ip"]
-    os.environ["TF_VAR_vms_host"] = capture["vms_host"]
+    # Provider auth + DNS for Stage 4 (basic_cluster config)
+    os.environ["TF_VAR_vast_host"] = vms_ip
+    os.environ.setdefault("TF_VAR_vast_username", USERNAME)
+    os.environ.setdefault("TF_VAR_vast_password", PASSWORD)
+    if capture.get("dns_vip"):
+        os.environ["TF_VAR_dns_vip"] = capture["dns_vip"]
 
     # Stage 2: Wait for ONLINE
     print(f"--- Waiting for VMS at {vms_ip} to reach ONLINE ---")
@@ -605,7 +614,7 @@ def main():
     time.sleep(POST_ONLINE_WAIT)
     log_stage(f"✔ Waited {elapsed_minutes(stage3_start)} minutes after ONLINE")
 
-    # Stage 4: Configuration via Terraform (./config)
+    # Stage 4: Configuration via Terraform (./config — basic + DNS)
     stage4_start = time.time()
     print(f"--- Running configuration terraform apply in {config_dir} ---")
     clean_and_init_terraform(config_dir)
@@ -615,7 +624,7 @@ def main():
 
     # Stage 5: Final Output Generation
     s3_credentials = extract_s3_keys(config_dir, output_dir)
-    vip_ips = capture.get("protocol_vips") or [capture["vms_host"]]
+    vip_ips = capture.get("protocol_vips") or [vms_ip]
 
     mount_target_ip = vip_ips[0]
     remoteports_str = ",".join(vip_ips)
@@ -651,11 +660,9 @@ def main():
     print("   • VAST NFS (Multipath):")
     print(f"       sudo mount -t nfs -o vers=3,remoteports={remoteports_str} {mount_target_ip}:/ /mnt/vast")
 
-    print("\n   [ SMB / CIFS ]")
-    print("   • Windows / UNC Path:")
-    print(f"       \\\\{mount_target_ip}\\<share_name>")
-    print("   • Linux CIFS Mount:")
-    print(f"       sudo mount -t cifs //{mount_target_ip}/<share_name> /mnt/vast -o username=<user>")
+    if capture.get("dns_vip"):
+        print("\n   [ DNS ]")
+        print(f"   • Protocol DNS VIP: {capture['dns_vip']}")
     print("=======================================================\n")
 
 if __name__ == "__main__":

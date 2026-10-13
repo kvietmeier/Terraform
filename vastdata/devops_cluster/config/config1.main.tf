@@ -1,91 +1,82 @@
-###===================================================================================###
-# VAST Data – Cluster Resource Deployment for Demo/POC
+######################################################################
+# Post-bootstrap cluster config (from basic_cluster + DNS).
+# Cloud VIP pools come from vastcloud Stage 1 — not recreated here.
 #
-# Description:
-# This Terraform `main.tf` file provisions core VAST Data resources on a Google Cloud
-# cluster, designed for functional evaluation or proof-of-concept (POC) environments.
-# It orchestrates key components required for NFS, SMB, and S3 data access.
+#   1. NFS / S3 view policies and views
+#   2. Protocol DNS (dns_vip from VOC / TF_VAR_dns_vip)
 #
-# Provisioned Resources:
-# - VIP Pools:
-#     - `sharesPool` (role: PROTOCOLS) for NFS/SMB data services
-#     - `s3Pool` (role: PROTOCOLS) for S3-compatible services
-#     - `targetPool` (role: REPLICATION) for inter-cluster replication
-# - View Policies:
-#     - NFS default policy with permissions tied to `sharesPool`
-#     - S3 default policy with permissions tied to `s3Pool`
-# - Views:
-#     - Dynamic NFS views generated via `count`
-#     - Static S3 view with bucket configuration
-# - Policy-based access controls and DNS configuration for protocol resolution
-#
-# Features:
-# - Automatically computes VIP ranges based on cluster node count
-# - Supports multi-protocol deployments (NFS + S3) via distinct pools
-# - Centralized pool references through `locals` for simplified configuration
-# - Ensures ordered resource creation using `depends_on` where necessary
-#
-# Notes:
-# - `sharesPool` and `s3Pool` must both be defined in `var.vip_pools` (names must match)
-# - View policies require NFS/SMB ACLs even for S3-only deployments
-# - Provider configuration (`vastdata.GCPCluster_1`) must be declared outside this file
-# - Input variables must align with module references and `.tfvars` inputs
-###===================================================================================###
+# No Active Directory / SMB (add later if needed).
+# Provider alias: vastdata.GCPCluster
+######################################################################
+###=============================================================================
+###--- VIEW POLICIES
+###=============================================================================
 
+# NFS Basic Policy
+resource "vastdata_view_policy" "nfs_basic_policy" {
+  provider       = vastdata.GCPCluster
+  name           = var.nfs_basic_policy_name
+  flavor         = var.nfs_basic_policy_flavor
+  nfs_no_squash  = var.nfs_no_squash
+  nfs_read_write = var.nfs_read_write
+}
+
+# S3 Basic Policy
+resource "vastdata_view_policy" "s3_basic_policy" {
+  provider = vastdata.GCPCluster
+  name     = var.s3_basic_policy_name
+  flavor   = var.s3_basic_policy_flavor
+}
+
+###=============================================================================
+###--- NFS VIEWS
+###=============================================================================
+# Creates NFS data path mappings directly from var.file_views_config map
+resource "vastdata_view" "file_views" {
+  provider = vastdata.GCPCluster
+  for_each = var.file_views_config
+
+  name       = each.value.name
+  path       = each.value.path
+  alias      = each.value.path
+  protocols  = each.value.protocols
+  policy_id  = vastdata_view_policy.nfs_basic_policy.id
+  create_dir = each.value.create_dir
+}
+
+###=============================================================================
+###--- S3 VIEWS
+###=============================================================================
+# Creates S3 and Database views straight from your var.s3_views_config map
+resource "vastdata_view" "s3_views" {
+  provider = vastdata.GCPCluster
+  for_each = var.s3_views_config
+
+  name       = each.value.name
+  path       = each.value.path
+  bucket     = each.value.bucket
+  protocols  = each.value.protocols
+  create_dir = each.value.create_dir
+  
+  # References the centralized global S3 policy id dynamically
+  policy_id  = vastdata_view_policy.s3_basic_policy.id
+
+  # Maps bucket owners to the POSIX data-plane identities
+  bucket_owner              = each.value.bucket_owner
+  allow_s3_anonymous_access = lookup(each.value, "allow_s3_anonymous_access", false)
+
+  # Explicitly wait for users and groups to exist before creating storage targets
+  depends_on = [vastdata_user.users]
+}
 
 ###===================================================================================###
 # DNS Configuration
 ###===================================================================================###
 resource "vastdata_dns" "protocol_dns" {
-  provider      = vastdata.GCPCluster_1
+  provider      = vastdata.GCPCluster
   name          = var.dns_name
   vip           = var.dns_vip
   net_type      = var.port_type
   domain_suffix = var.dns_domain_suffix
   enabled       = var.dns_enabled
 }
-
-### Protocols VIP Pools
-resource "vastdata_vip_pool" "protocols" {
-  provider    = vastdata.GCPCluster_1
-  for_each    = local.protocols_pools
-
-  name        = each.value.name
-  domain_name = each.value.dns_name
-  role        = each.value.role
-  subnet_cidr = each.value.subnet_cidr
-  ip_ranges   = [[each.value.start_ip, each.value.end_ip]]
-
-  depends_on  = [vastdata_dns.protocol_dns]
-
-}
-
-### Replication VIP Pools
-resource "vastdata_vip_pool" "replication" {
-  provider    = vastdata.GCPCluster_1
-  for_each    = local.replication_pools
-
-  name        = each.value.name
-  role        = each.value.role
-  subnet_cidr = each.value.subnet_cidr
-  ip_ranges   = [[each.value.start_ip, each.value.end_ip]]
-}
-
-
-###===================================================================================###
-# Active Directory – Original Working Setup
-###===================================================================================###
-/* resource "vastdata_active_directory" "gcp_ad1" {
-  provider             = vastdata.GCPCluster_1
-  machine_account_name = var.ou_name
-  organizational_unit  = var.ad_ou
-  use_auto_discovery   = var.use_ad      # true to discover AD via DNS, false to specify host_name
-  binddn               = var.bind_dn
-  bindpw               = var.bindpw
-  use_ldaps            = var.ldap
-  domain_name          = var.ad_domain
-  method               = var.method
-  query_groups_mode    = var.query_mode
-  use_tls              = var.use_tls
-}
- */

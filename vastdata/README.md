@@ -26,7 +26,7 @@ vastdata/
 | [`simple_query/`](simple_query/) | Lightweight login test before larger applies |
 | [`basic_cluster/`](basic_cluster/) | POC baseline: tenants, users, NFS/S3 views and policies |
 | [`complete_cluster_config/`](complete_cluster_config/) | Full cluster from scratch (VIP pools, DNS, AD, keys, …) |
-| [`devops_cluster/`](devops_cluster/) | Cloud bring-up + post-bootstrap config helpers |
+| [`devops_cluster/`](devops_cluster/) | Cloud bring-up + basic config (NFS/S3/DNS; no AD) |
 | [`lab_setup/`](lab_setup/) | Scripted multi-cluster lab setup (`labclusters_setup.sh`) |
 | [`createviews/`](createviews/) | Create views/policies on an existing cluster/VIP pool |
 | [`view_template/`](view_template/) | Documented resource template (not meant to apply as-is) |
