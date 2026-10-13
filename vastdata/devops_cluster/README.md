@@ -1,21 +1,23 @@
 # devops_cluster
 
-Cloud cluster bring-up + post-bootstrap config (no AD / SMB).
+Cloud bring-up → **baseline functional cluster OOB**. Bells/whistles later.
+
+No AD / SMB in Stage 4. VOC always creates VIP pool `protocolsPool`; config looks
+it up and binds NFS/S3 view policies to it (does not recreate pools).
 
 ## Layout
 
 | Path | Purpose |
 |------|---------|
 | `install_configure.py` | vastcloud create → capture → ONLINE poll → `config/` apply → S3 key extract |
-| `config/` | Terraform from [`basic_cluster/`](../basic_cluster/) **plus DNS** |
+| `config/` | Terraform from [`basic_cluster/`](../basic_cluster/) **plus DNS** + `protocolsPool` bind |
 | `secrets/` | Local PGP key + extracted S3 credentials (not committed) |
 | `create.env.example` | Stage 1 env template for `--create-env` |
 
 ## Stage 4 config
 
-`config/` is the basic POC stack (tenants/users, NFS + S3 views/policies) with
-`vastdata_dns` enabled. VIP pools come from vastcloud Stage 1; AD can be layered
-on later if needed.
+Users/groups, NFS + S3 views/policies (on `protocolsPool`), and protocol DNS.
+AD / extra VIP pools / SMB can be layered on later.
 
 ```bash
 cp config/config1.auto.tfvars.example config/config1.auto.tfvars

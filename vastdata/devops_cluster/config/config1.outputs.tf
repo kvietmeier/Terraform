@@ -1,13 +1,15 @@
 ###===================================================================================###
-# VAST Data – Cluster Configuration Outputs
-#
-# Organized outputs for:
-# - S3 and shares protocol VIP pools
+# Baseline config outputs
 ###===================================================================================###
 
+output "protocols_vip_pool" {
+  description = "VOC protocolsPool looked up for view-policy binding"
+  value = {
+    name = data.vastdata_vip_pool.protocols.name
+    id   = data.vastdata_vip_pool.protocols.id
+  }
+}
 
-
-# Usernames
 output "vast_usernames" {
   value       = keys(var.users)
   description = "List of configured usernames"

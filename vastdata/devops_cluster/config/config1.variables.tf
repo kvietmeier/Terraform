@@ -43,6 +43,13 @@ variable "number_of_nodes" {
   type = number
 }
 
+# VOC always provisions this pool; Stage 4 binds view policies to it.
+variable "vip_pool_existing" {
+  description = "Name of the VOC-created protocols VIP pool"
+  type        = string
+  default     = "protocolsPool"
+}
+
 variable "protocols" {
   type    = list(string)
   default = ["NFS", "S3"]

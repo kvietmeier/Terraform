@@ -1,6 +1,8 @@
 ###===================================================================================###
-# devops_cluster Stage 4 config (basic_cluster + DNS; no AD/SMB)
+# devops_cluster Stage 4 — baseline functional cluster OOB
+# (basic_cluster + DNS; no AD/SMB; bells/whistles later)
 #
+# VOC always has vip pool "protocolsPool" — policies bind to it; do not recreate.
 # Copy to config1.auto.tfvars (gitignored) and fill in values.
 # Provider auth: TF_VAR_vast_host / TF_VAR_vast_username / TF_VAR_vast_password
 # DNS VIP: set here or override with TF_VAR_dns_vip (install_configure.py sets it
@@ -15,9 +17,10 @@ vast_skip_ssl_verify         = true
 vast_version_validation_mode = "warn"
 
 ###===================================================================================###
-#   Cluster sizing (informational; VIP pools come from vastcloud)
+#   Cluster sizing / existing VOC VIP pool
 ###===================================================================================###
-number_of_nodes = 4
+number_of_nodes   = 4
+vip_pool_existing = "protocolsPool"
 
 ###===================================================================================###
 #   Common View Policy Settings

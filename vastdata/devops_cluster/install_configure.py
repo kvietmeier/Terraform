@@ -8,7 +8,8 @@
 #    End-to-end cloud cluster bring-up living under vastdata/devops_cluster/:
 #    Stage 1 provisions infra via vastcloud; this script captures endpoints from
 #    Terraform outputs, polls until ONLINE, waits for VMS settle, then applies
-#    config/ Terraform (basic_cluster + DNS; no AD/SMB). S3 keys → secrets/.
+#    config/ Terraform (basic OOB: NFS/S3/DNS on VOC protocolsPool; no AD/SMB).
+#    S3 keys → secrets/.
 #
 #    Workflow:
 #      1. Stage 1 — vastcloud cluster create (CLI log redirected to disk; UX only).

@@ -1,13 +1,24 @@
 ######################################################################
-# Post-bootstrap cluster config (from basic_cluster + DNS).
-# Cloud VIP pools come from vastcloud Stage 1 — not recreated here.
+# Post-bootstrap baseline (functional OOB). Bells/whistles later.
 #
-#   1. NFS / S3 view policies and views
+# VOC Stage 1 always creates vip pool "protocolsPool" — we look it up,
+# never recreate VIP pools here.
+#
+#   1. NFS / S3 view policies (bound to protocolsPool) + views
 #   2. Protocol DNS (dns_vip from VOC / TF_VAR_dns_vip)
 #
 # No Active Directory / SMB (add later if needed).
 # Provider alias: vastdata.GCPCluster
 ######################################################################
+
+###=============================================================================
+###--- EXISTING VOC VIP POOL
+###=============================================================================
+data "vastdata_vip_pool" "protocols" {
+  provider = vastdata.GCPCluster
+  name     = var.vip_pool_existing
+}
+
 ###=============================================================================
 ###--- VIEW POLICIES
 ###=============================================================================
@@ -19,6 +30,11 @@ resource "vastdata_view_policy" "nfs_basic_policy" {
   flavor         = var.nfs_basic_policy_flavor
   nfs_no_squash  = var.nfs_no_squash
   nfs_read_write = var.nfs_read_write
+
+  vippool_permissions {
+    vippool_id          = data.vastdata_vip_pool.protocols.id
+    vippool_permissions = var.vippool_permissions
+  }
 }
 
 # S3 Basic Policy
@@ -26,6 +42,11 @@ resource "vastdata_view_policy" "s3_basic_policy" {
   provider = vastdata.GCPCluster
   name     = var.s3_basic_policy_name
   flavor   = var.s3_basic_policy_flavor
+
+  vippool_permissions {
+    vippool_id          = data.vastdata_vip_pool.protocols.id
+    vippool_permissions = var.vippool_permissions
+  }
 }
 
 ###=============================================================================
