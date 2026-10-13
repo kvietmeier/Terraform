@@ -1,0 +1,103 @@
+###====================================================================================###
+###    Stuff to exclude from the remote repo
+###====================================================================================###
+
+# =======================
+# OS artifacts
+# =======================
+.DS_Store
+Thumbs.db
+
+
+###==========================  Terraform Specific
+# Local .terraform directories
+**/.terraform/*
+
+# Lambda build artifacts
+**/.build/
+
+# Misc scratch directories
+**/samples/*
+**/secrets/*
+!**/secrets/.gitkeep
+
+# VAST directories
+# These directories are used for VAST specific configurations and should not be included in the repo.
+**/vast_configurations/**
+**/vast/**
+**/vast_on_cloud/**
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+*.tfplan
+# Provider lock files (local only — do not commit)
+.terraform.lock.hcl
+**/.terraform.lock.hcl
+.terraform.lock.*.backup
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Cloud init - can have SSH keys in it
+#cloud-init
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+#
+# !example_override.tf
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Real env values (SG IDs, subnet IDs, key names, …) — NOT in this public repo.
+# Backup / restore via: scripts/sync-tfvars-personal.sh  →  ~/github/personal/terraform-tfvars/
+# Users still get committed examples (*.tfvars.example / *.auto.tfvars.example):
+*.tfvars
+!*.tfvars.example
+*.tfvars.json
+!*.tfvars.json.example
+*.auto.tfvars
+!*.auto.tfvars.example
+**/private.auto.tfvars
+**/private.terraform.tfvars
+**/create.env
+!**/create.env.example
+
+
+###========================== Default entries
+HISTORY.txt
+README.txt
+
+# Ignore "Private" files directories
+/Private/
+
+# Ignore temporary or scratch files
+**/foo*
+**/*.log
+[Tt]emp/
+*.log
+*.bak
+*.[Tt]emp
+*.tmp
+*[Ss]cratch*
+
+# Ignore possibly very large files
+*.iso
+*.vhdx
+*.vhd
+*.zip
+
+# Exclude vim swap files and backups
+*.swap
+*.sw
+*~
+ 

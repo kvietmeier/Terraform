@@ -1,20 +1,18 @@
 ###===================================================================================###
 #
-#  File:  devops01.provider.tf
+#  File:  linux01.provider.tf
 #  Created By: Karl Vietmeier
 #
-#  Purpose: Configure the GCP TerraForm Provider 
-# 
-#  Google defaults set as Env: vars
+#  Purpose: Configure the GCP Terraform Provider
 #
 ###===================================================================================###
 
 
 terraform {
   required_providers {
-  google = {
+    google = {
       source  = "hashicorp/google"
-      version = "4.51.0"
+      version = ">= 5.0.0"
     }
   }
 }

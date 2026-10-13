@@ -58,45 +58,32 @@ provider "google" {
 ###===================================================================================###
 #                       Create VMs from Machine Images
 ###===================================================================================###
-###===================================================================================###
-#                 Create VMs from Machine Images (FIXED)
-###===================================================================================###
 
 resource "google_compute_instance_from_machine_image" "vm_instance" {
   provider = google-beta
   for_each = var.vms
 
   name         = each.key
-  # Using the zone from the variable file (e.g., europe-west4-b)
-  zone         = var.zone 
+  zone         = var.zone
   machine_type = each.value.machine_type
 
   source_machine_image = each.value.machine_image
 
   service_account {
     email  = var.service_account.email
-    # FIX 1: Must use 'scopes' (plural) to match variable definition
-    scopes = var.service_account.scopes 
+    scopes = var.service_account.scopes
   }
 
   network_interface {
-    # FIX 2: Construct the full subnetwork URL to avoid scope mismatch
+    # Full subnetwork self-link avoids project/region scope mismatch
     subnetwork = format(
       "projects/%s/regions/%s/subnetworks/%s",
       var.project_id,
-      # Extract the region from the zone variable (e.g., europe-west4-b -> europe-west4)
       substr(var.zone, 0, length(var.zone) - 2),
       var.subnet_name
     )
-    # ephemeral IP assigned automatically
   }
 
-/*   # FIX 3: Explicitly define the boot disk to ensure configuration consistency
-  # The Machine Image handles the *content*, but this ensures size/type if needed.
-  boot_disk {
-    disk_size_gb = each.value.bootdisk_size
-  }
- */
   metadata = {
     ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
     serial-port-enable = true

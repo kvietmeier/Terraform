@@ -1,6 +1,6 @@
 ###===================================================================================###
 #
-#  File:         devops01.variables.tf
+#  File:         linux01.variables.tf
 #  Created By:   Karl Vietmeier
 #
 #  Variable definitions with defaults
@@ -47,7 +47,7 @@ variable "vm_name" {
 variable "os_image" {
   description = "OS Image to use"
   type        = string
-  default     = "centos-stream-9-v20241009"
+  default     = "rocky-linux-9"
 }
 
 variable "bootdisk_size" {
@@ -127,7 +127,7 @@ variable "subnet_name" {
 variable "public_ip_name" {
   description = "Name for the reserved public IP resource"
   type        = string
-  default     = "karlv-pubip"
+  default     = "lab-client-pubip"
 }
 
 variable "private_ip_name" {
