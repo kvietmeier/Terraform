@@ -3,7 +3,7 @@
 # Redeploy client VMs from existing GCP machine images.
 ###===================================================================================###
 
-project_id  = "REPLACE_ME_PROJECT_ID"
+project_id  = "gcp-project-id"
 region      = "us-central1"
 zone        = "us-central1-a"
 
@@ -14,7 +14,7 @@ ssh_user     = "labuser"
 ssh_key_file = "../../../secrets/ssh_keys.txt"
 
 service_account = {
-  email = "REPLACE_ME_SERVICE_ACCOUNT_EMAIL"
+  email = "sa@gcp-project-id.iam.gserviceaccount.com"
   scope = [
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/monitoring.write",
@@ -27,11 +27,11 @@ vms = {
   "lab-client01" = {
     machine_type  = "n2-standard-8"
     bootdisk_size = 100
-    machine_image = "projects/REPLACE_ME_PROJECT_ID/global/machineImages/lab-client01-img"
+    machine_image = "projects/gcp-project-id/global/machineImages/lab-client01-img"
   }
   "lab-client02" = {
     machine_type  = "n2-standard-8"
     bootdisk_size = 100
-    machine_image = "projects/REPLACE_ME_PROJECT_ID/global/machineImages/lab-client02-img"
+    machine_image = "projects/gcp-project-id/global/machineImages/lab-client02-img"
   }
 }

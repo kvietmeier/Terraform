@@ -10,12 +10,12 @@
 #  Purpose: Configure the GCP Provider TerraForm
 #  Google defaults set as Env: vars
 #  Using remote state in GCS bucket with prefix for organization and project
-#    bucket  = "clouddev-itdesk124-tfstate"
+#    bucket  = "gcp-project-id-tfstate"
 #    prefix  = "terraform/state/CHANGEME"
 ###===================================================================================###
 terraform {
   backend "gcs" {
-    bucket  = "clouddev-itdesk124-tfstate"
+    bucket  = "gcp-project-id-tfstate"
     prefix  = "terraform/state/clientvms-1"
   }
   required_providers {

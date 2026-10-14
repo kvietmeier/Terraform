@@ -134,7 +134,7 @@ variable "subnet_name" {
 variable "public_ip_name" {
   description = "Name for the reserved public IP resource"
   type        = string
-  default     = "karlv-pubip"
+  default     = "lab-client-pubip"
 }
 
 variable "private_ip_name" {

@@ -8,12 +8,12 @@
 ###===================================================================================###
 
 # Project Info
-project_id      = "your-project-id"
+project_id      = "gcp-project-id"
 region          = "us-west2"
 zone            = "us-west2-b"
 
 # Service Account/s
-sa_email        = "your-sa@your-project-id.iam.gserviceaccount.com"
+sa_email        = "sa@gcp-project-id.iam.gserviceaccount.com"
 sa_scopes       = ["cloud-platform"]
 
 # VM Info

@@ -12,7 +12,7 @@
 #                            Project and Location Information
 ###===================================================================================###
 
-project_id  = "REPLACE_ME_PROJECT_ID"
+project_id  = "gcp-project-id"
 region      = "us-central1"
 zone        = "us-central1-a"
 
@@ -27,7 +27,7 @@ subnet_name  = "REPLACE_ME_SUBNET_NAME"
 #                              Service Account Configuration
 ###===================================================================================###
 
-sa_email  = "REPLACE_ME_SERVICE_ACCOUNT_EMAIL"
+sa_email  = "sa@gcp-project-id.iam.gserviceaccount.com"
 sa_scopes = ["cloud-platform"]
 
 ###===================================================================================###

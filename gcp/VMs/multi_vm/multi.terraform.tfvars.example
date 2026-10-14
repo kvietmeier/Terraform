@@ -8,7 +8,7 @@
 ###===================================================================================###
 
 # Project Info
-project_id           = "REPLACE_ME_PROJECT_ID"
+project_id           = "gcp-project-id"
 region               = "REPLACE_ME_REGION"            # e.g., "us-west2"
 zone                 = "REPLACE_ME_ZONE"              # e.g., "us-west2-c"
 
@@ -30,7 +30,7 @@ vm_names             = ["REPLACE_ME_VM_NAMES"]        # e.g., ["linux01", "linux
 
 # Service account config
 service_account = {
-  email  = "REPLACE_ME_SERVICE_ACCOUNT_EMAIL"
+  email  = "sa@gcp-project-id.iam.gserviceaccount.com"
   scopes = [
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/monitoring.write",

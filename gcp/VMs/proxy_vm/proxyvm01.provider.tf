@@ -9,7 +9,7 @@
 
 terraform {
   backend "gcs" {
-    bucket  = "clouddev-itdesk124-tfstate"
+    bucket  = "gcp-project-id-tfstate"
     prefix  = "terraform/state/proxyvm01"
   }
   required_providers {

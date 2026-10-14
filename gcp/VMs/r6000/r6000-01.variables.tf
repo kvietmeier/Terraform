@@ -79,7 +79,7 @@ variable "personal_repo" {
 ### Locals to set file locations
 locals {
   # Use the variable or fallback
-  personal_repo   = var.personal_repo != "" ? var.personal_repo : "/home/karlv/projects/personal"
+  personal_repo   = var.personal_repo != "" ? var.personal_repo : "/home/labuser/projects/personal"
 
   # Path to your key file inside the personal repo
   ssh_key_file    = "${local.personal_repo}/secrets/ssh_keys.txt"
