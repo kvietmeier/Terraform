@@ -1,8 +1,10 @@
 # Terraform Projects
 
-Multi-cloud Terraform lab and POC stacks for AWS, Azure, GCP, and OCI, plus [VAST Data](https://www.vastdata.com/) cluster configuration examples.
+Multi-cloud Terraform lab and POC stacks for AWS, Azure, GCP, and OCI.
 
 Stacks are organized by cloud provider. Each leaf folder is typically a self-contained root module (`*.tf` + `*.tfvars`) you can `init` / `plan` / `apply` on its own. Shared Linux/Windows bootstrap lives under [`scripts/`](scripts/), not under each cloud.
+
+VAST Data provider examples and lab stacks live in internal GitLab (`karlv/tools` → `terraform/`), not this repo.
 
 ## Quick start
 
@@ -17,8 +19,6 @@ terraform plan
 terraform apply
 ```
 
-For VAST, start with [`vastdata/simple_query/`](vastdata/simple_query/) to verify credentials before larger applies.
-
 ## Repository layout
 
 ```text
@@ -27,7 +27,6 @@ For VAST, start with [`vastdata/simple_query/`](vastdata/simple_query/) to verif
 ├── azure/               # Azure: CoreInfra, VMs, AKS, AVD, templates
 ├── gcp/                 # GCP: CoreInfra, configure-project, VMs, GKE, TPUs
 ├── oci/                 # Oracle Cloud stacks
-├── vastdata/            # VAST Data provider examples (cluster / views / lab)
 ├── scripts/             # Shared helpers — see scripts/README.md
 │   ├── cloud-init/      # Universal Linux lab bootstrap (all clouds)
 │   ├── windows/         # Generic Windows sysprep / static-IP scripts
@@ -42,7 +41,6 @@ For VAST, start with [`vastdata/simple_query/`](vastdata/simple_query/) to verif
 |------|------------|------------|
 | [`azure/`](azure/) | Networks, identity, VMs, AKS, AVD | [`azure/README.md`](azure/README.md) |
 | [`gcp/`](gcp/) | VPCs/firewalls/DNS, roll-up project module, VMs, GKE, TPUs | [`gcp/README.md`](gcp/README.md), [`gcp/configure-project/`](gcp/configure-project/) |
-| [`vastdata/`](vastdata/) | VAST provider: auth smoke test → full cluster / lab / views | [`vastdata/README.md`](vastdata/README.md) |
 | [`scripts/`](scripts/) | Cloud-init, Windows specialize, cloud-specific helpers | [`scripts/README.md`](scripts/README.md) |
 | [`aws/`](aws/) | EC2 / basic auth / CloudFormation samples | `aws/` |
 | [`oci/`](oci/) | OCI templates and multi-VM examples | `oci/` |
@@ -74,10 +72,6 @@ Auth is usually via AzureRM env vars (`ARM_TENANT_ID`, `ARM_SUBSCRIPTION_ID`, `A
 | [`templates/`](gcp/templates/), [`testing/`](gcp/testing/) | Starters and scratch |
 
 Many Linux images on GCP lack cloud-init; VM stacks often install it via `startup-script` metadata. See [`gcp/README.md`](gcp/README.md).
-
-### VAST Data (`vastdata/`)
-
-Provider examples for configuring VAST clusters (tenants, views, VIP pools, AD, lab orchestration). Prefer env-based auth (`TF_VAR_vast_*`). Full map and workflow: [`vastdata/README.md`](vastdata/README.md).
 
 ### AWS / OCI
 
