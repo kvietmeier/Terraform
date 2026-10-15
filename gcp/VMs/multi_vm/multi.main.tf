@@ -90,11 +90,54 @@ output "ssh_commands" {
   value = {
     for name, vm in google_compute_instance.vm_instance :
     name => format(
-      "gcloud compute ssh %s@%s --zone=%s --tunnel-through-iap",
+      "gcloud compute ssh %s@%s --zone=%s --project=%s --tunnel-through-iap",
       local.vms[name].ssh_user,
       name,
-      var.zone
+      var.zone,
+      var.project_id
     )
   }
   description = "IAP SSH commands per VM"
+}
+
+output "stop_commands" {
+  value = {
+    for name, vm in google_compute_instance.vm_instance :
+    name => format(
+      "gcloud compute instances stop %s --zone=%s --project=%s",
+      name,
+      var.zone,
+      var.project_id
+    )
+  }
+  description = "Per-VM stop commands"
+}
+
+output "start_commands" {
+  value = {
+    for name, vm in google_compute_instance.vm_instance :
+    name => format(
+      "gcloud compute instances start %s --zone=%s --project=%s",
+      name,
+      var.zone,
+      var.project_id
+    )
+  }
+  description = "Per-VM start commands"
+}
+
+# Handy copy-paste block after apply
+output "power_cheatsheet" {
+  value = join("\n", flatten([
+    ["# stop"],
+    [for name in sort(keys(local.vms)) :
+      format("gcloud compute instances stop %s --zone=%s --project=%s", name, var.zone, var.project_id)
+    ],
+    [""],
+    ["# start"],
+    [for name in sort(keys(local.vms)) :
+      format("gcloud compute instances start %s --zone=%s --project=%s", name, var.zone, var.project_id)
+    ],
+  ]))
+  description = "Newline-separated per-VM stop then start commands"
 }

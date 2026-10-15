@@ -108,3 +108,34 @@ resource "google_compute_instance" "vm_instance" {
 output "instance_private_ip" {
   value = google_compute_instance.vm_instance.network_interface[0].network_ip
 }
+
+output "stop_command" {
+  value = format(
+    "gcloud compute instances stop %s --zone=%s --project=%s",
+    google_compute_instance.vm_instance.name,
+    var.zone,
+    var.project_id
+  )
+  description = "Stop this VM"
+}
+
+output "start_command" {
+  value = format(
+    "gcloud compute instances start %s --zone=%s --project=%s",
+    google_compute_instance.vm_instance.name,
+    var.zone,
+    var.project_id
+  )
+  description = "Start this VM"
+}
+
+output "ssh_command" {
+  value = format(
+    "gcloud compute ssh %s@%s --zone=%s --project=%s --tunnel-through-iap",
+    var.ssh_user,
+    google_compute_instance.vm_instance.name,
+    var.zone,
+    var.project_id
+  )
+  description = "IAP SSH into this VM"
+}
