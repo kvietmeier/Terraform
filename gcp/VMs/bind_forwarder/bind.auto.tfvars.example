@@ -1,0 +1,45 @@
+###===================================================================================###
+#
+#  File:  bind.auto.tfvars.example
+#  Created By: Karl Vietmeier
+#
+#  Mini networking node — BIND VAST forwarder when Cloud DNS cannot be updated.
+#  Copy to bind.auto.tfvars and edit. After cluster up, set:
+#    vast_zones  +  vast_dns_ips
+#
+###===================================================================================###
+
+project_id = "gcp-project-id"
+region     = "us-west2"
+zone       = "us-west2-a"
+
+subnet_name = "subnet-hub-us-west2"
+vpc_cidr    = "172.20.0.0/16"
+
+vm_name       = "bind-vast-fwd"
+machine_type  = "e2-micro"
+bootdisk_size = 20
+os_image      = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+
+ssh_user             = "ubuntu"
+ssh_key_file         = "../../../secrets/ssh_keys.txt"
+ssh_private_key_path = "$HOME/.ssh/id_rsa"
+
+sa_email = "PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+sa_scopes = ["cloud-platform"]
+
+# Firewall must allow UDP/TCP 53 from clients to these tags
+vm_tags = ["bind-vast-forwarder"]
+
+labels = {
+  used_by     = "solutions"
+  environment = "lab"
+  lifecycle   = "demo"
+}
+
+# --- The two knobs you usually change ---
+vast_zones   = ["cluster.example.com"]
+vast_dns_ips = ["192.168.1.50"]
+
+# GCP metadata DNS (AWS uses 169.254.169.253, Azure uses 168.63.129.16)
+cloud_resolver = "169.254.169.254"

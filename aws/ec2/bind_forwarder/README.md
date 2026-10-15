@@ -91,9 +91,11 @@ aws ec2 create-tags \
 
 | File | Role |
 |------|------|
-| `bind.main.tf` | AMI + EC2 + cloud-init + tags |
-| `cloud-init-bind.yaml.tftpl` | BIND + net tools + named.conf |
+| `bind.main.tf` | AMI + EC2 + tags; loads shared cloud-init |
+| [`scripts/cloud-init/cloud-init-bind.yaml.tftpl`](../../../scripts/cloud-init/cloud-init-bind.yaml.tftpl) | **Shared** BIND + net tools + named.conf (multi-cloud) |
 | `bind.auto.tfvars.example` | Copy → local `bind.auto.tfvars` (gitignored) |
+
+Same user-data pattern: [`gcp/VMs/bind_forwarder/`](../../../gcp/VMs/bind_forwarder/), [`azure/VMs/bind_forwarder/`](../../../azure/VMs/bind_forwarder/).
 
 Real tfvars: keep local / backup with `scripts/sync-tfvars-personal.sh`.
 

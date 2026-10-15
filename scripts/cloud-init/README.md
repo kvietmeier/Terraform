@@ -12,8 +12,17 @@ Standardized Linux VM user-data for AWS, Azure, and GCP (Debian/Ubuntu and RHEL-
 | `lab_bootstrap.sh` | Bootstrap logic — **source of truth** |
 | `cloud-init-universal.yaml.tftpl` | Template with `${bootstrap_b64}` placeholder |
 | `cloud-init-universal.yaml` | Ready-to-use file (script already embedded) |
+| `cloud-init-bind.yaml.tftpl` | Minimal BIND9 VAST conditional forwarder (+ net tools) — used by AWS/GCP/Azure bind stacks |
 | `render_cloud_init.sh` | Builds `.yaml` from `.tftpl` + `lab_bootstrap.sh` |
 | `deprecated/` | Old per-cloud copies — do not use |
+
+BIND mini-forwarder stacks (when you cannot change Cloud DNS / Route 53 Resolver / Azure DNS):
+
+- [`aws/ec2/bind_forwarder/`](../../aws/ec2/bind_forwarder/)
+- [`gcp/VMs/bind_forwarder/`](../../gcp/VMs/bind_forwarder/)
+- [`azure/VMs/bind_forwarder/`](../../azure/VMs/bind_forwarder/)
+
+Edit `cloud-init-bind.yaml.tftpl` here once; each cloud stack `templatefile()`s this path.
 
 `.yaml` and `.tftpl` are **not** two designs. The template builds the yaml.
 

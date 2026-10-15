@@ -36,7 +36,8 @@ locals {
     }
   )
 
-  cloudinit = templatefile("${path.module}/cloud-init-bind.yaml.tftpl", {
+  # Shared multi-cloud template — edit scripts/cloud-init/, not a per-cloud copy
+  cloudinit = templatefile("${path.module}/../../../scripts/cloud-init/cloud-init-bind.yaml.tftpl", {
     vast_zones     = var.vast_zones
     vast_dns_ips   = var.vast_dns_ips
     query_cidrs    = local.query_cidrs

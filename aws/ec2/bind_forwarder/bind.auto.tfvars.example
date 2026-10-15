@@ -39,8 +39,8 @@ common_tags = {
 }
 
 # --- The two knobs you usually change ---
-vast_zones   = ["busab.org"]
-vast_dns_ips = ["10.105.28.250"]
+vast_zones   = ["cluster.example.com"]
+vast_dns_ips = ["192.168.1.50"]
 
-# AWS VPC resolver (use 169.254.169.254 on GCP)
+# AWS VPC resolver (GCP: 169.254.169.254, Azure: 168.63.129.16)
 cloud_resolver = "169.254.169.253"

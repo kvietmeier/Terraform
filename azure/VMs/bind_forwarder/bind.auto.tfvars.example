@@ -1,0 +1,40 @@
+###===================================================================================###
+#
+#  File:  bind.auto.tfvars.example
+#  Created By: Karl Vietmeier
+#
+#  Mini networking node — BIND VAST forwarder when Azure DNS cannot be updated.
+#  Copy to bind.auto.tfvars and edit. After cluster up, set:
+#    vast_zones  +  vast_dns_ips
+#
+###===================================================================================###
+
+location            = "westus2"
+resource_group_name = "bind-vast-fwd-rg"
+
+network_resource_group_name = "hub-network-rg"
+vnet_name                   = "hub-vnet"
+subnet_name                 = "clients"
+vnet_cidr                   = "10.0.0.0/16"
+
+# Optional: existing NSG that allows UDP/TCP 53 from clients
+# nsg_id = "/subscriptions/.../resourceGroups/.../providers/Microsoft.Network/networkSecurityGroups/..."
+
+vm_name   = "bind-vast-fwd"
+vm_size   = "Standard_B1s"
+admin_username       = "ubuntu"
+ssh_public_key_file  = "../../../secrets/id_rsa.pub"
+ssh_private_key_path = "$HOME/.ssh/id_rsa"
+
+tags = {
+  UsedBy      = "solutions"
+  Environment = "lab"
+  Lifecycle   = "demo"
+}
+
+# --- The two knobs you usually change ---
+vast_zones   = ["cluster.example.com"]
+vast_dns_ips = ["192.168.1.50"]
+
+# Azure wire server (AWS: 169.254.169.253, GCP: 169.254.169.254)
+cloud_resolver = "168.63.129.16"

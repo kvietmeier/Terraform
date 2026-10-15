@@ -6,7 +6,7 @@ Terraform stacks and helpers for AWS lab / POC work.
 
 | Directory | Purpose |
 |-----------|---------|
-| [`ec2/`](ec2/) | EC2 examples — Linux/Windows clients, BIND forwarder, auto-shutdown |
+| [`ec2/`](ec2/) | EC2 examples — Linux/Windows clients, BIND forwarder ([`bind_forwarder/`](ec2/bind_forwarder/); shared cloud-init), auto-shutdown |
 | [`solutions-sre/`](solutions-sre/) | Org-agnostic Solutions-style starter (tfvars-driven; not fully tested) |
 | [`basic_auth/`](basic_auth/) | Minimal auth / provider smoke pattern |
 
