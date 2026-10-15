@@ -9,7 +9,7 @@
 #  Files in Module:
 #    - devops01.main.tf
 #    - devops01.variables.tf
-#    - devops01.tfvars
+#    - devops01.auto.tfvars.example  → copy to devops01.auto.tfvars (gitignored)
 #
 ###===================================================================================###
 
