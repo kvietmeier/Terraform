@@ -3,52 +3,36 @@
 #  File:        multi.main.tf
 #  Created By:  Karl Vietmeier
 #
-#  Description: 
-#    This Terraform configuration dynamically provisions multiple Google Cloud VMs 
-#    with consistent naming (e.g., linux01, linux02, ...) and assigns each instance 
-#    a static private IP address within a subnet using a configurable starting offset. 
-#    The static IPs are calculated using cidrhost() and the VM index.
-#
-#  Inputs:
-#    - vm_count:         Number of VMs to create
-#    - vm_base_name:     Base name used for VM instances
-#    - ip_start_offset:  Starting IP host offset within the subnet
-#
-#  Behavior:
-#    - VM names are auto-generated using the base name and a 2-digit suffix
-#    - Static IPs are assigned incrementally from the starting offset
-#    - Cloud-init is used for OS configuration at startup
+#  Description:
+#    Provisions N Google Cloud VMs with consistent naming (e.g. labuser01, labuser02, …).
+#    Default: private-only NIC, cloud-assigned internal IP (same pattern as CoreInfra devops).
+#    Optional: static private IPs via assign_static_ip + ip_start_offset.
 #
 ###===================================================================================###
 
-###===================================================================================###
-###                  Start creating infrastructure resources                          ###
-
-# Setup cloud-init
 data "cloudinit_config" "system_setup" {
-  gzip = false
+  gzip          = false
   base64_encode = false
 
   part {
     content_type = "text/cloud-config"
-    content      = "${local.cloudinit_config}"
+    content      = local.cloudinit_config
     filename     = "conf.yaml"
   }
 }
 
-
-# Google Cloud VM instance with public IP
 resource "google_compute_instance" "vm_instance" {
   for_each     = toset(local.vm_names)
   name         = each.value
-  
-  zone         = var.zone             # Use the zone variable
-  machine_type = var.machine_type     # Use the machine_type variable
-  
+  zone         = var.zone
+  machine_type = var.machine_type
+  labels       = var.labels
+  tags         = var.vm_tags
+
   boot_disk {
     initialize_params {
-      image    = var.os_image  # Replace with your preferred image
-      size     = var.bootdisk_size
+      image = var.os_image
+      size  = var.bootdisk_size
     }
   }
 
@@ -57,34 +41,54 @@ resource "google_compute_instance" "vm_instance" {
     scopes = var.service_account.scopes
   }
 
-  # Configure the network interface with the specified private and public IPs
   network_interface {
     subnetwork = var.subnet_name
-    network_ip = cidrhost(
+    # Static private IP only when requested; otherwise GCP assigns from the subnet
+    network_ip = var.assign_static_ip ? cidrhost(
       data.google_compute_subnetwork.my_subnet.ip_cidr_range,
-      var.ip_start_offset + index (local.vm_names, each.value)) 
+      var.ip_start_offset + index(local.vm_names, each.value)
+    ) : null
+    # No access_config — no public IP (IAP / bastion)
   }
 
   metadata = {
-    # Install cloud-init if not available yet
-    startup-script = <<-CLOUDINIT
+    # Ubuntu ships cloud-init; Rocky/RHEL may need install+reboot
+    startup-script = <<-EOT
     #!/bin/bash
-    sleep 30
-    command -v cloud-init &>/dev/null || (dnf install -y cloud-init && reboot)
-    CLOUDINIT
-    
+    command -v cloud-init &>/dev/null && exit 0
+    sleep 10
+    if command -v apt-get &>/dev/null; then
+      apt-get update -y && apt-get install -y cloud-init && reboot
+    elif command -v dnf &>/dev/null; then
+      dnf install -y cloud-init && reboot
+    fi
+    EOT
+
     ssh-keys           = "${var.ssh_user}:${local.ssh_key_content}"
-    serial-port-enable = true # Enable serial port access for debugging
-    user-data          = "${data.cloudinit_config.system_setup.rendered}"
-
+    serial-port-enable = true
+    user-data          = data.cloudinit_config.system_setup.rendered
   }
-
-  #tags = ["kv-linux", "kv-infra"]
 }
-### END VM Resource
 
+output "vm_names" {
+  value       = local.vm_names
+  description = "Names of the client VMs"
+}
 
 output "vm_private_ips" {
-  value = [for vm in google_compute_instance.vm_instance : vm.network_interface[0].network_ip]
-  description = "List of private IP addresses of the VMs"
+  value       = { for name, vm in google_compute_instance.vm_instance : name => vm.network_interface[0].network_ip }
+  description = "Map of VM name → cloud-assigned (or static) private IP"
+}
+
+output "ssh_commands" {
+  value = {
+    for name, vm in google_compute_instance.vm_instance :
+    name => format(
+      "gcloud compute ssh %s@%s --zone=%s --tunnel-through-iap",
+      var.ssh_user,
+      name,
+      var.zone
+    )
+  }
+  description = "IAP SSH commands per VM"
 }

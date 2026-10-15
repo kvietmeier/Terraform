@@ -1,37 +1,29 @@
 ###===================================================================================###
 #
-#  File:  variables.tf
+#  File:  multi.variables.tf
 #  Created By: Karl Vietmeier
-#
-#  Variable definitions with some defaults
 #
 ###===================================================================================###
 
 data "google_compute_subnetwork" "my_subnet" {
-  name    = var.subnet_name
-  region  = var.region
+  name   = var.subnet_name
+  region = var.region
 }
 
-# Project ID
 variable "project_id" {
   description = "The GCP project ID"
   type        = string
 }
 
-# Region
 variable "region" {
   description = "The GCP region to deploy resources"
   type        = string
 }
 
-# Zone
 variable "zone" {
-  description = "The GCP zone to deploy the VM"
+  description = "The GCP zone to deploy the VMs"
   type        = string
 }
-
-
-###--- VM Info
 
 variable "service_account" {
   description = "Service account configuration"
@@ -41,46 +33,43 @@ variable "service_account" {
   })
 }
 
-# VM instance count
 variable "vm_count" {
   description = "Number of VMs to create"
-  type    = string
+  type        = number
+  default     = 3
 }
 
-# Base name for VMs
 variable "vm_base_name" {
   type        = string
-  description = "Base name for VM instances"
-  default     = "linux"
+  description = "Base name for VM instances (labuser01, labuser02, …)"
+  default     = "labuser"
 }
 
-# Machine type for the VM
 variable "machine_type" {
-  description = "The machine type for the VM"
+  description = "The machine type for the VMs"
   type        = string
   default     = "e2-medium"
 }
 
 variable "os_image" {
-  description = "OS Image to use"
+  description = "OS image or family (e.g. ubuntu-os-cloud/ubuntu-2404-lts-amd64)"
   type        = string
+  default     = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
 }
 
 variable "bootdisk_size" {
   description = "Size of boot disk in GB"
   type        = string
-  default     = "150"
+  default     = "50"
 }
 
-###--- VM Metadata
-# SSH 
 variable "ssh_user" {
-  description = "User to SSH in as"
+  description = "User to SSH in as (GCP metadata ssh-keys)"
   type        = string
 }
 
 variable "ssh_key_file" {
-  description = "Path to the SSH public key file"
+  description = "Path to the SSH public key file (multi-key OK)"
   type        = string
 }
 
@@ -89,38 +78,44 @@ variable "cloudinit_configfile" {
   type        = string
 }
 
+variable "vm_tags" {
+  description = "Network tags for firewall targeting"
+  type        = list(string)
+  default     = []
+}
 
-###--- Network
+variable "labels" {
+  description = "GCE labels (e.g. used=solutions, owned_by=solutions)"
+  type        = map(string)
+  default     = {}
+}
 
-# Network name
 variable "vpc_name" {
-  description = "The name of the VPC network"
+  description = "The name of the VPC network (informational)"
   type        = string
   default     = "default"
 }
 
-# Subnet name
 variable "subnet_name" {
   description = "The name of the subnetwork"
   type        = string
   default     = "default"
 }
 
+variable "assign_static_ip" {
+  description = "If true, assign static private IPs from ip_start_offset; if false, cloud-assign"
+  type        = bool
+  default     = false
+}
+
 variable "ip_start_offset" {
   type        = number
-  description = "Offset to start IP assignments within the subnet"
+  description = "Host offset for static private IPs when assign_static_ip is true"
   default     = 20
 }
 
-###=================          Locals                ==================###
 locals {
-  # Read the SSH public keys file
-  ssh_key_content = file(var.ssh_key_file)
-  
-  # cloud-init file
-  cloudinit_config  = file(var.cloudinit_configfile)
-
-  # Create the list of vm names
-  vm_names = [for i in range(var.vm_count) : format("%s%02d", var.vm_base_name, i + 1)]
-
+  ssh_key_content  = file(var.ssh_key_file)
+  cloudinit_config = file(var.cloudinit_configfile)
+  vm_names         = [for i in range(var.vm_count) : format("%s%02d", var.vm_base_name, i + 1)]
 }

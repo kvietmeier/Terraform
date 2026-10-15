@@ -1,0 +1,37 @@
+###===================================================================================###
+#
+#  File:  multi.auto.tfvars.example
+#  Copy to multi.auto.tfvars (gitignored) — Terraform loads *.auto.tfvars automatically.
+#
+###===================================================================================###
+
+project_id = "gcp-project-id"
+region     = "us-central1"
+zone       = "us-central1-a"
+
+vpc_name    = "default"
+subnet_name = "default"
+
+vm_count      = 3
+vm_base_name  = "labuser"
+machine_type  = "e2-medium"
+os_image      = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+bootdisk_size = "50"
+
+# Private-only, cloud-assigned IPs (match CoreInfra devops)
+assign_static_ip = false
+
+vm_tags = ["lab-linux", "lab-client"]
+labels = {
+  used     = "solutions"
+  owned_by = "solutions"
+}
+
+ssh_user             = "labuser"
+ssh_key_file         = "../../../secrets/ssh_keys.txt"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
+
+service_account = {
+  email  = "PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+  scopes = ["cloud-platform"]
+}
