@@ -123,20 +123,23 @@ variable "subnet_name" {
   default     = "default"
 }
 
+# Optional — only needed if the reserved-IP blocks in main.tf are uncommented
 variable "public_ip_name" {
-  description = "Name for the reserved public IP resource"
+  description = "Name for the reserved public IP resource (unused when private-only)"
   type        = string
-  default     = "karlv-pubip"
+  default     = null
 }
 
 variable "private_ip_name" {
-  description = "Name for the reserved private IP resource"
+  description = "Name for the reserved private IP resource (unused when cloud-assigned)"
   type        = string
+  default     = null
 }
 
 variable "private_ip" {
-  description = "Static private IP address to assign to the VM"
+  description = "Static private IP (unused when cloud-assigned)"
   type        = string
+  default     = null
 }
 
 

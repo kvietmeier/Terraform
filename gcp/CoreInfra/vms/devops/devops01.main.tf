@@ -33,17 +33,15 @@ data "cloudinit_config" "system_setup" {
   }
 }
 
-# Reserve External (Public) IP Address
-# Allocates a static external IP address in the specified region.
+/*
+# Reserve External (Public) IP Address — unused (no public IP)
 resource "google_compute_address" "vm_public_ip" {
   name         = var.public_ip_name
   address_type = "EXTERNAL"
   region       = var.region
 }
 
-
-# Reserve Internal (Private) IP Address
-# Allocates a static internal IP address in the specified subnet and region.
+# Reserve Internal (Private) IP Address — unused (cloud-assigned private IP)
 resource "google_compute_address" "vm_private_ip" {
   name         = var.private_ip_name
   address_type = "INTERNAL"
@@ -51,10 +49,10 @@ resource "google_compute_address" "vm_private_ip" {
   region       = var.region
   address      = var.private_ip
 }
-
+*/
 
 # Google Compute Engine VM Instance
-# Provisions a GCP VM instance using the reserved IPs and supplied configuration.
+# Private-only NIC; GCP assigns the internal IP from the subnet.
 resource "google_compute_instance" "vm_instance" {
   zone         = var.zone
   name         = var.vm_name
@@ -69,11 +67,8 @@ resource "google_compute_instance" "vm_instance" {
 
   network_interface {
     subnetwork = var.subnet_name
-    network_ip = google_compute_address.vm_private_ip.address
-
-    access_config {
-      nat_ip = google_compute_address.vm_public_ip.address
-    }
+    # Cloud-assigned private IP — do not set network_ip
+    # No access_config — no public IP (use IAP / bastion)
   }
 
   metadata = {
@@ -103,12 +98,12 @@ resource "google_compute_instance" "vm_instance" {
 ###===================              Outputs              ===================###
 
 
-# Output the public IP address assigned to the VM.
-output "instance_public_ip" {
-  value = google_compute_address.vm_public_ip.address
-}
+# No public IP when access_config is omitted.
+# output "instance_public_ip" {
+#   value = google_compute_address.vm_public_ip.address
+# }
 
-# Output the internal private IP address assigned to the VM.
+# Cloud-assigned internal private IP.
 output "instance_private_ip" {
-  value = google_compute_address.vm_private_ip.address
+  value = google_compute_instance.vm_instance.network_interface[0].network_ip
 }
