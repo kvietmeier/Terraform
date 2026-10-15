@@ -11,8 +11,9 @@
 # Env knobs:
 #   INSTALL_BENCH_TOOLS=true|false   Compile fio/iperf/dool/sockperf/elbencho
 #                                    (default: true for benchmark lab images)
-#   CLONE_LAB_SCRIPTS=true|false     Clone kvietmeier/scripts into labuser home
-#                                    (default: true)
+#   CLONE_LAB_SCRIPTS=true|false     Legacy: clone kvietmeier/scripts (private /
+#                                    retired monolith). Default: false — use
+#                                    CLONE_TOOLS_REPOS instead.
 #   CLONE_TOOLS_REPOS=true|false     Clone sys-perf-tools + system-tools into
 #                                    /home/labuser/tools (default: true)
 #
@@ -24,7 +25,7 @@ set -u
 # Do NOT use set -e globally — bench compiles must not fail the whole bootstrap.
 
 INSTALL_BENCH_TOOLS="${INSTALL_BENCH_TOOLS:-true}"
-CLONE_LAB_SCRIPTS="${CLONE_LAB_SCRIPTS:-true}"
+CLONE_LAB_SCRIPTS="${CLONE_LAB_SCRIPTS:-false}"
 CLONE_TOOLS_REPOS="${CLONE_TOOLS_REPOS:-true}"
 
 LOG_FILE="/tmp/cloud-init-out.txt"
@@ -325,15 +326,20 @@ install_bench_tools() {
     smart_build "https://github.com/breuner/elbencho.git" "elbencho" "$el_cmd"
 }
 
+# Legacy monolith (kvietmeier/scripts) was split into sys-perf-tools + system-tools.
+# Off by default — repo is private/unavailable for unattended HTTPS clone.
 clone_lab_scripts() {
     local home="/home/labuser"
     cd "$home" || return 0
     if [[ -d "$home/scripts/.git" ]]; then
         log "lab scripts already cloned"
-    else
-        log_and_continue "clone lab scripts" \
-            git clone https://github.com/kvietmeier/scripts.git "$home/scripts"
+        return 0
     fi
+    log "CLONE_LAB_SCRIPTS=true but kvietmeier/scripts is private/retired — prefer tools under ~/tools"
+    # Never prompt for GitHub credentials on headless cloud-init
+    export GIT_TERMINAL_PROMPT=0
+    log_and_continue "clone lab scripts" \
+        git -c credential.helper= clone --depth 1 https://github.com/kvietmeier/scripts.git "$home/scripts"
     chown -R labuser:labuser "$home/scripts" 2>/dev/null || true
 }
 

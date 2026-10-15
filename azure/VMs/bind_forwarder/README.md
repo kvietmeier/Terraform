@@ -32,4 +32,4 @@ Existing NSG (optional `nsg_id`) must allow **UDP/TCP 53** from clients and egre
 ## Sisters
 
 - AWS: [`aws/ec2/bind_forwarder/`](../../../aws/ec2/bind_forwarder/)
-- GCP: [`gcp/VMs/bind_forwarder/`](../../../gcp/VMs/bind_forwarder/)
+- GCP: [`gcp/CoreInfra/vms/bind_forwarder/`](../../../gcp/CoreInfra/vms/bind_forwarder/)

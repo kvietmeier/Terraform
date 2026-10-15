@@ -18,9 +18,9 @@ gcp/
 
 | Directory | Purpose |
 |-----------|---------|
-| [`CoreInfra/`](CoreInfra/) | VPCs, firewalls, DNS forwarders/zones, NAT, VPN, IAP, core VMs — apply piece by piece |
+| [`CoreInfra/`](CoreInfra/) | VPCs, firewalls, DNS forwarders/zones, NAT, VPN, IAP, core VMs (incl. [`vms/bind_forwarder`](CoreInfra/vms/bind_forwarder/)) — apply piece by piece |
 | [`configure-project/`](configure-project/) | Single root module wiring CoreInfra modules with feature flags |
-| [`VMs/`](VMs/) | Multi-VM, proxy, Windows, image, migration, BIND forwarder ([`VMs/bind_forwarder/`](VMs/bind_forwarder/); shared cloud-init) |
+| [`VMs/`](VMs/) | Multi-VM, proxy, Windows, image, migration examples (BIND lives under CoreInfra) |
 | [`GKE/`](GKE/) | GKE labs — **IT brief:** [`GKE/gke-aicluster/README.md`](GKE/gke-aicluster/README.md) (scale-from-zero AI cluster, apps staging, VPN/alias networking) |
 | [`tpus/`](tpus/) | TPU nodes and discovery helpers |
 | [`templates/`](templates/), [`testing/`](testing/) | Reference and experimental stacks |

@@ -19,7 +19,7 @@ Standardized Linux VM user-data for AWS, Azure, and GCP (Debian/Ubuntu and RHEL-
 BIND mini-forwarder stacks (when you cannot change Cloud DNS / Route 53 Resolver / Azure DNS):
 
 - [`aws/ec2/bind_forwarder/`](../../aws/ec2/bind_forwarder/)
-- [`gcp/VMs/bind_forwarder/`](../../gcp/VMs/bind_forwarder/)
+- [`gcp/CoreInfra/vms/bind_forwarder/`](../../gcp/CoreInfra/vms/bind_forwarder/)
 - [`azure/VMs/bind_forwarder/`](../../azure/VMs/bind_forwarder/)
 
 Edit `cloud-init-bind.yaml.tftpl` here once; each cloud stack `templatefile()`s this path.
@@ -111,7 +111,7 @@ Set on the guest before bootstrap (or wrap `runcmd`):
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `INSTALL_BENCH_TOOLS` | `true` | Compile fio / iperf / dool / sockperf / elbencho |
-| `CLONE_LAB_SCRIPTS` | `true` | Clone helper scripts into `/home/labuser` |
+| `CLONE_LAB_SCRIPTS` | `false` | Legacy `kvietmeier/scripts` (private/retired) — leave off |
 | `CLONE_TOOLS_REPOS` | `true` | Clone `sys-perf-tools` + `system-tools` into `/home/labuser/tools` |
 
 ## Quick decision

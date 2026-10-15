@@ -3,8 +3,8 @@
 #  File:  bind.provider.tf
 #  Created By: Karl Vietmeier
 #
-#  Purpose: Tiny Ubuntu GCE BIND9 conditional forwarder for VAST DNS testing
-#           when Cloud DNS private forwarding zones cannot be updated.
+#  Purpose: Tiny Ubuntu GCE BIND9 conditional forwarder (CoreInfra).
+#           Use when Cloud DNS private forwarding zones cannot be updated.
 #
 ###===================================================================================###
 

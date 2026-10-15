@@ -1,0 +1,45 @@
+###===================================================================================###
+#
+#  File:  bind.auto.tfvars.example
+#  Copy to bind.auto.tfvars (gitignored).
+#
+#  After the VAST cluster is up, set the two knobs:
+#    vast_zones   = ["cluster.example.com"]
+#    vast_dns_ips = ["192.168.1.50"]   # VAST DNS VIP(s)
+#  then terraform apply again (cloud-init / named.conf refresh on recreate,
+#  or edit named.conf.local on the box for a quick day-2 tweak).
+#
+###===================================================================================###
+
+project_id = "gcp-project-id"
+region     = "us-central1"
+zone       = "us-central1-a"
+
+network_name = "default"
+subnet_name  = "default"
+vpc_cidr     = "10.0.0.0/16"
+
+vm_name              = "bind-vast-fwd"
+machine_type         = "e2-micro"
+bootdisk_size        = 20
+os_image             = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+assign_public_ip     = false
+enable_dns_firewall  = true
+
+ssh_user     = "labuser"
+ssh_key_file = "../../../../secrets/ssh_keys.txt"
+
+sa_email  = "PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+sa_scopes = ["cloud-platform"]
+
+vm_tags = ["bind-vast-forwarder"]
+labels = {
+  used     = "solutions"
+  owned_by = "solutions"
+}
+
+# --- Day-2 knobs (placeholders until cluster DNS VIP is known) ---
+vast_zones   = ["cluster.example.com"]
+vast_dns_ips = ["192.168.1.50"]
+
+cloud_resolver = "169.254.169.254"
