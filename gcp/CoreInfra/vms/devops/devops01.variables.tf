@@ -45,9 +45,9 @@ variable "vm_name" {
 }
 
 variable "os_image" {
-  description = "OS Image to use"
+  description = "OS image or family (project/family keeps Rocky current)"
   type        = string
-  default     = "centos-stream-9-v20241009"
+  default     = "rocky-linux-cloud/rocky-linux-9"
 }
 
 variable "bootdisk_size" {
@@ -102,8 +102,14 @@ variable "cloudinit_configfile" {
 }
 
 variable "vm_tags" {
-  description = "Tags to assign to the VM for network/firewall configuration"
+  description = "Network tags for firewall targeting"
   type        = list(string)
+}
+
+variable "labels" {
+  description = "GCE labels (key/value). Use for ownership — e.g. used=solutions, owned_by=solutions"
+  type        = map(string)
+  default     = {}
 }
 
 

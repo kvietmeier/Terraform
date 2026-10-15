@@ -16,13 +16,18 @@ region          = "us-west2"
 zone            = "us-west2-a"
 
 # VM Info
-vm_name         = "linux01"
+vm_name         = "devops01"
 machine_type    = "e2-medium"
-os_image        = "centos-stream-9-v20241009"
+os_image        = "rocky-linux-cloud/rocky-linux-9"
 bootdisk_size   = "200"
-ssh_key_file    = "../../../somedir/foo.bar"
-ssh_user        = "karlv"
+ssh_key_file    = "../../../../secrets/ssh_keys.txt"
+ssh_user        = "labuser"
+vm_tags         = ["lab-linux", "lab-infra"]
+labels = {
+  used     = "solutions"
+  owned_by = "solutions"
+}
 
-# VPC Config - existing
+# VPC Config - existing (private-only NIC; no public/static private IP)
 vpc_name        = "default"
 subnet_name     = "default"

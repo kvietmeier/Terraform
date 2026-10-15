@@ -88,7 +88,8 @@ resource "google_compute_instance" "vm_instance" {
     scopes = var.sa_scopes
   }
 
-  tags = var.vm_tags
+  tags   = var.vm_tags
+  labels = var.labels
 }
 
 
