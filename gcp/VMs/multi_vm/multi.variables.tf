@@ -41,7 +41,13 @@ variable "vm_count" {
 
 variable "vm_base_name" {
   type        = string
-  description = "Base name for VM instances (labuser01, labuser02, …)"
+  description = "Base name for VM instances (client01, client02, …)"
+  default     = "client"
+}
+
+variable "user_base_name" {
+  type        = string
+  description = "Base name for per-VM SSH users (labuser01 on client01, …)"
   default     = "labuser"
 }
 
@@ -61,11 +67,6 @@ variable "bootdisk_size" {
   description = "Size of boot disk in GB"
   type        = string
   default     = "50"
-}
-
-variable "ssh_user" {
-  description = "User to SSH in as (GCP metadata ssh-keys)"
-  type        = string
 }
 
 variable "ssh_key_file" {
@@ -117,5 +118,12 @@ variable "ip_start_offset" {
 locals {
   ssh_key_content  = file(var.ssh_key_file)
   cloudinit_config = file(var.cloudinit_configfile)
-  vm_names         = [for i in range(var.vm_count) : format("%s%02d", var.vm_base_name, i + 1)]
+
+  # client01 → labuser01, client02 → labuser02, …
+  vms = {
+    for i in range(var.vm_count) :
+    format("%s%02d", var.vm_base_name, i + 1) => {
+      ssh_user = format("%s%02d", var.user_base_name, i + 1)
+    }
+  }
 }

@@ -17,7 +17,8 @@ terraform init && terraform apply
 
 | Setting | Value |
 |---------|--------|
-| Count / names | `labuser01` … `labuser0N` |
+| VM names | `client01` … `client0N` |
+| SSH users | `labuser01` on client01, `labuser02` on client02, … |
 | Image | `ubuntu-os-cloud/ubuntu-2404-lts-amd64` |
 | Labels | `used` / `owned_by` (set in tfvars) |
 | Cloud-init | [`scripts/cloud-init/cloud-init-universal.yaml`](../../../scripts/cloud-init/cloud-init-universal.yaml) |
