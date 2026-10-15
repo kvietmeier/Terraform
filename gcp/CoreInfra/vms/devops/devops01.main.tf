@@ -56,10 +56,9 @@ resource "google_compute_address" "vm_private_ip" {
 # Google Compute Engine VM Instance
 # Provisions a GCP VM instance using the reserved IPs and supplied configuration.
 resource "google_compute_instance" "vm_instance" {
-  zone           = var.zone
-  name           = var.vm_name
-  machine_type   = var.machine_type
-  desired_status = var.desired_status
+  zone         = var.zone
+  name         = var.vm_name
+  machine_type = var.machine_type
 
   boot_disk {
     initialize_params {

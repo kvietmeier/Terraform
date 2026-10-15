@@ -56,18 +56,6 @@ variable "bootdisk_size" {
   default     = "40"
 }
 
-variable "desired_status" {
-  description = "VM power state after apply: RUNNING or TERMINATED (default stopped to save cost)"
-  type        = string
-  default     = "TERMINATED"
-
-  validation {
-    condition     = contains(["RUNNING", "TERMINATED"], var.desired_status)
-    error_message = "desired_status must be RUNNING or TERMINATED."
-  }
-}
-
-
 ###===================================================================================###
 #                              Service Account Settings
 ###===================================================================================###
