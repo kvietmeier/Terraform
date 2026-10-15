@@ -39,9 +39,10 @@ resource "google_compute_address" "vm_private_ip" {
 ###=================   Create VM instance with public IP   ===================###
 #
 resource "google_compute_instance" "vm_instance" {
-  zone         = var.zone             # Use the zone variable
-  name         = var.vm_name          # Use the vm_name variable
-  machine_type = var.machine_type     # Use the machine_type variable
+  zone           = var.zone
+  name           = var.vm_name
+  machine_type   = var.machine_type
+  desired_status = var.desired_status
 
   boot_disk {
     initialize_params {
