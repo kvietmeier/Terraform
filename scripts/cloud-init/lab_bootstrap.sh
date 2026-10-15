@@ -91,8 +91,34 @@ EOF
 }
 
 ###-----------------------------------------------------------------------------###
+### Passwordless sudo for lab accounts (wheel / sudo / google-sudoers)
+### GCP metadata users (e.g. karlv) land in google-sudoers; labuser uses wheel/sudo.
+###-----------------------------------------------------------------------------###
+ensure_passwordless_sudo() {
+    cat > /etc/sudoers.d/90-lab-nopasswd <<'EOF'
+# Managed by lab_bootstrap.sh — lab VMs only
+%wheel ALL=(ALL) NOPASSWD:ALL
+%sudo ALL=(ALL) NOPASSWD:ALL
+%google-sudoers ALL=(ALL) NOPASSWD:ALL
+EOF
+    chmod 440 /etc/sudoers.d/90-lab-nopasswd
+
+    # Explicit drop-in if cloud-init already created labuser without sudoers.d
+    if id -u labuser >/dev/null 2>&1; then
+        echo "labuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/labuser
+        chmod 440 /etc/sudoers.d/labuser
+    fi
+
+    if visudo -cf /etc/sudoers >/dev/null 2>&1; then
+        log "OK: passwordless sudo for wheel/sudo/google-sudoers"
+    else
+        log "WARN: sudoers validation failed — check /etc/sudoers.d/90-lab-nopasswd"
+    fi
+}
+
+###-----------------------------------------------------------------------------###
 ### Copy the cloud key pair onto labuser (Ansible uses labuser, not ubuntu)
-### AWS/Azure/GCP inject the key into the image default user only.
+### AWS/Azure/GCP inject the key into the image default / metadata user only.
 ###-----------------------------------------------------------------------------###
 prepare_ansible_ssh() {
     local home="$1"
@@ -104,6 +130,7 @@ prepare_ansible_ssh() {
         /home/ec2-user/.ssh/authorized_keys \
         /home/azureuser/.ssh/authorized_keys \
         /home/opc/.ssh/authorized_keys \
+        /home/karlv/.ssh/authorized_keys \
         /root/.ssh/authorized_keys
     do
         if [[ -s "$candidate" ]]; then
@@ -111,6 +138,16 @@ prepare_ansible_ssh() {
             break
         fi
     done
+
+    # Fallback: first non-empty authorized_keys under /home (GCP metadata users)
+    if [[ -z "$src" ]]; then
+        for candidate in /home/*/.ssh/authorized_keys; do
+            [[ -s "$candidate" ]] || continue
+            [[ "$candidate" == /home/labuser/* ]] && continue
+            src="$candidate"
+            break
+        done
+    fi
 
     if [[ -z "$src" ]]; then
         log "WARN: no cloud SSH key found; labuser is not yet reachable by Ansible"
@@ -332,6 +369,7 @@ clone_tools_repos() {
 ###-----------------------------------------------------------------------------###
 main() {
     disable_noise
+    ensure_passwordless_sudo
     ensure_labuser
     configure_chrony
 
