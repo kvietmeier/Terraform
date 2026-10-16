@@ -71,6 +71,11 @@ resource "google_compute_instance" "vm_instance" {
   }
 }
 
+
+###===================================================================================###
+###  Outputs
+###===================================================================================###
+
 output "vm_names" {
   value       = keys(local.vms)
   description = "Names of the client VMs"
