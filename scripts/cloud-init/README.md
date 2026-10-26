@@ -101,6 +101,7 @@ git commit -m "Update lab bootstrap"
 | Layer | What | Where |
 |-------|------|--------|
 | Standard devops toolset | vim, git, curl, python3, tmux, tree, jq, htop, sysstat, … | YAML `packages:` |
+| Storage / S3 clients | `nfs-utils`/`nfs-common`, `aws` CLI, `s3cmd` | `lab_bootstrap.sh` (always) |
 | Bench tools (optional) | fio, iperf, dool, sockperf, elbencho | `lab_bootstrap.sh` when `INSTALL_BENCH_TOOLS=true` |
 | Personal tools (optional) | `sys-perf-tools`, `system-tools` | `/home/labuser/tools/` when `CLONE_TOOLS_REPOS=true` |
 
@@ -111,7 +112,7 @@ Set on the guest before bootstrap (or wrap `runcmd`):
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `INSTALL_BENCH_TOOLS` | `true` | Compile fio / iperf / dool / sockperf / elbencho |
-| `CLONE_LAB_SCRIPTS` | `false` | Legacy `kvietmeier/scripts` (private/retired) — leave off |
+| `CLONE_LAB_SCRIPTS` | `false` | **Retired** — no longer clones `kvietmeier/scripts` (ignored if set) |
 | `CLONE_TOOLS_REPOS` | `true` | Clone `sys-perf-tools` + `system-tools` into `/home/labuser/tools` |
 
 ## Quick decision

@@ -11,9 +11,8 @@
 # Env knobs:
 #   INSTALL_BENCH_TOOLS=true|false   Compile fio/iperf/dool/sockperf/elbencho
 #                                    (default: true for benchmark lab images)
-#   CLONE_LAB_SCRIPTS=true|false     Legacy: clone kvietmeier/scripts (private /
-#                                    retired monolith). Default: false — use
-#                                    CLONE_TOOLS_REPOS instead.
+#   CLONE_LAB_SCRIPTS=true|false     Ignored / retired — kvietmeier/scripts is gone.
+#                                    Kept only so old user-data env vars do not break.
 #   CLONE_TOOLS_REPOS=true|false     Clone sys-perf-tools + system-tools into
 #                                    /home/labuser/tools (default: true)
 #
@@ -326,21 +325,9 @@ install_bench_tools() {
     smart_build "https://github.com/breuner/elbencho.git" "elbencho" "$el_cmd"
 }
 
-# Legacy monolith (kvietmeier/scripts) was split into sys-perf-tools + system-tools.
-# Off by default — repo is private/unavailable for unattended HTTPS clone.
+# Legacy flag only — never clones kvietmeier/scripts (retired / private).
 clone_lab_scripts() {
-    local home="/home/labuser"
-    cd "$home" || return 0
-    if [[ -d "$home/scripts/.git" ]]; then
-        log "lab scripts already cloned"
-        return 0
-    fi
-    log "CLONE_LAB_SCRIPTS=true but kvietmeier/scripts is private/retired — prefer tools under ~/tools"
-    # Never prompt for GitHub credentials on headless cloud-init
-    export GIT_TERMINAL_PROMPT=0
-    log_and_continue "clone lab scripts" \
-        git -c credential.helper= clone --depth 1 https://github.com/kvietmeier/scripts.git "$home/scripts"
-    chown -R labuser:labuser "$home/scripts" 2>/dev/null || true
+    log "CLONE_LAB_SCRIPTS ignored — kvietmeier/scripts retired; use ~/tools/{sys-perf-tools,system-tools}"
 }
 
 # Clone personal tool repos for labuser (Ubuntu + CentOS/RHEL-family alike).
@@ -351,6 +338,7 @@ clone_tools_repos() {
     local name url dest
 
     mkdir -p "$tools"
+    export GIT_TERMINAL_PROMPT=0
 
     # name|url
     for entry in \
@@ -364,10 +352,44 @@ clone_tools_repos() {
             log "tools/$name already cloned"
             continue
         fi
-        log_and_continue "clone tools/$name" git clone "$url" "$dest"
+        log_and_continue "clone tools/$name" \
+            git -c credential.helper= clone --depth 1 "$url" "$dest"
     done
 
     chown -R labuser:labuser "$tools" 2>/dev/null || true
+}
+
+###-----------------------------------------------------------------------------###
+### Storage / S3 clients (NFS + awscli + s3cmd) — always; distro-specific names
+###-----------------------------------------------------------------------------###
+install_storage_clients() {
+    wait_for_locks
+    if is_debian; then
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update -y || true
+        log_and_continue "install nfs-common" apt-get install -y nfs-common
+        log_and_continue "install awscli" apt-get install -y awscli
+        log_and_continue "install s3cmd" apt-get install -y s3cmd
+    elif is_rhel; then
+        dnf install -y epel-release || true
+        log_and_continue "install nfs-utils" dnf install -y nfs-utils
+        log_and_continue "install awscli" dnf install -y awscli
+        if ! command -v aws >/dev/null 2>&1; then
+            log ">> install awscliv2 (official zip)"
+            (
+                cd /tmp || exit 1
+                curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip \
+                    && unzip -qo awscliv2.zip \
+                    && ./aws/install -i /usr/local/aws-cli -b /usr/local/bin
+            ) && log "OK: install awscliv2" || log "WARN: install awscliv2 failed (continuing)"
+        fi
+        log_and_continue "install s3cmd" dnf install -y s3cmd
+    else
+        log "WARN: unknown distro; skipping NFS/aws/s3cmd clients"
+    fi
+    command -v mount.nfs >/dev/null 2>&1 && log "OK: mount.nfs present" || log "WARN: mount.nfs missing"
+    command -v aws >/dev/null 2>&1 && log "OK: aws $(aws --version 2>&1 | head -1)" || log "WARN: aws missing"
+    command -v s3cmd >/dev/null 2>&1 && log "OK: s3cmd present" || log "WARN: s3cmd missing"
 }
 
 ###-----------------------------------------------------------------------------###
@@ -378,6 +400,7 @@ main() {
     ensure_passwordless_sudo
     ensure_labuser
     configure_chrony
+    install_storage_clients
 
     if [[ "$INSTALL_BENCH_TOOLS" == "true" ]]; then
         install_build_deps
