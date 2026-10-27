@@ -131,7 +131,7 @@ s3_views_config = {
 ###===================================================================================###
 #   User/Group Settings using maps
 ###===================================================================================###
-s3_allowall_policy_file = "../../policies/s3Policy-VastAllowAll.json"
+s3_allowall_policy_file = "../policies/s3Policy-VastAllowAll.json"
 s3_allowall_policy_name = "s3_user_AllowAll"
 
 s3pgpkey = "../../secrets/s3_pgp_key.asc"

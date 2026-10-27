@@ -181,7 +181,7 @@ dns_enabled       = true
 
 #- User View Polices json files
 s3_allowall_policy_file = "../policies/s3Policy-VastAllowAll.json"
-#s3_detailed_policy_file = "s3Policy-Detailed.example.json"
+#s3_detailed_policy_file = "../policies/s3Policy-Detailed.example.json"
 
 # Policy names
 s3_allowall_policy_name = "s3_user_AllowAll"
