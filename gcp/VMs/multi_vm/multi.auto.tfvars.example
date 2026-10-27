@@ -12,12 +12,18 @@ zone       = "us-central1-a"
 vpc_name    = "default"
 subnet_name = "default"
 
-vm_count       = 3
-vm_base_name   = "client"   # → client01, client02, client03
-user_base_name = "labuser"  # → labuser01 on client01, etc.
-machine_type   = "e2-medium"
-os_image       = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
-bootdisk_size  = "50"
+vm_name_prefix = "kv-"
+# Mode B — named fleet (preferred for demos)
+vm_names = ["copper", "lead", "zinc", "moly", "silver", "gold"]
+
+# Mode A — numbered fallback (leave vm_names = [] to use):
+# vm_count     = 3
+# vm_base_name = "linux"   # → kv-linux01, kv-linux02, kv-linux03
+
+ssh_user      = "strata"
+machine_type  = "e2-medium"
+os_image      = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+bootdisk_size = "50"
 
 assign_static_ip = false
 

@@ -45,7 +45,7 @@ tfinit && tfapply
 
 ## Opting instances in
 
-Add `AutoShutdown = "true"` to instance tags (see `../linux_clients/` for an example).
+Add `AutoShutdown = "true"` to instance tags (see `../multi_vm/` for an example).
 Hosts that must stay up overnight: omit the tag or set `AutoShutdown = "false"`.
 
 ## Manual test

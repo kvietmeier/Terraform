@@ -1,0 +1,47 @@
+###===================================================================================###
+#
+#  File:  multi_map.auto.tfvars.example
+#  Copy to multi_map.auto.tfvars (gitignored).
+#
+###===================================================================================###
+
+region = "us-west-2"
+
+vpc_id             = "vpc-0123456789abcdef0"
+subnet_id          = "subnet-0123456789abcdef0"
+security_group_ids = ["sg-0123456789abcdef0"]
+
+ssh_key_name         = "lab-keypair"
+ssh_user             = "strata"
+ssh_private_key_path = "$HOME/.ssh/lab-keypair.pem"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
+
+common_tags = {
+  Project     = "poc"
+  Environment = "lab"
+  Lifecycle   = "demo"
+  AutoShutdown = "true"
+}
+
+os_amis = {
+  ubuntu = {
+    owners      = ["099720109477"]
+    name_filter = "ubuntu/images/hvm-ssd*/ubuntu-noble-24.04-amd64-server-*"
+  }
+  rocky = {
+    owners      = ["792107900819"]
+    name_filter = "Rocky-9-EC2-Base-*.x86_64"
+  }
+}
+
+vm_name_prefix = "kv-"
+
+# Keys = short names → instance Name kv-copper, kv-lead, …
+vms = {
+  copper = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
+  lead   = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
+  zinc   = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
+  moly   = { machine_type = "m6i.4xlarge", bootdisk_size = 512, os_type = "ubuntu" }
+  silver = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "rocky" }
+  gold   = { machine_type = "m6i.2xlarge", bootdisk_size = 256, os_type = "ubuntu" }
+}

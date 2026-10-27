@@ -3,6 +3,8 @@
 #  File:  multi.variables.tf
 #  Created By: Karl Vietmeier
 #
+#  Identical client pool — mirrors aws/ec2/multi_vm and azure/VMs/multi_vm.
+#
 ###===================================================================================###
 
 data "google_compute_subnetwork" "my_subnet" {
@@ -34,21 +36,33 @@ variable "service_account" {
 }
 
 variable "vm_count" {
-  description = "Number of VMs to create"
+  description = "Number of VMs when vm_names is empty"
   type        = number
   default     = 3
 }
 
-variable "vm_base_name" {
+variable "vm_name_prefix" {
+  description = "Prefix applied to every VM name (e.g. kv- → kv-copper, kv-linux01)"
   type        = string
-  description = "Base name for VM instances (client01, client02, …)"
-  default     = "client"
+  default     = "kv-"
 }
 
-variable "user_base_name" {
+variable "vm_base_name" {
+  description = "Base name for numbered mode: {prefix}{base}01, 02, …"
   type        = string
-  description = "Base name for per-VM SSH users (labuser01 on client01, …)"
-  default     = "labuser"
+  default     = "linux"
+}
+
+variable "vm_names" {
+  description = "Optional short names (e.g. copper, lead). Non-empty → fleet size = length"
+  type        = list(string)
+  default     = []
+}
+
+variable "ssh_user" {
+  description = "Shared SSH / Ansible user on every VM (strata after universal cloud-init)"
+  type        = string
+  default     = "strata"
 }
 
 variable "machine_type" {
@@ -119,11 +133,16 @@ locals {
   ssh_key_content  = file(var.ssh_key_file)
   cloudinit_config = file(var.cloudinit_configfile)
 
-  # client01 → labuser01, client02 → labuser02, …
+  vm_name_list = length(var.vm_names) > 0 ? [
+    for n in var.vm_names : "${var.vm_name_prefix}${n}"
+    ] : [
+    for i in range(var.vm_count) : format("%s%s%02d", var.vm_name_prefix, var.vm_base_name, i + 1)
+  ]
+
+  # One shared ssh_user on every host (not labuserNN)
   vms = {
-    for i in range(var.vm_count) :
-    format("%s%02d", var.vm_base_name, i + 1) => {
-      ssh_user = format("%s%02d", var.user_base_name, i + 1)
+    for name in local.vm_name_list : name => {
+      ssh_user = var.ssh_user
     }
   }
 }

@@ -1,10 +1,10 @@
 ###===================================================================================###
 #
-#  File:  clients.variables.tf
+#  File:  multi.variables.tf
 #  Created By: Karl Vietmeier
 #
-#  Variable definitions — all values come from tfvars
-#  Pattern mirrors gcp/VMs/multi_vm (identical client pool via count + base name)
+#  Identical client pool — mirrors gcp/VMs/multi_vm and azure/VMs/multi_vm.
+#  Names: vm_name_prefix + vm_names list, or numbered vm_base_name fallback.
 #
 ###===================================================================================###
 
@@ -40,9 +40,9 @@ variable "ssh_key_name" {
 }
 
 variable "ssh_user" {
-  description = "OS user for SSH / Ansible (labuser after universal cloud-init)"
+  description = "OS user for SSH / Ansible (strata after universal cloud-init)"
   type        = string
-  default     = "labuser"
+  default     = "strata"
 }
 
 variable "ssh_private_key_path" {
@@ -71,17 +71,30 @@ variable "os_amis" {
   }))
 }
 
-###--- Identical VM pool (like gcp/VMs/multi_vm)
+###--- Identical VM pool
 
-variable "num_vm" {
-  description = "Number of identical client VMs to create"
+variable "vm_count" {
+  description = "Number of identical client VMs when vm_names is empty"
   type        = number
+  default     = 3
+}
+
+variable "vm_name_prefix" {
+  description = "Prefix applied to every VM name (e.g. kv- → kv-copper, kv-linux01)"
+  type        = string
+  default     = "kv-"
 }
 
 variable "vm_base_name" {
-  description = "Base name for instances; names are {vm_base_name}01, {vm_base_name}02, ..."
+  description = "Base name for numbered mode: {prefix}{base}01, 02, …"
   type        = string
-  default     = "lab-client"
+  default     = "linux"
+}
+
+variable "vm_names" {
+  description = "Optional short names (e.g. copper, lead). Non-empty → fleet size = length; names = prefix + each entry"
+  type        = list(string)
+  default     = []
 }
 
 variable "machine_type" {
@@ -103,6 +116,10 @@ variable "os_type" {
 locals {
   cloudinit_config = file(var.cloudinit_configfile)
 
-  # lab-client01, lab-client02, ... (same naming as prior map keys → state-safe)
-  vm_names = [for i in range(var.num_vm) : format("%s%02d", var.vm_base_name, i + 1)]
+  # Mode B (list) preferred for demos; Mode A (numbered) when vm_names is empty
+  vm_names = length(var.vm_names) > 0 ? [
+    for n in var.vm_names : "${var.vm_name_prefix}${n}"
+    ] : [
+    for i in range(var.vm_count) : format("%s%s%02d", var.vm_name_prefix, var.vm_base_name, i + 1)
+  ]
 }

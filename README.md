@@ -14,9 +14,23 @@ Each leaf folder is typically a self-contained root module you can
 | VAST auth smoke test | [`vastdata/simple_query/`](vastdata/simple_query/) |
 | VAST POC baseline (views/users) | [`vastdata/basic_cluster/`](vastdata/basic_cluster/) |
 | GCP project roll-up | [`gcp/configure-project/`](gcp/configure-project/) |
-| AWS EC2 Linux clients | [`aws/ec2/linux_clients/`](aws/ec2/linux_clients/) |
-| Azure Linux VMs | [`azure/VMs/`](azure/VMs/) |
+| AWS Linux clients (`multi_vm`) | [`aws/ec2/multi_vm/`](aws/ec2/multi_vm/) |
+| GCP Linux clients (`multi_vm`) | [`gcp/VMs/multi_vm/`](gcp/VMs/multi_vm/) |
+| Azure Linux clients (`multi_vm`) | [`azure/VMs/multi_vm/`](azure/VMs/multi_vm/) |
 | Shared cloud-init / Windows | [`scripts/`](scripts/) |
+
+## Linux POC clients → day-2 Ansible
+
+Terraform + [`scripts/cloud-init/`](scripts/cloud-init/) births tools-ready VMs (user **`strata`**, NFS *packages* only).
+Install the VAST NFS **kernel driver** and lab polish with
+[kvietmeier/ansible](https://github.com/kvietmeier/ansible):
+
+```bash
+ansible-playbook -i inventory.ini site.yml --tags client,install_driver
+```
+
+Same naming on every cloud: `multi_vm` / `multi_vm_map`, prefix `kv-`, optional mineral `vm_names`
+(`copper`, `lead`, `zinc`, `moly`, `silver`, `gold`).
 
 Copy any `*.tfvars.example` → `*.tfvars` (gitignored) before apply.
 

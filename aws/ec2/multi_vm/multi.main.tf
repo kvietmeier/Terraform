@@ -1,18 +1,15 @@
 ###===================================================================================###
 #
-#  File:  clients.main.tf
+#  File:  multi.main.tf
 #  Created By: Karl Vietmeier
 #
 #  Purpose: Deploy a pool of identical AWS EC2 client instances (cloud-init,
-#           existing key pair, tagging). Scale with num_vm + vm_base_name.
-#           For unique per-VM specs, use ../linux_clients_map (map-driven).
+#           existing key pair, tagging). Scale with vm_count + vm_base_name, or
+#           set vm_names for explicit hostnames (kv-copper, …).
+#           For unique per-VM specs, use ../multi_vm_map.
 #
 ###===================================================================================###
 
-###===================================================================================###
-###                  Start creating infrastructure resources                          ###
-
-# Single AMI lookup for the shared os_type
 data "aws_ami" "os" {
   most_recent = true
   owners      = var.os_amis[var.os_type].owners

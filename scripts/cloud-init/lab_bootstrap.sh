@@ -14,7 +14,7 @@
 #   CLONE_LAB_SCRIPTS=true|false     Ignored / retired — kvietmeier/scripts is gone.
 #                                    Kept only so old user-data env vars do not break.
 #   CLONE_TOOLS_REPOS=true|false     Clone sys-perf-tools + system-tools into
-#                                    /home/labuser/tools (default: true)
+#                                    /home/strata/tools (default: true)
 #
 # Author: Karl Vietmeier
 # License: Apache 2.0
@@ -26,6 +26,8 @@ set -u
 INSTALL_BENCH_TOOLS="${INSTALL_BENCH_TOOLS:-true}"
 CLONE_LAB_SCRIPTS="${CLONE_LAB_SCRIPTS:-false}"
 CLONE_TOOLS_REPOS="${CLONE_TOOLS_REPOS:-true}"
+# Shared SSH / Ansible user created by cloud-init + this script
+LAB_USER="${LAB_USER:-strata}"
 
 LOG_FILE="/tmp/cloud-init-out.txt"
 BOOT_LOG="/tmp/lab_bootstrap-out.log"
@@ -92,7 +94,7 @@ EOF
 
 ###-----------------------------------------------------------------------------###
 ### Passwordless sudo for lab accounts (wheel / sudo / google-sudoers)
-### GCP metadata users (e.g. karlv) land in google-sudoers; labuser uses wheel/sudo.
+### GCP metadata users (e.g. karlv) land in google-sudoers; strata uses wheel/sudo.
 ###-----------------------------------------------------------------------------###
 ensure_passwordless_sudo() {
     cat > /etc/sudoers.d/90-lab-nopasswd <<'EOF'
@@ -103,10 +105,10 @@ ensure_passwordless_sudo() {
 EOF
     chmod 440 /etc/sudoers.d/90-lab-nopasswd
 
-    # Explicit drop-in if cloud-init already created labuser without sudoers.d
-    if id -u labuser >/dev/null 2>&1; then
-        echo "labuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/labuser
-        chmod 440 /etc/sudoers.d/labuser
+    # Explicit drop-in if cloud-init already created strata without sudoers.d
+    if id -u "$LAB_USER" >/dev/null 2>&1; then
+        echo "$LAB_USER ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/$LAB_USER"
+        chmod 440 "/etc/sudoers.d/$LAB_USER"
     fi
 
     if visudo -cf /etc/sudoers >/dev/null 2>&1; then
@@ -117,7 +119,7 @@ EOF
 }
 
 ###-----------------------------------------------------------------------------###
-### Copy the cloud key pair onto labuser (Ansible uses labuser, not ubuntu)
+### Copy the cloud key pair onto strata (Ansible uses strata, not ubuntu)
 ### AWS/Azure/GCP inject the key into the image default / metadata user only.
 ###-----------------------------------------------------------------------------###
 prepare_ansible_ssh() {
@@ -143,14 +145,14 @@ prepare_ansible_ssh() {
     if [[ -z "$src" ]]; then
         for candidate in /home/*/.ssh/authorized_keys; do
             [[ -s "$candidate" ]] || continue
-            [[ "$candidate" == /home/labuser/* ]] && continue
+            [[ "$candidate" == /home/$LAB_USER/* ]] && continue
             src="$candidate"
             break
         done
     fi
 
     if [[ -z "$src" ]]; then
-        log "WARN: no cloud SSH key found; labuser is not yet reachable by Ansible"
+        log "WARN: no cloud SSH key found; $LAB_USER is not yet reachable by Ansible"
         return 0
     fi
 
@@ -162,24 +164,24 @@ prepare_ansible_ssh() {
     done < "$src"
     chmod 700 "$home/.ssh"
     chmod 600 "$home/.ssh/authorized_keys"
-    chown -R labuser:labuser "$home/.ssh"
-    log "OK: copied SSH key from $src to labuser"
+    chown -R "$LAB_USER:$LAB_USER" "$home/.ssh"
+    log "OK: copied SSH key from $src to $LAB_USER"
 }
 
 ###-----------------------------------------------------------------------------###
-### labuser + shell defaults
+### strata + shell defaults
 ###-----------------------------------------------------------------------------###
-ensure_labuser() {
+ensure_lab_user() {
     wait_for_locks
-    if ! id -u labuser >/dev/null 2>&1; then
+    if ! id -u "$LAB_USER" >/dev/null 2>&1; then
         local grp="wheel"
         is_debian && grp="sudo"
-        useradd -m -s /bin/bash -G "$grp" labuser
-        echo "labuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/labuser
-        chmod 440 /etc/sudoers.d/labuser
+        useradd -m -s /bin/bash -G "$grp" "$LAB_USER"
+        echo "$LAB_USER ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/$LAB_USER"
+        chmod 440 "/etc/sudoers.d/$LAB_USER"
     fi
 
-    local home="/home/labuser"
+    local home="/home/$LAB_USER"
     mkdir -p "$home/output" "$home/git" "$home/tools" /root/git
 
     # Append once (idempotent marker)
@@ -209,7 +211,7 @@ EOF
             printf '\n%s\n' "$aliases" >> "$rc"
         fi
     done
-    chown -R labuser:labuser "$home"
+    chown -R "$LAB_USER:$LAB_USER" "$home"
     prepare_ansible_ssh "$home"
 }
 
@@ -330,10 +332,10 @@ clone_lab_scripts() {
     log "CLONE_LAB_SCRIPTS ignored — kvietmeier/scripts retired; use ~/tools/{sys-perf-tools,system-tools}"
 }
 
-# Clone personal tool repos for labuser (Ubuntu + CentOS/RHEL-family alike).
-# Layout: /home/labuser/tools/{sys-perf-tools,system-tools}
+# Clone personal tool repos for strata (Ubuntu + CentOS/RHEL-family alike).
+# Layout: /home/strata/tools/{sys-perf-tools,system-tools}
 clone_tools_repos() {
-    local home="/home/labuser"
+    local home="/home/$LAB_USER"
     local tools="$home/tools"
     local name url dest
 
@@ -356,7 +358,7 @@ clone_tools_repos() {
             git -c credential.helper= clone --depth 1 "$url" "$dest"
     done
 
-    chown -R labuser:labuser "$tools" 2>/dev/null || true
+    chown -R "$LAB_USER:$LAB_USER" "$tools" 2>/dev/null || true
 }
 
 ###-----------------------------------------------------------------------------###
@@ -398,7 +400,7 @@ install_storage_clients() {
 main() {
     disable_noise
     ensure_passwordless_sudo
-    ensure_labuser
+    ensure_lab_user
     configure_chrony
     install_storage_clients
 

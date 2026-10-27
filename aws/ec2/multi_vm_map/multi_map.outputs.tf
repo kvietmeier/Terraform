@@ -1,15 +1,18 @@
 ###===================================================================================###
 #
-#  File:  clients.outputs.tf
+#  File:  multi_map.outputs.tf
 #  Created By: Karl Vietmeier
-#
-#  Connection helpers for the unique client VMs
 #
 ###===================================================================================###
 
+output "vm_names" {
+  value       = keys(aws_instance.vm_instance)
+  description = "Full VM names (prefix + short key)"
+}
+
 output "vm_private_ips" {
   value       = { for name, vm in aws_instance.vm_instance : name => vm.private_ip }
-  description = "Map of VM name to private IP"
+  description = "Map of VM name to private IP (for Ansible inventory)"
 }
 
 output "vm_ids" {

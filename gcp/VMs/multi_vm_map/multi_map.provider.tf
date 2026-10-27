@@ -15,8 +15,8 @@
 ###===================================================================================###
 terraform {
   backend "gcs" {
-    bucket  = "gcp-project-id-tfstate"
-    prefix  = "terraform/state/clientvms-1"
+    bucket = "gcp-project-id-tfstate"
+    prefix = "terraform/state/clientvms-1"
   }
   required_providers {
     google = {

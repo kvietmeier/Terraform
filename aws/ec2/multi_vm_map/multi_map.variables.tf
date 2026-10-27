@@ -1,10 +1,10 @@
 ###===================================================================================###
 #
-#  File:  clients.variables.tf
+#  File:  multi_map.variables.tf
 #  Created By: Karl Vietmeier
 #
-#  Variable definitions — all values come from tfvars
-#  Pattern mirrors gcp/VMs/multi_vm_map (unique VMs via map; key = Name tag)
+#  Unique VMs via map; keys are short names (copper, lead, …).
+#  Full Name tag = vm_name_prefix + key (e.g. kv-copper).
 #
 ###===================================================================================###
 
@@ -40,9 +40,9 @@ variable "ssh_key_name" {
 }
 
 variable "ssh_user" {
-  description = "OS user for SSH / Ansible (labuser after universal cloud-init)"
+  description = "OS user for SSH / Ansible (strata after universal cloud-init)"
   type        = string
-  default     = "labuser"
+  default     = "strata"
 }
 
 variable "ssh_private_key_path" {
@@ -71,10 +71,16 @@ variable "os_amis" {
   }))
 }
 
-###--- Unique VMs (like gcp/VMs/multi_vm_map)
+variable "vm_name_prefix" {
+  description = "Prefix applied to each map key for the instance Name tag"
+  type        = string
+  default     = "kv-"
+}
+
+###--- Unique VMs (keys = short names; Name = prefix + key)
 
 variable "vms" {
-  description = "Map of VM configurations; key = instance Name tag"
+  description = "Map of VM configurations; key = short name (copper, lead, …)"
   type = map(object({
     machine_type  = string
     bootdisk_size = number
@@ -86,7 +92,11 @@ variable "vms" {
 locals {
   cloudinit_config = file(var.cloudinit_configfile)
 
-  # Only look up AMIs for os_types actually used by var.vms
+  # kv-copper, kv-lead, …
+  vms = {
+    for short, spec in var.vms : "${var.vm_name_prefix}${short}" => spec
+  }
+
   used_os_amis = {
     for os_type, ami in var.os_amis : os_type => ami
     if contains([for vm in var.vms : vm.os_type], os_type)

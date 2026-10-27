@@ -55,13 +55,13 @@ packages:
 users:
   # Keep distro default (ubuntu/ec2-user/...) so the cloud key pair is injected.
   - default
-  - name: labuser
-    gecos: Lab User
+  - name: strata
+    gecos: Strata lab user
     groups: [sudo, wheel]
     shell: /bin/bash
     sudo: ALL=(ALL) NOPASSWD:ALL
     lock_passwd: true
-    # Key is copied onto labuser by lab_bootstrap.sh (prepare_ansible_ssh)
+    # Key is copied onto strata by lab_bootstrap.sh (prepare_ansible_ssh)
 
 write_files:
   - path: /tmp/lab_bootstrap.sh

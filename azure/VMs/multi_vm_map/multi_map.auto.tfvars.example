@@ -1,0 +1,33 @@
+###===================================================================================###
+#
+#  File:  multi_map.auto.tfvars.example
+#  Copy to multi_map.auto.tfvars (gitignored).
+#
+###===================================================================================###
+
+resource_group_name = "rg-lab-clients"
+location            = "westus3"
+
+vm_name_prefix = "kv-"
+ssh_user       = "strata"
+
+disk_ctlr            = "NVMe"
+secure_boot_enabled  = false
+vtpm_enabled         = true
+
+ssh_key_path         = "~/.ssh/id_rsa.pub"
+cloudinit_configfile = "../../../scripts/cloud-init/cloud-init-universal.yaml"
+
+existing_network_rg  = "rg-network"
+existing_vnet_name   = "vnet-lab"
+existing_subnet_name = "subnet-clients"
+
+# Keys = short names → VM name kv-copper, …
+vms = {
+  copper = { vm_size = "Standard_E2bds_v5", data_disk_count = 1 }
+  lead   = { vm_size = "Standard_E2bds_v5", data_disk_count = 1 }
+  zinc   = { vm_size = "Standard_E2bds_v5", data_disk_count = 1 }
+  moly   = { vm_size = "Standard_E4bds_v5", data_disk_count = 2 }
+  silver = { vm_size = "Standard_E2bds_v5", data_disk_count = 1 }
+  gold   = { vm_size = "Standard_E2bds_v5", data_disk_count = 1 }
+}

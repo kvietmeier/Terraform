@@ -1,39 +1,31 @@
 ###===================================================================================###
 #
-#  File:  variables.tf
+#  File:  multi_map.variables.tf
 #  Created By: Karl Vietmeier
 #
-#  Variable definitions with some defaults
+#  Unique VMs via map; keys are short names. Name = vm_name_prefix + key.
 #
 ###===================================================================================###
 
-# Get subnet CIDR
 data "google_compute_subnetwork" "my_subnet" {
-  name    = var.subnet_name
-  region  = var.region
+  name   = var.subnet_name
+  region = var.region
 }
 
-
-# Project ID
 variable "project_id" {
   description = "The GCP project ID"
   type        = string
 }
 
-# Region
 variable "region" {
   description = "The GCP region to deploy resources"
   type        = string
 }
 
-# Zone
 variable "zone" {
   description = "The GCP zone to deploy the VM"
   type        = string
 }
-
-
-###--- VM Info
 
 variable "service_account" {
   description = "Service account configuration"
@@ -43,9 +35,14 @@ variable "service_account" {
   })
 }
 
-# VM Config
+variable "vm_name_prefix" {
+  description = "Prefix applied to each map key for the instance name"
+  type        = string
+  default     = "kv-"
+}
+
 variable "vms" {
-  description = "Map of VM configurations"
+  description = "Map of VM configurations; key = short name (copper, lead, …)"
   type = map(object({
     machine_type  = string
     bootdisk_size = string
@@ -54,12 +51,10 @@ variable "vms" {
   }))
 }
 
-
-###--- VM Metadata
-# SSH 
 variable "ssh_user" {
-  description = "User to SSH in as"
+  description = "Shared SSH user (strata after universal cloud-init)"
   type        = string
+  default     = "strata"
 }
 
 variable "ssh_key_file" {
@@ -72,29 +67,23 @@ variable "cloudinit_configfile" {
   type        = string
 }
 
-
-###--- Network
-
-# Network name
 variable "vpc_name" {
   description = "The name of the VPC network"
   type        = string
   default     = "default"
 }
 
-# Subnet name
 variable "subnet_name" {
   description = "The name of the subnetwork"
   type        = string
   default     = "default"
 }
 
-
-###=================          Locals                ==================###
 locals {
-  # Read the SSH public keys file
-  ssh_key_content = file(var.ssh_key_file)
-  
-  # cloud-init file
-  cloudinit_config  = file(var.cloudinit_configfile)
+  ssh_key_content  = file(var.ssh_key_file)
+  cloudinit_config = file(var.cloudinit_configfile)
+
+  vms = {
+    for short, spec in var.vms : "${var.vm_name_prefix}${short}" => spec
+  }
 }

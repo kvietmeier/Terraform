@@ -1,39 +1,51 @@
-# linux_clients — identical Linux client pool
+# multi_vm — identical Linux client pool (AWS)
 
-Root module for a **scaled pool of identical** Ubuntu (or other) EC2 clients. Same instance type, disk, OS, and cloud-init for every VM. Names are generated as `{vm_base_name}01`, `02`, …
+Root module for a **scaled pool of identical** EC2 clients. Same instance type,
+disk, OS, and cloud-init for every VM.
 
-Mirrors [`gcp/VMs/multi_vm`](../../../gcp/VMs/multi_vm/). For mixed sizes / OS per host, use [`../linux_clients_map/`](../linux_clients_map/).
+Mirrors [`gcp/VMs/multi_vm`](../../../gcp/VMs/multi_vm/) and
+[`azure/VMs/multi_vm`](../../../azure/VMs/multi_vm/). For mixed sizes / OS per
+host, use [`../multi_vm_map/`](../multi_vm_map/).
 
-## Scale
+## Naming
 
-Edit `clients.auto.tfvars`:
+| Mode | Vars | Example names |
+|------|------|---------------|
+| Named list (demo default) | `vm_name_prefix` + `vm_names` | `kv-copper` … `kv-gold` |
+| Numbered | `vm_name_prefix` + `vm_base_name` + `vm_count` | `kv-linux01`, `kv-linux02`, … |
 
-```hcl
-num_vm        = 3
-vm_base_name  = "lab-client"
-machine_type  = "m6i.2xlarge"
-bootdisk_size = 256
-os_type       = "ubuntu"
-```
-
-Bump `num_vm` to grow the pool.
+SSH / Ansible user: **`strata`** (universal cloud-init).
 
 ## Deploy
 
 ```bash
-cd aws/ec2/linux_clients
-# edit clients.auto.tfvars: subnet, SG, key, tags, pool size
+cd aws/ec2/multi_vm
+cp multi.auto.tfvars.example multi.auto.tfvars
+# edit: subnet, SG, key, tags, vm_names or vm_count
 
 export AWS_PROFILE=your-profile
-terraform init
-terraform apply
+terraform init && terraform apply
 ```
 
-Requires an existing subnet, security group, and EC2 key pair. Cloud-init path defaults to the shared universal bootstrap under `scripts/cloud-init/`.
+Requires an existing subnet, security group, and EC2 key pair. Cloud-init:
+[`scripts/cloud-init/cloud-init-universal.yaml`](../../../scripts/cloud-init/cloud-init-universal.yaml).
 
-## Outputs
+## Outputs (Ansible handoff)
 
-- `vm_names`, `vm_ids`, `vm_private_ips`
+- `vm_names`, `vm_private_ips`, `vm_ids`
 - `ssh_commands`, `serial_console_urls`, `connection_info`
 
-Tag `AutoShutdown=true` (in `common_tags`) to opt into overnight stop — see [`../autoshutdown/`](../autoshutdown/).
+Copy private IPs into [ansible `inventory.ini`](https://github.com/kvietmeier/ansible/blob/main/inventory.ini) (`ansible_ssh_user=strata`).
+
+## Day-2 — POC / demo ready
+
+Cloud-init installs NFS *packages* only. Install the VAST NFS kernel driver +
+client polish with [kvietmeier/ansible](https://github.com/kvietmeier/ansible):
+
+```bash
+ansible-playbook -i inventory.ini site.yml --tags client,install_driver
+# optional: --tags mountprep  or  mount_now -e '...'
+```
+
+Tag `AutoShutdown=true` (in `common_tags`) to opt into overnight stop — see
+[`../autoshutdown/`](../autoshutdown/).

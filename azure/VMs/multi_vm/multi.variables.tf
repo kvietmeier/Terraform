@@ -1,133 +1,176 @@
 ###===================================================================================###
-# SUMMARY:
-#   Input variables for the Linux VM deployment.
-#   Defines networking targets, VM sizing, storage configs, and image details.
 #
-# USAGE:
-#   These are defaults. Override specific values in 'terraform.tfvars'.
+#  File:  multi.variables.tf
+#  Created By: Karl Vietmeier
 #
-# LICENSE:
-#   Copyright 2025 Karl Vietmeier / KCV Consulting
-#   SPDX-License-Identifier: Apache-2.0
+#  Identical client pool — mirrors aws/ec2/multi_vm and gcp/VMs/multi_vm.
+#  Default image: Azure Linux HPC (accept Marketplace terms once).
 #
 ###===================================================================================###
 
-### Existing Resources
+### Existing networking
+
 variable "existing_network_rg" {
-  description = "The Resource Group where the vNet exists"
+  description = "Resource group where the vNet exists"
   type        = string
 }
 
 variable "existing_vnet_name" {
-  description = "The name of the existing vNet"
+  description = "Name of the existing vNet"
   type        = string
 }
 
 variable "existing_subnet_name" {
-  description = "The name of the subnet to attach to"
+  description = "Name of the subnet to attach to"
   type        = string
 }
 
+### VM fleet
 
-### VM Resources
 variable "resource_group_name" {
-  default = "rg-deleteme-tf"
+  description = "New resource group for the client fleet"
+  type        = string
+  default     = "rg-lab-clients"
 }
 
 variable "location" {
-  default = "westus3"
+  description = "Azure region"
+  type        = string
+  default     = "westus3"
 }
 
 variable "vm_count" {
-  default = 2
+  description = "Number of VMs when vm_names is empty"
+  type        = number
+  default     = 3
+}
+
+variable "vm_name_prefix" {
+  description = "Prefix applied to every VM name (e.g. kv- → kv-copper)"
+  type        = string
+  default     = "kv-"
+}
+
+variable "vm_base_name" {
+  description = "Base name for numbered mode: {prefix}{base}01, 02, …"
+  type        = string
+  default     = "linux"
+}
+
+variable "vm_names" {
+  description = "Optional short names (e.g. copper, lead). Non-empty → fleet size = length"
+  type        = list(string)
+  default     = []
 }
 
 variable "data_disk_count_per_vm" {
-  default = 1
+  description = "UltraSSD data disks attached per VM"
+  type        = number
+  default     = 1
 }
 
 variable "vm_size" {
-  default = "Standard_E2bds_v5" # Supports NVMe and UltraSSD
+  description = "Azure VM size (NVMe + UltraSSD capable)"
+  type        = string
+  default     = "Standard_E2bds_v5"
 }
 
-# OS Disk - 
 variable "disk_ctlr" {
-  description = "Disk Controller Type"
+  description = "Disk controller type"
   type        = string
-  default     = "NVME"
+  default     = "NVMe"
 }
+
 variable "os_disk_caching" {
-  description = "Caching type for the OS Disk (ReadWrite, ReadOnly, None)"
+  description = "OS disk caching"
   type        = string
   default     = "ReadWrite"
 }
 
 variable "os_disk_storage_type" {
-  description = "Storage Account type for the OS Disk (Standard_LRS, Premium_LRS, StandardSSD_LRS)"
+  description = "OS disk storage account type"
   type        = string
   default     = "Premium_LRS"
 }
 
+### Azure Linux HPC image
 
-### Azure Linux
 variable "image_publisher" {
-  description = "The publisher of the image (e.g., azure-hpc)"
-  type        = string
-  default     = "azure-hpc"
+  type    = string
+  default = "azure-hpc"
 }
 
 variable "image_offer" {
-  description = "The offer of the image (e.g., azurelinux-hpc)"
-  type        = string
-  default     = "azurelinux-hpc"
+  type    = string
+  default = "azurelinux-hpc"
 }
 
 variable "image_sku" {
-  description = "The SKU of the image (e.g., 3)"
-  type        = string
-  default     = "3"
+  type    = string
+  default = "3"
 }
 
 variable "image_version" {
-  description = "The version of the image (e.g., latest)"
-  type        = string
-  default     = "latest"
+  type    = string
+  default = "latest"
 }
 
+variable "ssh_user" {
+  description = "Admin / Ansible user (strata after universal cloud-init)"
+  type        = string
+  default     = "strata"
+}
+
+# Kept for older tfvars; prefer ssh_user
 variable "admin_user" {
-  description = "Admin user"
+  description = "Deprecated alias for ssh_user"
   type        = string
-  default     = "azureuser"
+  default     = null
+  nullable    = true
 }
 
-### Secure Boot settings
 variable "security_type" {
-  description = "Trusted Launch setting"
-  type        = string
-  default     = "TrustedLaunch"
+  type    = string
+  default = "TrustedLaunch"
 }
 
 variable "secure_boot_enabled" {
-  description = "Enable or disable secure boot (set to false for unsigned drivers)"
+  description = "Set false for unsigned kernel drivers"
   type        = bool
   default     = false
 }
 
 variable "vtpm_enabled" {
-  description = "Enable or disable VTPM - (set to true is secure_boot_enabled = false)"
-  type        = bool
-  default     = true
+  type    = bool
+  default = true
 }
 
+variable "cloudinit_configfile" {
+  description = "Path to cloud-init yaml"
+  type        = string
+  default     = "../../../scripts/cloud-init/cloud-init-universal.yaml"
+}
 
-### System Config
+# Alias used by older tfvars
 variable "cloud_init_path" {
-  # Update this path to your real cloud-init file
-  default = "cloud-init-universal.yaml"  # resolve under scripts/cloud-init/
+  type     = string
+  default  = null
+  nullable = true
 }
 
-### User Variables
 variable "ssh_key_path" {
-  # Update this path to your real key file
-  default = "C:/Users/karl.vietmeier/.ssh/id_rsa.pub"
+  description = "Path to SSH public key"
+  type        = string
+}
+
+locals {
+  admin_username = coalesce(var.admin_user, var.ssh_user)
+  cloudinit_path = coalesce(var.cloud_init_path, var.cloudinit_configfile)
+
+  vm_name_list = length(var.vm_names) > 0 ? [
+    for n in var.vm_names : "${var.vm_name_prefix}${n}"
+    ] : [
+    for i in range(var.vm_count) : format("%s%s%02d", var.vm_name_prefix, var.vm_base_name, i + 1)
+  ]
+
 }

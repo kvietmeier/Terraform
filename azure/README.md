@@ -17,7 +17,7 @@ azure/
 | Directory | Purpose |
 |-----------|---------|
 | [`CoreInfra/`](CoreInfra/) | vNets, NSGs, Azure AD DS, VPN gateway, storage, user management |
-| [`VMs/`](VMs/) | Single/multi Linux & Windows VMs, Azure Linux, DB/Linux benchmarks, BIND forwarder ([`VMs/bind_forwarder/`](VMs/bind_forwarder/); shared cloud-init) |
+| [`VMs/`](VMs/) | Linux/Windows VMs — POC fleets [`multi_vm`](VMs/multi_vm/) / [`multi_vm_map`](VMs/multi_vm_map/), benchmarks, BIND ([`VMs/bind_forwarder/`](VMs/bind_forwarder/)) |
 | [`AKS/`](AKS/) | AKS clusters (`aks-1`, `aks-2`, deploy / bill-run variants) |
 | [`AVD/`](AVD/) | Azure Virtual Desktop test stacks |
 | [`templates/`](templates/) | Starter patterns (not always turnkey) |

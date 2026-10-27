@@ -3,7 +3,9 @@
 Standardized Linux VM user-data for AWS, Azure, and GCP (Debian/Ubuntu and RHEL-family).
 
 - **YAML** installs the standard devops toolset (`packages:`)
-- **`lab_bootstrap.sh`** does everything that branches by OS/cloud (chrony, labuser, optional bench compiles)
+- **`lab_bootstrap.sh`** does everything that branches by OS/cloud (chrony, user **`strata`**, optional bench compiles)
+
+NFS *client packages* (`nfs-common` / `nfs-utils`) are installed here. The VAST NFS **kernel driver** is day-2 Ansible — [`vast_nfs`](https://github.com/kvietmeier/ansible/tree/main/roles/vast_nfs) via `site.yml --tags install_driver`. Client fleets: [`aws/ec2/multi_vm`](../../aws/ec2/multi_vm/), [`gcp/VMs/multi_vm`](../../gcp/VMs/multi_vm/), [`azure/VMs/multi_vm`](../../azure/VMs/multi_vm/).
 
 ## Files
 
@@ -103,7 +105,7 @@ git commit -m "Update lab bootstrap"
 | Standard devops toolset | vim, git, curl, python3, tmux, tree, jq, htop, sysstat, … | YAML `packages:` |
 | Storage / S3 clients | `nfs-utils`/`nfs-common`, `aws` CLI, `s3cmd` | `lab_bootstrap.sh` (always) |
 | Bench tools (optional) | fio, iperf, dool, sockperf, elbencho | `lab_bootstrap.sh` when `INSTALL_BENCH_TOOLS=true` |
-| Personal tools (optional) | `sys-perf-tools`, `system-tools` | `/home/labuser/tools/` when `CLONE_TOOLS_REPOS=true` |
+| Personal tools (optional) | `sys-perf-tools`, `system-tools` | `/home/strata/tools/` when `CLONE_TOOLS_REPOS=true` |
 
 ## Environment knobs
 
@@ -113,7 +115,7 @@ Set on the guest before bootstrap (or wrap `runcmd`):
 |----------|---------|---------|
 | `INSTALL_BENCH_TOOLS` | `true` | Compile fio / iperf / dool / sockperf / elbencho |
 | `CLONE_LAB_SCRIPTS` | `false` | **Retired** — no longer clones `kvietmeier/scripts` (ignored if set) |
-| `CLONE_TOOLS_REPOS` | `true` | Clone `sys-perf-tools` + `system-tools` into `/home/labuser/tools` |
+| `CLONE_TOOLS_REPOS` | `true` | Clone `sys-perf-tools` + `system-tools` into `/home/strata/tools` |
 
 ## Quick decision
 

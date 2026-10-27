@@ -4,9 +4,8 @@
 #  Created By:  Karl Vietmeier
 #
 #  Description:
-#    Provisions N Google Cloud VMs (e.g. client01, client02, …) with matching
-#    per-VM SSH users (labuser01, labuser02, …).
-#    Default: private-only NIC, cloud-assigned internal IP (same pattern as CoreInfra devops).
+#    Provisions N Google Cloud VMs (kv-linux01… or kv-copper…) with a single
+#    shared SSH user (strata). Private-only NIC by default (IAP / bastion).
 #    Optional: static private IPs via assign_static_ip + ip_start_offset.
 #
 ###===================================================================================###
@@ -52,7 +51,6 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   metadata = {
-    # Ubuntu ships cloud-init; Rocky/RHEL may need install+reboot
     startup-script = <<-EOT
     #!/bin/bash
     command -v cloud-init &>/dev/null && exit 0
@@ -64,13 +62,11 @@ resource "google_compute_instance" "vm_instance" {
     fi
     EOT
 
-    # Per-VM user: client01 → labuser01, etc.
     ssh-keys           = "${each.value.ssh_user}:${local.ssh_key_content}"
     serial-port-enable = true
     user-data          = data.cloudinit_config.system_setup.rendered
   }
 }
-
 
 ###===================================================================================###
 ###  Outputs
@@ -83,12 +79,12 @@ output "vm_names" {
 
 output "vm_users" {
   value       = { for name, spec in local.vms : name => spec.ssh_user }
-  description = "Map of VM name → SSH username"
+  description = "Map of VM name → SSH username (shared strata)"
 }
 
 output "vm_private_ips" {
   value       = { for name, vm in google_compute_instance.vm_instance : name => vm.network_interface[0].network_ip }
-  description = "Map of VM name → cloud-assigned (or static) private IP"
+  description = "Map of VM name → private IP (for Ansible inventory)"
 }
 
 output "ssh_commands" {
@@ -131,7 +127,6 @@ output "start_commands" {
   description = "Per-VM start commands"
 }
 
-# Handy copy-paste block after apply
 output "power_cheatsheet" {
   value = join("\n", flatten([
     ["# stop"],

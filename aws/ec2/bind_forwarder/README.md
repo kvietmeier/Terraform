@@ -11,7 +11,7 @@ Not useful OOB — after the cluster is up, set the two knobs and point test cli
 | `vast_zones` | `["cluster.example.com"]` | Domain(s) sent to VAST |
 | `vast_dns_ips` | `["192.168.1.50"]` | VAST DNS VIP(s) |
 
-Everything else is wiring: existing subnet + SG (same pattern as `linux_clients`), key pair, VPC CIDR for BIND’s query ACL.
+Everything else is wiring: existing subnet + SG (same pattern as `multi_vm`), key pair, VPC CIDR for BIND’s query ACL.
 
 
 ## What’s on the box
@@ -20,7 +20,7 @@ Everything else is wiring: existing subnet + SG (same pattern as `linux_clients`
 - BIND9 + `bind9utils` / `dnsutils`
 - Net tools: `ip`/`ss`, ping, traceroute, mtr, tcpdump, nmap, curl/wget
 - Light QoL: vim, jq, python3, htop, tmux; basic aliases + `set -o vi`
-- No labuser, no bench-tool compiles — add packages later if needed (`sudo apt install netcat-openbsd`, etc.)
+- No strata, no bench-tool compiles — add packages later if needed (`sudo apt install netcat-openbsd`, etc.)
 
 ## Deploy
 
