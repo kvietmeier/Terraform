@@ -1,23 +1,13 @@
 # Terraform Projects
 
-Multi-cloud Terraform lab and POC stacks for AWS, Azure, GCP, and OCI — plus scrubbed **VAST Data provider** working examples under [`vastdata/`](vastdata/).
+Multi-cloud Terraform lab and POC stacks for AWS, Azure, GCP, and OCI — plus
+**VAST Data provider** examples under [`vastdata/`](vastdata/).
 
-Stacks are organized by cloud (or provider). Each leaf folder is typically a self-contained root module you can `init` / `plan` / `apply`. Shared Linux/Windows bootstrap lives under [`scripts/`](scripts/).
+Each leaf folder is typically a self-contained root module you can
+`init` / `plan` / `apply`. Shared Linux/Windows bootstrap lives under
+[`scripts/`](scripts/).
 
-Live VAST lab stacks (real hosts, `setup_lab`, VoC wrappers) stay on GitLab [`karlv/tools`](https://git.vastdata.com/karlv/tools) → `terraform/vast/`. Real `*.tfvars` stay local / in private [`personal/terraform-tfvars`](https://github.com/kvietmeier/personal).
-
-## Where things live (three tiers)
-
-| Need | Place |
-|------|-------|
-| Karl-only Jira / proposal drafts | GitHub private [`personal`](https://github.com/kvietmeier/personal) → `staging/` |
-| Company-shareable runbooks / RAs | GitLab [`projects-docs`](https://git.vastdata.com/karlv/projects-docs) |
-| Live VAST provider lab TF | GitLab [`tools`](https://git.vastdata.com/karlv/tools) → `terraform/vast/` |
-| VoC cloud modules | GitLab [`vastoncloud`](https://git.vastdata.com/karlv/vastoncloud) |
-| **This repo** — scrubbed cloud + VAST examples | Public GitHub (`vastdata/`, `aws/`, `azure/`, `gcp/`, `oci/`) |
-| Azure helper scripts | GitHub [`cloud-tools`](https://github.com/kvietmeier/cloud-tools) |
-
-## Start here (basics)
+## Start here
 
 | Example | Path |
 |---------|------|
@@ -47,31 +37,30 @@ terraform apply
 
 ```text
 .
-├── aws/                 # AWS stacks
+├── aws/                 # AWS stacks (EC2, IAM patterns)
 ├── azure/               # Azure: CoreInfra, VMs, AKS, AVD, templates
-├── gcp/                 # GCP: CoreInfra, configure-project, VMs, GKE, TPUs
+├── gcp/                 # GCP: CoreInfra, configure-project, VMs, GKE, TPU
 ├── oci/                 # Oracle Cloud stacks
-├── vastdata/            # Scrubbed VAST Data provider working examples
-├── scripts/             # Shared helpers — see scripts/README.md
+├── vastdata/            # VAST Data provider examples
+├── scripts/             # Shared cloud-init / Windows helpers
 ├── LICENSE.md
 └── README.md
 ```
 
-| Area | What it is | Start here |
-|------|------------|------------|
+| Area | What it is | Details |
+|------|------------|---------|
 | [`vastdata/`](vastdata/) | VAST provider examples (auth, views, block, full config) | [`vastdata/README.md`](vastdata/README.md) |
 | [`azure/`](azure/) | Networks, identity, VMs, AKS, AVD | [`azure/README.md`](azure/README.md) |
-| [`gcp/`](gcp/) | VPCs/firewalls/DNS, roll-up project module, VMs, GKE | [`gcp/README.md`](gcp/README.md) |
-| [`scripts/`](scripts/) | Cloud-init, Windows specialize | [`scripts/README.md`](scripts/README.md) |
+| [`gcp/`](gcp/) | VPCs/firewalls/DNS, project roll-up, VMs, GKE | [`gcp/README.md`](gcp/README.md) |
 | [`aws/`](aws/) | EC2 / IAM patterns | `aws/` |
-| [`oci/`](oci/) | OCI templates | `oci/` |
+| [`oci/`](oci/) | OCI templates | [`oci/README.md`](oci/README.md) |
+| [`scripts/`](scripts/) | Cloud-init, Windows specialize | [`scripts/README.md`](scripts/README.md) |
 
 ## Conventions
 
 - **One stack per folder** — independent root module.
 - **Secrets stay local** — untracked `*.tfvars` / env vars; commit `*.tfvars.example` only.
-- **Backup real tfvars** — `scripts/sync-tfvars-personal.sh` → `~/github/personal/terraform-tfvars/`.
-- **Examples stay public** — placeholders only (`192.168.1.100`, `lab.example.com`, `gcp-project-id`).
+- **Examples use placeholders** — e.g. `192.168.1.100`, `lab.example.com`, `gcp-project-id`.
 
 ## Author
 

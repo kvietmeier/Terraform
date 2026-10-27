@@ -1,10 +1,8 @@
 # vastdata/ — VAST Data provider examples
 
-Scrubbed, public working examples for the [VAST Data Terraform provider](https://registry.terraform.io/providers/vast-data/vastdata/latest/docs).
+Working examples for the [VAST Data Terraform provider](https://registry.terraform.io/providers/vast-data/vastdata/latest/docs).
 
-**Live lab stacks** (real hosts, `setup_lab`, VoC wrappers) stay on GitLab [`karlv/tools`](https://git.vastdata.com/karlv/tools) → `terraform/vast/`. Do not copy real `*.tfvars` here.
-
-Provider version pinned to **3.2.2** in these examples. Auth via env / `TF_VAR_*` (never commit passwords).
+Provider version pinned to **3.2.2**. Auth via env / `TF_VAR_*` (never commit passwords).
 
 ## Start here
 

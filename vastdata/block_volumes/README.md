@@ -42,7 +42,7 @@ Most initiators use a **standard NQN format** (vendor prefix + hostname or UUID)
 
 ```bash
 cp private.auto.tfvars.example private.auto.tfvars
-# edit base_nqn_prefix — vendor-specific examples: internal GitLab docs
+# edit base_nqn_prefix (vendor NQN prefix for your initiators)
 ```
 
 Add a host map entry (with nested `volumes`) in `block.variables.tfvars` and re-apply. Do not adopt or modify existing lab hosts.
