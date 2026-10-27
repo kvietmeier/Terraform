@@ -29,7 +29,8 @@
 package_update: true
 package_upgrade: false
 
-# Standard devops toolset (compile toolchain / bench tools are in lab_bootstrap.sh)
+# Standard devops / core utility toolset (compile / bench builds are in lab_bootstrap.sh)
+# Distro-specific names (dnsutils vs bind-utils, bpfcc vs bcc, perf) live in lab_bootstrap.sh.
 packages:
   - vim
   - git
@@ -51,6 +52,8 @@ packages:
   - pkg-config
   - libtool
   - psmisc
+  - rpcbind
+  - stress-ng
 
 users:
   # Keep distro default (ubuntu/ec2-user/...) so the cloud key pair is injected.

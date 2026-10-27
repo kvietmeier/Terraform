@@ -102,7 +102,8 @@ git commit -m "Update lab bootstrap"
 
 | Layer | What | Where |
 |-------|------|--------|
-| Standard devops toolset | vim, git, curl, python3, tmux, tree, jq, htop, sysstat, … | YAML `packages:` |
+| Standard devops / core utils | vim, git, curl, python3, tmux, jq, htop, sysstat, **rpcbind**, **stress-ng**, … | YAML `packages:` |
+| Core utils (distro names) | dig (`dnsutils`/`bind-utils`), bcc (`bpfcc-tools`/`bcc-tools`), perf | `lab_bootstrap.sh` (always) |
 | Storage / S3 clients | `nfs-utils`/`nfs-common`, `aws` CLI, `s3cmd` | `lab_bootstrap.sh` (always) |
 | Bench tools (optional) | fio, iperf, dool, sockperf, elbencho | `lab_bootstrap.sh` when `INSTALL_BENCH_TOOLS=true` |
 | Personal tools (optional) | `sys-perf-tools`, `system-tools` | `/home/strata/tools/` when `CLONE_TOOLS_REPOS=true` |

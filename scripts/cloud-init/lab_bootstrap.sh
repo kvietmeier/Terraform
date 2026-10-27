@@ -362,6 +362,29 @@ clone_tools_repos() {
 }
 
 ###-----------------------------------------------------------------------------###
+### Core utilities — distro-specific names (YAML packages: is portable-only)
+###-----------------------------------------------------------------------------###
+install_core_utils() {
+    wait_for_locks
+    if is_debian; then
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update -y || true
+        log_and_continue "install dnsutils" apt-get install -y dnsutils
+        log_and_continue "install bpfcc-tools" apt-get install -y bpfcc-tools
+        log_and_continue "install linux-perf" apt-get install -y linux-perf
+    elif is_rhel; then
+        dnf install -y epel-release || true
+        log_and_continue "install bind-utils" dnf install -y bind-utils
+        log_and_continue "install bcc-tools" dnf install -y bcc-tools
+        log_and_continue "install perf" dnf install -y perf
+    else
+        log "WARN: unknown distro; skipping core utils (dig/bcc/perf)"
+    fi
+    command -v dig >/dev/null 2>&1 && log "OK: dig present" || log "WARN: dig missing"
+    command -v perf >/dev/null 2>&1 && log "OK: perf present" || log "WARN: perf missing"
+}
+
+###-----------------------------------------------------------------------------###
 ### Storage / S3 clients (NFS + awscli + s3cmd) — always; distro-specific names
 ###-----------------------------------------------------------------------------###
 install_storage_clients() {
@@ -402,6 +425,7 @@ main() {
     ensure_passwordless_sudo
     ensure_lab_user
     configure_chrony
+    install_core_utils
     install_storage_clients
 
     if [[ "$INSTALL_BENCH_TOOLS" == "true" ]]; then
