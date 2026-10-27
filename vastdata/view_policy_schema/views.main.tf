@@ -1,17 +1,9 @@
 ######################################################################
-# main.tf
-# This Terraform file defines:
-#   1. View policies for NFS and S3 protocols
-#   2. NFS file system views
-#   3. S3 bucket views
+# views.main.tf — example wiring for the schema in views.variables.tf
 #
-# Notes:
-#   - All policy names, flavors, and protocols are now configurable via variables.
-#   - NFS views automatically use the NFS basic policy.
-#   - S3 views reference a policy defined per view.
-#   - SMB or AD-integrated views can be added as needed.
+# Primary purpose of this folder: documented view-policy schema reference.
+# Resources here show how the map variables plug into the provider.
 ######################################################################
-
 
 ###=============================================================================
 ###--- Provider
@@ -115,7 +107,7 @@ resource "vastdata_view" "file_views" {
   tenant_name = each.value.tenant_name
   vip_pools   = each.value.vip_pools
 
-  policy_id = vastdata_view_policy.this[each.value.policy_key].id
+  policy_id = vastdata_view_policy.lab_policies[each.value.policy_key].id
 }
 
 # ------------------------------------------------------------------------------

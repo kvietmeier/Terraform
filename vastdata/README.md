@@ -31,7 +31,7 @@ terraform init && terraform apply
 | [`cluster_gcp/`](cluster_gcp/) | Full-config sibling with GCP-oriented naming |
 | [`createviews/`](createviews/) | NFS views/policies on an existing VIP pool |
 | [`lab_share/`](lab_share/) | Wide-open NFS+S3 lab dump share (**lab only, not prod**) |
-| [`view_template/`](view_template/) | Documented schema reference |
+| [`view_policy_schema/`](view_policy_schema/) | Fully documented view-policy schema reference + compact examples |
 | [`block_volumes/`](block_volumes/) | Block subsystem / volume / host-mapping |
 | [`protected_path/`](protected_path/) | Protected-path pattern |
 | [`policies/`](policies/) | S3 policy JSON examples ([README](policies/README.md)) |

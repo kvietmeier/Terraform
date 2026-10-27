@@ -1,18 +1,20 @@
-# documented_template.tfvars
+# documented_template.tfvars.example
 # ==============================================================================
-#   VAST DATA VIEW POLICY - EXHAUSTIVE PARAMETER REFERENCE
-#   For Reference Only - Not for Direct Use 
-#   Use this file as a complete reference for all available options.
+#   VAST view policy — exhaustive parameter reference
+#
+#   Full field catalog with comments. Copy attributes into a real stack's
+#   tfvars; this folder exists because this schema isn't documented elsewhere
+#   in one place.
 # ==============================================================================
 
-view_policies_config = {
+lab_view_policies_config = {
   "exhaustive_reference_policy" = {
     
     # --------------------------------------------------------------------------
     # 1. Core Policy Identity & Scope
     # --------------------------------------------------------------------------
     name                                     = "exhaustive_reference_policy"
-    cluster                                  = "voc1-cluster01f"
+    cluster                                  = null
     tenant_name                              = "default"
     flavor                                   = "NFS"          # Options: "NFS", "SMB", "S3", "S3_NATIVE", "MIXED"
     access_flavor                            = "ALL"          # Options: "ALL", "READ_ONLY", etc.

@@ -1,52 +1,37 @@
-## VAST Data Terraform Template: Views, Policies & Block Storage
+# view_policy_schema/ — documented view-policy schema reference
 
-This repository is Terraform template for Views, View Policies, and Block Storage. It contains the complete schema definition from swagger cross referenced with the Terraform resources in the latest provider docs.
-  
-It is not intended for use "as is" it is designed as a template and reference.  
-  
----
+Fully annotated **view policy schema** for the VAST Data Terraform provider,
+plus compact examples. The provider docs and Swagger never laid this out in one
+place — this folder is that reference.
 
-## Table of Contents
+Use it to see every policy field (with defaults and comments), then copy what
+you need into a real stack (`createviews/`, `basic_cluster/`, etc.).
 
-- **View Policies** (`vastdata_view_policy`): Permission rules, audit settings, and security flavors for NFS, SMB, and S3 protocols.
-- **Views** (`vastdata_view`): File exports, buckets, and shares mapped to specific paths and policies.
-- **Block Hosts** (`vastdata_block_host`): SAN client host definitions and initiator mappings (iSCSI IQNs, FC WWPNs, NVMe NQNs).
-- **Block Host Mappings** (`vastdata_block_host_mapping`): LUN attachments linking block hosts to VAST volumes.
+## What’s here
 
----
+| File | Role |
+|------|------|
+| [`views.variables.tf`](views.variables.tf) | Typed `lab_view_policies_config` schema — `optional()` factory defaults for each attribute |
+| [`documented_template.tfvars.example`](documented_template.tfvars.example) | Exhaustive, comment-rich field catalog (one policy with every knob explained) |
+| [`views.auto.tfvars.example`](views.auto.tfvars.example) | Short NFS / SMB / S3 policy + matching view examples |
+| [`views.main.tf`](views.main.tf) | Example resource wiring (`vastdata_view_policy`, `vastdata_view`, optional block host sketches) |
 
-### Architecture & Code Structure
+Auth: `TF_VAR_vast_host` / `TF_VAR_vast_username` / `TF_VAR_vast_password` (provider block is in `views.main.tf`).
 
-The project is structured into 4 primary Terraform files:
+## How to use it
 
-```text
-├── README.md
-├── views.provider.tf
-├── views.main.tf          # Core Terraform resource blocks and dynamic linkages
-├── views.variables.tf     # Typed schema definitions for all parameters
-└── views.auto.tfvars      # Environment-specific values and default parameters
-```
-
----
-
-### Usage
-
-You will need to set the cluster VMS information as environment variables.
-
-Linux:
+1. **Learn the schema** — read `documented_template.tfvars.example` (sections: identity, path behavior, snapshots, NFS / S3 / SMB, audit).
+2. **See minimal shapes** — `views.auto.tfvars.example` (`lab_nfs_policy`, `lab_smb_policy`, `lab_s3_policy` + views).
+3. **Copy into a working stack** — don’t treat this folder as your day-2 apply path.
 
 ```bash
-export TF_VAR_vast_host = "192.168.1.100"
+export TF_VAR_vast_host="192.168.1.100"
 export TF_VAR_vast_username="admin"
-export TF_VAR_vast_password = "CHANGE_ME"
+export TF_VAR_vast_password="CHANGE_ME"
 ```
 
-Windows:
+## Notes
 
-```powershell
-$env:TF_VAR_vast_host = "192.168.1.100"
-$env:TF_VAR_vast_username = "admin"
-$env:TF_VAR_vast_password = "CHANGE_ME"
-```
-
----
+- Variable name for policies is `lab_view_policies_config` (variables + both example tfvars).
+- Block host / mapping examples in `views.main.tf` are secondary illustrations only; the documented catalog is the **view policy** schema.
+- Placeholders only (`192.168.1.100`, `default` tenant, example paths).

@@ -46,11 +46,11 @@ variable "vast_skip_ssl_verify" {
 # ------------------------------------------------------------------------------
 
 variable "lab_view_policies_config" {
-  description = "Streamlined map for rapid testing and benchmarking VAST View Policies."
+  description = "View policy map — full attribute schema with optional() defaults (documented reference)."
   type = map(object({
     # Core Identification
     name        = optional(string)
-    cluster     = optional(string, "voc1-cluster01f")
+    cluster     = optional(string, null)
     tenant_name = optional(string, "default")
 
     # Required Policy Attributes

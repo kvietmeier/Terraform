@@ -1,19 +1,15 @@
-# terraform.tfvars
-# Provider Connection Settings
+# views.auto.tfvars.example — compact policy + view examples
+# Full field catalog: documented_template.tfvars.example
+# Auth: TF_VAR_vast_host / TF_VAR_vast_username / TF_VAR_vast_password
+
 vast_port            = 443
 vast_skip_ssl_verify = true
 
-
-
 ###----------------------------- View Policies -------------------------------###
-#   The type of policy is determined by the choice of settings for the following attributes:
-#     flavor: NFS, SMB, S3
-#     access_flavor: ALL, READ_ONLY, READ_WRITE
-#     auth_source: RPC, RPC_AND_PROVIDERS, PROVIDERS
-#     use_auth_provider: true, false
-#   
+# flavor: NFS | SMB | S3_NATIVE | …
+# auth_source: RPC | RPC_AND_PROVIDERS | PROVIDERS | …
+# See documented_template.tfvars.example for every attribute.
 
-###--- Lab View Policies
 lab_view_policies_config = {
 
   # Standard Lab NFS Policy
