@@ -36,6 +36,6 @@ terraform init && terraform apply
 | [`view_template/`](view_template/) | Documented schema reference |
 | [`block_volumes/`](block_volumes/) | Block subsystem / volume / host-mapping |
 | [`protected_path/`](protected_path/) | Protected-path pattern |
-| [`templates/`](templates/), [`policies/`](policies/) | Snippets / sample S3 policy JSON |
+| [`templates/`](templates/), [`policies/`](policies/) | S3 policy JSON examples ([templates README](templates/README.md)) |
 
 Provider alias in these examples is `cluster` (not a cloud-specific name).
