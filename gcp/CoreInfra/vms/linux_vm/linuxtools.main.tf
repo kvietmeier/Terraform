@@ -52,7 +52,7 @@ resource "google_compute_address" "my_private_ip" {
   address_type = "INTERNAL"
   subnetwork   = var.subnet_name
   region       = var.region
-  address      = "10.111.1.4" # Replace with your desired static private IP
+  address      = "10.0.0.10" # Replace with your desired static private IP
 }
 
 # Google Cloud VM instance with public IP

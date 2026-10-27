@@ -21,11 +21,11 @@ Thumbs.db
 **/secrets/*
 !**/secrets/.gitkeep
 
-# VAST directories
-# These directories are used for VAST specific configurations and should not be included in the repo.
+# VoC / eng dumps — not public examples (scrubbed provider examples live under /vastdata/)
 **/vast_configurations/**
-**/vast/**
 **/vast_on_cloud/**
+# Legacy path name; public examples use top-level vastdata/ instead
+**/vast/**
 
 # .tfstate files
 *.tfstate

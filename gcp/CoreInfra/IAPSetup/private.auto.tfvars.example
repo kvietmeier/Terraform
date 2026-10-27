@@ -1,0 +1,5 @@
+# Placeholder private overrides — copy to private.auto.tfvars locally (gitignored).
+# Do not put real project IDs, subnet IDs, or secrets in the committed example.
+
+# project_id = "gcp-project-id"
+# region     = "us-west2"

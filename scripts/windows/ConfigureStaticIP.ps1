@@ -8,8 +8,8 @@
 $nicName = "Ethernet" # Replace with the actual name of your NIC
 
 # IP Settings
-$IPAddr     = "10.111.1.5"
-$DefGateway = "10.111.1.1"
+$IPAddr     = "10.0.0.10"
+$DefGateway = "10.0.0.1"
 $DNSServer1 = "127.0.0.1"
 
 # Get the NIC object

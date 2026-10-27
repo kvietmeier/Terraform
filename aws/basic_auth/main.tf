@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "aws" {
-  profile = "AWS-POC-VOC-Admin"
+  profile = "default"  # or your AWS CLI profile name
   region  = "us-west-2"
 }
 

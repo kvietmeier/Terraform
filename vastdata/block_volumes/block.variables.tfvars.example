@@ -1,0 +1,60 @@
+###===================================================================================###
+#
+#  File:        block.variables.tfvars
+#  Author:      Karl Vietmeier
+#
+#  Description:
+#  Lab values for block objects we own. Shared tenant / VIP pool / policy are
+#  names for lookups. Nested map: host → volumes (one subsystem view per host).
+#  Uncomment hosts to grow incrementally.
+#  base_nqn_prefix is the client initiator format (vendor-standard NQN).
+#
+###===================================================================================###
+
+# Lookups (existing shared infrastructure)
+tenant_name       = "default"
+vip_pool_name     = "vippool-block"
+block_policy_name = "block_default_policy"
+
+# Shared settings for every per-host subsystem view
+view_protocols  = ["BLOCK"]
+view_create_dir = true
+
+# -------------------------------------------------------------------------
+# hosts → subsystem → volumes
+# Defaults: view_name=<hostname>_block  view_path=/<hostname>_block
+# Optional overrides: view_name / view_path / nqn
+# NQN = <base_nqn_prefix>:<hostname> (prefix in private.auto.tfvars)
+# Volume size is bytes (2 TiB = 2199023255552)
+# Naming: <osyear>_<hostnum>_volN
+# -------------------------------------------------------------------------
+hosts = {
+  # Hand-built on cluster (not managed here): ws-2019bm vol1/vol2
+  # "ws-2019bm-01" = {
+  #   volumes = {
+  #     "2019_01_vol1" = { size = 2199023255552 }
+  #     "2019_01_vol2" = { size = 2199023255552 }
+  #   }
+  # }
+
+  "ws-2019bm-02" = {
+    volumes = {
+      "2019_02_vol1" = { size = 2199023255552 }  # 2TiB
+      "2019_02_vol2" = { size = 2199023255552 }  # 2TiB
+    }
+  }
+
+  "lab-client01" = {
+    volumes = {
+      "2022_01_vol1" = { size = 1099511627776 }  # 1 TiB
+      "2022_01_vol2" = { size = 1649267441664 }  # 1.5 TiB
+    }
+  }
+
+  "lab-client02" = {
+    volumes = {
+      "2022_02_vol1" = { size = 1099511627776 }  # 1 TiB
+      "2022_02_vol2" = { size = 1649267441664 }  # 1.5 TiB
+    }
+  }
+}

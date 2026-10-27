@@ -1,0 +1,32 @@
+###===================================================================================###
+#
+#  File:        lab.variables.tfvars
+#  Author:      Karl Vietmeier
+#
+#  Description:
+#  Lab defaults matching vastops/create_lab_share.py.
+#  Auth: TF_VAR_vast_host / TF_VAR_vast_username / TF_VAR_vast_password.
+#
+#  WARNING: Wide-open lab share — not for production.
+#
+###===================================================================================###
+
+tenant_name = "default"
+
+# Default: NFSv3 + S3 (no AD). Uncomment for SMB when AD is ready:
+# protocols = ["NFS", "SMB", "S3"]
+protocols = ["NFS", "S3"]
+
+policy_name = "lab_policy"
+view_path   = "/lab_share"
+view_name   = "lab_share"
+share_name  = "lab_share"
+bucket_name = "lab-share"
+
+lab_user_name     = "lab"
+lab_user_uid      = 50000
+local_provider_id = 1
+
+# Existing VOC protocols VIP pool (Stage 1); policy binds via permission_per_vip_pool
+vip_pool_existing   = "protocolsPool"
+vippool_permissions = "RW"

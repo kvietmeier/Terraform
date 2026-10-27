@@ -3,7 +3,7 @@
 #
 # Source inventory: gcp/CoreInfra (unchanged). Full subnet list matches vpcs/core.
 
-project_id = "clouddev-itdesk124"
+project_id = "gcp-project-id"
 region     = "us-west2"
 zone       = "us-west2-a"
 

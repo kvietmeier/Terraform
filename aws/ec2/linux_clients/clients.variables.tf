@@ -81,7 +81,7 @@ variable "num_vm" {
 variable "vm_base_name" {
   description = "Base name for instances; names are {vm_base_name}01, {vm_base_name}02, ..."
   type        = string
-  default     = "voc-client"
+  default     = "lab-client"
 }
 
 variable "machine_type" {
@@ -103,6 +103,6 @@ variable "os_type" {
 locals {
   cloudinit_config = file(var.cloudinit_configfile)
 
-  # voc-client01, voc-client02, ... (same naming as prior map keys → state-safe)
+  # lab-client01, lab-client02, ... (same naming as prior map keys → state-safe)
   vm_names = [for i in range(var.num_vm) : format("%s%02d", var.vm_base_name, i + 1)]
 }

@@ -1,19 +1,43 @@
 # Terraform Projects
 
-Multi-cloud Terraform lab and POC stacks for AWS, Azure, GCP, and OCI.
+Multi-cloud Terraform lab and POC stacks for AWS, Azure, GCP, and OCI — plus scrubbed **VAST Data provider** working examples under [`vastdata/`](vastdata/).
 
-Stacks are organized by cloud provider. Each leaf folder is typically a self-contained root module (`*.tf` + `*.tfvars`) you can `init` / `plan` / `apply` on its own. Shared Linux/Windows bootstrap lives under [`scripts/`](scripts/), not under each cloud.
+Stacks are organized by cloud (or provider). Each leaf folder is typically a self-contained root module you can `init` / `plan` / `apply`. Shared Linux/Windows bootstrap lives under [`scripts/`](scripts/).
 
-VAST Data provider examples and lab stacks live in internal GitLab (`karlv/tools` → `terraform/`), not this repo.
+Live VAST lab stacks (real hosts, `setup_lab`, VoC wrappers) stay on GitLab [`karlv/tools`](https://git.vastdata.com/karlv/tools) → `terraform/vast/`. Real `*.tfvars` stay local / in private [`personal/terraform-tfvars`](https://github.com/kvietmeier/personal).
+
+## Where things live (three tiers)
+
+| Need | Place |
+|------|-------|
+| Karl-only Jira / proposal drafts | GitHub private [`personal`](https://github.com/kvietmeier/personal) → `staging/` |
+| Company-shareable runbooks / RAs | GitLab [`projects-docs`](https://git.vastdata.com/karlv/projects-docs) |
+| Live VAST provider lab TF | GitLab [`tools`](https://git.vastdata.com/karlv/tools) → `terraform/vast/` |
+| VoC cloud modules | GitLab [`vastoncloud`](https://git.vastdata.com/karlv/vastoncloud) |
+| **This repo** — scrubbed cloud + VAST examples | Public GitHub (`vastdata/`, `aws/`, `azure/`, `gcp/`, `oci/`) |
+| Azure helper scripts | GitHub [`cloud-tools`](https://github.com/kvietmeier/cloud-tools) |
+
+## Start here (basics)
+
+| Example | Path |
+|---------|------|
+| VAST auth smoke test | [`vastdata/simple_query/`](vastdata/simple_query/) |
+| VAST POC baseline (views/users) | [`vastdata/basic_cluster/`](vastdata/basic_cluster/) |
+| GCP project roll-up | [`gcp/configure-project/`](gcp/configure-project/) |
+| AWS EC2 Linux clients | [`aws/ec2/linux_clients/`](aws/ec2/linux_clients/) |
+| Azure Linux VMs | [`azure/VMs/`](azure/VMs/) |
+| Shared cloud-init / Windows | [`scripts/`](scripts/) |
+
+Copy any `*.tfvars.example` → `*.tfvars` (gitignored) before apply.
 
 ## Quick start
 
-1. [Install Terraform](https://developer.hashicorp.com/terraform/install) (or use `scripts/InstallUpgradeTerraForm.ps1` / `winget` on Windows).
-2. Authenticate to the target cloud (see cloud sections below).
-3. Pick a stack directory, copy/edit any `*.tfvars` / `*.tfvars.example`, then:
+1. [Install Terraform](https://developer.hashicorp.com/terraform/install).
+2. Authenticate to the target cloud or VAST VMS (`TF_VAR_vast_*` for provider examples).
+3. Pick a stack directory, copy/edit tfvars examples, then:
 
 ```bash
-cd <cloud>/<area>/<stack>
+cd <cloud-or-vastdata>/<stack>
 terraform init
 terraform plan
 terraform apply
@@ -23,121 +47,31 @@ terraform apply
 
 ```text
 .
-├── aws/                 # AWS stacks (lighter footprint)
+├── aws/                 # AWS stacks
 ├── azure/               # Azure: CoreInfra, VMs, AKS, AVD, templates
 ├── gcp/                 # GCP: CoreInfra, configure-project, VMs, GKE, TPUs
 ├── oci/                 # Oracle Cloud stacks
+├── vastdata/            # Scrubbed VAST Data provider working examples
 ├── scripts/             # Shared helpers — see scripts/README.md
-│   ├── cloud-init/      # Universal Linux lab bootstrap (all clouds)
-│   ├── windows/         # Generic Windows sysprep / static-IP scripts
-│   ├── gcp/             # GCP-only helpers
-│   ├── azure/           # Azure-only (vms/, aks/)
-│   └── aws/             # AWS-only helpers
 ├── LICENSE.md
 └── README.md
 ```
 
 | Area | What it is | Start here |
 |------|------------|------------|
+| [`vastdata/`](vastdata/) | VAST provider examples (auth, views, block, full config) | [`vastdata/README.md`](vastdata/README.md) |
 | [`azure/`](azure/) | Networks, identity, VMs, AKS, AVD | [`azure/README.md`](azure/README.md) |
-| [`gcp/`](gcp/) | VPCs/firewalls/DNS, roll-up project module, VMs, GKE, TPUs | [`gcp/README.md`](gcp/README.md), [`gcp/configure-project/`](gcp/configure-project/) |
-| [`scripts/`](scripts/) | Cloud-init, Windows specialize, cloud-specific helpers | [`scripts/README.md`](scripts/README.md) |
-| [`aws/`](aws/) | EC2 / basic auth / CloudFormation samples | `aws/` |
-| [`oci/`](oci/) | OCI templates and multi-VM examples | `oci/` |
-
-## By cloud
-
-### Azure (`azure/`)
-
-| Directory | Purpose |
-|-----------|---------|
-| [`CoreInfra/`](azure/CoreInfra/) | Shared infra: vNets, NSGs, AADDS, VPN GW, storage, user management |
-| [`VMs/`](azure/VMs/) | Linux / Windows / multi-VM and benchmarking stacks |
-| [`AKS/`](azure/AKS/) | AKS cluster examples and deploy helpers |
-| [`AVD/`](azure/AVD/) | Azure Virtual Desktop experiments |
-| [`templates/`](azure/templates/) | Reusable snippets / starter patterns |
-| [`testing/`](azure/testing/) | Scratch / experimental modules |
-
-Auth is usually via AzureRM env vars (`ARM_TENANT_ID`, `ARM_SUBSCRIPTION_ID`, `ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`) loaded from a local secrets script — details in [`azure/README.md`](azure/README.md).
-
-### GCP (`gcp/`)
-
-| Directory | Purpose |
-|-----------|---------|
-| [`CoreInfra/`](gcp/CoreInfra/) | Production-style pieces: VPCs, firewalls, DNS, NAT, VPN, IAP, core VMs |
-| [`configure-project/`](gcp/configure-project/) | **Roll-up** of CoreInfra into one apply (feature flags) — preferred for a full project |
-| [`VMs/`](gcp/VMs/) | Standalone VM patterns (multi-VM, proxy, Windows, images, …) |
-| [`GKE/`](gcp/GKE/) | Scale-from-zero AI/lab GKE — apps staging, GPU min=0, VPN/alias networking | [`gcp/GKE/gke-aicluster/README.md`](gcp/GKE/gke-aicluster/README.md) |
-| [`tpus/`](gcp/tpus/) | TPU node / discovery experiments |
-| [`templates/`](gcp/templates/), [`testing/`](gcp/testing/) | Starters and scratch |
-
-Many Linux images on GCP lack cloud-init; VM stacks often install it via `startup-script` metadata. See [`gcp/README.md`](gcp/README.md).
-
-### AWS / OCI
-
-Smaller collections under [`aws/`](aws/) (EC2, basic auth, CloudFormation) and [`oci/`](oci/) (templates, multi-VM). Use the same per-folder apply pattern as the other clouds.
+| [`gcp/`](gcp/) | VPCs/firewalls/DNS, roll-up project module, VMs, GKE | [`gcp/README.md`](gcp/README.md) |
+| [`scripts/`](scripts/) | Cloud-init, Windows specialize | [`scripts/README.md`](scripts/README.md) |
+| [`aws/`](aws/) | EC2 / IAM patterns | `aws/` |
+| [`oci/`](oci/) | OCI templates | `oci/` |
 
 ## Conventions
 
-- **One stack per folder** — treat each leaf with its own `.tf` files as an independent root module.
-- **Secrets stay local** — use env vars or untracked `*.auto.tfvars` / private tfvars; do not commit passwords, keys, or org SG/subnet IDs.
-- **Examples stay public** — commit `*.tfvars.example` / `*.auto.tfvars.example` so users have a starting point (`cp …example …tfvars`).
-- **Keep real tfvars out of git** — use local `*.tfvars` / env vars only; optional helper: `scripts/sync-tfvars-personal.sh` for your own off-repo backup.
-- **Shared bootstrap** — Linux user-data: [`scripts/cloud-init/`](scripts/cloud-init/) (`cloud-init-universal.yaml` day-to-day). Windows: [`scripts/windows/`](scripts/windows/). Do not add new scripts under stale stubs like `gcp/scripts` or `azure/VMs/scripts` — those point at `scripts/`.
-- **`templates/`** folders are reference/starters; not every file is meant to apply as-is.
-
-## Installing Terraform
-
-[HashiCorp install docs](https://developer.hashicorp.com/terraform/install)
-
-- `scripts/InstallUpgradeTerraForm.ps1` — install/upgrade the binary on Windows
-- Or with winget:
-
-```powershell
-winget list terraform
-winget upgrade terraform
-```
-
-## Terraform notes
-
-### Common commands
-
-```bash
-terraform apply -auto-approve
-terraform destroy -auto-approve
-
-# Override state lock (use carefully)
-terraform apply -lock=false -auto-approve
-
-# Explicit tfvars
-terraform apply -var-file="./MultiLinuxVM-vars.tfvars"
-```
-
-### PowerShell shortcuts
-
-Avoid repeating a non-default tfvars path:
-
-```powershell
-function tfapply {
-  $VarFile = (Get-ChildItem -Path . -Recurse -Filter "*.tfvars")
-  terraform apply --auto-approve -var-file="$VarFile"
-}
-
-function tfdestroy {
-  $VarFile = (Get-ChildItem -Path . -Recurse -Filter "*.tfvars")
-  terraform destroy --auto-approve -var-file="$VarFile"
-}
-
-function tfshow {
-  terraform show
-}
-```
-
-## Built with
-
-- [Visual Studio Code](https://code.visualstudio.com/) / Cursor
-- [Terraform](https://www.terraform.io/)
-- [Windows Terminal](https://docs.microsoft.com/en-us/windows/terminal/) (PowerShell on Windows 11)
+- **One stack per folder** — independent root module.
+- **Secrets stay local** — untracked `*.tfvars` / env vars; commit `*.tfvars.example` only.
+- **Backup real tfvars** — `scripts/sync-tfvars-personal.sh` → `~/github/personal/terraform-tfvars/`.
+- **Examples stay public** — placeholders only (`192.168.1.100`, `lab.example.com`, `gcp-project-id`).
 
 ## Author
 

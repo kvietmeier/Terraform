@@ -1,0 +1,11 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+   {
+     "Sid": "Read_write_ALL_DB",
+     "Action": "s3:Tabular*",
+     "Effect": "Allow",
+     "Resource": "arn:aws:s3:::*"
+   }
+  ]
+}

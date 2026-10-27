@@ -15,8 +15,8 @@ resource "google_compute_firewall" "vast_internal" {
     protocol = "all"
   }
 
-  source_tags = ["voc-internal"]
-  target_tags = ["voc-internal"]
+  source_tags = ["lab-internal"]
+  target_tags = ["lab-internal"]
 }
 
 resource "google_compute_firewall" "vast_client_access" {
@@ -35,8 +35,8 @@ resource "google_compute_firewall" "vast_client_access" {
     ports    = var.external_ingress_udp
   }
 
-  source_tags = ["voc-clients"]
-  target_tags = ["voc-internal"]
+  source_tags = ["lab-clients"]
+  target_tags = ["lab-internal"]
 }
 
 resource "google_compute_firewall" "vast_replication" {
@@ -51,8 +51,8 @@ resource "google_compute_firewall" "vast_replication" {
     ports    = ["49001", "49002"]
   }
 
-  source_tags = ["voc-replication-peer", "voc-internal", "voc-clients"]
-  target_tags = ["voc-internal"]
+  source_tags = ["lab-replication-peer", "lab-internal", "lab-clients"]
+  target_tags = ["lab-internal"]
 }
 
 resource "google_compute_firewall" "vast_gcp_services" {
@@ -71,7 +71,7 @@ resource "google_compute_firewall" "vast_gcp_services" {
   }
 
   source_ranges = var.gcp_service_cidrs
-  target_tags   = ["voc-internal"]
+  target_tags   = ["lab-internal"]
 }
 
 resource "google_compute_firewall" "vast_external_ingress" {
@@ -94,7 +94,7 @@ resource "google_compute_firewall" "vast_external_ingress" {
   }
 
   source_ranges = var.external_ingress
-  target_tags   = ["voc-internal"]
+  target_tags   = ["lab-internal"]
 }
 
 resource "google_compute_firewall" "spark_rules" {
@@ -109,7 +109,7 @@ resource "google_compute_firewall" "spark_rules" {
     ports    = concat(var.spark_tcp, var.spark_vast_tcp)
   }
 
-  source_tags = ["spark-node", "voc-internal"]
+  source_tags = ["spark-node", "lab-internal"]
   target_tags = ["spark-node"]
 }
 
